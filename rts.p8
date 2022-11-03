@@ -3,9 +3,12 @@ version 38
 __lua__
 cx=0
 cy=0
+mx=0
+my=0
 mapw=256
 maph=256
-fows=8
+fogtile=8
+mvtile=4
 
 selbox=nil
 selection=false
@@ -13,59 +16,78 @@ units={}
 
 fps=0
 
-obstacles={}
+positions={}
 
 function _init()
 	--enable mouse & mouse btns
 	poke(0x5f2d,0x1|0x2)
 	
-	for x=1,mapw/8 do
-	 obstacles[x]={}
-	 for y=1,maph/8 do
-	 	if fget(mget(x-1,y-1), 0) then
-	 		obstacles[x][y]=1
-	 	end
-	 end
-	end
-	
 	units={
 		{
-			typ=t_ant,
+			typ=ant,
 			x=15,
 			y=28,
 			st=st_rest,
 			obj=obj_shr,
-			fr=1,
-			frmax=2,
 			dir=1,
 			p=1,
 		},
 		{
-			typ=t_ant,
+			typ=spider,
 			x=45,
 			y=26,
 			st=st_rest,
 			obj=nil,
-			fr=1,
-			frmax=2,
 			dir=1,
 			p=1
 		},
 		{
-			typ=t_rock,
-			x=5*8,
-			y=4*8,
-			inert=true,
+			typ=beetle,
+			x=20,
+			y=36,
+			st=st_rest,
+			obj=nil,
+			dir=1,
+			p=1
 		},
+		{
+			typ=beetle,
+			x=60,
+			y=76,
+			st=st_rest,
+			obj=nil,
+			dir=1,
+			p=2
+		},
+		{
+			typ=queen,
+			x=90,
+			y=23,
+			st=st_rest,
+			dir=1,
+			p=1
+		}
 	}
+	
+	for x=1,mapw/8 do
+	 for y=1,maph/8 do
+	 	if fget(mget(x-1,y-1), 0) then
+	 		add(units,{
+					typ=rock,
+					x=x*8,
+					y=y*8,
+					inert=true,
+				})
+	 	end
+	 end
+	end
 end
 
 function _draw()
  cls()
- camera(cx%8,cy%8)
-	map(cx/8,cy/8,0,0,17,17)
-	camera(cx,cy)
-	
+ 
+ draw_map()
+ 
 	foreach(units,draw_unit)
 	
 	draw_fow()
@@ -77,108 +99,71 @@ function _draw()
 		fillp(0)
 	end
 	
-	--mouse
-	mx=mid(0,stat(32),128-5)
-	my=mid(-1,stat(33),128-6)
 	camera(0,0)
-	spr(64,mx,my)
+	
+	--menu
+	draw_menu()
+	
+	--mouse
+	draw_cursor()
 end
 
-function darken(x,y,a)
- if (a==0) return
- pal(1,0)
-	fillp(▒)
-	local sw=4
-	rectfill(x-sw,y-sw,x+fows+sw,y+fows+sw,1)
-	fillp(0)
-	rectfill(x,y,x+fows,y+fows,1)
-	pal(1,1)
-end
-
-function dist(dx,dy)
- local maskx,masky=dx>>31,dy>>31
- local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
- if a0>b0 then
-  return a0*0.9609+b0*0.3984
- end
- return b0*0.9609+a0*0.3984
-end
-
-function mindist(x,y)
-	local md=999
-	for u in all(units) do
-		if u.p==1 then
-		 local dx=u.x-x
-		 local dy=u.y-y
-			local d=dist(dx,dy)
-			if (d<md) md=d
-		end
-	end
-	return md
-end
-
-function viz(x,y)
-	local d=mindist(x,y)
-	if (d<25) return 0
-	return 1
-end
-
-function draw_fow()
-	camera(0,0)  	
-	for x=0,128/fows do
-	 for y=0,128/fows do
-	 	local mapx=x*fows+flr(cx/fows)*fows
-	 	local mapy=y*fows+flr(cy/fows)*fows
-	 	local drawx=x*fows-cx%fows
-	 	local drawy=y*fows-cy%fows
-	 	local shade=viz(mapx,mapy)
-	 	darken(
-	 	 drawx,
-	 	 drawy,
-	 	 shade
-	 	)
-	 end
-	end
-	camera(cx,cy)
-end
-
-function intersect(r1,r2)
-	local r1_x1=min(r1[1],r1[3])
-	local r1_x2=max(r1[1],r1[3])
-	local r1_y1=min(r1[2],r1[4])
-	local r1_y2=max(r1[2],r1[4])
-	return (
-		r1_x1<r2[3] and
-		r1_x2>r2[1] and
-		r1_y1<r2[4] and
-		r1_y2>r2[2]
-	)
-end
-
-function u_rect(u)
-	local s=size[u.typ]
- return {u.x,u.y,u.x+s,u.y+s}
-end
-
-function draw_unit(u)
- local cr={cx,cy,cx+128,cy+128}
-	if not intersect(u_rect(u),cr) then
-		return
-	end
-	if u.typ==t_ant then
-		draw_ant(u)
-		if u.wayp then
-			for i=1,#u.wayp do
-			 pset(u.wayp[i][1],u.wayp[i][2],8)
-			end
-		end
-	end
-end
 -->8
---gfx
+--unit defs
 
-t_ant=1
-t_rock=2
+ant={
+	w=4,
+	h=4,
+	x=0,
+	y=8,
+	anim_fr=2,
+	port=144,
+	fps=1,
+	spd=1,
+	los=20,
+	name="ant"
+}
+beetle={
+	w=7,
+	fw=8,
+	h=6,
+	x=8,
+	y=0,
+	anim_fr=2,
+	fps=3,
+	spd=1.5,
+	los=25,
+	name="beetl",
+	port=150
+}
+spider={
+ w=7,
+ fw=8,
+ h=4,
+ x=0,
+ y=16,
+ anim_fr=7,
+ fps=10,
+ spd=2,
+ los=30,
+ name="spdr",
+ port=148
+}
+queen={
+	w=14,
+	h=7,
+	fw=16,
+	x=56,
+	y=0,
+	anim_fr=2,
+	fps=2,
+	spd=0.5,
+	los=18,
+	dir=-1,
+	name="queen",
+	port=146
+}
+rock={}
 
 st_rest=1
 st_move=2
@@ -187,57 +172,281 @@ obj_shr=1
 obj_wat=2
 obj_pla=3
 
-size={
-	4, --ant
-	8, --rock
-}
 
-function draw_ant(a)
-	local frames={}
-	if a.st==st_rest then
-		if a.obj==obj_shr then
-			frames={{16,4},{8,12}}
-		elseif a.obj==obj_wat then
-			frames={{16,0},{12,8}}
-		elseif a.obj==obj_pla then
-			frames={{8,4},{12,12}}
-		else
-			frames={{8,0},{8,8}}
-		end
-	elseif a.st==st_move then
-		if a.obj==obj_shr then
-			frames={{16,4},{20,4}}
-		elseif a.obj==obj_wat then
-			frames={{16,0},{20,0}}
-		elseif a.obj==obj_pla then
-			frames={{8,4},{12,4}}
-		else
-			frames={{8,0},{12,0}}
-		end
-	end
-	local f=frames[a.fr]
-	local s=size[a.typ]
-	if a.sel then
-		pal(4,9)
-	end
-	sspr(f[1],f[2],s,s,a.x,a.y,s,s,a.dir==1)
-	pal(4,4)
-end
 -->8
 --update
 
+function handle_click()
+	--check buttons
+	for b in all(buttons) do
+		if (
+			btnp(5) and
+			amx>=b.x and amx<=b.x+b.w and
+			amy>=b.y and amy<=b.y+b.h
+		) then
+			b.handle()
+			return
+		end
+	end
+	
+	--left click in menu
+	if my>104 and not selbox then
+		local mm=19
+		local mmx=amx-104
+		local mmy=amy-106
+		--minimap
+		if (
+			mmx>=0 and mmy>=0 and
+			mmx<mm and mmy<mm)
+		then
+			local off=128/(mapw/128)
+			local x=mmx/mm*mapw
+			local y=mmy/mm*maph
+			if btnp(4) then
+				move_selected_units(x,y)
+			elseif btnp(5) then
+				cx=mid(0,x-off,mapw-128)
+				cy=mid(0,y-off,maph-128)
+			end
+		end
+	 return
+	end
+
+ --left drag makes selection
+ if (btn(5)) then
+ 	if selbox==nil then
+ 		selbox={mx,my,mx,my}
+ 	else
+	 	selbox[3]=mx
+	 	selbox[4]=my
+ 	end
+ 	selection=true
+ else
+ 	selbox=nil
+ end
+	
+	--left click clears selection
+ if (btnp(5)) then
+ 	selection=false
+ end
+ 
+ --right click moves selection
+ if (btnp(4)) then
+ 	move_selected_units(mx,my)
+ end
+end
+
+function move_selected_units(x,y)
+	for i=1,#units do
+		local u=units[i]
+		if u.sel then
+ 		move(u,x,y)
+		end
+	end
+end
+
+function _update()
+	fps+=1
+	if fps==60 then
+		fps=0
+ end
+
+ --map scroll
+ if (btn(⬅️) or btn(⬅️,1))cx-=2
+ if (btn(⬆️) or btn(⬆️,1))cy-=2
+ if (btn(➡️) or btn(➡️,1))cx+=2
+ if (btn(⬇️) or btn(⬇️,1))cy+=2
+ cx=mid(0,cx,mapw-128)
+ cy=mid(0,cy,maph-128)
+ 
+ amx=mid(0,stat(32),128-5)
+	amy=mid(-1,stat(33),128-6)
+ mx=amx+cx
+ my=amy+cy
+ 
+ handle_click()
+ 
+ foreach(units,update_unit)
+ 
+ --[[
+ positions={}
+	for i=1,#units do
+		local u=units[i]
+		local r=u_rect(u)
+		for x=flr(r[1]/mvtile),flr(r[3]/mvtile) do
+			for y=flr(r[2]/mvtile),flr(r[4]/mvtile) do
+				if not positions[x] then
+				 positions[x]={}
+				end
+				positions[x][y]=u
+			end
+		end
+		--printh("u at "..x..","..y)
+	end
+	]]
+	buttons={}
+end
+-->8
+--map
+
+function draw_map()
+ camera(cx%8,cy%8)
+	map(cx/8,cy/8,0,0,17,17)
+	camera(cx,cy)
+end
+
+function darken(x,y)
+ pal(1,0)
+	fillp(▒)
+	local sw=4
+	rectfill(x-sw,y-sw,x+fogtile+sw,y+fogtile+sw,1)
+	fillp(0)
+	rectfill(x,y,x+fogtile,y+fogtile,1)
+	pal(1,1)
+end
+
+function viz(x,y)
+	for u in all(units) do
+		if u.p==1 then
+		 local dx=u.x-x
+		 local dy=u.y-y
+			local d=dist(dx,dy)
+			if (d<u.typ.los) then
+			 return true
+			end
+		end
+	end
+	return false
+end
+
+function draw_fow()
+	camera(0,0)  	
+	for x=0,128/fogtile do
+	 for y=0,128/fogtile do
+	 	local mapx=x*fogtile+flr(cx/fogtile)*fogtile
+	 	local mapy=y*fogtile+flr(cy/fogtile)*fogtile
+	 	local drawx=x*fogtile-cx%fogtile
+	 	local drawy=y*fogtile-cy%fogtile
+	 	local v=viz(mapx+fogtile/2,mapy+fogtile/2)
+	 	if not v then
+	 		darken(drawx,drawy)
+	 	end
+	 end
+	end
+	camera(cx,cy)
+end
+
+function draw_minimap()
+ local mm=19
+	local br=125
+	local mmx=br-mm-2
+	local mmy=br-mm
+	
+	rectfill(mmx,mmy,mmx+mm,mmy+mm,15)
+	
+	--units
+	for u in all(units) do
+		local x=(u.x/mapw)*mm
+		local y=(u.y/maph)*mm
+		local col=u.p==1 and 1 or 2
+		if (u.sel) col=9
+		
+		
+		pset(mmx+x,mmy+y,col)
+	end
+	
+	--fog
+	pal(1,0)
+	local mmtile=(mapw/mm)
+	for x=0,mm do
+	 for y=0,mm do
+	 	local mapx=mmtile*x
+	 	local mapy=mmtile*y
+	 	local v=viz(mapx+mmtile/2,mapy+mmtile/2)
+	 	if not v then
+				pset(mmx+x,mmy+y,1)
+			end
+	 end
+	end
+	pal(1,1)
+	
+	--visible area
+	local mmvx=ceil((cx/mapw)*mm)
+	local mmvy=ceil((cy/maph)*mm)
+	local mms=(128/mapw)*mm
+	rect(
+		mmx+mmvx-1,
+		mmy+mmvy-1,
+		mmx+mmvx+mms+1,
+		mmy+mmvy+mms+1,
+		7
+	)
+	
+	--corners
+	if (mmvx>1 or mmvy>1) pset(mmx,mmy,4)
+	if (mmvx<flr(mm/2) or mmvy>1) pset(mmx+mm,mmy,4)
+	if (mmvx>1 or mmvy<flr(mm/2)) pset(mmx,mmy+mm,4)
+	if (mmvx<flr(mm/2) or mmvy<flr(mm/2)) pset(mmx+mm,mmy+mm,4)
+end
+-->8
+--units
+
+function draw_unit(u)
+	if not u.p then
+		return
+	end
+ local cr={cx,cy,cx+128,cy+128}
+	if not intersect(u_rect(u),cr) then
+		return
+	end
+	
+	if u.wayp then
+		for i=1,#u.wayp do
+			pset(u.wayp[i][1],u.wayp[i][2],8)
+		end
+	end
+
+	local frames={}
+	local ut=u.typ
+	local w=ut.fw or ut.w
+	local h=ut.h
+	local x=ut.x
+	local y=ut.y
+	local ufps=ut.fps
+	if (u.st==st_rest) ufps=1
+	local anim=flr(fps/(30/ufps))
+	if u.st==st_rest then
+		x+=(anim%2)*w
+	elseif u.st==st_move then
+		x+=w+(anim%(ut.anim_fr))*w
+	end
+	if u.obj==obj_shr then
+		x+=12
+	elseif u.obj==obj_pla then
+		y+=4
+	elseif u.obj==obj_wat then
+		y+=4
+		x+=12
+	end
+	local col=u.p==1 and 1 or 2
+	pal(2,col)
+	if (u.sel) col=9
+	pal(1,col)
+	local sdir=u.typ.dir or 1
+	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==sdir)
+	pal(1,1)
+	pal(2,2)
+end
+
+
 function update_unit(u)
  if (u.inert) return
-	if selbox then
+	if selbox and u.p==1 then
 		u.sel=intersect(
 			selbox,
 			u_rect(u)
 		)
 	end
-	if fps%30==0 then
-		u.fr+=1
-		if (u.fr>u.frmax) u.fr=1
- end
  if u.wayp then
  	local wp=u.wayp[1]
  	local xv=wp[1]-u.x
@@ -251,8 +460,8 @@ function update_unit(u)
  		dy=sgn(yv)
  		dx=abs(xv/yv)*sgn(xv)
  	end
- 	dx/=6
- 	dy/=6
+ 	dx/=(6/u.typ.spd)
+ 	dy/=(6/u.typ.spd)
  	
 	 u.dir=sgn(dx)
  	u.x+=dx
@@ -299,48 +508,125 @@ function move(u,x,y)
 	end
 end
 
-function _update()
-	fps=(fps+1)%30
-	
- --map scroll
- if (btn(⬅️) or btn(⬅️,1))cx-=2
- if (btn(⬆️) or btn(⬆️,1))cy-=2
- if (btn(➡️) or btn(➡️,1))cx+=2
- if (btn(⬇️) or btn(⬇️,1))cy+=2
- cx=mid(0,cx,mapw-128)
- cy=mid(0,cy,maph-128)
- 
- --left drag makes selection
- if (btn(5)) then
- 	if selbox==nil then
- 		selbox={mx,my,mx,my}
- 	else
-	 	selbox[3]=mx
-	 	selbox[4]=my
- 	end
- 	selection=true
- else
- 	selbox=nil
- end
-	
-	--left click clears selection
- if (btnp(5)) then
- 	selection=false
- end
- 
- --right click moves selection
- if (btnp(4)) then
- 	for i=1,#units do
- 		local u=units[i]
- 		if u.sel then
-	 		move(u,mx,my)
- 		end
- 	end
- end
- 
- foreach(units,update_unit)
-end
 -->8
+--utils
+
+function intersect(r1,r2)
+	local r1_x1=min(r1[1],r1[3])
+	local r1_x2=max(r1[1],r1[3])
+	local r1_y1=min(r1[2],r1[4])
+	local r1_y2=max(r1[2],r1[4])
+	return (
+		r1_x1<r2[3] and
+		r1_x2>r2[1] and
+		r1_y1<r2[4] and
+		r1_y2>r2[2]
+	)
+end
+
+function u_rect(u)
+ return {
+ 	u.x-u.typ.w/2,u.y-u.typ.h/2,
+ 	u.x+u.typ.w/2,u.y+u.typ.h/2
+ }
+end
+
+
+function dist(dx,dy)
+ local maskx,masky=dx>>31,dy>>31
+ local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
+ if a0>b0 then
+  return a0*0.9609+b0*0.3984
+ end
+ return b0*0.9609+a0*0.3984
+end
+
+
+-->8
+--get_wayp
+
+tw=4
+f=(mvtile/tw)
+
+function get_wayp(u,x,y)
+ local nodes=find_path(
+		{flr(u.x/tw),flr(u.y/tw)},
+		{flr(x/tw),flr(y/tw)},
+		estimate,
+		edge_cost,
+  neighbors,
+  node_to_id,
+  nil
+ )
+ --todo get as close as possible
+ if (not nodes) return nil
+ local wayp={}
+ for i=1,#nodes do
+ 	local n=nodes[#nodes-(i-1)]
+ 	add(wayp,
+ 		{n[1]*tw+tw/2,
+ 		 n[2]*tw+tw/2}
+ 	)
+ end
+ return wayp
+end
+
+function estimate(n1,n2,g)
+ return dist(n1[1]-n2[1],n1[2]-n2[2])
+end
+
+function edge_cost(n1,n2,g)
+	return 1
+end
+
+function obstacle(x,y)
+	x=flr(x/f)+1
+	y=flr(y/f)+1
+	if (
+		x<1 or x>=#positions or
+		not positions[x] or
+		y<1 or y>=#positions[x]
+	) then
+	 return nil
+	end
+	return positions[x][y]
+end
+
+function neighbor(ns,x,y)
+ if (
+ 	x<0 or x>=mapw/tw or
+		y<0 or y>=maph/tw or
+		obstacle(x,y) or
+		obstacle(x-1,y) or
+		obstacle(x+1,y) or
+		obstacle(x,y-1) or
+		obstacle(x,y+1)
+	) then
+		return
+	end
+	add(ns,{x,y})
+end
+
+function neighbors(n,g)
+	local ns={}
+	neighbor(ns,n[1]-1,n[2])
+	neighbor(ns,n[1]  ,n[2]-1)
+	neighbor(ns,n[1]  ,n[2]+1)
+	neighbor(ns,n[1]+1,n[2])
+	
+	if false then
+	neighbor(ns,n[1]-1,n[2]+1)
+	neighbor(ns,n[1]+1,n[2]-1)
+	neighbor(ns,n[1]+1,n[2]+1)
+	neighbor(ns,n[1]-1,n[2]-1)
+	end
+	return ns
+end
+
+function node_to_id(node,g)
+	return node[1]..","..node[2]
+end
+
 --a*
 --https://t.co/nasud3d1ix
 
@@ -456,132 +742,164 @@ function find_path
  -- return nil
 end
 -->8
-tw=4
-f=(8/tw)
+--menu/cursor
 
-function get_wayp(u,x,y)
- local nodes=find_path(
-		{flr(u.x/tw),flr(u.y/tw)},
-		{flr(x/tw),flr(y/tw)},
-		estimate,
-		edge_cost,
-  neighbors,
-  node_to_id,
-  nil
- )
- --todo get as close as possible
- if (not nodes) return nil
- local wayp={}
- for i=1,#nodes do
- 	local n=nodes[#nodes-(i-1)]
- 	add(wayp,
- 		{n[1]*tw+tw/2,
- 		 n[2]*tw+tw/2}
- 	)
- end
- return wayp
-end
-
-function estimate(n1,n2,g)
- return dist(n1[1]-n2[1],n1[2]-n2[2])
-end
-
-function edge_cost(n1,n2,g)
-	return 1
-end
-
-function obstacle(x,y)
-	x=flr(x/f)+1
-	y=flr(y/f)+1
-	if x<1 or x>=mapw/8 or y<1 or y>=mapw/8 then
-	 return nil
+function cursor_spr()
+ --check buttons
+	for b in all(buttons) do
+		if (
+			amx>=b.x and amx<=b.x+b.w and
+			amy>=b.y and amy<=b.y+b.h
+		) then
+			return 66
+		end
 	end
-	return obstacles[x][y]
-end
-
-function neighbor(ns,x,y)
- if (
- 	x<0 or x>=mapw/tw or
-		y<0 or y>=maph/tw or
-		obstacle(x,y) or
-		obstacle(x-1,y) or
-		obstacle(x+1,y) or
-		obstacle(x,y-1) or
-		obstacle(x,y+1)
-	) then
-		return
+	for i=1,#units do
+		local mbox={mx-1,my-1,mx+2,my+2}
+		if intersect(u_rect(units[i]),mbox) then
+			return 65
+		end
 	end
-	add(ns,{x,y})
+	return 64
 end
 
-function neighbors(n,g)
-	local ns={}
-	neighbor(ns,n[1]-1,n[2])
-	neighbor(ns,n[1]  ,n[2]-1)
-	neighbor(ns,n[1]  ,n[2]+1)
-	neighbor(ns,n[1]+1,n[2])
+function draw_cursor()
+ local mspr=cursor_spr()
+	local x=flr(mx/mvtile)
+	local y=flr(my/mvtile)
+	spr(mspr,amx,amy)
+end
+
+function selected_units()
+	local s={}
+	for i=1,#units do
+		if units[i].sel then
+			add(s,units[i])
+		end
+	end
+	return s
+end
+
+buttons={}
+function button(x,y,w,h,handle)
+	add(buttons,{
+		x=x,y=y,w=w,h=h,handle=handle
+	})
+end
+
+function draw_menu()
+ spr(128,0,104)
+	spr(129,120,104)
+	rectfill(8,104,120,128,4)
+	rectfill(0,112,8,128,4)
+	rectfill(120,112,128,128,4)
+	line(0,112,0,128,15)
+	line(127,112,127,128,2)
+
+	local selected=selected_units()
+	local y=104+2
+	if #selected==1 then
+		local typ=selected[1].typ
+		local wid=18
+		pal(3,0)
+		spr(typ.port,4+(wid-12)/2,y,2,2)
+		y+=13
+		local twid=#typ.name*4-2
+		print(typ.name,4+(wid-twid)/2,y,15)
+		y+=6
+		line(4,y,4+wid,y,8)
+		line(4,y,8,y,11)
+		pal(3,3)
+	elseif #selected>0 then
+		for i=0,#selected-1 do
+			local u=selected[i+1]
+			pal(3,0)
+			local x=7+i*13
+			spr(u.typ.port,x,y,2,2)
+			line(x,y+13,x+11,y+13,8)
+			line(x,y+13,x+8,y+13,11)
+			pal(3,3)
+			button(x,y,12,12,
+				function()
+					u.sel=false
+				end
+			)
+		end
+	end
 	
-	if false then
-	neighbor(ns,n[1]-1,n[2]+1)
-	neighbor(ns,n[1]+1,n[2]-1)
-	neighbor(ns,n[1]+1,n[2]+1)
-	neighbor(ns,n[1]-1,n[2]-1)
-	end
-	return ns
+	--minimap
+	draw_minimap()	
 end
+-->8
+--notes
+--[[
 
-function node_to_id(node,g)
-	return node[1]..","..node[2]
-end
+spider: can build "web", spans
+limited length but is just a
+white line. spider must station
+on the web. takes time to do and
+undo web. if any enemy crosses
+the web, they are stuck and
+spider takes time to eat them.
+
+spider: requires egg to create.
+first egg must be found on map.
+spider can build "den", which
+allows sacrificing a spider
+to generate x eggs.
+
+- dbl click to select same units
+
+]]
 __gfx__
-00000000000000000c0000c000000000600006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000cc000cc000000c0006000060d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0070070001100011011000110000cc00011000110d000000d0000000000000000000000000000000000000000000000000000000000000000000000000000000
-0007700000010001000100010111011100010001005111000d000000dd0000000000000000000000000000000000000000000000000000000000000000000000
-000770000b0000b00800008000000000000000000051111000511100005111000000000000000000000000000000000000000000000000000000000000000000
-00700700bb000bb08800088008000b00600000000001111000511110005111100000000000000000000000000000000000000000000000000000000000000000
-0000000001100011011000118800bb0006000000000d1d10000d1d100001d1d00000000000000000000000000000000000000000000000000000000000000000
-00000000000100010001000101110111011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000c0000c000000000600006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000cc000cc000000c0006000060d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000002200022022000220000cc00022000220d000000d0000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000020002000200020222022200020002005222000d000000dd0000000000000000000000000000000000000000000000000000000000000000000000
-000000000b0000b00800008000000000000000000052222000522200005222000000000000000000000000000000000000000000000000000000000000000000
-00000000bb000bb08800088008000b00600000000002222000522220005222200000000000000000000000000000000000000000000000000000000000000000
-0000000002200022022000228800bb00060000000006262000062620000262600000000000000000000000000000000000000000000000000000000000000000
-00000000000200020002000202220222022200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000d00000000000000000000000000000000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
+000000000d000000d000000000000000000000000000000000000000011000000010100000000000110001100000000011000110000000000000000000000000
+00700700005111000d000000dd000000000000000000000000000000111100000010100001110000001010000111000000101000000000000000000000000000
+00077000005111100051110000511100000000000000000000000000111101110444400011110111044440001111011104444000000000000000000000000000
+00077000000111100051111000511110000000000000000000000000110144114424200011014411442420001101441144242000000000000000000000000000
+00700700000d1d10000d1d100001d1d0000000000000000000000000000544005044000011054400504400001150440504440000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000005050050500500000505005050050000505005050050000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000800008000006000060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000008008800088060000600006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000110001188000110001106000110001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01110001000101110001000101110001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000b0000b000000c0000c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0b00bb000bb00c00cc000cc000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+bb0001100011cc000110001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01110001000101110001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00505050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+05015105005050500050505000505050005050500505050005050500005050500000000000000000000000000000000000000000000000000000000000000000
+05015105050151050501510505051105050511505015150050151050050115050000000000000000000000000000000000000000000000000000000000000000
+05005005050151055001510550051105500511505015150050151050050115050000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000050505000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00505050005050500050505005050500050505000501510500000000000000000000000000000000000000000000000000000000000000000000000000000000
-05015105050151050505110550151500501510500501510500000000000000000000000000000000000000000000000000000000000000000000000000000000
-05015105500151055005110550151500501510500500500500000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000050505000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00505050005050500050505005050500050505000502520500000000000000000000000000000000000000000000000000000000000000000000000000000000
-05025205050252050505220550252500502520500502520500000000000000000000000000000000000000000000000000000000000000000000000000000000
-05025205500252055005220550252500502520500500500500000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-05000000fff88fffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-57500000f887888ff33fff33ffaff7ffff776666ffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-5775000087887878f3bff3bbfffffffff76cccccffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-5777500088788788ffbbfbfff7ffffaff6cccccc6666fff6ffffffff0000000000000000000000000000000000000000ffffffffffffffffffffafffffffffff
-57777500fff77ffffffbbbfffffffffff6cc6cc6ccc76666faff7ff60000000000000000000000000000000000000000ffafffffff7fffffffffffffffffffff
-57755000ff7777ffffffbfffffff7ffff66ccc6cccccccccfffff6660000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-05575000fff77fffffffbfffffafffffff7cccccc77ccc7c7ffff6cc0000000000000000000000000000000000000000ffffffffffffffffffffffff7fffffff
-00050000fff77fffffffbfffffffffffff6c6c11ccccccc7ffff66cc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-00000000ff5555ff0000000000000000f66ccc1111111111ffff67cc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-00000000f555555f0000000000000000f6ccc6111dd11111ffff6ccc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-00000000555555550000000000000000f7cccc1111dd1111fff76ccc0000000000000000000000000000000000000000fffffffffffffff7ffffffffffffffaf
-00000000555555550000000000000000f6c6cc1111111111ff67cc6c0000000000000000000000000000000000000000fffff7ffffffffffffffffffffffffff
-00000000555555550000000000000000f66ccc1111111dd1666ccccc0000000000000000000000000000000000000000fffffffffffffffffffffaffffffffff
-000000005555555f0000000000000000ff6c6c1111111111c7ccccc10000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-00000000f55555ff0000000000000000ff6cc11111dd1111cccc6cc10000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-00000000fff55fff0000000000000000f76c611111111111cccccc110000000000000000000000000000000000000000fffffffffffffaffffffffffffffffff
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+050000005550000000500000ffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+575000005775000005750000ffaff7ffff776666ffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+577500005677550005755550fffffffff76cccccffffffffffffffff0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+577750000565400055757575f7ffffaff6cccccc6666fff6ffffffff0000000000000000000000000000000000000000ffffffffffffffffffffafffffffffff
+577775000054440075777775fffffffff6cc6cc6ccc76666faff7ff60000000000000000000000000000000000000000ffafffffff7fffffffffffffffffffff
+577550000050445057777775ffff7ffff66ccc6cccccccccfffff6660000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+055750000000050005577750ffafffffff7cccccc77ccc7c7ffff6cc0000000000000000000000000000000000000000ffffffffffffffffffffffff7fffffff
+000500000000000000055500ffffffffff6c6c11ccccccc7ffff66cc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+fff88fffff5555ffffffffff00000000f66ccc1111111111ffff67cc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+f887888ff555555ff33fff3300000000f6ccc6111dd11111ffff6ccc0000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+8788787855555555f3bff3bb00000000f7cccc1111dd1111fff76ccc0000000000000000000000000000000000000000fffffffffffffff7ffffffffffffffaf
+8878878855555555ffbbfbff00000000f6c6cc1111111111ff67cc6c0000000000000000000000000000000000000000fffff7ffffffffffffffffffffffffff
+fff77fff55555555fffbbbff00000000f66ccc1111111dd1666ccccc0000000000000000000000000000000000000000fffffffffffffffffffffaffffffffff
+ff7777ff5555555fffffbfff00000000ff6c6c1111111111c7ccccc10000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+fff77ffff55555ffffffbfff00000000ff6cc11111dd1111cccc6cc10000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+fff77ffffff55fffffffbfff00000000f76c611111111111cccccc110000000000000000000000000000000000000000fffffffffffffaffffffffffffffffff
 000000000000000000000000000000000000000000000000f66ccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 000000000000000000000000000000000000000000000000f6ccc6110000000000000000000000000000000000000000fffffffffffffffffffffffff7ffffff
 000000000000000000000000000000000000000000000000f7cccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
@@ -598,6 +916,26 @@ __gfx__
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+0000f444444200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00f44444444442000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0f444444444444200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0f444444444444200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f4444444444444420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f4444444444444420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f4444444444444420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f4444444444444420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01111111111000000111111111100000011111111110000001111111111000000000000000000000000000000000000000000000000000000000000000000000
+11ffffffff11000011ffffffff11000011ffffffff11000011ffffffff1100000000000000000000000000000000000000000000000000000000000000000000
+1ffffffffff100001ffffffffff100001ffffffffff100001ffffffffff100000000000000000000000000000000000000000000000000000000000000000000
+1ffff2fff2f100001fff29f9f9f100001f5fffff55f100001ffffffffff100000000000000000000000000000000000000000000000000000000000000000000
+1fffff2f2ff100001ffff29992f1000015f5fff5ff5100001ff22222fff100000000000000000000000000000000000000000000000000000000000000000000
+1fffff4f4ff100001444f4444ff1000015f55555f5f100001f2222fffff100000000000000000000000000000000000000000000000000000000000000000000
+1444f46464f10000144444141ff100001f5535355f5100001f2222fffff100000000000000000000000000000000000000000000000000000000000000000000
+14444f444ff1000014f5f444fff1000015f55555f5f100001ff222fffff100000000000000000000000000000000000000000000000000000000000000000000
+15f5f5f4f5f100001f5f5fff5ff1000015f5fff5f5f100001ffffffffff100000000000000000000000000000000000000000000000000000000000000000000
+1ffffffffff100001ffffffffff100001fff5f5ffff100001ffffffffff100000000000000000000000000000000000000000000000000000000000000000000
+11ffffffff11000011ffffffff11000011ffffffff11000011ffffffff1100000000000000000000000000000000000000000000000000000000000000000000
+01111111111000000111111111100000011111111110000001111111111000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000100000101010000000000000000000000000000000100000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
