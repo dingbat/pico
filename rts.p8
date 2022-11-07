@@ -1,22 +1,30 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
-cx=0
-cy=0
-mx=0
-my=0
+--constants
 mapw=256
 maph=256
 fogtile=8
 mvtile=4
+mmw=19
+mmh=flr(maph/(mapw/mmw))
+mmx=105
+mmy=107
+menuh=21
+menuy=104
+
+--global state
+cx=0
+cy=0
+mx=0
+my=0
 
 selbox=nil
-selection=false
+selection={}
 units={}
+buttons={}
 
 fps=0
-
-positions={}
 
 function _init()
 	--enable mouse & mouse btns
@@ -25,8 +33,8 @@ function _init()
 	units={
 		{
 			typ=ant,
-			x=15,
-			y=28,
+			x=60,
+			y=65,
 			st=st_rest,
 			obj=obj_shr,
 			dir=1,
@@ -43,7 +51,7 @@ function _init()
 		},
 		{
 			typ=beetle,
-			x=20,
+			x=40,
 			y=36,
 			st=st_rest,
 			obj=nil,
@@ -61,27 +69,14 @@ function _init()
 		},
 		{
 			typ=queen,
-			x=90,
-			y=23,
+			x=55,
+			y=43,
 			st=st_rest,
 			dir=1,
 			p=1,
 			q={}
 		}
 	}
-	
-	for x=1,mapw/8 do
-	 for y=1,maph/8 do
-	 	if fget(mget(x-1,y-1), 0) then
-	 		add(units,{
-					typ=rock,
-					x=x*8,
-					y=y*8,
-					inert=true,
-				})
-	 	end
-	 end
-	end
 end
 
 function _draw()
@@ -167,7 +162,6 @@ queen={
 		{typ=ant,t=5,r=2,g=3}
 	}
 }
-rock={}
 
 st_rest=1
 st_move=2
@@ -217,6 +211,11 @@ function handle_click()
 	 return
 	end
 
+	--left click clears selection
+ if (btnp(5)) then
+ 	selection={}
+ end
+ 
  --left drag makes selection
  if (btn(5)) then
  	if selbox==nil then
@@ -225,16 +224,18 @@ function handle_click()
 	 	selbox[3]=mx
 	 	selbox[4]=my
  	end
- 	selection=true
+ 	selection={}
+  for u in all(units) do
+	 	if u.p==1 then
+	 		local s=intersect(selbox,u_rect(u))
+	 		if (s) add(selection,u)
+				u.sel=s
+			end
+		end
  else
  	selbox=nil
  end
 	
-	--left click clears selection
- if (btnp(5)) then
- 	selection=false
- end
- 
  --right click moves selection
  if (btnp(4)) then
  	move_selected_units(mx,my)
@@ -242,11 +243,8 @@ function handle_click()
 end
 
 function move_selected_units(x,y)
-	for i=1,#units do
-		local u=units[i]
-		if u.sel then
- 		move(u,x,y)
-		end
+	for u in all(selection) do
+		move(u,x,y)
 	end
 end
 
@@ -272,32 +270,10 @@ function _update()
  handle_click()
  
  foreach(units,update_unit)
- 
- --[[
- positions={}
-	for i=1,#units do
-		local u=units[i]
-		local r=u_rect(u)
-		for x=flr(r[1]/mvtile),flr(r[3]/mvtile) do
-			for y=flr(r[2]/mvtile),flr(r[4]/mvtile) do
-				if not positions[x] then
-				 positions[x]={}
-				end
-				positions[x][y]=u
-			end
-		end
-		--printh("u at "..x..","..y)
-	end
-	]]
 	buttons={}
 end
 -->8
 --map
-
-mmw=19
-mmh=flr(maph/(mapw/mmw))
-mmx=105
-mmy=107
 
 function draw_map()
  camera(cx%8,cy%8)
@@ -348,8 +324,23 @@ end
 
 function draw_minimap()
 	local w,h,x,y=mmw,mmh,mmx,mmy
+	local tilew=mapw/w
+	local tileh=maph/h
 	
-	rectfill(x,y,x+w,y+h,15)
+	--map tiles
+	for tx=0,w do
+	 for ty=0,h do
+	 	local mapx=tilew*tx/8
+	 	local mapy=tileh*ty/8
+	 	local t=mget(mapx,mapy)
+	 	local col=15
+	 	if (fget(t,2)) col=8
+	 	if (fget(t,3)) col=11
+	 	if (fget(t,4)) col=4
+	 	if (fget(t,5)) col=12 --water
+	 	pset(x+tx,y+ty,col)
+		end
+	end
 	
 	--units
 	for u in all(units) do
@@ -363,8 +354,6 @@ function draw_minimap()
 	
 	--fog
 	pal(1,0)
-	local tilew=mapw/w
-	local tileh=maph/h
 	for tx=0,w do
 	 for ty=0,h do
 	 	local mapx=tilew*tx
@@ -447,12 +436,6 @@ end
 
 function update_unit(u)
  if (u.inert) return
-	if selbox and u.p==1 then
-		u.sel=intersect(
-			selbox,
-			u_rect(u)
-		)
-	end
  if u.wayp then
  	local wp=u.wayp[1]
  	local xv=wp[1]-u.x
@@ -551,27 +534,23 @@ end
 -->8
 --get_wayp
 
-tw=4
-f=(mvtile/tw)
 
 function get_wayp(u,x,y)
  local nodes=find_path(
-		{flr(u.x/tw),flr(u.y/tw)},
-		{flr(x/tw),flr(y/tw)},
+		{flr(u.x/mvtile),flr(u.y/mvtile)},
+		{flr(x/mvtile),flr(y/mvtile)},
 		estimate,
 		edge_cost,
   neighbors,
   node_to_id,
   nil
  )
- --todo get as close as possible
- if (not nodes) return nil
  local wayp={}
  for i=1,#nodes do
  	local n=nodes[#nodes-(i-1)]
  	add(wayp,
- 		{n[1]*tw+tw/2,
- 		 n[2]*tw+tw/2}
+ 		{n[1]*mvtile+mvtile/2,
+ 		 n[2]*mvtile+mvtile/2}
  	)
  end
  return wayp
@@ -586,27 +565,18 @@ function edge_cost(n1,n2,g)
 end
 
 function obstacle(x,y)
-	x=flr(x/f)+1
-	y=flr(y/f)+1
-	if (
-		x<1 or x>=#positions or
-		not positions[x] or
-		y<1 or y>=#positions[x]
-	) then
-	 return nil
-	end
-	return positions[x][y]
+	x=flr(x*(mvtile/8))
+	y=flr(y*(mvtile/8))
+	local t=mget(x,y)
+	if (fget(t,0)) return true
+	return nil
 end
 
 function neighbor(ns,x,y)
  if (
- 	x<0 or x>=mapw/tw or
-		y<0 or y>=maph/tw or
-		obstacle(x,y) or
-		obstacle(x-1,y) or
-		obstacle(x+1,y) or
-		obstacle(x,y-1) or
-		obstacle(x,y+1)
+ 	x<0 or x>=mapw/mvtile or
+		y<0 or y>=maph/mvtile or
+		obstacle(x,y)
 	) then
 		return
 	end
@@ -658,6 +628,8 @@ function find_path
  }, {}
 
  best_table[node_to_id(start, graph)] = shortest
+	--dh
+	closest=shortest
 
  -- array of frontier paths each
  -- represented by their last
@@ -740,19 +712,26 @@ function find_path
     -- node
     old_best.cost_from_start, old_best.prev = new_cost_from_start, p
    end -- if
+			--dhstart
+			if old_best.cost_to_goal < closest.cost_to_goal then
+				closest = old_best
+			end
+			--dhend
   end -- for each neighbor
   
  end -- while frontier not empty
 
- -- unreachable, so implicitly
- -- return nil
+	--dhstart
+ local p = {closest.last}
+ while closest.prev do
+  closest = best_table[node_to_id(closest.prev, graph)]
+  add(p, closest.last)
+ end
+ return p
+	--dhend
 end
 -->8
 --menu/cursor
-
-menuh=21
-menuy=104
-sections={17,24,61,26}
 
 --typ="b/g/r"
 function draw_cost(typ,val,x,y)
@@ -791,7 +770,7 @@ function draw_port(o)
 end
 
 function cursor_spr()
- --check buttons
+ --pointer (buttons)
 	for b in all(buttons) do
 		if (
 			amx>=b.x and amx<=b.x+b.w and
@@ -800,23 +779,25 @@ function cursor_spr()
 			return 66
 		end
 	end
+	--sword
+	local mbox={mx-1,my-1,mx+2,my+2}
 	for i=1,#units do
-		local mbox={mx-1,my-1,mx+2,my+2}
 		if intersect(u_rect(units[i]),mbox) then
 			return 65
 		end
 	end
+	--pick (resource)
 	if fget(mget(mx/8,my/8),1) then
-		local su=selected_units()
 		local all_ant=true
-		for u in all(su) do
+		for u in all(selection) do
 			if u.typ!=ant then
 				all_ant=false
 				break
 			end
 		end
-		if (all_ant) return 67
+		if (all_ant and #selection>0) return 67
 	end
+	--default
 	return 64
 end
 
@@ -825,19 +806,9 @@ function draw_cursor()
 	local x=flr(mx/mvtile)
 	local y=flr(my/mvtile)
 	spr(mspr,amx,amy)
-	if mspr==66 then --click
+	if mspr==66 then --pointer
 		pset(amx-1,amy+4,5)
 	end
-end
-
-function selected_units()
-	local s={}
-	for i=1,#units do
-		if units[i].sel then
-			add(s,units[i])
-		end
-	end
-	return s
 end
 
 buttons={}
@@ -848,12 +819,12 @@ function button(x,y,w,h,handle)
 end
 
 function draw_menu()
+ local sections={17,24,61,26}
  draw_menu_bg(sections)
  
-	local selected=selected_units()
 	local y=menuy+2
-	if #selected==1 then
-		local u=selected[1]
+	if #selection==1 then
+		local u=selection[1]
 		local typ=u.typ
 				
 		draw_port({
@@ -895,9 +866,9 @@ function draw_menu()
 				print("\88"..qty,x+13,y+4,7)
 			end
 		end
-	elseif #selected>0 then
-		for i=0,#selected-1 do
-			local u=selected[i+1]
+	elseif #selection>0 then
+		for i=0,#selection-1 do
+			local u=selection[i+1]
 			local x=3+i*13
 			draw_port({
 				typ=u.typ,x=x,y=y,hp=0.5,
@@ -1047,15 +1018,15 @@ fff77ffffff55fffffffbffffffffffff76c611111111111cccccc11000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000004400006000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000004000666000000000000000000000000000000000000000000000000
 __gff__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000020102020101010000000000000000000000000000000100000000000000000000000000000000000000000000000000
+000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000007010b130101010000000000000000000000000000000100000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 504d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4e4f4c4d4c4d4e4f4c4d4e4f4c4f4c4d4e4f4c4d4e4f4c4d4e4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5c525252525d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5e5f5c5d5c5d5e5f5c5d5e5f5c5f5c5d5e5f5c5d5e5f5c5d5e5f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5252526f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6e6f6c6d6c6d6e6f6c6d6e6f6c6f6c6d6e6f6c6d6e6f6c6d6e6f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-525253507c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7e7f7c7d7c7d7e7f7c7d7e7f7c7f7c7d7e7f7c7d7e7f7c7d7e7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5353534f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4f4c4d4e4f4c4d4e4f4c4d4e4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5c50535f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5f5c5d5e5f5c5d5e5f5c5d5e5f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5252526f6c6d6e6f53536e53536d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6e6f6c6d6c6d6e6f6c6d6e6f6c6f6c6d6e6f6c6d6e6f6c6d6e6f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+525253507c7d7e7f7c7d535353537e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7e7f7c7d7c7d7e7f7c7d7e7f7c7f7c7d7e7f7c7d7e7f7c7d7e7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5353534f4c4d4e4f4c53535353534e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4f4c4d4e4f4c4d4e4f4c4d4e4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5c50535f5c5d5e5f5c53535353535e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5f5c5d5e5f5c5d5e5f5c5d5e5f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6f6c6d6e6f6c6d6e6f6c6d6e6f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7f7c7d7e7f7c7d7e7f7c7d7e7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4f4c4d4e4f4c4d4e4f4c4d4e4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
