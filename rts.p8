@@ -37,8 +37,7 @@ function unit(typ,x,y,p)
 		st=st_rest,
 		dir=1,
 		p=p,
-		hp=typ.hp,
-		q={}
+		hp=typ.hp
 	}
 end
 
@@ -140,7 +139,7 @@ queen={
 	port=146,
 
 	build={
-		{typ=ant,t=5,r=2,g=3,b=1}
+		{typ=ant,t=6,r=2,g=3,b=1}
 	},
 
 	spd=0.5,
@@ -432,6 +431,22 @@ end
 
 function update_unit(u)
  if (u.inert) return
+ if u.q then
+ 	if fps%15==u.q.to then
+ 		u.q.t-=0.5
+ 		if u.q.t==0 then
+ 			add(units,
+ 			 unit(u.q.b.typ,u.x+5,u.y+5,1)
+ 			)
+ 			if u.q.qty>1 then
+ 				u.q.qty-=1
+ 				u.q.t=u.q.b.t
+ 			else
+ 				u.q=nil
+ 			end
+ 		end
+ 	end
+ end
  if u.wayp then
  	local wp=u.wayp[1]
  	local xv=wp[1]-u.x
@@ -804,11 +819,11 @@ function draw_port(o)
 	end
 	y+=12
 	if hp then
-		local lw=11
+		local lw=12
 		local hp_bg=prog and 5 or 8
 		local hp_fg=prog and 12 or 11
 		line(x,y,x+lw,y,hp_bg)
-		line(x,y,x+lw*hp,y,hp_fg)
+		line(x,y,x+round(lw*hp),y,hp_fg)
 	elseif costs then
 		print_cost(costs,x-1,y)
 	end
@@ -891,33 +906,37 @@ function draw_menu()
 						if res.r<b.r or res.g<b.g or res.b<b.b then
 							return
 						end
+						if (u.q and u.q.b!=b) return
 						res.r-=b.r
 						res.g-=b.g
 						res.b-=b.b
-						local cq=u.q[1]
-						if cq and cq.b==b then
-							cq.qty+=1
+						if u.q then
+							u.q.qty+=1
 						else
-							add(u.q,{b=b,qty=1})
+							u.q={
+								b=b, qty=1, t=b.t,
+								to=max(fps%15-1,0)
+							}
 						end
 					end
 				})
 			end
-			if #u.q>0 then 
-				local b=u.q[1].b
-				local qty=u.q[1].qty
+			if u.q then 
+				local b=u.q.b
+				local qty=u.q.qty
 				local x=20
 				draw_port({
-					typ=b.typ,x=x,y=y,hp=0.5,
+					typ=b.typ,x=x,y=y,
+					hp=u.q.t/b.t,
 					prog=true,
 					onclick=function()
 						res.r+=b.r
 						res.g+=b.g
 						res.b+=b.b
 						if qty==1 then
-							deli(u.q,1)
+							u.q=nil
 						else
-							u.q[1].qty-=1
+							u.q.qty-=1
 						end
 					end
 				})
