@@ -24,11 +24,13 @@ selbox=nil
 selection={}
 units={}
 res={r=12,g=9,b=22}
+p1q=nil
 
  --reset every frame
 buttons={}
 vizmap=nil
 hoverunit=nil
+hilite=nil
 
 function unit(typ,x,y,p)
  return {
@@ -46,12 +48,13 @@ function _init()
 	--enable mouse & mouse btns
 	poke(0x5f2d,0x1|0x2)
 	
+	p1q=unit(queen,55,43,1)
 	units={
-		unit(ant,60,65,1),
+		unit(ant,29,34,1),
 		unit(spider,48,26,1),
 		unit(beetle,40,36,1),
 		unit(beetle,60,76,2),
-		unit(queen,55,43,1),
+		p1q,
 		unit(tower,100,100,1)
 	}
 end
@@ -72,6 +75,14 @@ function _draw()
 		fillp(0)
 	end
 	
+	if hilite then
+		if hilite.typ=="gather" then
+			rect(
+				hilite.x-1,hilite.y-1,
+				hilite.x+8,hilite.y+8,8)
+		end
+	end
+	
 	camera(0,0)
 	
 	--menu
@@ -85,6 +96,10 @@ function _update()
 	fps+=1
 	if fps==60 then
 		fps=0
+ end
+ 
+ if hilite and hilite.t%20==fps%20 then
+ 	hilite=nil
  end
 	
  handle_input()
@@ -167,10 +182,6 @@ queen={
 st_rest=1
 st_move=2
 
-obj_shr=1
-obj_wat=2
-obj_pla=3
-
 tower={
 	w=7,
 	fw=8,
@@ -213,7 +224,7 @@ function handle_click()
 			local x=dx/mmw*mapw
 			local y=dy/mmh*maph
 			if btnp(4) then
-				move_selected_units(x,y)
+				move_units(selection,x,y)
 			elseif btnp(5) then
 				--move camera
 				cx=mid(0,x-xoff,mapw-128)
@@ -241,15 +252,43 @@ function handle_click()
  	selbox=nil
  end
 	
- --right click moves selection
+ --right click
  if (btnp(4)) then
- 	move_selected_units(mx,my)
+ 	local gt=nil
+	 if can_gather() then
+	 	--gather resources
+	 	local x=flr(mx/8)
+	 	local y=flr(my/8)
+	  hilite={
+	  	typ="gather",t=fps,
+	  	x=x*8,y=y*8
+	  }
+	  gt={x,y}
+		end
+	 --move selection
+ 	move_units(selection,mx,my,gt)
  end
 end
 
-function move_selected_units(x,y)
-	for u in all(selection) do
+function can_gather()
+	if fget(mget(mx/8,my/8),1) then
+		for u in all(selection) do
+			if u.typ!=ant then
+				return false
+			end
+		end
+		return #selection>0
+	end
+end
+
+function move_units(un,x,y,gt)
+	for u in all(un) do
 		if not u.typ.inert then
+			if gt then
+				u.gather={tile=gt}
+			else
+				u.gather=nil
+			end
 		 move(u,x,y)
 		end
 	end
@@ -386,9 +425,9 @@ function draw_minimap()
 	 	local mapy=tileh*ty/8
 	 	local t=mget(mapx,mapy)
 	 	local col=15
-	 	if (fget(t,2)) col=8
-	 	if (fget(t,3)) col=11
-	 	if (fget(t,4)) col=4
+	 	if (fget(t,2)) col=8 --r
+	 	if (fget(t,3)) col=11 --g
+	 	if (fget(t,4)) col=4 --b
 	 	if (fget(t,5)) col=12 --water
 	 	pset(x+tx,y+ty,col)
 		end
@@ -467,13 +506,15 @@ function draw_unit(u)
 	elseif u.st==st_move then
 		x+=w+(anim%(ut.anim_fr))*w
 	end
-	if u.obj==obj_shr then
-		x+=12
-	elseif u.obj==obj_pla then
-		y+=4
-	elseif u.obj==obj_wat then
-		y+=4
-		x+=12
+	if u.res then
+		if u.res.typ=="r" then
+			x+=12
+		elseif u.res.typ=="g" then
+			y+=4
+		elseif u.res.typ=="b" then
+			y+=4
+			x+=12
+		end
 	end
 	local col=u.p==1 and 1 or 2
 	pal(2,col)
@@ -488,6 +529,15 @@ end
 
 function update_unit(u)
  if (u.inert) return
+ if u.gather then
+ 	if not u.gather.drop and fps==u.gather.t then
+ 		u.res.qty+=1
+ 		if u.res.qty==9 then
+ 			u.gather.drop=true
+ 			move(u,p1q.x,p1q.y)
+ 		end
+ 	end
+ end
  if u.q then
  	if fps%15==u.q.to then
  		u.q.t-=0.5
@@ -523,32 +573,23 @@ function update_unit(u)
 	 u.dir=sgn(dx)
  	u.x+=dx
  	u.y+=dy
- 	mvmt=true
  	
  	local int=nil
- 	--[[
- 	for i=1,#units do
- 	 if u!=units[i] then
-	 		local u2=u_rect(units[i])
-	 		if intersect(u2,u_rect(u)) then
-	 			int=u2
-	 			break
-	 		end
-	 	end
- 	end
- 	--]]
  	
  	if int then
- 		u.x-=dx
- 		u.y-=dy
+ 		--u.x-=dx
+ 	--	u.y-=dy
  		--recompute wayp
- 	elseif (
- 	 abs(u.x-wp[1])<2 and
- 	 abs(u.y-wp[2])<2
- 	) then
+ 	elseif adj(u.x,u.y,wp[1],wp[2]) then
  		delete_wp(u)
  	end
  end
+end
+
+function adj(x1,y1,x2,y2)
+	return (
+	 abs(x1-x2)<2 and abs(y1-y2)<2
+	)
 end
 
 function delete_wp(u)
@@ -556,14 +597,53 @@ function delete_wp(u)
 	if #u.wayp==0 then
 		u.wayp=nil
 		u.st=st_rest
+		
+		local g=u.gather
+		if g then
+			local gt=g.tile
+			local gr={
+				gt[1]*8,gt[2]*8,gt[1]*8+7,gt[2]*8+7
+			}
+			if intersect(u_rect(u),gr) then
+				u.st=st_move
+				local s=mget(gt[1],gt[2])
+				if (fget(s,2)) typ="r"
+				if (fget(s,3)) typ="g"
+				if (fget(s,4)) typ="b"
+				u.gather.t=fps
+				local q=1
+				if u.res and u.res.typ==typ then
+					q=u.res.qty
+				end
+				u.res={typ=typ,qty=q}
+			end
+		end
+		if u.res and intersect(u_rect(u),u_rect(p1q)) then
+			local q=u.res.qty/3
+			if u.res.typ=="r" then
+				res.r+=q
+			elseif u.res.typ=="g" then
+				res.g+=q
+			elseif u.res.typ=="b" then
+				res.b+=q
+			end
+			u.res=nil
+			if u.gather then
+				local gt=u.gather.tile
+				u.gather=nil
+				move_units({u},gt[1]*8,gt[2]*8,gt)
+			end
+		end
 	end
 end
 
 function move(u,x,y)
 	u.wayp=get_wayp(u,x,y)
-	if u.wayp then
-		u.st=st_move
+	if u.gather and not u.gather.drop then
+		local gt=u.gather.tile
+		add(u.wayp,{8*gt[1]+3,8*gt[2]+3})
 	end
+	u.st=st_move
 end
 
 -->8
@@ -828,7 +908,7 @@ function draw_resource(typ,val,x,y)
 
 	local _x=x
 	local w=0
-	local s=""..val
+	local s=""..flr(val)
 	for i=0,#s do
 		if i==0 then
 			w=4
@@ -884,24 +964,14 @@ function cursor_spr()
 	end
 	--cursors requiring viz
 	if vget(mx,my) then
-		--sword
-		if (
+		if can_gather() then
+			return 67 --pick
+		elseif (
 			hoverunit and
 		 hoverunit.p!=1 and
 			#selection>0
 		) then
-			return 65
-		end
-		--pick (resource)
-		if fget(mget(mx/8,my/8),1) then
-			local all_ant=true
-			for u in all(selection) do
-				if u.typ!=ant then
-					all_ant=false
-					break
-				end
-			end
-			if (all_ant and #selection>0) return 67
+			return 65 --sword
 		end
 	end
 	--default
@@ -938,6 +1008,10 @@ function draw_menu()
 		 typ=typ,x=1,y=y,
 		 hp=u.hp/u.typ.hp
 		})
+		
+		if u.res then
+			print(u.res.typ.." x"..u.res.qty,20,y+2,7)
+		end
 		
 		if typ.build then
 			for i=1,#typ.build do
@@ -1076,9 +1150,9 @@ __gfx__
 00000000000008008800088060000600006000000000000000000000000000000000000000000000005b50000000000000000000000000000000000000000000
 0000011000118800011000110600011000110000000000000000000000000000000000000000000000b5b0000000000000000000000000000000000000000000
 01110001000101110001000101110001000100000000000000000000000000000000000000000000011011000000000000000000000000000000000000000000
-00000b0000b000000c0000c000000000000000000000000000000000000000000000000000000000041114000000000000000000000000000000000000000000
-0b00bb000bb00c00cc000cc000000000000000000000000000000000000000000000000000000000401110400000000000000000000000000000000000000000
-bb0001100011cc000110001100000000000000000000000000000000000000000000000000000000404040400000000000000000000000000000000000000000
+00000b0000b000000400004000000000000000000000000000000000000000000000000000000000041114000000000000000000000000000000000000000000
+0b00bb000bb004004400044000000000000000000000000000000000000000000000000000000000401110400000000000000000000000000000000000000000
+bb000110001144000110001100000000000000000000000000000000000000000000000000000000404040400000000000000000000000000000000000000000
 01110001000101110001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0050505000000000000000000000000000000000000000000000000000000000007777000000000000000000000b0000000b0060000b00000000000000000000
 050151050050505000505050005050500050505005050500050505000050505007711770000000000000000000b3560000b3500000b350000000000000000000
