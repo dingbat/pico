@@ -18,64 +18,39 @@ cx=0
 cy=0
 mx=0
 my=0
+fps=0
 
 selbox=nil
 selection={}
 units={}
-buttons={}
 
-fps=0
+ --reset every frame
+buttons={}
+vizmap=nil
+
+function unit(typ,x,y,p)
+ return {
+		typ=typ,
+		x=x,
+		y=y,
+		st=st_rest,
+		dir=1,
+		p=p,
+		hp=typ.hp,
+		q={}
+	}
+end
 
 function _init()
 	--enable mouse & mouse btns
 	poke(0x5f2d,0x1|0x2)
 	
 	units={
-		{
-			typ=ant,
-			x=60,
-			y=65,
-			st=st_rest,
-			obj=obj_shr,
-			dir=1,
-			p=1,
-		},
-		{
-			typ=spider,
-			x=45,
-			y=26,
-			st=st_rest,
-			obj=nil,
-			dir=1,
-			p=1
-		},
-		{
-			typ=beetle,
-			x=40,
-			y=36,
-			st=st_rest,
-			obj=nil,
-			dir=1,
-			p=1
-		},
-		{
-			typ=beetle,
-			x=60,
-			y=76,
-			st=st_rest,
-			obj=nil,
-			dir=1,
-			p=2
-		},
-		{
-			typ=queen,
-			x=55,
-			y=43,
-			st=st_rest,
-			dir=1,
-			p=1,
-			q={}
-		}
+		unit(ant,60,65,1),
+		unit(spider,45,26,1),
+		unit(beetle,40,36,1),
+		unit(beetle,60,76,2),
+		unit(queen,55,43,1)
 	}
 end
 
@@ -115,9 +90,11 @@ ant={
 	anim_fr=2,
 	port=144,
 	fps=1,
+	name="ant",
+
 	spd=1,
 	los=20,
-	name="ant"
+	hp=10
 }
 beetle={
 	w=7,
@@ -127,10 +104,12 @@ beetle={
 	y=0,
 	anim_fr=2,
 	fps=3,
+	name="beetl",
+	port=150,
+
 	spd=1.5,
 	los=25,
-	name="beetl",
-	port=150
+	hp=20
 }
 spider={
  w=7,
@@ -140,10 +119,12 @@ spider={
  y=16,
  anim_fr=7,
  fps=10,
+ name="spdr",
+ port=148,
+
  spd=2,
  los=30,
- name="spdr",
- port=148
+	hp=15
 }
 queen={
 	w=14,
@@ -153,14 +134,17 @@ queen={
 	y=0,
 	anim_fr=2,
 	fps=2,
-	spd=0.5,
-	los=18,
 	dir=-1,
 	name="queen",
 	port=146,
+
 	build={
 		{typ=ant,t=5,r=2,g=3}
-	}
+	},
+
+	spd=0.5,
+	los=18,
+ hp=25
 }
 
 st_rest=1
@@ -255,6 +239,7 @@ function _update()
  end
 
  --map scroll
+ local oldcx,oldcy=cx,cy
  if (btn(⬅️) or btn(⬅️,1))cx-=2
  if (btn(⬆️) or btn(⬆️,1))cy-=2
  if (btn(➡️) or btn(➡️,1))cx+=2
@@ -269,8 +254,34 @@ function _update()
  
  handle_click()
  
+ mvmt=(oldcx!=cx or oldy!=cy)
  foreach(units,update_unit)
+ if mvmt or vizmap==nil then
+ 	remake_vizmap()
+ end
 	buttons={}
+end
+
+function remake_vizmap()
+	vizmap={}
+	for x=0,128/fogtile do
+		vizmap[x+1]={}
+	 for y=0,128/fogtile do
+	 	local mapx=x*fogtile+flr(cx/fogtile)*fogtile
+	 	local mapy=y*fogtile+flr(cy/fogtile)*fogtile
+			local v=viz(mapx+fogtile/2,mapy+fogtile/2)
+	 	vizmap[x+1][y+1]=v
+	 end
+	end
+end
+
+--x y are absolute coords, 0-128
+--returns true if coord is viz
+--in currently visible screen
+function vget(x,y)
+ x=flr(x/fogtile)+1
+ y=flr(y/fogtile)+1
+ return vizmap[x][y]
 end
 -->8
 --map
@@ -291,29 +302,13 @@ function darken(x,y)
 	pal(1,1)
 end
 
-function viz(x,y)
-	for u in all(units) do
-		if u.p==1 then
-		 local dx=u.x-x
-		 local dy=u.y-y
-			local d=dist(dx,dy)
-			if (d<u.typ.los) then
-			 return true
-			end
-		end
-	end
-	return false
-end
-
 function draw_fow()
-	camera(0,0)  	
+	camera(0,0)	
 	for x=0,128/fogtile do
 	 for y=0,128/fogtile do
-	 	local mapx=x*fogtile+flr(cx/fogtile)*fogtile
-	 	local mapy=y*fogtile+flr(cy/fogtile)*fogtile
+	 	local v=vget(x*fogtile,y*fogtile)
 	 	local drawx=x*fogtile-cx%fogtile
 	 	local drawy=y*fogtile-cy%fogtile
-	 	local v=viz(mapx+fogtile/2,mapy+fogtile/2)
 	 	if not v then
 	 		darken(drawx,drawy)
 	 	end
@@ -455,6 +450,7 @@ function update_unit(u)
 	 u.dir=sgn(dx)
  	u.x+=dx
  	u.y+=dy
+ 	mvmt=true
  	
  	local int=nil
  	--[[
@@ -530,7 +526,24 @@ function dist(dx,dy)
  return b0*0.9609+a0*0.3984
 end
 
+function viz(x,y)
+	for u in all(units) do
+		if u.p==1 then
+		 local dx=u.x-x
+		 local dy=u.y-y
+			local d=dist(dx,dy)
+			if (d<u.typ.los) then
+			 return true
+			end
+		end
+	end
+	return false
+end
 
+function round(n)
+ if (n<0) return flr(n-0.5)
+ return flr(n+0.5)
+end
 -->8
 --get_wayp
 
@@ -779,23 +792,26 @@ function cursor_spr()
 			return 66
 		end
 	end
-	--sword
-	local mbox={mx-1,my-1,mx+2,my+2}
-	for i=1,#units do
-		if intersect(u_rect(units[i]),mbox) then
-			return 65
-		end
-	end
-	--pick (resource)
-	if fget(mget(mx/8,my/8),1) then
-		local all_ant=true
-		for u in all(selection) do
-			if u.typ!=ant then
-				all_ant=false
-				break
+	--cursors requiring viz
+	if vget(amx+cx%fogtile,amy+cy%fogtile) then
+		--sword
+		local mbox={mx-1,my-1,mx+2,my+2}
+		for i=1,#units do
+			if intersect(u_rect(units[i]),mbox) then
+				return 65
 			end
 		end
-		if (all_ant and #selection>0) return 67
+		--pick (resource)
+		if fget(mget(mx/8,my/8),1) then
+			local all_ant=true
+			for u in all(selection) do
+				if u.typ!=ant then
+					all_ant=false
+					break
+				end
+			end
+			if (all_ant and #selection>0) return 67
+		end
 	end
 	--default
 	return 64
@@ -828,7 +844,8 @@ function draw_menu()
 		local typ=u.typ
 				
 		draw_port({
-		 typ=typ,x=1,y=y,hp=0.5
+		 typ=typ,x=1,y=y,
+		 hp=u.hp/u.typ.hp
 		})
 		
 		if typ.build then
