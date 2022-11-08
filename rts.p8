@@ -23,6 +23,7 @@ fps=0
 selbox=nil
 selection={}
 units={}
+res={r=12,g=9,b=22}
 
  --reset every frame
 buttons={}
@@ -139,7 +140,7 @@ queen={
 	port=146,
 
 	build={
-		{typ=ant,t=5,r=2,g=3}
+		{typ=ant,t=5,r=2,g=3,b=1}
 	},
 
 	spd=0.5,
@@ -746,15 +747,47 @@ end
 -->8
 --menu/cursor
 
+function print_cost(costs,x,y)
+	if costs.r then
+		print(costs.r,x,y,8)
+		x+=4
+	end
+	if costs.g then
+		print(costs.g,x,y,11)
+		x+=4
+	end
+	if costs.b then
+		print(costs.b,x,y,4)
+		x+=4
+	end
+end
+
 --typ="b/g/r"
-function draw_cost(typ,val,x,y)
-	if (not val) return 0
-	local sy=64 --g
-	if (typ=="r") sy=72
- if (typ=="b") sy=80
- sspr(72,sy,3,5,x,y)
-	print(""..val,x+4,y,5)
-	return 9
+function draw_resource(typ,val,x,y)
+ local sy,c=64,11 --g
+	if (typ=="r") sy,c=72,8
+ if (typ=="b") sy,c=80,4
+
+	local _x=x
+	local w=0
+	local s=""..val
+	for i=0,#s do
+		if i==0 then
+			w=4
+			rectfill(x,y-1,x+w,y+6,7)
+ 		sspr(72,sy,3,5,x,y)
+		elseif s[i]=="1" then
+			w=2
+  	rectfill(x,y-1,x+w,y+6,7)
+			line(x,y,x,y+4,c)
+		else
+			w=4
+			rectfill(x,y-1,x+w,y+6,7)
+			print(s[i],x,y,c)
+		end
+		x+=w
+	end
+	return x-_x+1
 end
 
 function draw_port(o)
@@ -777,8 +810,7 @@ function draw_port(o)
 		line(x,y,x+lw,y,hp_bg)
 		line(x,y,x+lw*hp,y,hp_fg)
 	elseif costs then
-		x+=draw_cost("r",costs.r,x-1,y)
-		x+=draw_cost("g",costs.g,x-1,y)
+		print_cost(costs,x-1,y)
 	end
 end
 
@@ -856,6 +888,12 @@ function draw_menu()
 				 typ=b.typ,x=x,y=y,
 				 costs=b,onclick=
 					function()
+						if res.r<b.r or res.g<b.g or res.b<b.b then
+							return
+						end
+						res.r-=b.r
+						res.g-=b.g
+						res.b-=b.b
 						local cq=u.q[1]
 						if cq and cq.b==b then
 							cq.qty+=1
@@ -873,6 +911,9 @@ function draw_menu()
 					typ=b.typ,x=x,y=y,hp=0.5,
 					prog=true,
 					onclick=function()
+						res.r+=b.r
+						res.g+=b.g
+						res.b+=b.b
 						if qty==1 then
 							deli(u.q,1)
 						else
@@ -902,12 +943,13 @@ function draw_menu()
 	--resources
 	local x=1
 	local y=122
-	line(x-1,y-2,9*3-2,y-2,5)
-	rectfill(x-1,y-1,9*3,128,7)
-	pset(9*3,y-1,4)
-	x+=draw_cost("r",0,x,y)
-	x+=draw_cost("g",0,x,y)
-	x+=draw_cost("b",0,x,y)
+	x+=draw_resource("r",res.r,x,y)
+	x+=draw_resource("g",res.g,x,y)
+	x+=draw_resource("b",res.b,x,y)
+	line(0,y-1,0,y+5,7)
+	pset(x-1,y-1,5)
+	line(0,y-2,x-2,y-2,5)
+	line(x,y,x,y+5,5)
 end
 
 function draw_menu_bg(secs)
