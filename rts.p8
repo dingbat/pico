@@ -5,7 +5,7 @@ __lua__
 mapw=256
 maph=256
 fogtile=8
-mvtile=4
+mvtile=8
 mmw=19
 mmh=flr(maph/(mapw/mmw))
 mmx=105
@@ -272,6 +272,7 @@ function handle_click()
 end
 
 function can_gather()
+	if (not vget(mx,my)) return
 	if fget(mget(mx/8,my/8),1) then
 		for u in all(selection) do
 			if u.typ!=ant then
@@ -577,17 +578,11 @@ function update_unit(u)
  	local wp=u.wayp[1]
  	local xv=wp[1]-u.x
  	local yv=wp[2]-u.y
- 	local dx=0
- 	local dy=0
- 	if abs(xv)>abs(yv) then
- 		dx=sgn(xv)
- 		dy=abs(yv/xv)*sgn(yv)
- 	else
- 		dy=sgn(yv)
- 		dx=abs(xv/yv)*sgn(xv)
- 	end
- 	dx/=(6/u.typ.spd)
- 	dy/=(6/u.typ.spd)
+ 	local norm=1/(abs(xv)+abs(yv))
+ 	local dx=xv*norm
+ 	local dy=yv*norm
+ 	dx*=u.typ.spd/3.5
+ 	dy*=u.typ.spd/3.5
  	
 	 u.dir=sgn(dx)
  	u.x+=dx
@@ -688,6 +683,11 @@ function u_rect(u)
  }
 end
 
+function mag(v1,v2)
+  local d = max(abs(v1),abs(v2))
+  local n = min(abs(v1),abs(v2)) / d
+  return sqrt(n*n + 1) * d
+end
 
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
@@ -761,7 +761,7 @@ function neighbors(n,g)
 	neighbor(ns,n[1]  ,n[2]+1)
 	neighbor(ns,n[1]+1,n[2])
 	
-	if false then
+	if true then
 	neighbor(ns,n[1]-1,n[2]+1)
 	neighbor(ns,n[1]+1,n[2]-1)
 	neighbor(ns,n[1]+1,n[2]+1)
