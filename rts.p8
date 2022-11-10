@@ -26,6 +26,7 @@ units={}
 res={r=12,g=9,b=22}
 p1q=nil
 restiles={}
+dmaps={}
 
  --reset every frame
 buttons={}
@@ -58,6 +59,7 @@ function _init()
 		p1q,
 		unit(tower,100,100,1)
 	}
+ make_dmaps()
 end
 
 function _draw()
@@ -86,6 +88,8 @@ function _draw()
 	
 	camera(0,0)
 	
+	if (show_dmap) draw_dmap("b")
+	
 	--menu
 	draw_menu()
 	
@@ -94,6 +98,10 @@ function _draw()
 end
 
 function _update()
+	if btnp(🅾️) and btnp(❎) then
+		show_dmap=not show_dmap
+	end
+
 	fps+=1
 	if fps==60 then
 		fps=0
@@ -287,7 +295,10 @@ function move_units(un,x,y,gt)
 	for u in all(un) do
 		if not u.typ.inert then
 			if gt then
-				u.gather={tile=gt}
+				u.gather={
+					tile=gt,
+					res=tile2res(gt[1],gt[2]),
+				}
 			else
 				u.gather=nil
 			end
@@ -312,19 +323,6 @@ function handle_input()
  my=amy+cy
  
  handle_click()
-end
-
-function surrounding_tiles(x,y,n)
-	local st={}
-	for dx=-n,n do
-	 for dy=-n,n do
-	 	local v=(
-	 		dx<2 and dx>-2 and
-	 		dy<2 and dy>-2)
-		 add(st,{x+dx,y+dy,v})
-		end
-	end
-	return st
 end
 
 function tick_unit(u)
@@ -352,7 +350,8 @@ function update_viz(u)
 	local x=flr(u.x/fogtile)
 	local y=flr(u.y/fogtile)
 	local st=surrounding_tiles(
-		x,y,ceil(u.typ.los/fogtile)
+		x,y,ceil(u.typ.los/fogtile),
+		mapw/fogtile,maph/fogtile
 	)
 	for t in all(st) do
 		local xx,yy,v=t[1],t[2],t[3]
@@ -538,6 +537,7 @@ function mine_res(t)
 	end
 	if n==0 then
 		mset(t[1],t[2],72)
+		make_dmaps()
 	end
 	restiles[idx]=n
 	return n
@@ -546,17 +546,22 @@ end
 function update_unit(u)
  if (u.inert) return
  if u.gather then
- 	if not u.gather.drop and fps==u.gather.t then
- 		u.res.qty+=1
- 		local rem=mine_res(u.gather.tile)
- 		if u.res.qty==9 then
- 			u.gather.drop=true
- 			move(u,p1q.x,p1q.y)
- 		elseif rem==0 then
- 		 --todo: move to next tile
- 			u.gather=nil
- 		end
- 	end
+ 	local tile=u.gather.tile
+ 	if not u.gather.drop then
+	 	--if tile is no longer there
+	 	--move on to the next one
+	 	local f=res2flag(u.gather.res)
+	 	if not fget(mget(tile[1],tile[2]),f) then
+ 			mine_nxt_res(u)
+ 		elseif fps==u.gather.t then
+	 		u.res.qty+=1
+	 		local rem=mine_res(tile)
+	 		if u.res.qty==9 then
+	 			u.gather.drop=true
+	 			move(u,p1q.x,p1q.y)
+	 		end
+	 	end
+	 end
  end
  if u.q then
  	if fps%15==u.q.to then
@@ -644,9 +649,7 @@ function delete_wp(u)
 		end
 		u.res=nil
 		if u.gather then
-			local gt=u.gather.tile
-			u.gather=nil
-			move_units({u},gt[1]*8,gt[2]*8,gt)
+			mine_nxt_res(u)
 		end
 	end
 end
@@ -701,6 +704,71 @@ end
 function round(n)
  if (n<0) return flr(n-0.5)
  return flr(n+0.5)
+end
+
+function surrounding_tiles(x,y,n,maxx,maxy)
+	local st={}
+	for dx=-n,n do
+	 for dy=-n,n do
+	 	if (
+	 		x+dx>=0 and y+dy>=0 and
+	 		x+dx<maxx and y+dy<maxy
+	 	) then
+		 	local v=(
+		 		dx<2 and dx>-2 and
+		 		dy<2 and dy>-2)
+			 add(st,{
+			  x+dx,y+dy,v,
+			 	diag=(dx!=0 and dy!=0)
+			 })
+			end
+		end
+	end
+	return st
+end
+
+function res2flag(res_typ)
+ if (res_typ=="r") return 2
+ if (res_typ=="g") return 3
+ return 4
+end
+
+function tile2res(x,y)
+ local tile=mget(x,y)
+ if (fget(tile,2)) return "r"
+ if (fget(tile,3)) return "g"
+ if (fget(tile,4)) return "b"
+ return nil
+end
+
+function mine_nxt_res(u)
+	u.st=st_move
+	local x,y=flr(u.x/8),flr(u.y/8)
+	local res=u.gather.res
+	local dmap=dmaps[res]
+	local wayp={}
+	while true do
+		local n=g(dmap,x,y)
+		local ts=surrounding_tiles(
+			x,y,1,mapw/8,maph/8
+		)
+		local lowest=n
+		for t in all(ts) do
+			local w=g(dmap,t[1],t[2])
+			if (t.diag) w+=0.4
+			if w<lowest then
+				x=t[1]
+				y=t[2]
+				lowest=w
+			end
+		end
+		if (lowest>=n) return
+		add(wayp,{x*8+3,y*8+3})
+		if (lowest<1) break
+	end
+	u.wayp=wayp
+	u.st=st_move
+	u.gather={tile={x,y},res=res}
 end
 -->8
 --get_wayp
@@ -1156,6 +1224,107 @@ to generate x eggs.
 - dbl click to select same units
 
 ]]
+-->8
+r=mapw/8
+ 
+function g(a,x,y)
+	return a[x+y*r+1]
+end
+
+function s(a,x,y,v)
+ a[x+y*r+1]=v
+end
+
+function add_neigh(to,closed,x,y)
+	local ts=surrounding_tiles(
+		x,y,1,mapw/8,maph/8
+	)
+	for t in all(ts) do
+		if (
+			not (x==t[1] and y==t[2]) and
+			not fget(mget(t[1],t[2]),1)
+			and not g(closed,t[1],t[2])
+		) then
+			s(closed,t[1],t[2],true)
+			add(to,{t[1],t[2]})
+		end
+	end
+end
+
+function acc_res(x,y,f)
+ if fget(mget(x,y),f) then
+ 	return not (
+ 		(x==0 or fget(mget(x-1,y),1)) and
+ 		(x==r-1 or fget(mget(x+1,y),1)) and
+ 		(y==0 or fget(mget(x,y-1),1)) and
+ 		(y==r-1 or fget(mget(x,y+1),1))
+ 	)
+ end
+ return false
+end
+
+function make_dmaps()
+	dmaps={
+		r=make_dmap(2),
+		g=make_dmap(3),
+		b=make_dmap(4),
+	}
+end
+
+function make_dmap(resf)
+	local dmap={}
+	local closed,start,open={},{},{}
+
+	--1st pass
+	for i=0,(mapw/8*maph)-1 do
+		local x,y=i%r,flr(i/r)
+		closed[i+1]=false
+		dmap[i+1]=9
+		if acc_res(x,y,resf) then
+			closed[i+1]=true
+			dmap[i+1]=0
+			add(start,{x,y})
+		elseif fget(mget(x,y),1) then
+		 closed[i+1]=true
+		end
+	end
+	
+	--2nd pass
+	for st in all(start) do
+		add_neigh(open,closed,st[1],st[2])
+	end
+	
+ --3rd pass
+	local c=1
+ while c<6 and #open>0 do
+ 	local nxt_open={}
+ 	for op in all(open) do
+ 		s(dmap,op[1],op[2],c)
+ 		add_neigh(nxt_open,closed,op[1],op[2])
+ 	end
+ 	open=nxt_open
+ 	c+=1
+ end
+ 
+ --last pass
+ for op in all(open) do
+		s(dmap,op[1],op[2],c)
+	end
+	
+	return dmap
+end
+
+function draw_dmap(res_typ)
+	local dmap=dmaps[res_typ]
+	local r=mapw/8
+ for x=0,16 do
+		for y=0,16 do
+			local n=g(dmap,x+flr(cx/8),y+flr(cy/8))
+			n=min(n,9)
+			print(n==0 and "-" or n,x*8+2,y*8+2,9)
+	 end
+	end
+end
 __gfx__
 00000000d00000000000000000000000004444000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
 000000000d000000d000000000000000044114400000000000000000011000000010100000000000110001100000000011000110000000000000000000000000
