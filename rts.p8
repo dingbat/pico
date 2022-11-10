@@ -183,7 +183,7 @@ queen={
 		{typ=ant,t=6,r=2,g=3,b=1}
 	},
 
-	spd=0.5,
+	spd=1,--0.5,
 	los=18,
  hp=25
 }
@@ -556,9 +556,10 @@ function update_unit(u)
  		elseif fps==u.gather.t then
 	 		u.res.qty+=1
 	 		local rem=mine_res(tile)
-	 		if u.res.qty==9 then
+	 		if u.res.qty==2 then
 	 			u.gather.drop=true
 	 			move(u,p1q.x,p1q.y)
+	 			u.follow=p1q
 	 		end
 	 	end
 	 end
@@ -638,29 +639,53 @@ function delete_wp(u)
 			end
 		end
 	end
-	if u.res and intersect(u_rect(u),u_rect(p1q)) then
-		local q=u.res.qty/3
-		if u.res.typ=="r" then
-			res.r=min(res.r+q,99)
-		elseif u.res.typ=="g" then
-			res.g=min(res.g+q,99)
-		elseif u.res.typ=="b" then
-			res.b=min(res.b+q,99)
-		end
-		u.res=nil
-		if u.gather then
-			mine_nxt_res(u)
+	local f=u.follow
+	if f then
+	 if intersect(u_rect(u),u_rect(f)) then
+	 	u.follow=nil
+	 	u.st=st_rest
+	 	u.wayp=nil
+
+			if (
+			 u.res and u.p==f.p
+			 and f.typ==queen
+			) then
+				local q=u.res.qty/3
+				if u.res.typ=="r" then
+					res.r=min(res.r+q,99)
+				elseif u.res.typ=="g" then
+					res.g=min(res.g+q,99)
+				elseif u.res.typ=="b" then
+					res.b=min(res.b+q,99)
+				end
+				u.res=nil
+				if u.gather then
+					mine_nxt_res(u)
+				end
+			end
+			
+		else
+		 --recalc the follow
+		 move(u,f.x,f.y)
+		 if (#u.wayp>1) deli(u.wayp,1)
+		 u.follow=f
 		end
 	end
 end
 
+function setwayp(u,wayp)
+	u.st=st_move
+	u.wayp=wayp
+	u.follow=nil
+end
+
 function move(u,x,y)
-	u.wayp=get_wayp(u,x,y)
+	local wayp=get_wayp(u,x,y)
 	if u.gather and not u.gather.drop then
 		local gt=u.gather.tile
-		add(u.wayp,{8*gt[1]+3,8*gt[2]+3})
+		add(wayp,{8*gt[1]+3,8*gt[2]+3})
 	end
-	u.st=st_move
+	setwayp(u,wayp)
 end
 
 -->8
@@ -766,8 +791,7 @@ function mine_nxt_res(u)
 		add(wayp,{x*8+3,y*8+3})
 		if (lowest<1) break
 	end
-	u.wayp=wayp
-	u.st=st_move
+	setwayp(u,wayp)
 	u.gather={tile={x,y},res=res}
 end
 -->8
@@ -1097,7 +1121,7 @@ function draw_menu()
 		})
 		
 		if u.res then
-			print(u.res.typ.." x"..u.res.qty,20,y+2,7)
+			print(u.res.typ.." \88"..u.res.qty,20,y+2,7)
 		end
 		
 		if typ.build then
