@@ -63,7 +63,7 @@ function _init()
 		unit(beetle,40,36,1),
 		unit(beetle,60,76,2),
 		p1q,
-		unit(tower,100,100,1)
+		unit(tower,65,65,1)
 	}
  make_dmaps()
 end
@@ -189,7 +189,8 @@ spider={
 	hp=15
 }
 warant={
- w=8,
+ w=7,
+ fw=8,
  h=5,
  x=0,
  y=25,
@@ -427,6 +428,13 @@ function handle_click()
   	hilite={
 	  	typ="build",t=fps,unit=hoverunit
 	  }
+	 elseif can_attack() then
+	 	for u in all(selection) do
+  		send_attack(u,hoverunit)
+  	end
+  	hilite={
+	  	typ="attack",t=fps,unit=hoverunit
+	  }
   else
 	  --move selection
    move_units(selection,mx,my)
@@ -637,10 +645,7 @@ end
 --units
 
 function draw_unit(u)
-	if not u.p then
-		return
-	end
- local cr={cx,cy,cx+128,cy+128}
+	local cr={cx-1,cy-1,cx+129,cy+129}
 	if not intersect(u_rect(u),cr) then
 		return
 	end
@@ -660,12 +665,16 @@ function draw_unit(u)
 		rectaround(u,12)
 		fillp(0)
 		local x=u.x-flr(w/2)
-		local y=u.y-flr(h/2)-2
+		local y=u.y-flr(h/2)-1
 		local p=u.const/u.typ.const
 		local w=u.typ.w-1
 		line(x,y,x+w,y,5)
 		line(x,y,x+w*p,y,14)
 		if (u.const<=1) return
+	end
+	
+	if hilite and hilite.typ=="attack" and hilite.unit==u then
+		rectaround(u,8)
 	end
 	
 	local x=ut.x
@@ -708,8 +717,7 @@ function draw_unit(u)
 	pal(1,col)
 	local sdir=u.typ.dir or 1
 	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==sdir)
-	pal(1,1)
-	pal(2,2)
+	pal()
 end
 
 function mine_res(t)
@@ -853,31 +861,26 @@ function delete_wp(u)
 			end
 		end
 	end
+	if u.res and intersect(u_rect(u),u_rect(p1q)) then
+		local q=u.res.qty/3
+		if u.res.typ=="r" then
+			res.r=min(res.r+q,99)
+		elseif u.res.typ=="g" then
+			res.g=min(res.g+q,99)
+		elseif u.res.typ=="b" then
+			res.b=min(res.b+q,99)
+		end
+		u.res=nil
+		if u.gather then
+			mine_nxt_res(u)
+		end
+	end
 	local f=u.follow
 	if f then
 	 if intersect(u_rect(u),u_rect(f)) then
 	 	u.follow=nil
 	 	u.st=st_rest
-	 	u.wayp=nil
-
-			if (
-			 u.res and u.p==f.p
-			 and f.typ==queen
-			) then
-				local q=u.res.qty/3
-				if u.res.typ=="r" then
-					res.r=min(res.r+q,99)
-				elseif u.res.typ=="g" then
-					res.g=min(res.g+q,99)
-				elseif u.res.typ=="b" then
-					res.b=min(res.b+q,99)
-				end
-				u.res=nil
-				if u.gather then
-					mine_nxt_res(u)
-				end
-			end
-			
+	 	u.wayp=nil			
 		else
 		 --recalc the follow
 		 move(u,f.x,f.y)
@@ -1044,6 +1047,13 @@ function can_gather()
 	end
 end
 
+function can_attack()
+	if (not vget(mx,my)) return
+	return hoverunit and
+	 hoverunit.p!=1 and
+		#selection>0
+end
+
 function can_build()
 	if (
 		hoverunit and
@@ -1058,12 +1068,17 @@ function rectaround(u,c)
 	local w=u.typ.fw or u.typ.w
 	local h=u.typ.h
 	rect(
-		u.x-flr(w/2)-1,
-		u.y-flr(h/2)-1,
+		u.x-ceil(w/2)-1,
+		u.y-ceil(h/2)-1,
 		u.x+ceil(w/2)-1,
 		u.y+ceil(h/2)-1,
 		c
 	)
+end
+
+function send_attack(u,b)
+	move(u,b.x,b.y)
+	u.follow=u
 end
 
 function send_build(u,b)
@@ -1304,7 +1319,7 @@ function draw_resource(typ,val,x,y)
 
 	local _x=x
 	local w=0
-	local s=""..val
+	local s=""..flr(val)
 	for i=0,#s do
 		if i==0 then
 			w=typ=="p" and 6 or 4
@@ -1388,18 +1403,10 @@ function cursor_spr()
 	if (build or can_build()) then
 		return 68
 	end
-	--cursors requiring viz
-	if vget(mx,my) then
-		if can_gather() then
-			return 67 --pick
-		elseif (
-			hoverunit and
-		 hoverunit.p!=1 and
-			#selection>0
-		) then
-			return 65 --sword
-		end
-	end
+	--pick
+	if (can_gather())	return 67
+	 --sword
+	if (can_attack()) return 65
 	--default
 	return 64
 end
@@ -1516,12 +1523,28 @@ function draw_menu()
 		if #selection<3 then
 			draw_sel_ports(y)
 		else
-			draw_port({typ=typ,x=3,y=y+2})
-			print("\88"..#selection,15,y+5,7)
+			draw_port({
+			typ=typ,x=3,y=y+2,
+			onclick=function()
+				selection[1].sel=false
+				deli(selection,1)
+			end})
+			print("\88"..#selection,16,y+5,7)
 		end
 		
-		if u.res then
-			print(u.res.typ.." \88"..u.res.qty,20,y+2,7)
+		if #selection==1 and u.res then
+			for i=0,8 do
+				local xx=20+(i%3)*3
+				local yy=y+2+flr(i/3)*3
+				rect(xx,yy,xx+3,yy+3,7)
+				local col=5
+				if u.res.qty>i then
+					if (u.res.typ=="g") col=11
+					if (u.res.typ=="r") col=8
+					if (u.res.typ=="b") col=4
+				end
+				rect(xx+1,yy+1,xx+2,yy+2,col)
+			end
 		end
 		
 		if typ.prod and not u.const then
@@ -1780,9 +1803,9 @@ bb001100011044001100011000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0d000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-d00000110d0000000dd0000000000000011110000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000
-11000011d0000011d00000110000000000d1d00000d1d00000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0d111100111111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d00001100d0000000dd0000000000000011110000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000
+11000110d0000110d00001100000000000d1d00000d1d00000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0d111100111111101111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001d1d000d1d1d0001d1d1d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
