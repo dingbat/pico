@@ -13,6 +13,8 @@ mmy=107
 menuh=21
 menuy=104
 
+melee=4
+
 --global state
 cx=0
 cy=0
@@ -28,6 +30,7 @@ res={r=22,g=23,b=22,p=99}
 p1q=nil
 restiles={}
 dmaps={}
+proj={} --projectiles
 
  --reset every frame
 buttons={}
@@ -62,6 +65,7 @@ function _init()
 		unit(warant,58,30,1),
 		unit(beetle,40,36,1),
 		unit(beetle,60,76,2),
+		--unit(beetle,65,81,2),
 		p1q,
 		unit(tower,65,65,1)
 	}
@@ -81,6 +85,7 @@ function _draw()
  end
  
 	foreach(built,draw_unit)
+	draw_projectiles()
 	draw_fow()
 	foreach(building,draw_unit)
 
@@ -134,6 +139,7 @@ function _update()
  hoverunit=nil
  buttons={}
  unit_sel=false
+ update_projectiles()
  foreach(units,tick_unit)
 end
 
@@ -219,7 +225,11 @@ queen={
 
 	spd=0.5,
 	los=18,
+	range=15,
  hp=25,
+ proj_col=11,
+ proj_xo=-4,
+ proj_yo=2,
 }
 
 st_rest=1
@@ -236,10 +246,13 @@ tower={
 	porty=80,
 	inert=true,
 	los=30,
-	hp=50,
+	hp=40,
 	dir=-1,
 	restfr=1,
+	range=25,
 	const=20,
+ proj_yo=-2,
+ proj_xo=-1,
 }
 mound={
 	w=7,
@@ -411,7 +424,9 @@ function handle_click()
  end
 	
  --right click
- if (btnp(4)) then
+ if (btnp(4) and #selection>0
+ 	and selection[1].p==1
+ 	) then
 	 if can_gather() then
 	 	--gather resources
 	 	local x=flr(mx/8)
@@ -476,33 +491,48 @@ function handle_input()
  handle_click()
 end
 
+function update_sel(u)
+local no_other=(not unit_sel and #selection==0)
+	local s=(
+		intersect(selbox,u_rect(u)) and
+		(
+			not u.typ.inert or no_other
+		) and
+		(u.p==1 or no_other)
+	)
+	u.sel=s
+	if (s) then
+		if (not u.typ.inert) then
+			unit_sel=true
+			for i=1,#selection do
+				if (
+					selection[i].typ.inert or
+					selection[i].p!=1) then
+					selection[i].sel=false
+					deli(selection,i)
+					i-=1
+				end
+			end
+		end
+		add(selection,u)
+	end
+end
+
 function tick_unit(u)
+	if u.hp<=0 then
+		u.dead=true
+		del(units,u)
+		del(selection,u)
+		return		
+	end
+
 	update_unit(u)
 	
 	if u.p==1 then
-		if u.const==nil then
-			update_viz(u)
-		end
-		
-		if selbox then
-			local s=intersect(selbox,u_rect(u))
-			s=s and (not u.typ.inert or not unit_sel)
-			u.sel=s
-			if (s) then
-				if (not u.typ.inert) then
-					unit_sel=true
-					for i=1,#selection do
-						if selection[i].typ.inert then
-							selection[i].sel=false
-							deli(selection,i)
-							i-=1
-						end
-					end
-				end
-				add(selection,u)
-			end
-		end
+		if (u.const==nil)	update_viz(u)
 	end
+	
+	if (selbox) update_sel(u)
 	
 	local mbox={mx-1,my-1,mx+2,my+2}
 	if intersect(u_rect(u),mbox) then
@@ -533,15 +563,26 @@ function update_viz(u)
 	end
 end
 
---x y are absolute coords, 0-128
---returns true if coord is viz
---in currently visible screen
-function vget(x,y)
-	local tiles=mapw/fogtile
-	x=flr(x/fogtile)
- y=flr(y/fogtile)
- if (x<0 or y<0) return true
- return vizmap[x*tiles+y+1]
+function update_projectiles()
+ for p in all(proj) do
+ 	local xv=p.to[1]-p.x
+ 	local yv=p.to[2]-p.y
+ 	local norm=1/(abs(xv)+abs(yv))
+ 	local dx=xv*norm
+ 	local dy=yv*norm
+  p.x+=dx/1.25
+  p.y+=dy/1.25
+		if (
+  	abs(p.x-p.to[1])<=0.5 and
+  	abs(p.y-p.to[2])<=0.5
+  ) then
+   if intersect(u_rect(p.to_unit),
+  	{p.x,p.y,p.x,p.y}) then
+ 	 	p.to_unit.hp-=1
+			end
+  	del(proj,p)
+  end
+ end
 end
 -->8
 --map
@@ -641,6 +682,13 @@ function draw_minimap()
 	if (vx1>x or vy2<y+h) pset(x,y+h,4)
 	if (vx2<x+w or vy2<y+h) pset(x+w,y+h,4)
 end
+
+function draw_projectiles()
+ for p in all(proj) do
+ 	local c=p.from_typ.proj_col or 5
+		pset(p.x,p.y,c)
+	end
+end
 -->8
 --units
 
@@ -655,6 +703,8 @@ function draw_unit(u)
 			pset(u.wayp[i][1],u.wayp[i][2],8)
 		end
 	end
+	
+	if (u.sel)	circ(u.x,u.y,u.typ.los,8)
 	
 	local ut=u.typ
 	local w=ut.fw or ut.w
@@ -720,34 +770,56 @@ function draw_unit(u)
 	pal()
 end
 
-function mine_res(t)
-	local idx=t[1]*mapw/8+t[2]+1
-	local n=restiles[idx] or 12
-	n-=1
-	if n==4 or n==9 then
-		local s=mget(t[1],t[2])
-		mset(t[1],t[2],s+16)
-	end
-	if n==0 then
-		mset(t[1],t[2],72)
-		make_dmaps()
-	end
-	restiles[idx]=n
-	return n
+function attack(u)
+	local a=u.attack
+	if (not a or fps%30!=0) return
+	if u.typ.range then
+		local d=dist(a.x-u.x,a.y-u.y)
+		if (d<=u.typ.range) then
+ 		add(proj,{
+ 			from_typ=u.typ,
+ 			x=u.x+(u.typ.proj_xo or 0),
+ 			y=u.y+(u.typ.proj_yo or 0),
+ 			to={a.x,a.y},to_unit=a,
+ 		})
+ 	end
+ else
+ 	if intersect(u_rect(u),u_rect(a),1) then
+		 a.hp-=1
+		end
+ end
 end
 
 function update_unit(u)
+	if u.attack and u.attack.dead then
+		u.attack=nil
+		u.follow=nil
+		u.st=st_rest
+	end
+	if u.follow and u.follow.dead then
+		u.follow=nil
+		u.st=st_rest
+	end
+	local attacking=attack(u)
+	aggress(u)
  if (u.inert) return
  if u.build and u.build.active then
  	local b=u.build.u
- 	if b.const and fps%30==0 then
- 		b.const+=1
- 		if b.const==b.typ.const then
- 			b.const=nil
- 		end
+ 	if fps%30==0 then
+ 		if b.const then
+	 		b.const+=1
+	 		if b.const==b.typ.const then
+	 			b.const=nil
+	 		end
+	 	elseif (
+	 		b.hp<b.typ.hp and
+	 		res.b>=1) then
+	 		b.hp+=1
+	 		res.b-=0.5
+	 	end
  	end
  	--poss another worker finished
- 	if not b.const then
+ 	if (not b.const) and b.hp==b.typ.hp then
  		u.build=nil
  		u.st=st_rest
  	end
@@ -787,6 +859,26 @@ function update_unit(u)
  		end
  	end
  end
+ local f=u.follow
+	if f then
+	 if intersect(u_rect(u),u_rect(f)) then
+	 	if not u.attack then
+				u.follow=nil
+	 		u.st=st_rest
+	 	end
+	 	u.wayp=nil
+		elseif not attacking then
+			local a=u.attack
+		 --recalc the follow
+		 -- only do this for attacking!
+		 -- otherwise, do this in
+		 -- del_wayp to save cpu
+		 move(u,f.x,f.y)
+		 if (#u.wayp>1) deli(u.wayp,1)
+		 u.follow=f
+		 u.attack=a
+		end
+	end
  if u.wayp then
  	local wp=u.wayp[1]
  	local xv=wp[1]-u.x
@@ -799,26 +891,23 @@ function update_unit(u)
  	
 	 u.dir=sgn(dx)
  	u.x+=dx
- 	u.y+=dy
-			
- 	local int=nil
- 	
- 	if int then
- 		--u.x-=dx
- 	--	u.y-=dy
- 		--recompute wayp
- 	elseif adj(u.x,u.y,wp[1],wp[2]) then
+ 	u.y+=dy	
+		
+ 	if adj(u.x,u.y,wp[1],wp[2]) then
  		delete_wp(u)
  	end
  	
  	if u.build then
- 		if not u.build.u.const then
+ 		local b=u.build.u
+ 		if (
+ 			not b.const and
+ 			b.hp==b.typ.hp
+ 		) then
  		 u.wayp=nil
  		 u.build=nil
  		 u.st=st_rest
- 		elseif intersect(
- 			u_rect(u),
- 			u_rect(u.build.u)
+ 		elseif intersect(u_rect(u),
+ 			u_rect(b)
  		) then
  			u.wayp=nil
  			u.build.active=true
@@ -826,12 +915,6 @@ function update_unit(u)
  		end
  	end
  end
-end
-
-function adj(x1,y1,x2,y2)
-	return (
-	 abs(x1-x2)<2 and abs(y1-y2)<2
-	)
 end
 
 function delete_wp(u)
@@ -875,19 +958,6 @@ function delete_wp(u)
 			mine_nxt_res(u)
 		end
 	end
-	local f=u.follow
-	if f then
-	 if intersect(u_rect(u),u_rect(f)) then
-	 	u.follow=nil
-	 	u.st=st_rest
-	 	u.wayp=nil			
-		else
-		 --recalc the follow
-		 move(u,f.x,f.y)
-		 if (#u.wayp>1) deli(u.wayp,1)
-		 u.follow=f
-		end
-	end
 end
 
 function setwayp(u,wayp)
@@ -895,6 +965,7 @@ function setwayp(u,wayp)
 	u.wayp=wayp
 	u.follow=nil
 	u.build=nil
+	u.attack=nil
 end
 
 function move(u,x,y)
@@ -906,14 +977,32 @@ function move(u,x,y)
 	setwayp(u,wayp)
 end
 
+function aggress(u)
+	if ((not u.typ.range) or u.attack or u.wayp) then
+		return
+	end
+	for e in all(units) do
+		if e.p!=u.p and not e.typ.inert then
+			local d=dist(e.x-u.x,e.y-u.y)
+			if d<=u.typ.range then
+				u.attack=e
+				break
+			elseif not u.typ.inert and d<=u.typ.los then
+				send_attack(u,e)
+				break
+			end
+		end
+	end
+end
 -->8
 --utils
 
-function intersect(r1,r2)
-	local r1_x1=min(r1[1],r1[3])
-	local r1_x2=max(r1[1],r1[3])
-	local r1_y1=min(r1[2],r1[4])
-	local r1_y2=max(r1[2],r1[4])
+function intersect(r1,r2,e)
+	e=e or 0
+	local r1_x1=min(r1[1],r1[3])-e
+	local r1_x2=max(r1[1],r1[3])+e
+	local r1_y1=min(r1[2],r1[4])-e
+	local r1_y2=max(r1[2],r1[4])+e
 	return (
 		r1_x1<r2[3] and
 		r1_x2>r2[1] and
@@ -1057,8 +1146,10 @@ end
 function can_build()
 	if (
 		hoverunit and
+		hoverunit.typ.inert and
 		hoverunit.p==1 and
-		hoverunit.const
+		(hoverunit.const or
+			hoverunit.hp<hoverunit.typ.hp)
 	) then
 		return all_ants()
 	end
@@ -1078,14 +1169,50 @@ end
 
 function send_attack(u,b)
 	move(u,b.x,b.y)
-	u.follow=u
+	u.follow=b
+	u.attack=b
 end
 
 function send_build(u,b)
 	u.res=nil
 	u.gather=nil
 	move(u,b.x,b.y)
+	printh(u.wayp,"log")
+	printh(#u.wayp,"log")
 	u.build={u=b}
+end
+
+function mine_res(t)
+	local idx=t[1]*mapw/8+t[2]+1
+	local n=restiles[idx] or 12
+	n-=1
+	if n==4 or n==9 then
+		local s=mget(t[1],t[2])
+		mset(t[1],t[2],s+16)
+	end
+	if n==0 then
+		mset(t[1],t[2],72)
+		make_dmaps()
+	end
+	restiles[idx]=n
+	return n
+end
+
+function adj(x1,y1,x2,y2)
+	return (
+	 abs(x1-x2)<2 and abs(y1-y2)<2
+	)
+end
+
+--x y are absolute coords, 0-128
+--returns true if coord is viz
+--in currently visible screen
+function vget(x,y)
+	local tiles=mapw/fogtile
+	x=flr(x/fogtile)
+ y=flr(y/fogtile)
+ if (x<0 or y<0) return true
+ return vizmap[x*tiles+y+1]
 end
 -->8
 --get_wayp
@@ -1349,17 +1476,18 @@ end
 
 function draw_port(o)
 	local
-		typ,x,y,hp,onclick,prog,costs=
+		typ,x,y,hp,onclick,prog,costs,p=
 		o.typ,o.x,o.y,o.hp,o.onclick,
-		o.prog,o.costs
+		o.prog,o.costs,o.p or 1
 		
-	local bg=costs and 3 or 1
+	local outline=costs and 3 or 1
+	if (p!=1) outline=2
 	pal(14,0)
 	if costs and not can_pay(costs) then
-		bg=5
+		outline=5
 		pal({1,1,5,5,5,6,7,13,6,7,7,6,13,6,7,1})
 	end
-	rect(x,y,x+10,y+9,bg)
+	rect(x,y,x+10,y+9,outline)
 	x+=1
 	y+=1
 	rectfill(x,y,x+8,y+7,costs and 12 or 6)
@@ -1399,14 +1527,17 @@ function cursor_spr()
 			return 66
 		end
 	end
- --build cursor
-	if (build or can_build()) then
-		return 68
+	if #selection>0 and
+		selection[1].p==1 then
+	 --build cursor
+		if (build or can_build()) then
+			return 68
+		end
+		--pick
+		if (can_gather())	return 67
+		 --sword
+		if (can_attack()) return 65
 	end
-	--pick
-	if (can_gather())	return 67
-	 --sword
-	if (can_attack()) return 65
 	--default
 	return 64
 end
@@ -1488,32 +1619,12 @@ function draw_sel_ports(y)
 		end
 		draw_port({
 			typ=u.typ,x=x,y=y+1,hp=hp,
-			onclick=onclick
+			onclick=onclick,p=u.p
 		})
 	end
 end
 
-function draw_menu()
- local sel=0
- for s in all(selection) do
- 	sel=1
- 	if s.typ!=selection[1].typ then
- 		sel=2
- 		break
- 	end
- end
- 
- local sections={102,26}
- if sel==1 then
- 	local t=selection[1].typ
- 	if t.has_q then
-  	sections={17,24,61,26}
- 	elseif t.prod then
-  	sections={35,67,26}
-  end
- end
- draw_menu_bg(sections)
- 
+function draw_unit_section(sel)
 	local y=menuy+2
 	if sel==1 then
 		local u=selection[1]
@@ -1532,6 +1643,8 @@ function draw_menu()
 			print("\88"..#selection,16,y+5,7)
 		end
 		
+		if (u.p!=1) return
+		
 		if #selection==1 and u.res then
 			for i=0,8 do
 				local xx=20+(i%3)*3
@@ -1541,7 +1654,7 @@ function draw_menu()
 				if u.res.qty>i then
 					if (u.res.typ=="g") col=11
 					if (u.res.typ=="r") col=8
-					if (u.res.typ=="b") col=4
+					if (u.res.typ=="b") col=9
 				end
 				rect(xx+1,yy+1,xx+2,yy+2,col)
 			end
@@ -1606,6 +1719,30 @@ function draw_menu()
 	elseif sel==2 then
 		draw_sel_ports(y)
 	end
+end
+
+function draw_menu()
+ local sel=0
+ for s in all(selection) do
+ 	sel=1
+ 	if s.typ!=selection[1].typ then
+ 		sel=2
+ 		break
+ 	end
+ end
+ 
+ local sections={102,26}
+ if sel==1 then
+ 	local t=selection[1].typ
+ 	if t.has_q then
+  	sections={17,24,61,26}
+ 	elseif t.prod then
+  	sections={35,67,26}
+  end
+ end
+ draw_menu_bg(sections)
+ 
+	draw_unit_section(sel)
 	
 	--minimap
 	draw_minimap()
@@ -1805,7 +1942,7 @@ bb001100011044001100011000000000000000000000000000000000000000000000000000000000
 0d000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 d00001100d0000000dd0000000000000011110000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000
 11000110d0000110d00001100000000000d1d00000d1d00000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0d111100111111101111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00111100111111101111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001d1d000d1d1d0001d1d1d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1853,7 +1990,7 @@ fff77fff00000000ffffbfffffffffff000000000000000000000000000000000000000000000000
 000200020290909250500050500000050500022ddd220000000000000000000000000000888000060000000000000000000000000ffffffff000000000000000
 00002020002999205055555050022225050000ddddd0000000000000000000000000000088800066000000000000000000000000000000000000000000000000
 0000404040444400055e5e55002622dddd0d00ddddd0000000000000000000000000000006000006000000000000000000000000000000000000000000000000
-44047474444e4e0050555550502266d5d50dd04a4a40000000000000000000000000000006000666000000000000000000000000000000000000000000000000
+44047474444e4e0050555550502266d5d50dd04e4e40000000000000000000000000000006000666000000000000000000000000000000000000000000000000
 444044404504400050500050502222dddd0444044400000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 05050405505005000005050000505050500050504050000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
