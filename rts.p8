@@ -26,7 +26,7 @@ selbox=nil
 selection={}
 units={}
 unit_sel=false
-res={r=22,g=23,b=22,p=99}
+res={r=22,g=30,b=22,p=99}
 p1q=nil
 restiles={}
 dmaps={}
@@ -337,7 +337,7 @@ spider.prod={
 	{typ=web,t=4,r=0,g=2,b=0},
 }
 queen.prod={
-	{typ=ant,t=6,r=2,g=3,b=1}
+	{typ=ant,t=6,r=2,g=3,b=0}
 }
 barracks.prod={
 	{typ=warant,t=10,r=1,g=2,b=1},
@@ -351,15 +351,23 @@ btden.prod={
 -->8
 --update
 
-function handle_click()
-	--check buttons
+function hoverbutton()
 	for b in all(buttons) do
 		if (
-			btnp(5) and
 			amx>=b.x and amx<=b.x+b.w and
 			amy>=b.y and amy<=b.y+b.h
 		) then
-			b.handle()
+			return b
+		end
+	end
+end
+
+function handle_click()
+	--check buttons
+	if btnp(5) then
+		local hb=hoverbutton()
+		if hb then
+			hb.handle()
 			return
 		end
 	end
@@ -1437,6 +1445,20 @@ function print_cost(costs,x,y)
 	end
 end
 
+function cost_len(c)
+	local len=0
+	if c.r>0 then
+		len+=draw_resource("r",c.r)
+	end
+	if c.g>0 then
+		len+=draw_resource("g",c.g)
+	end
+	if c.b>0 then
+		len+=draw_resource("b",c.b)
+	end
+	return len
+end
+
 --typ="b/g/r/p"
 function draw_resource(typ,val,x,y)
  local sy,c=64,11 --g
@@ -1444,26 +1466,33 @@ function draw_resource(typ,val,x,y)
  if (typ=="b") sy,c=80,4
  if (typ=="p") sy,c=88,1
 
-	local _x=x
+	local total=0
 	local w=0
 	local s=""..flr(val)
 	for i=0,#s do
 		if i==0 then
 			w=typ=="p" and 6 or 4
-			rectfill(x-1,y-1,x+w,y+6,7)
- 		sspr(72,sy,5,5,x,y)
+			if x and y then
+				rectfill(x-1,y-1,x+w,y+6,7)
+	 		sspr(72,sy,5,5,x,y)
+	 	end
 		elseif s[i]=="1" then
 			w=2
-  	rectfill(x-1,y-1,x+w,y+6,7)
-			line(x,y,x,y+4,c)
+  	if x and y then
+	  	rectfill(x-1,y-1,x+w,y+6,7)
+				line(x,y,x,y+4,c)
+			end
 		else
 			w=4
-			rectfill(x-1,y-1,x+w,y+6,7)
-			print(s[i],x,y,c)
+			if x and y then
+				rectfill(x-1,y-1,x+w,y+6,7)
+				print(s[i],x,y,c)
+			end
 		end
-		x+=w
+		total+=w
+		if (x) x+=w
 	end
-	return x-_x+2
+	return total+2
 end
 
 function can_pay(costs)
@@ -1485,7 +1514,7 @@ function draw_port(o)
 	pal(14,0)
 	if costs and not can_pay(costs) then
 		outline=5
-		pal({1,1,5,5,5,6,7,13,6,7,7,6,13,6,7,1})
+		pal({5,5,5,5,5,6,7,13,6,7,7,6,13,6,7,5})
 	end
 	rect(x,y,x+10,y+9,outline)
 	x+=1
@@ -1503,7 +1532,7 @@ function draw_port(o)
 	pal()
 	
 	if onclick then
-		button(x,y,10,10,onclick)
+		button(x,y,10,10,onclick,costs)
 	end
 	y+=11
 	if hp then
@@ -1512,8 +1541,6 @@ function draw_port(o)
 		local hp_fg=prog and 12 or 11
 		line(x,y,x+lw,y,hp_bg)
 		line(x,y,x+round(lw*hp),y,hp_fg)
-	elseif costs then
-		print_cost(costs,x,y)
 	end
 end
 
@@ -1594,9 +1621,10 @@ function draw_cursor()
 end
 
 buttons={}
-function button(x,y,w,h,handle)
+function button(x,y,w,h,handle,hover)
 	add(buttons,{
-		x=x,y=y,w=w,h=h,handle=handle
+		x=x,y=y,w=w,h=h,handle=handle,
+		hover=hover
 	})
 end
 
@@ -1672,14 +1700,16 @@ function draw_unit_section(sel)
 				end
 				draw_port({
 				 typ=b.typ,x=x,y=yy,
-				 costs=nil,onclick=
+				 costs=b,onclick=
 					function()
 						if (not can_pay(b)) return
 						if b.typ.inert then
 							build=b
 							return
 						end
-						if (u.q and u.q.b!=b) return
+						if (u.q and (u.q.b!=b or u.q.qty==9)) then
+							return
+						end
 						res.r-=b.r
 						res.g-=b.g
 						res.b-=b.b
@@ -1770,6 +1800,34 @@ function draw_menu()
 	pset(x-1,y-1,5)
 	line(0,y-2,x-2,y-2,5)
 	line(x,y,x,y+5,5)
+	
+	local hb=hoverbutton()
+	if hb and hb.hover then
+		local b=hb.hover
+		local w=cost_len(b)
+		local h=8
+		local x=hb.x-(w-hb.w)/2
+		local y=hb.y-h-2
+		rectfill(x,y,x+w,y+h,7)
+		local rx=x+2
+		if b.r>0 then
+			rx+=draw_resource("r",b.r,rx,y+2)
+		end
+		if b.g>0 then
+			rx+=draw_resource("g",b.g,rx,y+2)
+		end
+		if b.b>0 then
+			rx+=draw_resource("b",b.b,rx,y+2)
+		end
+		line(x+1,y-1,x+w-1,y-1,5)
+		line(x+1,y+h+1,x+w-1,y+h+1,5)
+		line(x,y,x,y+h,5)
+		line(x+w,y,x+w,y+h,5)
+		pset(x+1,y,5)
+		pset(x+w-1,y,5)
+		pset(x+1,y+h,5)
+		pset(x+w-1,y+h,5)
+	end
 end
 
 function draw_menu_bg(secs)
@@ -1794,6 +1852,15 @@ end
 -->8
 --notes
 --[[
+
+todo
+- building shld obstruct pathf
+- building shld obstruct bldng
+- redo unit state (fix gather)
+- units adjst when in same spot
+- spiderweb
+- rock paper scissors (var dmg)
+- tech tree
 
 pathfinding:
 - if destination tile is impass,
