@@ -30,7 +30,7 @@ units={}
 unit_sel=false
 --0.1 so res displays in readout
 --but is also essentially 0
-res={r=0.1,g=0.1,b=0.1,p=99}
+res={r=10.1,g=10.1,b=10.1,p=99}
 p1q=nil
 restiles={}
 dmaps={}
@@ -81,8 +81,7 @@ function _draw()
  
  draw_map()
  
- local built={}
- local building={}
+ local built,building={},{}
  for u in all(units) do
  	if (u.const) add(building,u)
  	if (not u.const) add(built,u)
@@ -100,9 +99,7 @@ function _draw()
 		fillp(0)
 	end
 	
-	if hilite then
-		draw_hilite()
-	end
+	if (hilite) draw_hilite()
 	
 	camera(0,0)
 	
@@ -114,18 +111,18 @@ function _draw()
 	--mouse
 	draw_cursor()
 	
-	if debug then
+	--[[if debug then
 		local s=selection[1]
 		if s then
 			print(s.st.t,0,0,7)
 		end
-	end
+	end]]
 end
 
 function _update()
-	if debug and btnp(🅾️) and btnp(❎) then
+	--[[if debug and btnp(🅾️) and btnp(❎) then
 		show_dmap=not show_dmap
-	end
+	end]]
 
 	fps+=1
 	if fps==60 then
@@ -147,21 +144,20 @@ function _update()
  foreach(units,tick_unit)
 end
 
-
 function draw_hilite()
 	local dt=t()-hilite.t
-	if hilite.typ=="gather" then
-		if (dt>0.1 and dt<0.3) return
-		local w=hilite.w or 8
-		local h=hilite.h or 8
-		rect(
-			hilite.x-1,hilite.y-1,
-			hilite.x+w,hilite.y+h,8)
-	elseif hilite.typ=="build" then
-		if (dt>0.1 and dt<0.3) return
-		rectaround(hilite.unit,8)
-	elseif hilite.typ=="move" then
+	if hilite.x then
 		circ(hilite.x,hilite.y,min(1/dt/2,4),8)
+	else
+		if (dt>0.1 and dt<0.25) return
+		local tx,ty,u=hilite.tx,hilite.ty,hilite.unit
+		if tx then
+			rect(
+				tx*8-1,ty*8-1,
+				tx*8+8,ty*8+8,8)
+		elseif u then
+			rectaround(u,8)
+		end
 	end
 end
 -->8
@@ -194,7 +190,6 @@ spd=1
 los=20
 hp=10
 ]])
-
 beetle=parse([[
 w=7
 fw=8
@@ -392,9 +387,6 @@ function move(u,x,y)
 		t="move",
 		wayp=get_wayp(u,x,y),
 	}
-	hilite={
-		typ="move",x=x,y=y,t=t(),
-	}
 end
 
 function build(u,b)
@@ -530,10 +522,7 @@ function handle_click()
 	 	--gather resources
 	 	local x=flr(mx/8)
 	 	local y=flr(my/8)
-	  hilite={
-	  	typ="gather",t=t(),
-	  	x=x*8,y=y*8
-	  }
+	  hilite={t=t(),tx=x,ty=y}
 	  for u in all(selection) do
 				gather(u,x,y)
   	end
@@ -541,27 +530,22 @@ function handle_click()
   	for u in all(selection) do
   		build(u,hoverunit)
   	end
-  	hilite={
-	  	typ="build",t=t(),unit=hoverunit
-	  }
+  	hilite={t=t(),unit=hoverunit}
 	 elseif can_attack() then
 	 	for u in all(selection) do
   		attack(u,hoverunit)
   	end
-  	hilite={
-	  	typ="attack",t=t(),unit=hoverunit
-	  }
+  	hilite={t=t(),unit=hoverunit}
   elseif sel_carry() and hoverunit==p1q then
 	 	for u in all(selection) do
 				drop(u)
   	end
-  	hilite={
-	  	typ="attack",t=t(),unit=hoverunit
-	  }
+  	hilite={t=t(),unit=hoverunit}
   else
 	 	for u in all(selection) do
 				move(u,mx,my)
   	end
+  	hilite={t=t(),x=mx,y=my}
   end
  end
 end
@@ -630,8 +614,8 @@ function tick_unit(u)
 
 	update_unit(u)
 	
-	if u.p==1 then
-		if (u.const==nil)	update_viz(u)
+	if u.p==1 and not u.const then
+		update_viz(u)
 	end
 	
 	if (selbox) update_sel(u)
@@ -667,17 +651,12 @@ end
 
 function update_projectiles()
  for p in all(proj) do
- 	local xv=p.to[1]-p.x
- 	local yv=p.to[2]-p.y
- 	local norm=1/(abs(xv)+abs(yv))
- 	local dx=xv*norm
- 	local dy=yv*norm
+ 	local dx,dy=norm(p.to,p)
   p.x+=dx/1.25
   p.y+=dy/1.25
-		if (
-  	abs(p.x-p.to[1])<=0.5 and
-  	abs(p.y-p.to[2])<=0.5
-  ) then
+		if adj(
+			p.x,p.y,p.to[1],p.to[2],0.5
+		) then
    if intersect(u_rect(p.to_unit),
   	{p.x,p.y,p.x,p.y}) then
  	 	p.to_unit.hp-=1
@@ -719,7 +698,7 @@ function draw_fow()
 	 	end
 	 end
 	end
-	pal(1,1)
+	pal()
 	camera(cx,cy)
 end
 
@@ -766,7 +745,7 @@ function draw_minimap()
 			end
 	 end
 	end
-	pal(1,1)
+	pal()
 	
 	--current view area outline
 	local vx=ceil((cx/mapw)*w)
@@ -829,10 +808,6 @@ function draw_unit(u)
 		line(x,y,x+w,y,5)
 		line(x,y,x+w*p,y,14)
 		if (u.const<=1) return
-	end
-	
-	if hilite and hilite.typ=="attack" and hilite.unit==u then
-		rectaround(u,8)
 	end
 	
 	local x=ut.x
@@ -1048,11 +1023,7 @@ end
 function step(u)
 	if u.st.wayp then
  	local wp=u.st.wayp[1]
- 	local xv=wp[1]-u.x
- 	local yv=wp[2]-u.y
- 	local norm=1/(abs(xv)+abs(yv))
- 	local dx=xv*norm
- 	local dy=yv*norm
+ 	local dx,dy=norm(wp,u)
  	dx*=u.typ.spd/3.5
  	dy*=u.typ.spd/3.5
  	
@@ -1060,7 +1031,7 @@ function step(u)
  	u.x+=dx
  	u.y+=dy	
 		
- 	if adj(u.x,u.y,wp[1],wp[2]) then
+ 	if adj(u.x,u.y,wp[1],wp[2],2) then
  		if (#u.st.wayp==1) then
 				rest(u)
 			else
@@ -1093,12 +1064,6 @@ function u_rect(u)
  }
 end
 
-function mag(v1,v2)
-  local d = max(abs(v1),abs(v2))
-  local n = min(abs(v1),abs(v2)) / d
-  return sqrt(n*n + 1) * d
-end
-
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
@@ -1106,11 +1071,6 @@ function dist(dx,dy)
   return a0*0.9609+b0*0.3984
  end
  return b0*0.9609+a0*0.3984
-end
-
-function round(n)
- if (n<0) return flr(n-0.5)
- return flr(n+0.5)
 end
 
 function corner_cuttable(x,y,dx,dy)
@@ -1256,9 +1216,9 @@ function mine_res(x,y)
 	restiles[idx]=n
 end
 
-function adj(x1,y1,x2,y2)
+function adj(x1,y1,x2,y2,n)
 	return (
-	 abs(x1-x2)<2 and abs(y1-y2)<2
+	 abs(x1-x2)<n and abs(y1-y2)<n
 	)
 end
 
@@ -1272,20 +1232,24 @@ function vget(x,y)
  if (x<0 or y<0) return true
  return vizmap[x*tiles+y+1]
 end
+
+function norm(it,nt)
+	local xv=it[1]-nt.x
+	local yv=it[2]-nt.y
+	local norm=1/(abs(xv)+abs(yv))
+	return xv*norm,yv*norm
+end
 -->8
 --get_wayp
 
-
 function get_wayp(u,x,y)
-	if (u.typ.inert) return nil
+	if (u.typ.inert) return
  local nodes=find_path(
 		{flr(u.x/mvtile),flr(u.y/mvtile)},
 		{flr(x/mvtile),flr(y/mvtile)},
 		estimate,
-		edge_cost,
   neighbors,
-  node_to_id,
-  nil
+  node_to_id
  )
  local wayp={}
  for i=1,#nodes do
@@ -1303,16 +1267,12 @@ function estimate(n1,n2,g)
  return dist(n1[1]-n2[1],n1[2]-n2[2])
 end
 
-function edge_cost(n1,n2,g)
-	return 1
-end
-
 function obstacle(x,y)
 	x=flr(x*(mvtile/8))
 	y=flr(y*(mvtile/8))
 	local t=mget(x,y)
 	if (fget(t,0)) return true
-	return nil
+	return
 end
 
 function neighbor(ns,n,dx,dy)
@@ -1358,10 +1318,8 @@ function find_path
 (start,
  goal,
  estimate,
- edge_cost,
  neighbors, 
- node_to_id, 
- graph)
+ node_to_id)
  
  -- the final step in the
  -- current shortest path
@@ -1372,10 +1330,10 @@ function find_path
  best_table = {
   last = start,
   cost_from_start = 0,
-  cost_to_goal = estimate(start, goal, graph)
+  cost_to_goal = estimate(start, goal)
  }, {}
 
- best_table[node_to_id(start, graph)] = shortest
+ best_table[node_to_id(start)] = shortest
 	--dh
 	closest=shortest
 
@@ -1384,7 +1342,7 @@ function find_path
  -- step, used as a priority
  -- queue. elements past
  -- frontier_len are ignored
- local frontier, frontier_len, goal_id, max_number = {shortest}, 1, node_to_id(goal, graph), 32767.99
+ local frontier, frontier_len, goal_id, max_number = {shortest}, 1, node_to_id(goal), 32767.99
 
  -- while there are frontier paths
  while frontier_len > 0 do
@@ -1407,7 +1365,7 @@ function find_path
   -- shortest path
   local p = shortest.last
   
-  if node_to_id(p, graph) == goal_id then
+  if node_to_id(p) == goal_id then
    -- we're done.  generate the
    -- path to the goal by
    -- retracing steps. reuse
@@ -1415,7 +1373,7 @@ function find_path
    p = {goal}
 
    while shortest.prev do
-    shortest = best_table[node_to_id(shortest.prev, graph)]
+    shortest = best_table[node_to_id(shortest.prev)]
     add(p, shortest.last)
    end
 
@@ -1426,15 +1384,15 @@ function find_path
   -- consider each neighbor n of
   -- p which is still in the
   -- frontier queue
-  for n in all(neighbors(p, graph)) do
+  for n in all(neighbors(p)) do
    -- find the current-best
    -- known way to n (or
    -- create it, if there isn't
    -- one)
-   local id = node_to_id(n, graph)
+   local id = node_to_id(n)
    local old_best, new_cost_from_start =
     best_table[id],
-    shortest.cost_from_start + edge_cost(p, n, graph)
+    shortest.cost_from_start + 1
    
    if not old_best then
     -- create an expensive
@@ -1445,7 +1403,7 @@ function find_path
     old_best = {
      last = n,
      cost_from_start = max_number,
-     cost_to_goal = estimate(n, goal, graph)
+     cost_to_goal = estimate(n, goal)
     }
 
     -- insert into queue
@@ -1472,7 +1430,7 @@ function find_path
 	--dhstart
  local p = {closest.last}
  while closest.prev do
-  closest = best_table[node_to_id(closest.prev, graph)]
+  closest = best_table[node_to_id(closest.prev)]
   add(p, closest.last)
  end
  return p
@@ -1480,21 +1438,6 @@ function find_path
 end
 -->8
 --menu/cursor
-
-function print_cost(costs,x,y)
-	if costs.r then
-		print(costs.r,x,y,8)
-		x+=4
-	end
-	if costs.g then
-		print(costs.g,x,y,11)
-		x+=4
-	end
-	if costs.b then
-		print(costs.b,x,y,4)
-		x+=4
-	end
-end
 
 function cost_len(c)
 	local len=0
@@ -1586,7 +1529,7 @@ function draw_port(o)
 		local hp_bg=prog and 5 or 8
 		local hp_fg=prog and 12 or 11
 		line(x,y,x+lw,y,hp_bg)
-		line(x,y,x+round(lw*hp),y,hp_fg)
+		line(x,y,x+lw*hp,y,hp_fg)
 	end
 end
 
@@ -1666,7 +1609,6 @@ function draw_cursor()
 	end
 end
 
-buttons={}
 function button(x,y,w,h,handle,hover)
 	add(buttons,{
 		x=x,y=y,w=w,h=h,handle=handle,
@@ -1756,9 +1698,9 @@ function draw_unit_section(sel)
 						if (u.q and (u.q.b!=b or u.q.qty==9)) then
 							return
 						end
-						res.r-=b.r
-						res.g-=b.g
-						res.b-=b.b
+						res.r-=b.r or 0
+						res.g-=b.g or 0
+						res.b-=b.b or 0
 						if u.q then
 							u.q.qty+=1
 						else
@@ -1779,9 +1721,9 @@ function draw_unit_section(sel)
 					hp=u.q.t/b.t,
 					prog=true,
 					onclick=function()
-						res.r+=b.r
-						res.g+=b.g
-						res.b+=b.b
+						res.r+=b.r or 0
+						res.g+=b.g or 0
+						res.b+=b.b or 0
 						if qty==1 then
 							u.q=nil
 						else
@@ -1873,9 +1815,7 @@ end
 function draw_menu_bg(secs)
 	local mod=1
 	if (#secs==3) mod=0
-	local x=0
- local y,mh=menuy,menuh
- mh+=3
+ local x,y,mh=0,menuy,menuh+3
  for i=1,#secs do
  	local c=i%2==mod and 15 or 4
  	local sp=i%2==mod and 129 or 128
@@ -1887,7 +1827,7 @@ function draw_menu_bg(secs)
  	rectfill(x,y+4,x+s,y+mh,c)
  	x+=s
  end
- assert(x==128)
+ --assert(x==128)
 end
 -->8
 --notes
@@ -2008,6 +1948,7 @@ function make_dmap(resf)
 	return dmap
 end
 
+--[[
 function draw_dmap(res_typ)
 	local dmap=dmaps[res_typ]
 	local r=mapw/8
@@ -2018,7 +1959,7 @@ function draw_dmap(res_typ)
 			print(n==0 and "-" or n,x*8,y*8,9)
 	 end
 	end
-end
+end]]
 __gfx__
 00000000d00000000000000000000000000000000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
 000000000d000000d000000000000000000000000000000000000000011000000010100000000000110001100000000011000110000000000000000000000000
