@@ -37,14 +37,14 @@ buttons={}
 vizmap=nil
 hoverunit=nil
 hilite=nil
-build=nil
+place_build=nil
 
 function unit(typ,x,y,p,const)
  return {
 		typ=typ,
 		x=x,
 		y=y,
-		st=st_rest,
+		st={t="rest"},
 		dir=1,
 		p=p,
 		hp=typ.hp,
@@ -67,7 +67,7 @@ function _init()
 		unit(beetle,60,76,2),
 		--unit(beetle,65,81,2),
 		p1q,
-		unit(tower,65,65,1)
+		--unit(tower,65,65,1)
 	}
  make_dmaps()
 end
@@ -117,6 +117,38 @@ function _draw()
 	
 	--mouse
 	draw_cursor()
+	
+	--debug
+	local s=selection[1]
+	if s then
+		print(dump(s.st),0,0,7)
+	end
+end
+
+function dump(o,n)
+	n=n or 0
+	local sp = ""
+ for i=0,n-1 do
+ 	sp=sp.." "
+ end
+ for u in all(units) do
+ 	if u==o then
+ 		return sp.."[unit]"
+ 	end
+ end
+   if type(o) == 'table' then
+      local s=sp.."{\n"
+      for k,v in pairs(o) do
+      	if k=="wayp" then
+      		v="#"..#v
+      	end
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s..sp ..k..' = ' .. dump(v,n+1) .. "\n"
+      end
+      return s ..sp.. '} '
+   else
+      return tostring(o)
+   end
 end
 
 function _update()
@@ -348,6 +380,57 @@ spden.prod={
 btden.prod={
 	{typ=beetle,t=8,r=0,g=4,b=3},
 }
+
+function rest(u)
+	u.st={t="rest"}
+end
+
+function move(u,x,y)
+	u.st={
+		t="move",
+		wayp=get_wayp(u,x,y),
+	}
+end
+
+function build(u,b)
+	u.st={
+		t="build",
+		target=b,
+		wayp=get_wayp(u,b.x,b.y),
+	}
+end
+
+function gather(u,tx,ty,wp)
+	wp=wp or get_wayp(u,tx*8+3,ty*8+3)
+	u.st={
+		t="gather",
+		tx=tx,
+		ty=ty,
+		res=tile2res(tx,ty),
+		wayp=wp,
+		target={
+			x=tx*8+4,y=ty*8+4,
+			typ={w=8,h=8},
+		}
+	}
+end
+
+function drop(u,res)
+	u.st={
+		t="drop",
+		target=p1q,
+		wayp=get_wayp(u,p1q.x,p1q.y),
+		nxt=res,
+	}
+end
+
+function attack(u,e)
+	u.st={
+		t="attack",
+		target=e,
+		wayp=get_wayp(u,e.x,e.y),
+	}
+end
 -->8
 --update
 
@@ -363,7 +446,7 @@ function hoverbutton()
 end
 
 function handle_click()
-	--check buttons
+	--check left click on button
 	if btnp(5) then
 		local hb=hoverbutton()
 		if hb then
@@ -372,7 +455,7 @@ function handle_click()
 		end
 	end
 	
-	--left click in menu
+	--click in menubar
 	if amy>menuy and not selbox then
 		local dx=amx-mmx
 		local dy=amy-mmy
@@ -386,7 +469,10 @@ function handle_click()
 			local x=dx/mmw*mapw
 			local y=dy/mmh*maph
 			if btnp(4) then
-				move_units(selection,x,y)
+				--right click, move
+				for u in all(selection) do
+					move(u,x,y)
+				end
 			elseif btnp(5) then
 				--move camera
 				cx=mid(0,x-xoff,mapw-128)
@@ -397,20 +483,20 @@ function handle_click()
 	end
 
  --left click places building
- if btnp(5) and build then
+ if btnp(5) and place_build then
   if (not buildable()) return
- 	res.r-=build.r
-		res.g-=build.g
-		res.b-=build.b
-		local new=unit(build.typ,mx,my,1,0)
+ 	res.r-=place_build.r
+		res.g-=place_build.g
+		res.b-=place_build.b
+		local new=unit(place_build.typ,mx,my,1,0)
 		add(units,new)
  
 		--make selected units build it
 		for u in all(selection) do
-		 send_build(u,new)
+		 build(u,new)
 		end
 		
-		build=nil
+		place_build=nil
  end
  
 	--left click clears selection
@@ -419,7 +505,7 @@ function handle_click()
  end
  
  --left drag makes selection
- if btn(5) and not build then
+ if btn(5) and not place_build then
  	if selbox==nil then
  		selbox={mx,my,mx,my}
  	else
@@ -443,46 +529,46 @@ function handle_click()
 	  	typ="gather",t=fps,
 	  	x=x*8,y=y*8
 	  }
-		 move_units(selection,mx,my,{x,y})
+	  for u in all(selection) do
+				gather(u,x,y)
+  	end
   elseif can_build() then
   	for u in all(selection) do
-  		send_build(u,hoverunit)
+  		build(u,hoverunit)
   	end
   	hilite={
 	  	typ="build",t=fps,unit=hoverunit
 	  }
 	 elseif can_attack() then
 	 	for u in all(selection) do
-  		send_attack(u,hoverunit)
+  		attack(u,hoverunit)
+  	end
+  	hilite={
+	  	typ="attack",t=fps,unit=hoverunit
+	  }
+  elseif sel_carry() and hoverunit==p1q then
+	 	for u in all(selection) do
+				drop(u)
   	end
   	hilite={
 	  	typ="attack",t=fps,unit=hoverunit
 	  }
   else
-	  --move selection
-   move_units(selection,mx,my)
+	 	for u in all(selection) do
+				move(u,mx,my)
+  	end
   end
  end
 end
 
-function move_units(un,x,y,gt)
-	for u in all(un) do
-		if not u.typ.inert then
-			if gt then
-				u.gather={
-					tile=gt,
-					res=tile2res(gt[1],gt[2]),
-				}
-			else
-				u.gather=nil
-			end
-		 move(u,x,y)
-		end
+function sel_carry()
+ for u in all(selection) do
+		if (u.res) return true
 	end
 end
 
 function handle_input()
- --map scroll
+ --arrow keys (map scroll)
  local oldcx,oldcy=cx,cy
  if (btn(⬅️) or btn(⬅️,1))cx-=2
  if (btn(⬆️) or btn(⬆️,1))cy-=2
@@ -491,6 +577,7 @@ function handle_input()
  cx=mid(0,cx,mapw-128)
  cy=mid(0,cy,maph-128+menuh)
  
+ --mouse
  amx=mid(0,stat(32),128-2)
 	amy=mid(-1,stat(33),128-2)
  mx=amx+cx
@@ -500,12 +587,10 @@ function handle_input()
 end
 
 function update_sel(u)
-local no_other=(not unit_sel and #selection==0)
+ local no_other=(not unit_sel and #selection==0)
 	local s=(
 		intersect(selbox,u_rect(u)) and
-		(
-			not u.typ.inert or no_other
-		) and
+		(not u.typ.inert or no_other) and
 		(u.p==1 or no_other)
 	)
 	u.sel=s
@@ -701,14 +786,14 @@ end
 --units
 
 function draw_unit(u)
-	local cr={cx-1,cy-1,cx+129,cy+129}
-	if not intersect(u_rect(u),cr) then
+	local cr={cx,cy,cx+128,cy+128}
+	if not intersect(u_rect(u),cr,1) then
 		return
 	end
 	
-	if u.wayp then
-		for i=1,#u.wayp do
-			pset(u.wayp[i][1],u.wayp[i][2],8)
+	if u.st.wayp then
+		for i=1,#u.st.wayp do
+			pset(u.st.wayp[i][1],u.st.wayp[i][2],8)
 		end
 	end
 	
@@ -738,17 +823,19 @@ function draw_unit(u)
 	local x=ut.x
 	local y=ut.y
 	
-	local ufps=ut.fps
+	local ufps=ut.fps or 1
 	local restfr=ut.restfr or 2
-	if (u.st==st_rest) ufps=restfr/2
-	if (u.st==st_build) ufps*=2
+	if (u.st.t=="rest") ufps=restfr/2
+	if (u.st.t=="build") ufps*=2
 	local anim=flr(fps/(30/ufps))
-	if u.st==st_rest then
+	local move_anim=u.st.wayp or u.st.t=="gather" or u.st.t=="attack"
+	
+	if u.st.t=="rest" then
 		if (u.typ==ant) anim+=1
 		x+=(anim%restfr)*w
-	elseif u.st==st_move then
+	elseif move_anim then
 		x+=w+(anim%(ut.anim_fr))*w
-	elseif u.st==st_build then
+	elseif u.st.t=="build" then
 		x=24+(anim%(ut.anim_fr))*w
 	end
 	if u.res then
@@ -778,41 +865,78 @@ function draw_unit(u)
 	pal()
 end
 
-function attack(u)
-	local a=u.attack
-	if (not a or fps%30!=0) return
-	if u.typ.range then
-		local d=dist(a.x-u.x,a.y-u.y)
-		if (d<=u.typ.range) then
- 		add(proj,{
- 			from_typ=u.typ,
- 			x=u.x+(u.typ.proj_xo or 0),
- 			y=u.y+(u.typ.proj_yo or 0),
- 			to={a.x,a.y},to_unit=a,
- 		})
- 	end
- else
- 	if intersect(u_rect(u),u_rect(a),1) then
-		 a.hp-=1
-		end
- end
+function check_dead_target(u)
+	local t=u.st.target
+	if t and (t.dead or (
+		u.st.t=="build" and
+		not t.const and
+		t.hp==t.typ.hp
+	)) then
+		rest(u)
+	end
 end
 
 function update_unit(u)
-	if u.attack and u.attack.dead then
-		u.attack=nil
-		u.follow=nil
-		u.st=st_rest
+	check_dead_target(u)
+	if (u.st.t=="attack") fight(u)
+	if (u.st.t=="rest") aggress(u)
+ if (u.typ.inert) return
+ if (u.st.t=="build") buildrepair(u)
+ if (u.st.t=="gather") mine(u)
+ if (u.q) produce(u)
+ check_target_col(u)
+ step(u)
+end
+
+function aggress(u)
+	if (u.typ==ant) return
+	for e in all(units) do
+		if e.p!=u.p then
+			local d=dist(e.x-u.x,e.y-u.y)
+			if d<=u.typ.los then
+				attack(u,e)
+				break
+			end
+		end
 	end
-	if u.follow and u.follow.dead then
-		u.follow=nil
-		u.st=st_rest
-	end
-	local attacking=attack(u)
-	aggress(u)
- if (u.inert) return
- if u.build and u.build.active then
- 	local b=u.build.u
+end
+
+function fight(u)
+	local e=u.st.target
+	local in_range=false
+	if (not e or fps%10!=0) return
+	if u.typ.range then
+		local d=dist(e.x-u.x,e.y-u.y)
+		if (d<=u.typ.range) then
+			if fps%30==0 then
+	 		add(proj,{
+	 			from_typ=u.typ,
+	 			x=u.x+(u.typ.proj_xo or 0),
+	 			y=u.y+(u.typ.proj_yo or 0),
+	 			to={e.x,e.y},to_unit=e,
+	 		})
+ 		end
+ 		in_range=true
+ 	end
+ else
+ 	if intersect(u_rect(u),u_rect(e),1) then
+			if fps%30==0 then
+			 e.hp-=1
+			end
+		 in_range=true
+		end
+ end
+ if in_range then
+		u.st.wayp=nil
+	else
+ 	attack(u,e)
+ 	deli(u.st.wayp,1)
+ end
+end
+
+function buildrepair(u)
+ if u.st.active then
+ 	local b=u.st.target
  	if fps%30==0 then
  		if b.const then
 	 		b.const+=1
@@ -821,74 +945,91 @@ function update_unit(u)
 	 		end
 	 	elseif (
 	 		b.hp<b.typ.hp and
-	 		res.b>=1) then
+	 		res.b>=1
+	 	) then
 	 		b.hp+=1
 	 		res.b-=0.5
 	 	end
  	end
  	--poss another worker finished
  	if (not b.const) and b.hp==b.typ.hp then
- 		u.build=nil
- 		u.st=st_rest
+ 		rest(u)
  	end
  end
- if u.gather then
- 	local tile=u.gather.tile
- 	if not u.gather.drop then
-	 	--if tile is no longer there
-	 	--move on to the next one
-	 	local f=res2flag(u.gather.res)
-	 	if not fget(mget(tile[1],tile[2]),f) then
- 			mine_nxt_res(u)
- 		elseif fps==u.gather.t then
-	 		u.res.qty+=1
-	 		local rem=mine_res(tile)
-	 		if u.res.qty==9 then
-	 			u.gather.drop=true
-	 			move(u,p1q.x,p1q.y)
-	 			u.follow=p1q
-	 		end
-	 	end
-	 end
- end
- if u.q then
- 	if fps%15==u.q.to then
- 		u.q.t-=0.5
- 		if u.q.t==0 then
- 			add(units,
- 			 unit(u.q.b.typ,u.x+5,u.y+5,1)
- 			)
- 			if u.q.qty>1 then
- 				u.q.qty-=1
- 				u.q.t=u.q.b.t
- 			else
- 				u.q=nil
- 			end
- 		end
- 	end
- end
- local f=u.follow
-	if f then
-	 if intersect(u_rect(u),u_rect(f)) then
-	 	if not u.attack then
-				u.follow=nil
-	 		u.st=st_rest
-	 	end
-	 	u.wayp=nil
-		elseif not attacking then
-			local a=u.attack
-		 --recalc the follow
-		 -- only do this for attacking!
-		 -- otherwise, do this in
-		 -- del_wayp to save cpu
-		 move(u,f.x,f.y)
-		 if (#u.wayp>1) deli(u.wayp,1)
-		 u.follow=f
-		 u.attack=a
+end
+
+function mine(u)
+	if (not u.st.active) return
+	local x,y,r=u.st.tx,u.st.ty,u.st.res
+	--if tile is no longer there
+	--move on to the next one
+	local f=res2flag(r)
+	if not fget(mget(x,y),f) then
+		if (not mine_nxt_res(u,r)) then
+		 drop(u)
+		end
+	elseif fps==u.st.fps then
+		u.res.qty+=1
+		mine_res(x,y)
+		if (u.res.qty==9) drop(u,r)
+	end
+end
+
+function produce(u)
+	if fps%15==u.q.fps15 then
+		u.q.t-=0.5
+		if u.q.t==0 then
+			add(units,
+			 unit(u.q.b.typ,u.x+5,u.y+5,1)
+			)
+			if u.q.qty>1 then
+				u.q.qty-=1
+				u.q.t=u.q.b.t
+			else
+				u.q=nil
+			end
+		end
+	end 
+end
+
+function check_target_col(u)
+	if (u.st.active) return
+	local t=u.st.target
+	if (
+		t and
+		intersect(u_rect(u),u_rect(t))
+	) then
+		u.st.wayp=nil
+		u.st.active=true
+		if u.st.t=="gather" then
+			u.st.fps=fps
+			local q=0
+			if u.res and u.res.typ==u.st.res then
+				q=u.res.qty
+			end
+			u.res={typ=u.st.res,qty=q}
+		elseif u.st.t=="drop" and u.res then
+			local q=u.res.qty/3
+			if u.res.typ=="r" then
+				res.r=min(res.r+q,99)
+			elseif u.res.typ=="g" then
+				res.g=min(res.g+q,99)
+			elseif u.res.typ=="b" then
+				res.b=min(res.b+q,99)
+			end
+			u.res=nil
+			if u.st.nxt then
+				mine_nxt_res(u,u.st.nxt)
+			else
+				rest(u)
+			end
 		end
 	end
- if u.wayp then
- 	local wp=u.wayp[1]
+end
+
+function step(u)
+	if u.st.wayp then
+ 	local wp=u.st.wayp[1]
  	local xv=wp[1]-u.x
  	local yv=wp[2]-u.y
  	local norm=1/(abs(xv)+abs(yv))
@@ -902,105 +1043,13 @@ function update_unit(u)
  	u.y+=dy	
 		
  	if adj(u.x,u.y,wp[1],wp[2]) then
- 		delete_wp(u)
- 	end
- 	
- 	if u.build then
- 		local b=u.build.u
- 		if (
- 			not b.const and
- 			b.hp==b.typ.hp
- 		) then
- 		 u.wayp=nil
- 		 u.build=nil
- 		 u.st=st_rest
- 		elseif intersect(u_rect(u),
- 			u_rect(b)
- 		) then
- 			u.wayp=nil
- 			u.build.active=true
- 			u.st=st_build
- 		end
+ 		if (#u.st.wayp==1) then
+				rest(u)
+			else
+			 deli(u.st.wayp,1)
+			end
  	end
  end
-end
-
-function delete_wp(u)
-	deli(u.wayp,1)
-	if #u.wayp==0 then
-		u.wayp=nil
-		u.st=st_rest
-		
-		local g=u.gather
-		if g then
-			local gt=g.tile
-			local gr={
-				gt[1]*8,gt[2]*8,gt[1]*8+7,gt[2]*8+7
-			}
-			if intersect(u_rect(u),gr) then
-				u.st=st_move
-				local s=mget(gt[1],gt[2])
-				if (fget(s,2)) typ="r"
-				if (fget(s,3)) typ="g"
-				if (fget(s,4)) typ="b"
-				u.gather.t=fps
-				local q=0
-				if u.res and u.res.typ==typ then
-					q=u.res.qty
-				end
-				u.res={typ=typ,qty=q}
-			end
-		end
-	end
-	if u.res and intersect(u_rect(u),u_rect(p1q)) then
-		local q=u.res.qty/3
-		if u.res.typ=="r" then
-			res.r=min(res.r+q,99)
-		elseif u.res.typ=="g" then
-			res.g=min(res.g+q,99)
-		elseif u.res.typ=="b" then
-			res.b=min(res.b+q,99)
-		end
-		u.res=nil
-		if u.gather then
-			mine_nxt_res(u)
-		end
-	end
-end
-
-function setwayp(u,wayp)
-	u.st=st_move
-	u.wayp=wayp
-	u.follow=nil
-	u.build=nil
-	u.attack=nil
-end
-
-function move(u,x,y)
-	local wayp=get_wayp(u,x,y)
-	if u.gather and not u.gather.drop then
-		local gt=u.gather.tile
-		add(wayp,{8*gt[1]+3,8*gt[2]+3})
-	end
-	setwayp(u,wayp)
-end
-
-function aggress(u)
-	if ((not u.typ.range) or u.attack or u.wayp) then
-		return
-	end
-	for e in all(units) do
-		if e.p!=u.p and not e.typ.inert then
-			local d=dist(e.x-u.x,e.y-u.y)
-			if d<=u.typ.range then
-				u.attack=e
-				break
-			elseif not u.typ.inert and d<=u.typ.los then
-				send_attack(u,e)
-				break
-			end
-		end
-	end
 end
 -->8
 --utils
@@ -1099,10 +1148,8 @@ function tile2res(x,y)
  return nil
 end
 
-function mine_nxt_res(u)
-	u.st=st_move
+function mine_nxt_res(u,res)
 	local x,y=flr(u.x/8),flr(u.y/8)
-	local res=u.gather.res
 	local dmap=dmaps[res]
 	local wayp={}
 	while true do
@@ -1120,12 +1167,12 @@ function mine_nxt_res(u)
 				lowest=w
 			end
 		end
-		if (lowest>=n) return
+		if (lowest>=n) return false
 		add(wayp,{x*8+3,y*8+3})
 		if (lowest<1) break
 	end
-	setwayp(u,wayp)
-	u.gather={tile={x,y},res=res}
+	gather(u,x,y,wayp)
+	return true
 end
 
 function all_ants()
@@ -1175,35 +1222,19 @@ function rectaround(u,c)
 	)
 end
 
-function send_attack(u,b)
-	move(u,b.x,b.y)
-	u.follow=b
-	u.attack=b
-end
-
-function send_build(u,b)
-	u.res=nil
-	u.gather=nil
-	move(u,b.x,b.y)
-	printh(u.wayp,"log")
-	printh(#u.wayp,"log")
-	u.build={u=b}
-end
-
-function mine_res(t)
-	local idx=t[1]*mapw/8+t[2]+1
+function mine_res(x,y)
+	local idx=x*mapw/8+y+1
 	local n=restiles[idx] or 12
 	n-=1
 	if n==4 or n==9 then
-		local s=mget(t[1],t[2])
-		mset(t[1],t[2],s+16)
+		local s=mget(x,y)
+		mset(x,y,s+16)
 	end
 	if n==0 then
-		mset(t[1],t[2],72)
+		mset(x,y,72)
 		make_dmaps()
 	end
 	restiles[idx]=n
-	return n
 end
 
 function adj(x1,y1,x2,y2)
@@ -1227,6 +1258,7 @@ end
 
 
 function get_wayp(u,x,y)
+	if (u.typ.inert) return nil
  local nodes=find_path(
 		{flr(u.x/mvtile),flr(u.y/mvtile)},
 		{flr(x/mvtile),flr(y/mvtile)},
@@ -1557,7 +1589,7 @@ function cursor_spr()
 	if #selection>0 and
 		selection[1].p==1 then
 	 --build cursor
-		if (build or can_build()) then
+		if (place_build or can_build()) then
 			return 68
 		end
 		--pick
@@ -1581,7 +1613,7 @@ function xing_tiles(x,y,w,h)
 end
 
 function buildable()
-	local typ=build.typ
+	local typ=place_build.typ
 	local w,h=typ.w,typ.h
 	local xo,yo=flr(w/2),flr(h/2)
  if amy<menuy then
@@ -1600,8 +1632,8 @@ end
 
 function draw_cursor()
  local mspr=cursor_spr()
-	if build then
-		local typ=build.typ
+	if place_build then
+		local typ=place_build.typ
  	local w,h=typ.w,typ.h
 		local b,xo,yo=buildable()
 	 if amy<menuy then
@@ -1704,7 +1736,7 @@ function draw_unit_section(sel)
 					function()
 						if (not can_pay(b)) return
 						if b.typ.inert then
-							build=b
+							place_build=b
 							return
 						end
 						if (u.q and (u.q.b!=b or u.q.qty==9)) then
@@ -1718,7 +1750,7 @@ function draw_unit_section(sel)
 						else
 							u.q={
 								b=b, qty=1, t=b.t,
-								to=max(fps%15-1,0)
+								fps15=max(fps%15-1,0)
 							}
 						end
 					end
@@ -1976,7 +2008,7 @@ function draw_dmap(res_typ)
 		for y=0,16 do
 			local n=g(dmap,x+flr(cx/8),y+flr(cy/8))
 			n=min(n,9)
-			print(n==0 and "-" or n,x*8+2,y*8+2,9)
+			print(n==0 and "-" or n,x*8,y*8,9)
 	 end
 	end
 end
