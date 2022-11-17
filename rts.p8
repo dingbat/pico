@@ -28,13 +28,15 @@ selbox=nil
 selection={}
 units={}
 unit_sel=false
-res={r=22,g=30,b=22,p=99}
+--0.1 so res displays in readout
+--but is also essentially 0
+res={r=0.1,g=0.1,b=0.1,p=99}
 p1q=nil
 restiles={}
 dmaps={}
 proj={} --projectiles
 
- --reset every frame
+--reset every frame
 buttons={}
 vizmap=nil
 hoverunit=nil
@@ -165,212 +167,220 @@ end
 -->8
 --unit defs
 
-ant={
-	w=4,
-	h=4,
-	x=0,
-	y=8,
-	deadx=24,
-	deady=12,
-	anim_fr=2,
-	portx=0,
-	porty=72,
-	fps=1,
-	
-	spd=1,
-	los=20,
-	hp=10,
-}
-beetle={
-	w=7,
-	fw=8,
-	h=6,
-	x=8,
-	y=0,
-	deadx=32,
-	anim_fr=2,
-	fps=3,
-	portx=26,
-	porty=72,
-	portw=9,
+function parse(unit)
+	local obj={}
+	for l in all(split(unit,"\n")) do
+		if #l>0 then
+			local vals=split(l,"=")
+			obj[vals[1]]=tonum(vals[2])
+		end
+	end
+	return obj
+end
 
-	spd=1.5,
-	los=25,
-	hp=20
-}
-spider={
- w=7,
- fw=8,
- h=4,
- x=0,
- y=16,
- deadx=66,
- anim_fr=7,
- fps=10,
-	portx=16,
-	porty=72,
-	portw=9,
-	has_q=true,
+ant=parse([[
+w=4
+h=4
+x=0
+y=8
+deadx=24
+deady=12
+anim_fr=2
+portx=0
+porty=72
+fps=1
 
- spd=2,
- los=30,
-	hp=15
-}
-warant={
- w=7,
- fw=8,
- h=5,
- x=0,
- y=25,
- deadx=24,
- anim_fr=2,
- fps=3,
-	portx=35,
-	porty=72,
-	portw=9,
+spd=1
+los=20
+hp=10
+]])
 
- spd=1.5,
- los=30,
-	hp=15
-}
-queen={
-	w=14,
-	h=7,
-	fw=16,
-	x=56,
-	y=0,
-	deadx=104,
-	anim_fr=2,
-	fps=2,
-	dir=-1,
-	portx=8,
-	porty=72,
-	has_q=true,
+beetle=parse([[
+w=7
+fw=8
+h=6
+x=8
+y=0
+deadx=32
+anim_fr=2
+fps=3
+portx=26
+porty=72
+portw=9
 
-	spd=0.5,
-	los=18,
-	range=15,
- hp=25,
- proj_col=11,
- proj_xo=-4,
- proj_yo=2,
-}
+spd=1.5
+los=25
+hp=20
+]])
+spider=parse([[
+w=7
+fw=8
+h=4
+x=0
+y=16
+deadx=66
+anim_fr=7
+fps=10
+portx=16
+porty=72
+portw=9
+has_q=1
 
-st_rest=1
-st_move=2
-st_build=3
+spd=2
+los=30
+hp=15
+]])
+warant=parse([[
+w=7
+fw=8
+h=5
+x=0
+y=25
+deadx=24
+anim_fr=2
+fps=3
+portx=35
+porty=72
+portw=9
 
-tower={
-	w=7,
-	fw=8,
-	h=13,
-	x=24,
-	y=96,
-	portx=0,
-	porty=80,
-	inert=true,
-	los=30,
-	hp=40,
-	dir=-1,
-	restfr=1,
-	range=25,
-	const=20,
- proj_yo=-2,
- proj_xo=-1,
-}
-mound={
-	w=7,
-	fw=8,
-	h=5,
-	x=0,
-	y=99,
-	inert=true,
-	los=5,
-	hp=20,
-	dir=-1,
-	restfr=1,
-	const=12,
-}
-web={
-	w=8,
-	fw=8,
-	h=8,
-	x=0,
-	y=99,
-	portx=8,
-	porty=80,
-	portw=9,
-	inert=true,
-	los=5,
-	hp=5,
-	dir=-1,
-	restfr=1,
-	const=12,
-}
-spden={
-	w=8,
-	fw=8,
-	h=6,
-	x=0,
-	y=114,
-	inert=true,
-	los=10,
-	hp=20,
-	dir=-1,
-	restfr=1,
-	const=20,
-	has_q=true,
-}
-btden={
-	w=8,
-	fw=8,
-	h=6,
-	x=0,
-	y=106,
-	inert=true,
-	los=10,
-	hp=20,
-	dir=-1,
-	restfr=1,
-	const=20,
-	has_q=true,
-}
-barracks={
-	w=7,
-	fw=8,
-	h=7,
-	x=0,
-	y=121,
-	inert=true,
-	los=10,
-	hp=20,
-	dir=-1,
-	restfr=1,
-	const=20,
-	has_q=true,
-}
+spd=1.5
+los=30
+hp=15
+]])
+queen=parse([[
+w=14
+h=7
+fw=16
+x=56
+y=0
+deadx=104
+anim_fr=2
+fps=2
+dir=-1
+portx=8
+porty=72
+has_q=1
+
+spd=0.5
+los=18
+range=15
+hp=25
+proj_col=11
+proj_xo=-4
+proj_yo=2
+]])
+
+tower=parse([[
+w=7
+fw=8
+h=13
+x=24
+y=96
+portx=0
+porty=80
+inert=1
+los=30
+hp=40
+dir=-1
+restfr=1
+range=25
+const=20
+proj_yo=-2
+proj_xo=-1
+]])
+mound=parse([[
+w=7
+fw=8
+h=5
+x=0
+y=99
+inert=1
+los=5
+hp=20
+dir=-1
+restfr=1
+const=12
+]])
+web=parse([[
+w=8
+fw=8
+h=8
+x=0
+y=99
+portx=8
+porty=80
+portw=9
+inert=1
+los=5
+hp=5
+dir=-1
+restfr=1
+const=12
+]])
+spden=parse([[
+w=8
+fw=8
+h=6
+x=0
+y=114
+inert=1
+los=10
+hp=20
+dir=-1
+restfr=1
+const=20
+has_q=1
+]])
+btden=parse([[
+w=8
+fw=8
+h=6
+x=0
+y=106
+inert=1
+los=10
+hp=20
+dir=-1
+restfr=1
+const=20
+has_q=1
+]])
+barracks=parse([[
+w=7
+fw=8
+h=7
+x=0
+y=121
+inert=1
+los=10
+hp=20
+dir=-1
+restfr=1
+const=20
+has_q=1
+]])
 ant.prod={
-	{typ=mound,t=8,r=0,g=0,b=2},
-	{typ=tower,t=12,r=0,g=3,b=8},
-	{typ=spden,t=8,r=0,g=0,b=2},
-	{typ=btden,t=12,r=0,g=3,b=8},
-	{typ=barracks,t=15,r=0,g=5,b=10},
-	{typ=tower,t=12,r=0,g=3,b=8},
+	{typ=mound,t=8,b=2},
+	{typ=tower,t=12,g=3,b=8},
+	{typ=spden,t=8,b=2},
+	{typ=btden,t=12,g=3,b=8},
+	{typ=barracks,t=15,g=5,b=10},
+	{typ=tower,t=12,g=3,b=8},
 }
 spider.prod={
-	{typ=web,t=4,r=0,g=2,b=0},
+	{typ=web,t=4,g=2},
 }
 queen.prod={
-	{typ=ant,t=6,r=2,g=3,b=0}
+	{typ=ant,t=6,r=2,g=3}
 }
 barracks.prod={
 	{typ=warant,t=10,r=1,g=2,b=1},
 }
 spden.prod={
-	{typ=spider,t=8,r=3,g=4,b=0},
+	{typ=spider,t=8,r=3,g=4},
 }
 btden.prod={
-	{typ=beetle,t=8,r=0,g=4,b=3},
+	{typ=beetle,t=8,g=4,b=3},
 }
 
 function rest(u)
@@ -480,9 +490,9 @@ function handle_click()
  --left click places building
  if btnp(5) and place_build then
   if (not buildable()) return
- 	res.r-=place_build.r
-		res.g-=place_build.g
-		res.b-=place_build.b
+ 	res.r-=place_build.r or 0
+		res.g-=place_build.g or 0
+		res.b-=place_build.b or 0
 		local new=unit(place_build.typ,mx,my,1,0)
 		add(units,new)
  
@@ -1488,20 +1498,15 @@ end
 
 function cost_len(c)
 	local len=0
-	if c.r>0 then
-		len+=draw_resource("r",c.r)
-	end
-	if c.g>0 then
-		len+=draw_resource("g",c.g)
-	end
-	if c.b>0 then
-		len+=draw_resource("b",c.b)
-	end
+	len+=draw_resource("r",c.r)
+	len+=draw_resource("g",c.g)
+	len+=draw_resource("b",c.b)
 	return len
 end
 
 --typ="b/g/r/p"
 function draw_resource(typ,val,x,y)
+ if ((val or 0)==0) return 0
  local sy,c=64,11 --g
 	if (typ=="r") sy,c=72,8
  if (typ=="b") sy,c=80,4
@@ -1538,9 +1543,9 @@ end
 
 function can_pay(costs)
  return (
- 	res.r>=costs.r and
- 	res.g>=costs.g and
- 	res.b>=costs.b
+ 	res.r>=(costs.r or 0) and
+ 	res.g>=(costs.g or 0) and
+ 	res.b>=(costs.b or 0)
  )
 end
 
@@ -1851,15 +1856,9 @@ function draw_menu()
 		local y=hb.y-h-2
 		rectfill(x,y,x+w,y+h,7)
 		local rx=x+2
-		if b.r>0 then
-			rx+=draw_resource("r",b.r,rx,y+2)
-		end
-		if b.g>0 then
-			rx+=draw_resource("g",b.g,rx,y+2)
-		end
-		if b.b>0 then
-			rx+=draw_resource("b",b.b,rx,y+2)
-		end
+		rx+=draw_resource("r",b.r,rx,y+2)
+		rx+=draw_resource("g",b.g,rx,y+2)
+		rx+=draw_resource("b",b.b,rx,y+2)
 		line(x+1,y-1,x+w-1,y-1,5)
 		line(x+1,y+h+1,x+w-1,y+h+1,5)
 		line(x,y,x,y+h,5)
