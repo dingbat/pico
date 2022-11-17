@@ -1503,14 +1503,11 @@ function can_pay(costs)
  	res.b>=(costs.b or 0)
 end
 
-function draw_port(o)
-	local
-		typ,x,y,hp,onclick,prog,costs,p=
-		o.typ,o.x,o.y,o.hp,o.onclick,
-		o.prog,o.costs,o.p or 1
-		
+function draw_port(
+	typ,x,y,costs,onclick,prog,u
+)
 	local outline=costs and 11 or 1
-	if (p!=1) outline=2
+	if (u and u.p!=1) outline=2
 	pal(14,0)
 	if costs and not can_pay(costs) then
 		outline=5
@@ -1535,8 +1532,9 @@ function draw_port(o)
 		button(x,y,10,10,onclick,costs)
 	end
 	y+=11
-	if hp then
+	if u or prog then
 		local lw=10
+		local hp=prog or (u.hp/u.typ.hp)
 		local hp_bg=prog and 5 or 8
 		local hp_fg=prog and 12 or 11
 		line(x,y,x+lw,y,hp_bg)
@@ -1636,7 +1634,6 @@ function draw_sel_ports(y)
 			break
 		end
 		local u=selection[i+1]
-		local hp=u.hp/u.typ.hp
 		local onclick=nil
 		if #selection>1 then
 			onclick=function()
@@ -1644,10 +1641,7 @@ function draw_sel_ports(y)
 				del(selection,u)
 			end
 		end
-		draw_port({
-			typ=u.typ,x=x,y=y+1,hp=hp,
-			onclick=onclick,p=u.p
-		})
+		draw_port(u.typ,x,y+1,nil,onclick,nil,u)
 	end
 end
 
@@ -1661,12 +1655,11 @@ function draw_unit_section(sel)
 		if #selection<3 then
 			draw_sel_ports(y)
 		else
-			draw_port({
-			typ=typ,x=3,y=y+2,
-			onclick=function()
-				selection[1].sel=false
-				deli(selection,1)
-			end})
+			draw_port(typ,3,y+2,nil,
+				function()
+					selection[1].sel=false
+					deli(selection,1)
+				end)
 			print("\88"..#selection,16,y+5,7)
 		end
 		
@@ -1697,9 +1690,7 @@ function draw_unit_section(sel)
 					x+=4*14
 					yy+=11
 				end
-				draw_port({
-				 typ=b.typ,x=x,y=yy,
-				 costs=b,onclick=
+				draw_port(b.typ,x,yy,b,
 					function()
 						if (not can_pay(b)) return
 						if b.typ.inert then
@@ -1721,17 +1712,14 @@ function draw_unit_section(sel)
 							}
 						end
 					end
-				})
+				)
 			end
 			if u.q then 
 				local b=u.q.b
 				local qty=u.q.qty
 				local x=20
-				draw_port({
-					typ=b.typ,x=x,y=y+1,
-					hp=u.q.t/b.t,
-					prog=true,
-					onclick=function()
+				draw_port(b.typ,x,y+1,nil,
+					function()
 						res.r+=b.r or 0
 						res.g+=b.g or 0
 						res.b+=b.b or 0
@@ -1740,8 +1728,8 @@ function draw_unit_section(sel)
 						else
 							u.q.qty-=1
 						end
-					end
-				})
+					end,nil,u.q.t/b.t
+				)
 				print("\88"..qty,x+12,y+4,7)
 			end
 		end
