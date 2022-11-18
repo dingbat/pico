@@ -606,13 +606,13 @@ function handle_click()
  --right click
 	local sel1=selection[1]
  if btnp(4) and sel1 and sel1.p==1 then
+	 local tx=flr(mx/8)
+	 local ty=flr(my/8)
 	 if can_gather() then
 	 	--gather resources
-	 	local x=flr(mx/8)
-	 	local y=flr(my/8)
-	  hilite={t=t(),tx=x,ty=y}
+	 	hilite={t=t(),tx=tx,ty=ty}
 	  for u in all(selection) do
-				gather(u,x,y)
+				gather(u,tx,ty)
   	end
   elseif can_build() then
   	for u in all(selection) do
@@ -635,6 +635,10 @@ function handle_click()
   	end
   	hilite={t=t(),x=mx,y=my}
   elseif sel1.typ.prod then
+  	--set rally
+  	if is_res(mx,my) then
+ 	  hilite={t=t(),tx=tx,ty=ty}
+			end
   	sel1.rx,sel1.ry=mx,my
   end
  end
@@ -1079,7 +1083,15 @@ function produce(u)
 		if u.q.t==0 then
 			local new=unit(u.q.b.typ,u.x,u.y,1)
 			add(units,new)
-			move(new,u.rx or u.x+5,u.ry or u.y+5)
+			if (
+				new.typ==ant and
+				u.rx and
+				is_res(u.rx,u.ry)
+			) then
+				gather(new,flr(u.rx/8),flr(u.ry/8))
+			else
+				move(new,u.rx or u.x+5,u.ry or u.y+5)
+			end
 			if u.q.qty>1 then
 				u.q.qty-=1
 				u.q.t=u.q.b.t
@@ -1253,9 +1265,13 @@ function all_ants()
 	return #selection>0
 end
 
+function is_res(x,y)
+	return fget(mget(mx/8,my/8),1)
+end
+
 function can_gather()
 	if (not vget(mx,my)) return
-	if fget(mget(mx/8,my/8),1) then
+	if is_res(mx,my) then
 		return all_ants()
 	end
 end
