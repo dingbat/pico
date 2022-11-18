@@ -115,12 +115,12 @@ function _draw()
 	--mouse
 	draw_cursor()
 	
-	--[[if debug then
+	if debug then
 		local s=selection[1]
 		if s then
 			print(s.st.t,0,0,7)
 		end
-	end]]
+	end
 end
 
 function _update()
@@ -134,8 +134,9 @@ function _update()
  end
  
  if hilite then
-  local dt=t()-hilite.t
-  if (dt>=0.5) hilite=nil
+  if t()-hilite.t>=0.5 then
+  	hilite=nil
+  end
  end
 	
  handle_input()
@@ -260,10 +261,10 @@ portx=8
 porty=72
 has_q=1
 
-spd=0.5
-los=18
+inert=1
+los=20
 range=15
-hp=25
+hp=50
 proj_col=11
 proj_xo=-4
 proj_yo=2
@@ -537,9 +538,8 @@ function handle_click()
  end
 	
  --right click
- if (btnp(4) and #selection>0
- 	and selection[1].p==1
- 	) then
+	local sel1=selection[1]
+ if btnp(4) and sel1 and sel1.p==1 then
 	 if can_gather() then
 	 	--gather resources
 	 	local x=flr(mx/8)
@@ -563,7 +563,9 @@ function handle_click()
 				drop(u)
   	end
   	hilite={t=t(),unit=hoverunit}
-  else
+  elseif sel1.typ.prod then
+  	sel1.rx,sel1.ry=mx,my
+  elseif not sel1.typ.inert then
 	 	for u in all(selection) do
 				move(u,mx,my)
   	end
@@ -878,6 +880,8 @@ function draw_unit(u)
 	local sdir=u.typ.dir or 1
 	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==sdir)
 	pal()
+	
+	if (u.sel and u.rx) draw_rally(u)
 end
 
 function check_dead_target(u)
@@ -895,10 +899,10 @@ function update_unit(u)
 	check_dead_target(u)
 	if (u.st.t=="attack") fight(u)
 	if (u.st.t=="rest") aggress(u)
+ if (u.q) produce(u)
  if (u.typ.inert) return
  if (u.st.t=="build") buildrepair(u)
  if (u.st.t=="gather") mine(u)
- if (u.q) produce(u)
  check_target_col(u)
  step(u)
 end
@@ -992,9 +996,9 @@ function produce(u)
 	if fps%15==u.q.fps15 then
 		u.q.t-=0.5
 		if u.q.t==0 then
-			add(units,
-			 unit(u.q.b.typ,u.x+5,u.y+5,1)
-			)
+			local new=unit(u.q.b.typ,u.x,u.y,1)
+			add(units,new)
+			move(new,u.rx or u.x+5,u.ry or u.y+5)
 			if u.q.qty>1 then
 				u.q.qty-=1
 				u.q.t=u.q.b.t
@@ -1059,6 +1063,10 @@ function step(u)
 			end
  	end
  end
+end
+
+function draw_rally(u)
+	spr(69+(fps/5)%3,u.rx-2,u.ry-5)
 end
 -->8
 --utils
@@ -1733,7 +1741,7 @@ function draw_unit_section(sel)
 						else
 							u.q.qty-=1
 						end
-					end,nil,u.q.t/b.t
+					end,u.q.t/b.t
 				)
 				print("\88"..qty,x+12,y+4,7)
 			end
@@ -1996,30 +2004,30 @@ d00001100d0000000dd0000000000000011110000011100000000000000000000000000000000000
 001d1d000d1d1d0001d1d1d0d1d1d110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0500000055500000005000000055550000005000ffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-5750000057750000057500000577775000057500ffffffffffffffffffaff7ffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-5775000056775500057555505747550000577750ffffffffffffffffffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-57775000056540005575757557744000057777506666fff6fffffffff7ffffafffffffff000000000000000000000000ffffffffffffffffffffafffffffffff
-5777750000544400757777755754440057777400ccc76666faff7ff6ffffffffffffffff000000000000000000000000ffafffffff7fffffffffffffffffffff
-5775500000504450577777755750444005774440ccccccccfffff666ffff7fffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-0557500000000500055777500500044500550445c77ccc7c7ffff6ccffafffffffffffff000000000000000000000000ffffffffffffffffffffffff7fffffff
-0005000000000000000555000000005000000050ccccccc7ffff66ccffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-fff88fffff5555fffffffffffffffffff66ccc1111111111ffff67ccffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff
-f887888ff555555ff33fff33fff4f4fff6ccc6111dd11111ffff6cccff77666600000000000000000000000000000000ffffffffffffffffffffffffffffffff
-8788787855555555f3bff3bbf44ff44ff7cccc1111dd1111fff76cccf76ccccc00000000000000000000000000000000fffffffffffffff7ffffffffffffffaf
-8878878855555555ffbbfbffff4f44fff6c6cc1111111111ff67cc6cf6cccccc00000000000000000000000000000000fffff7ffffffffffffffffffffffffff
-fff77fff55555555fffbbbffff44f4fff66ccc1111111dd1666cccccf6cc6cc600000000000000000000000000000000fffffffffffffffffffffaffffffffff
-ff7777ff5555555fffffbffff44fff4fff6c6c1111111111c7ccccc1f66ccc6c00000000000000000000000000000000ffffffffffffffffffffffffffffffff
-fff77ffff55555ffffffbfffff4f4fffff6cc11111dd1111cccc6cc1ff7ccccc00000000000000000000000000000000ffffffffffffffffffffffffffffffff
-fff77ffffff55fffffffbffffffffffff76c611111111111cccccc11ff6c6c1100000000000000000000000000000000fffffffffffffaffffffffffffffffff
-fff88fff00000000ffffffffffffffff0000000000000000f66ccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-f887888f00000000fffffffffffff4ff0000000000000000f6ccc6110000000000000000000000000000000000000000fffffffffffffffffffffffff7ffffff
-ff8878f800000000f3bff3bfff4ff44f0000000000000000f7cccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-f8788fff00000000fffbfbffff4f44ff0000000000000000f6c6cc110000000000000000000000000000000000000000ffffffffffffffffff7fffffffffffff
-fff77fff00000000fffbbbffff44f4ff0000000000000000f66ccc110000000000000000000000000000000000000000fffaffffffffffffffffffffffffffff
-ff77ffff00000000ffffbffff44fffff0000000000000000ff6c6c110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
-fff7ffff00000000ffffbfffff4fffff0000000000000000ff6cc1110000000000000000000000000000000000000000fffffffff7ffffffffffffffffffafff
-fff77fff00000000ffffbfffffffffff0000000000000000f76c61110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+0500000055500000005000000055550000005000000000000000000000000000ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+5750000057750000057500000577775000057500048800000480080004008800ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+5775000056775500057555505747550000577750048888000488880004888800ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+5777500005654000557575755774400005777750048888000488880004888800ffffffff000000000000000000000000ffffffffffffffffffffafffffffffff
+5777750000544400757777755754440057777400040088000408800004880000ffffffff000000000000000000000000ffafffffff7fffffffffffffffffffff
+5775500000504450577777755750444005774440040000000400000004000000ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+0557500000000500055777500500044500550445141000001410000014100000ffffffff000000000000000000000000ffffffffffffffffffffffff7fffffff
+0005000000000000000555000000005000000050111000001110000011100000ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+fff88fffff5555fffffffffffffffffff66ccc1111111111ffff67ccffffffffffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+f887888ff555555ff33fff33fff4f4fff6ccc6111dd11111ffff6cccff776666ffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
+8788787855555555f3bff3bbf44ff44ff7cccc1111dd1111fff76cccf76cccccffffffff000000000000000000000000fffffffffffffff7ffffffffffffffaf
+8878878855555555ffbbfbffff4f44fff6c6cc1111111111ff67cc6cf6cccccc6666fff6000000000000000000000000fffff7ffffffffffffffffffffffffff
+fff77fff55555555fffbbbffff44f4fff66ccc1111111dd1666cccccf6cc6cc6ccc76666000000000000000000000000fffffffffffffffffffffaffffffffff
+ff7777ff5555555fffffbffff44fff4fff6c6c1111111111c7ccccc1f66ccc6ccccccccc000000000000000000000000ffffffffffffffffffffffffffffffff
+fff77ffff55555ffffffbfffff4f4fffff6cc11111dd1111cccc6cc1ff7cccccc77ccc7c000000000000000000000000ffffffffffffffffffffffffffffffff
+fff77ffffff55fffffffbffffffffffff76c611111111111cccccc11ff6c6c11ccccccc7000000000000000000000000fffffffffffffaffffffffffffffffff
+fff88fff00000000fffffffffffffffffffffffffffffffff66ccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+f887888f00000000fffffffffffff4ffffffffffffaff7fff6ccc6110000000000000000000000000000000000000000fffffffffffffffffffffffff7ffffff
+ff8878f800000000f3bff3bfff4ff44ffffffffffffffffff7cccc110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+f8788fff00000000fffbfbffff4f44fffffffffff7ffffaff6c6cc110000000000000000000000000000000000000000ffffffffffffffffff7fffffffffffff
+fff77fff00000000fffbbbffff44f4fffaff7ff6fffffffff66ccc110000000000000000000000000000000000000000fffaffffffffffffffffffffffffffff
+ff77ffff00000000ffffbffff44ffffffffff666ffff7fffff6c6c110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
+fff7ffff00000000ffffbfffff4fffff7ffff6ccffafffffff6cc1110000000000000000000000000000000000000000fffffffff7ffffffffffffffffffafff
+fff77fff00000000ffffbfffffffffffffff66ccfffffffff76c61110000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 ffffffff00000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 ffff8fff00000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
 ff88f8ff00000000fffffffffffff4ff0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff
