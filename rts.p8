@@ -19,7 +19,8 @@ melee=4
 
 bldg_drop=1
 bldg_farm=2
-bldg_other=3
+bldg_const=3
+bldg_other=4
 
 --global state
 cx=0
@@ -34,7 +35,7 @@ units={}
 unit_sel=false
 --0.1 so res displays in readout
 --but is also essentially 0
-res={r=10.1,g=10.1,b=4.1,p=99}
+res={r=10.1,g=10.1,b=4.1,p=7.1}
 p1q=nil
 restiles={}
 dmaps={}
@@ -198,6 +199,11 @@ end
 -->8
 --unit defs
 
+atk_arrow=1
+atk_acid=2
+atk_seige=3
+atk_pince=4
+
 function parse(unit)
 	local obj={}
 	for l in all(split(unit,"\n")) do
@@ -241,6 +247,9 @@ portw=9
 spd=1.5
 los=25
 hp=20
+
+atk_typ=3
+atk=2
 ]])
 spider=parse([[
 w=7
@@ -259,6 +268,9 @@ has_q=1
 spd=2
 los=30
 hp=15
+
+atk_typ=4
+atk=2
 ]])
 warant=parse([[
 w=7
@@ -276,6 +288,9 @@ portw=9
 spd=1.5
 los=30
 hp=15
+
+atk_typ=2
+atk=1
 ]])
 queen=parse([[
 w=14
@@ -298,6 +313,9 @@ hp=50
 proj_col=11
 proj_xo=-4
 proj_yo=2
+
+atk_typ=2
+atk=1
 ]])
 
 tower=parse([[
@@ -317,6 +335,9 @@ range=25
 const=20
 proj_yo=-2
 proj_xo=-1
+
+atk_typ=1
+atk=1
 ]])
 mound=parse([[
 w=7
@@ -478,11 +499,13 @@ function drop(u,res)
 end
 
 function attack(u,e)
-	u.st={
-		t="attack",
-		target=e,
-		wayp=get_wayp(u,e.x,e.y),
-	}
+	if u.typ.atk then
+		u.st={
+			t="attack",
+			target=e,
+			wayp=get_wayp(u,e.x,e.y),
+		}
+	end
 end
 -->8
 --update
@@ -551,6 +574,7 @@ function handle_click()
 			y+flr(typ.h/2),
 			1,0)
 		add(units,new)
+		register_bldg(new)
 
 		--make selected units build it
 		for u in all(selection) do
@@ -681,21 +705,25 @@ function tick_unit(u)
 		del(selection,u)
 		if u.typ.inert then
 			register_bldg(u)
+			if u.typ==mound and u.p==1 then
+				res.p-=5
+			end
 		end
 		return		
 	end
-
-	update_unit(u)
-	
-	if u.p==1 and not u.const then
-		update_viz(u)
-	end
-	
-	if (selbox) update_sel(u)
 	
 	local mbox={mx-1,my-1,mx+2,my+2}
 	if intersect(u_rect(u),mbox) then
 		hoverunit=u
+	end
+	
+	if (selbox) update_sel(u)
+	if (u.const) return
+
+	update_unit(u)
+	
+	if u.p==1 then
+		update_viz(u)
 	end
 end
 
@@ -732,7 +760,7 @@ function update_projectiles()
 		) then
    if intersect(u_rect(p.to_unit),
   	{p.x,p.y,p.x,p.y}) then
- 	 	p.to_unit.hp-=1
+ 	 	deal_dmg(p.from_unit,p.to_unit)
 			end
   	del(proj,p)
   end
@@ -840,7 +868,7 @@ end
 
 function draw_projectiles()
  for p in all(proj) do
- 	local c=p.from_typ.proj_col or 5
+ 	local c=p.from_unit.typ.proj_col or 5
 		pset(p.x,p.y,c)
 	end
 end
@@ -957,7 +985,7 @@ function update_unit(u)
 end
 
 function aggress(u)
-	if (u.typ==ant) return
+	if (not u.typ.atk) return
 	for e in all(units) do
 		if e.p!=u.p and not e.dead then
 			local d=dist(e.x-u.x,e.y-u.y)
@@ -978,7 +1006,7 @@ function fight(u)
 		if (d<=u.typ.range) then
 			if fps%30==0 then
 	 		add(proj,{
-	 			from_typ=u.typ,
+	 			from_unit=u,
 	 			x=u.x+u.dir*-(u.typ.proj_xo or 0),
 	 			y=u.y+(u.typ.proj_yo or 0),
 	 			to={e.x,e.y},to_unit=e,
@@ -989,7 +1017,7 @@ function fight(u)
  else
  	if intersect(u_rect(u),u_rect(e),1) then
 			if fps%30==0 then
-			 e.hp-=1
+			 deal_dmg(u,e)
 			end
 		 in_range=true
 		end
@@ -1011,6 +1039,9 @@ function buildrepair(u)
 	 		if b.const==b.typ.const then
 	 			b.const=nil
 	 			register_bldg(b)
+	 			if b.typ==mound and b.p==1 then
+	 				res.p+=5
+	 			end
 	 		end
 	 	elseif (
 	 		b.hp<b.typ.hp and
@@ -1037,7 +1068,7 @@ function mine(u)
 	elseif fps==u.st.fps then
 		u.res.qty+=1
 		mine_res(x,y)
-		if (u.res.qty==1) drop(u,r)
+		if (u.res.qty==9) drop(u,r)
 	end
 end
 
@@ -1229,11 +1260,16 @@ function can_gather()
 end
 
 function can_attack()
-	if (not vget(mx,my)) return
-	return hoverunit and
-	 hoverunit.p!=1 and
-		#selection>0 and
-		not all_ants()
+	if not (
+		vget(mx,my) and
+		hoverunit and
+	 hoverunit.p!=1
+	) then
+		return
+	end
+	for u in all(selection) do
+		if (u.typ.atk) return true
+	end
 end
 
 function can_build()
@@ -1298,18 +1334,35 @@ function norm(it,nt)
 	return xv*norm,yv*norm
 end
 
-function acc(x,y,farm_no)
+--strict=f to ignore farms+const
+function acc(x,y,strict)
 	local b=g(bldgs,x,y)
-	if (not farm_no and b==bldg_farm) b=nil
+	if	not strict and (
+		b==bldg_farm or b==bldg_const
+	) then
+		b=nil
+	end
 	return not (
 		b or fget(mget(x,y),0)
 	)
 end
 
 function buildable()
-	return acc(
-		to_build.x/8,
-		to_build.y/8,true)
+	local x,y=to_build.x/8,to_build.y/8
+	local w,h=to_build.typ.w,to_build.typ.h
+	return (
+		acc(x,y,true) and
+		(w<9 or acc(x+1,y,true)) and
+		(h<9 or acc(x,y+1,true))
+	)
+end
+
+function bldg_type(b)
+	if (b.dead) return
+	if (b.const) return bldg_const
+	if (typ==mound) return bldg_drop
+	if (typ==farm) return bldg_farm
+	return bldg_other
 end
 
 function register_bldg(b)
@@ -1317,18 +1370,19 @@ function register_bldg(b)
 	local w,h=typ.w,typ.h
 	local x,y=flr((b.x-2)/8),flr((b.y-2)/8)
 
-	local v=nil
-	if not b.dead then
-		v=bldg_other
-		if (typ==mound) v=bldg_drop
-		if (typ==farm) v=bldg_farm
-	end
-	
+	local v=bldg_type(b)
+
 	s(bldgs,x,y,v)
 	if (w>8) s(bldgs,x+1,y,v)
 	if (h>8) s(bldgs,x,y+1,v)
 	if (w>8 and h>8) s(bldgs,x+1,y+1,v)
-	make_dmaps()
+	if not b.const then
+		make_dmaps()
+	end
+end
+
+function deal_dmg(from,to)
+	to.hp-=1
 end
 -->8
 --get_wayp
@@ -1531,11 +1585,13 @@ end
 function cost_len(c)
 	return	draw_resource("r",c.r)+
 		draw_resource("g",c.g)+
-		draw_resource("b",c.b)
+		draw_resource("b",c.b)+
+		((not c.typ.inert and res.p<1) and
+			draw_resource("p",1) or 0)
 end
 
 --typ="b/g/r/p"
-function draw_resource(typ,val,x,y)
+function draw_resource(typ,val,x,y,sp)
  if ((val or 0)==0) return 0
  local sy,c=64,11 --g
 	if (typ=="r") sy,c=72,8
@@ -1545,36 +1601,47 @@ function draw_resource(typ,val,x,y)
 	local total=0
 	local w=0
 	local s=""..flr(val)
+	
+	local bg=7
+ if not sp and res[typ]<val then
+ 	bg=10
+ 	if (typ=="p") s=""
+ end
+ if typ=="p" and res.p<1 then
+ 	bg=10
+ end
+ 
 	for i=0,#s do
 		if i==0 then
 			w=typ=="p" and 6 or 4
 			if x then
-				rectfill(x-1,y-1,x+w,y+6,7)
+				rectfill(x-1,y-1,x+w,y+5,bg)
 	 		sspr(72,sy,5,5,x,y)
 	 	end
 		elseif s[i]=="1" then
 			w=2
   	if x then
-	  	rectfill(x-1,y-1,x+w,y+6,7)
+	  	rectfill(x-1,y-1,x+w,y+5,bg)
 				line(x,y,x,y+4,c)
 			end
 		else
 			w=4
 			if x then
-				rectfill(x-1,y-1,x+w,y+6,7)
+				rectfill(x-1,y-1,x+w,y+5,bg)
 				print(s[i],x,y,c)
 			end
 		end
 		total+=w
 		if (x) x+=w
 	end
-	return total+2
+	return total+1+(sp or 0)
 end
 
 function can_pay(costs)
  return res.r>=(costs.r or 0) and
  	res.g>=(costs.g or 0) and
- 	res.b>=(costs.b or 0)
+ 	res.b>=(costs.b or 0) and
+ 	(costs.typ.inert or res.p>=1)
 end
 
 function draw_port(
@@ -1750,6 +1817,7 @@ function draw_unit_section(sel)
 						res.r-=b.r or 0
 						res.g-=b.g or 0
 						res.b-=b.b or 0
+						res.p-=1
 						if u.q then
 							u.q.qty+=1
 						else
@@ -1770,6 +1838,7 @@ function draw_unit_section(sel)
 						res.r+=b.r or 0
 						res.g+=b.g or 0
 						res.b+=b.b or 0
+						res.p+=1
 						if qty==1 then
 							u.q=nil
 						else
@@ -1814,19 +1883,16 @@ function draw_menu()
 	--resources
 	local x=1
 	local y=122
-	local pop=2
-	x+=draw_resource("r",res.r,x,y)
-	x+=draw_resource("g",res.g,x,y)
-	x+=draw_resource("b",res.b,x,y)
+	x+=draw_resource("r",res.r,x,y,1)
+	x+=draw_resource("g",res.g,x,y,1)
+	x+=draw_resource("b",res.b,x,y,1)
 	x-=1
 	
 	line(x,y-1,x,y+5,5)
 	x+=1
-	line(x,y-1,x,y+5,7)
-	x+=1
-	line(x,y-1,x,y+5,7)
-	x+=1
-	x+=draw_resource("p",res.p-pop,x,y)
+	line(x,y-1,x,y+5,res.p<1 and 10 or 7)
+	x+=2
+	x+=draw_resource("p",res.p,x,y,1)
 	x-=1
 
 	pset(x-1,y-1,5)
@@ -1839,20 +1905,28 @@ function draw_menu()
 		local w=cost_len(b)
 		local h=8
 		local x=hb.x-(w-hb.w)/2
-		local y=hb.y-h-2
+		local y=hb.y-h
 		rectfill(x,y,x+w,y+h,7)
 		local rx=x+2
 		rx+=draw_resource("r",b.r,rx,y+2)
 		rx+=draw_resource("g",b.g,rx,y+2)
 		rx+=draw_resource("b",b.b,rx,y+2)
-		line(x+1,y-1,x+w-1,y-1,5)
-		line(x+1,y+h+1,x+w-1,y+h+1,5)
+		if res.p<1 and not b.typ.inert then
+			rx+=draw_resource("p",1,rx,y+2)
+		end
+		rect(x,y,x+w+1,y+h,1)
+		pal(5,0)
+		line(x-1,y+1,x-1,y+h+1,5)
+		line(x,y+h+1,x+w,y+h+1,5)
+		pal()
+		--[[line(x+1,y-1,x+w,y-1,5)
+		line(x+1,y+h+1,x+w,y+h+1,5)
 		line(x,y,x,y+h,5)
-		line(x+w,y,x+w,y+h,5)
+		line(x+w+1,y,x+w+1,y+h,5)
 		pset(x+1,y,5)
-		pset(x+w-1,y,5)
+		pset(x+w,y,5)
 		pset(x+1,y+h,5)
-		pset(x+w-1,y+h,5)
+		pset(x+w,y+h,5)]]
 	end
 end
 
