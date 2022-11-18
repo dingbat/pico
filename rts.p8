@@ -17,6 +17,10 @@ menuy=104
 
 melee=4
 
+bldg_drop=1
+bldg_farm=2
+bldg_other=3
+
 --global state
 cx=0
 cy=0
@@ -35,13 +39,14 @@ p1q=nil
 restiles={}
 dmaps={}
 proj={} --projectiles
+bldgs={}
 
 --reset every frame
 buttons={}
 vizmap=nil
 hoverunit=nil
 hilite=nil
-place_build=nil
+to_build=nil
 
 function unit(typ,x,y,p,const)
  return {
@@ -60,19 +65,22 @@ function _init()
 	--enable mouse & mouse btns
 	poke(0x5f2d,0x1|0x2)
 	
-	p1q=unit(queen,55,43,1)
+	local qx,qy=5,3
+	p1q=unit(queen,qx*8+7,qy*8+3,1)
 	units={
 		unit(ant,29,34,1),
 		unit(ant,35,39,1),
 		unit(ant,35,42,1),
-		unit(spider,48,26,1),
+		unit(spider,48,16,1),
 		unit(warant,58,30,1),
 		unit(beetle,40,36,1),
 		unit(beetle,60,76,2),
 		--unit(beetle,65,81,2),
 		p1q,
-		unit(tower,65,65,1)
+		--unit(tower,65,65,1)
 	}
+	s(bldgs,qx,qy,bldg_drop)
+	s(bldgs,qx+1,qy,bldg_drop)
  make_dmaps()
 end
 
@@ -81,16 +89,19 @@ function _draw()
  
  draw_map()
  
- local built,building={},{}
+ local above_fog,below_fog={},{}
  for u in all(units) do
- 	if (u.const) add(building,u)
- 	if (not u.const) add(built,u)
+ 	if u.const and u.p==1 then
+ 		add(above_fog,u)
+ 	else
+	 	add(below_fog,u)
+	 end
  end
  
-	foreach(built,draw_unit)
+	foreach(below_fog,draw_unit)
 	draw_projectiles()
 	draw_fow()
-	foreach(building,draw_unit)
+	foreach(above_fog,draw_unit)
 
 	--selection box
 	if selbox then
@@ -101,9 +112,11 @@ function _draw()
 	
 	if (hilite) draw_hilite()
 	
+	draw_to_build()
+	
 	camera(0,0)
 	
-	if (show_dmap) draw_dmap("b")
+	if (show_dmap) draw_dmap("d")
 	
 	--menu
 	draw_menu()
@@ -124,9 +137,9 @@ function _draw()
 end
 
 function _update()
-	--[[if debug and btnp(🅾️) and btnp(❎) then
+	if debug and btnp(🅾️) and btnp(❎) then
 		show_dmap=not show_dmap
-	end]]
+	end
 
 	fps+=1
 	if fps==60 then
@@ -163,6 +176,23 @@ function draw_hilite()
 		elseif u then
 			rectaround(u,8)
 		end
+	end
+end
+
+function draw_to_build()
+	if to_build and amy<menuy then
+		local b=buildable()
+		local typ=to_build.typ
+ 	local w,h=typ.w,typ.h
+		local x,y=to_build.x,to_build.y
+	 if amy<menuy then
+ 		rectfill(
+	 		x-1,y-1,
+	 		x+w,y+h,
+	 		b and 3 or 8
+	 	)
+ 	end
+ 	sspr(typ.x,typ.y,w,h,x,y)
 	end
 end
 -->8
@@ -418,6 +448,13 @@ function build(u,b)
 	}
 end
 
+function target_tile(tx,ty)
+	return {
+		x=tx*8+3,y=ty*8+3,
+		typ={w=8,h=8},
+	}
+end
+
 function gather(u,tx,ty,wp)
 	wp=wp or get_wayp(u,tx*8+3,ty*8+3)
 	u.st={
@@ -426,19 +463,17 @@ function gather(u,tx,ty,wp)
 		ty=ty,
 		res=tile2res(tx,ty),
 		wayp=wp,
-		target={
-			x=tx*8+4,y=ty*8+4,
-			typ={w=8,h=8},
-		}
+		target=target_tile(tx,ty),
 	}
 end
 
 function drop(u,res)
+	local wayp,x,y=dmap_find(u,"d")
 	u.st={
 		t="drop",
-		target=p1q,
-		wayp=get_wayp(u,p1q.x,p1q.y),
+		wayp=wayp,
 		nxt=res,
+		target=target_tile(x,y),
 	}
 end
 
@@ -498,25 +533,31 @@ function handle_click()
 				cy=mid(0,y-yoff,maph-128+menuh)
 			end
 		end
-		if (btnp(5)) place_build=nil
+		if (btnp(5)) to_build=nil
 	 return
 	end
 
  --left click places building
- if btnp(5) and place_build then
+ if btnp(5) and to_build then
   if (not buildable()) return
- 	res.r-=place_build.r or 0
-		res.g-=place_build.g or 0
-		res.b-=place_build.b or 0
-		local new=unit(place_build.typ,mx,my,1,0)
+ 	res.r-=to_build.r or 0
+		res.g-=to_build.g or 0
+		res.b-=to_build.b or 0
+		local typ=to_build.typ
+		local w,h=typ.w,typ.h
+		local x,y=to_build.x,to_build.y
+		local new=unit(
+			typ,x+flr(typ.w/2),
+			y+flr(typ.h/2),
+			1,0)
 		add(units,new)
- 
+
 		--make selected units build it
 		for u in all(selection) do
 		 build(u,new)
 		end
 		
-		place_build=nil
+	 to_build=nil
  end
  
 	--left click clears selection
@@ -525,7 +566,7 @@ function handle_click()
  end
  
  --left drag makes selection
- if btn(5) and not place_build then
+ if btn(5) and not to_build then
  	if selbox==nil then
  		selbox={mx,my,mx,my}
  	else
@@ -563,13 +604,13 @@ function handle_click()
 				drop(u)
   	end
   	hilite={t=t(),unit=hoverunit}
-  elseif sel1.typ.prod then
-  	sel1.rx,sel1.ry=mx,my
   elseif not sel1.typ.inert then
 	 	for u in all(selection) do
 				move(u,mx,my)
   	end
   	hilite={t=t(),x=mx,y=my}
+  elseif sel1.typ.prod then
+  	sel1.rx,sel1.ry=mx,my
   end
  end
 end
@@ -597,6 +638,11 @@ function handle_input()
  my=amy+cy
  
  handle_click()
+ 
+ if to_build then
+	 to_build.x=flr(mx/8)*8
+	 to_build.y=flr(my/8)*8
+	end
 end
 
 function update_sel(u)
@@ -633,6 +679,9 @@ function tick_unit(u)
 		u.dead=fps
 		u.sel=false
 		del(selection,u)
+		if u.typ.inert then
+			register_bldg(u)
+		end
 		return		
 	end
 
@@ -961,6 +1010,7 @@ function buildrepair(u)
 	 		b.const+=1
 	 		if b.const==b.typ.const then
 	 			b.const=nil
+	 			register_bldg(b)
 	 		end
 	 	elseif (
 	 		b.hp<b.typ.hp and
@@ -978,17 +1028,16 @@ end
 function mine(u)
 	if (not u.st.active) return
 	local x,y,r=u.st.tx,u.st.ty,u.st.res
-	--if tile is no longer there
+	--if res is exhausted, goto nxt
 	--move on to the next one
-	local f=res2flag(r)
-	if not fget(mget(x,y),f) then
-		if (not mine_nxt_res(u,r)) then
+	if g(restiles,x,y)==0 then
+		if not mine_nxt_res(u,r) then
 		 drop(u)
 		end
 	elseif fps==u.st.fps then
 		u.res.qty+=1
 		mine_res(x,y)
-		if (u.res.qty==9) drop(u,r)
+		if (u.res.qty==1) drop(u,r)
 	end
 end
 
@@ -1035,9 +1084,10 @@ function check_target_col(u)
 				res.b=min(res.b+q,99)
 			end
 			u.res=nil
-			if u.st.nxt then
-				mine_nxt_res(u,u.st.nxt)
-			else
+			if (
+				not u.st.nxt or
+				not mine_nxt_res(u,u.st.nxt)
+			) then
 				rest(u)
 			end
 		end
@@ -1155,30 +1205,11 @@ function tile2res(x,y)
 end
 
 function mine_nxt_res(u,res)
-	local x,y=flr(u.x/8),flr(u.y/8)
-	local dmap=dmaps[res]
-	local wayp={}
-	while true do
-		local n=g(dmap,x,y)
-		local ts=surrounding_tiles(
-			x,y,1,mapw/8,maph/8
-		)
-		local lowest=n
-		for t in all(ts) do
-			local w=g(dmap,t[1],t[2])
-			if (t.diag) w+=0.4
-			if w<lowest then
-				x=t[1]
-				y=t[2]
-				lowest=w
-			end
-		end
-		if (lowest>=n) return false
-		add(wayp,{x*8+3,y*8+3})
-		if (lowest<1) break
+	local wp,x,y=dmap_find(u,res)
+	if wp then
+		gather(u,x,y,wp)
+		return true
 	end
-	gather(u,x,y,wayp)
-	return true
 end
 
 function all_ants()
@@ -1230,8 +1261,7 @@ function rectaround(u,c)
 end
 
 function mine_res(x,y)
-	local idx=x*mapw/8+y+1
-	local n=restiles[idx] or 12
+	local n=g(restiles,x,y) or 12
 	n-=1
 	if n==4 or n==9 then
 		local s=mget(x,y)
@@ -1241,7 +1271,7 @@ function mine_res(x,y)
 		mset(x,y,72)
 		make_dmaps()
 	end
-	restiles[idx]=n
+	s(restiles,x,y,n)
 end
 
 function adj(x1,y1,x2,y2,n)
@@ -1266,6 +1296,39 @@ function norm(it,nt)
 	local yv=it[2]-nt.y
 	local norm=1/(abs(xv)+abs(yv))
 	return xv*norm,yv*norm
+end
+
+function acc(x,y,farm_no)
+	local b=g(bldgs,x,y)
+	if (not farm_no and b==bldg_farm) b=nil
+	return not (
+		b or fget(mget(x,y),0)
+	)
+end
+
+function buildable()
+	return acc(
+		to_build.x/8,
+		to_build.y/8,true)
+end
+
+function register_bldg(b)
+	local typ=b.typ
+	local w,h=typ.w,typ.h
+	local x,y=flr((b.x-2)/8),flr((b.y-2)/8)
+
+	local v=nil
+	if not b.dead then
+		v=bldg_other
+		if (typ==mound) v=bldg_drop
+		if (typ==farm) v=bldg_farm
+	end
+	
+	s(bldgs,x,y,v)
+	if (w>8) s(bldgs,x+1,y,v)
+	if (h>8) s(bldgs,x,y+1,v)
+	if (w>8 and h>8) s(bldgs,x+1,y+1,v)
+	make_dmaps()
 end
 -->8
 --get_wayp
@@ -1298,9 +1361,7 @@ end
 function obstacle(x,y)
 	x=flr(x*(mvtile/8))
 	y=flr(y*(mvtile/8))
-	local t=mget(x,y)
-	if (fget(t,0)) return true
-	return
+	return not acc(x,y)
 end
 
 function neighbor(ns,n,dx,dy)
@@ -1568,7 +1629,7 @@ function cursor_spr()
 	if #selection>0 and
 		selection[1].p==1 then
 	 --build cursor
-		if (place_build or can_build()) then
+		if (to_build or can_build()) then
 			return 68
 		end
 		--pick
@@ -1580,7 +1641,7 @@ function cursor_spr()
 	return 64
 end
 
-function xing_tiles(x,y,w,h)
+--[[function xing_tiles(x,y,w,h)
 	local tiles={}
 	local xx,yy=flr(x/8),flr(y/8)
 	for dx=0,ceil(w/8) do
@@ -1589,42 +1650,15 @@ function xing_tiles(x,y,w,h)
 		end
 	end
 	return tiles
-end
-
-function buildable()
-	local typ=place_build.typ
-	local w,h=typ.w,typ.h
-	local xo,yo=flr(w/2),flr(h/2)
- if amy<menuy then
- 	local xing=xing_tiles(
- 		mx-xo,my-yo,w,h
- 	)
- 	for t in all(xing) do
- 		if fget(mget(t[1],t[2]),0) then
- 			return false,xo,yo
- 		end
- 	end
- 	return true,xo,yo
- end
- return false,xo,yo
-end
+end]]
 
 function draw_cursor()
- local mspr=cursor_spr()
-	if place_build then
-		local typ=place_build.typ
+	if to_build and amy>=menuy then
+		local typ=to_build.typ
  	local w,h=typ.w,typ.h
-		local b,xo,yo=buildable()
-	 if amy<menuy then
-		 local w,h=typ.w,typ.h
- 		rectfill(
-	 		amx-xo-1,amy-yo-1,
-	 		amx+w-xo,amy+h-yo,
-	 		b and 3 or 8
-	 	)
- 	end
- 	sspr(typ.x,typ.y,w,h,amx-xo,amy-yo)
+ 	sspr(typ.x,typ.y,w,h,amx-3,amy-3)
 	end
+ local mspr=cursor_spr()
  spr(mspr,amx,amy)
 	if mspr==66 then --pointer
 		pset(amx-1,amy+4,5)
@@ -1707,7 +1741,7 @@ function draw_unit_section(sel)
 					function()
 						if (not can_pay(b)) return
 						if b.typ.inert then
-							place_build=b
+							to_build=b
 							return
 						end
 						if (u.q and (u.q.b!=b or u.q.qty==9)) then
@@ -1844,8 +1878,6 @@ end
 --[[
 
 todo
-- bld footpr shld affect pathf
-- building shld obstruct bldng
 - units adjst when in same spot
 - spiderweb
 - rock paper scissors (var dmg)
@@ -1871,6 +1903,32 @@ spider takes time to eat them.
 ]]
 -->8
 r=mapw/8
+
+function dmap_find(u,key)
+	local x,y=flr(u.x/8),flr(u.y/8)
+	local dmap=dmaps[key]
+	local wayp={}
+	while true do
+		local n=g(dmap,x,y)
+		local ts=surrounding_tiles(
+			x,y,1,mapw/8,maph/8
+		)
+		local lowest=n
+		for t in all(ts) do
+			local w=g(dmap,t[1],t[2])
+			if (t.diag) w+=0.4
+			if w<lowest then
+				x=t[1]
+				y=t[2]
+				lowest=w
+			end
+		end
+		if (lowest>=n) return nil
+		add(wayp,{x*8+3,y*8+3})
+		if (lowest<1) break
+	end
+	return wayp,x,y
+end
  
 function g(a,x,y)
 	return a[x+y*r+1]
@@ -1887,8 +1945,8 @@ function add_neigh(to,closed,x,y)
 	for t in all(ts) do
 		if (
 			not (x==t[1] and y==t[2]) and
-			not fget(mget(t[1],t[2]),0)
-			and not g(closed,t[1],t[2])
+			acc(t[1],t[2]) and
+			not g(closed,t[1],t[2])
 		) then
 			s(closed,t[1],t[2],true)
 			add(to,{t[1],t[2]})
@@ -1897,15 +1955,15 @@ function add_neigh(to,closed,x,y)
 end
 
 function acc_res(x,y,f)
- if fget(mget(x,y),f) then
- 	return not (
- 		(x==0 or fget(mget(x-1,y),0)) and
- 		(x==r-1 or fget(mget(x+1,y),0)) and
- 		(y==0 or fget(mget(x,y-1),0)) and
- 		(y==r-1 or fget(mget(x,y+1),0))
- 	)
- end
- return false
+	return (
+ 	(f=="d" and g(bldgs,x,y)==bldg_drop) or
+ 	(f!="d" and fget(mget(x,y),f))
+ ) and (
+ 	acc(x-1,y) or
+ 		acc(x+1,y) or
+ 		acc(x,y-1) or
+ 		acc(x,y+1)
+ )
 end
 
 function make_dmaps()
@@ -1913,6 +1971,7 @@ function make_dmaps()
 		r=make_dmap(2),
 		g=make_dmap(3),
 		b=make_dmap(4),
+		d=make_dmap("d"),
 	}
 end
 
@@ -1929,7 +1988,7 @@ function make_dmap(resf)
 			closed[i+1]=true
 			dmap[i+1]=0
 			add(start,{x,y})
-		elseif fget(mget(x,y),0) then
+		elseif not acc(x,y) then
 		 closed[i+1]=true
 		end
 	end
@@ -1959,7 +2018,6 @@ function make_dmap(resf)
 	return dmap
 end
 
---[[
 function draw_dmap(res_typ)
 	local dmap=dmaps[res_typ]
 	local r=mapw/8
@@ -1970,7 +2028,7 @@ function draw_dmap(res_typ)
 			print(n==0 and "-" or n,x*8,y*8,9)
 	 end
 	end
-end]]
+end
 __gfx__
 00000000d00000000000000000000000000000000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
 000000000d000000d000000000000000000000000000000000000000011000000010100000000000110001100000000011000110000000000000000000000000
