@@ -34,7 +34,6 @@ farm_cycles=5
 --selbox=nil
 --unit_sel=false
 --p1q=nil
-selection={}
 units={}
 res={r=10.1,g=10.1,b=10.1,p=7.1}
 restiles={}
@@ -49,6 +48,7 @@ buttons={}
 --hovbtn=nil
 --hilite=nil
 --to_build=nil
+selection={}
 
 function unit(typ,x,y,p,const)
  return {
@@ -104,11 +104,11 @@ function _draw()
  
 	foreach(bf1,draw_unit)
 
-	--[[for s in all(selection) do
+	for s in all(selection) do
 		if s.typ==farm and not s.const then
 		 rectaround(s,9)
 		end
-	end]]
+	end
 
 	draw_projectiles()
 	foreach(bf2,draw_unit)
@@ -149,10 +149,6 @@ function _draw()
 end
 
 function _update()
-	--[[if btnp(🅾️) and btnp(❎) then
-		show_dmap=not show_dmap
-	end]]
-
 	fps+=1
 	if fps==60 then
 		fps=0
@@ -170,7 +166,18 @@ function _update()
  buttons={}
  unit_sel=false
  update_projectiles()
+ 
+ if selbox then
+ 	bldg_sel=nil
+	 my_sel=nil
+	 enemy_sel=nil
+ end
  foreach(units,tick_unit)
+ if selbox then
+		selection=my_sel or
+			bldg_sel or
+			enemy_sel or {}
+	end
 end
 
 function draw_hilite()
@@ -633,12 +640,7 @@ function handle_click()
 	 to_build=nil
  end
  
-	--left click clears selection
- if btnp(5) then
- 	selection={}
- end
- 
- --left drag makes selection
+	--left drag makes selbox
  if btn(5) and not to_build then
  	if selbox==nil then
  		selbox={mx,my,mx,my}
@@ -646,7 +648,6 @@ function handle_click()
 	 	selbox[3]=mx
 	 	selbox[4]=my
  	end
- 	selection={}
  else
  	selbox=nil
  end
@@ -736,27 +737,16 @@ function handle_input()
 end
 
 function update_sel(u)
- local no_other=(not unit_sel and #selection==0)
-	local s=(
-		intersect(selbox,u_rect(u)) and
-		(u.typ.unit or no_other) and
-		(u.p==1 or no_other)
-	)
-	u.sel=s
-	if (s) then
-		if u.typ.unit then
-			unit_sel=true
-			for i=1,#selection do
-				if (
-					selection[i].typ.inert or
-					selection[i].p!=1) then
-					selection[i].sel=false
-					deli(selection,i)
-					i-=1
-				end
-			end
+	u.sel=intersect(selbox,u_rect(u))
+ if u.sel then
+		if u.p!=1 then
+			enemy_sel={u}
+		elseif u.typ.unit then
+			if (not my_sel) my_sel={}
+			add(my_sel,u)
+		else
+			bldg_sel={u}
 		end
-		add(selection,u)
 	end
 end
 
@@ -778,8 +768,8 @@ function tick_unit(u)
 		return		
 	end
 	
-	local mbox={mx-1,my-1,mx+2,my+2}
-	if intersect(u_rect(u),mbox) then
+	local mbox={mx,my,mx,my}
+	if intersect(u_rect(u),mbox,1) then
 		hoverunit=u
 	end
 	
@@ -945,20 +935,8 @@ function draw_unit(u)
 		return
 	end
 	
-	if debug then
-		if u.st.wayp then
-			for i=1,#u.st.wayp do
-				pset(u.st.wayp[i][1],u.st.wayp[i][2],8)
-			end
-		end
-		if (u.sel) then
-			circ(u.x,u.y,u.typ.los,8)
-			if u.typ.range then
-				circ(u.x,u.y,u.typ.range,9)
-			end
-		end
-	end
 	local ut=u.typ
+	local st=u.st
 	local w=ut.fw or ut.w
 	local h=ut.h
 	
@@ -968,8 +946,8 @@ function draw_unit(u)
 		fillp(0)
 		local x=u.x-flr(w/2)
 		local y=u.y-flr(h/2)-1
-		local p=u.const/u.typ.const
-		local w=u.typ.w-1
+		local p=u.const/ut.const
+		local w=ut.w-1
 		line(x,y,x+w,y,5)
 		line(x,y,x+w*p,y,14)
 		if (u.const<=1) return
@@ -980,28 +958,28 @@ function draw_unit(u)
 	
 	local ufps=ut.fps or 1
 	local restfr=ut.restfr or 2
-	if (u.st.t=="rest") ufps=restfr/2
-	if (u.st.t=="build") ufps*=2
+	if (st.t=="rest") ufps=restfr/2
+	if (st.t=="build") ufps*=2
 	local anim=flr(fps/(30/ufps))
-	local move_anim=u.st.wayp or
-		u.st.t=="gather" or
-		u.st.t=="attack" or
-		(u.st.t=="harvest" and u.farm.ready)
+	local move_anim=st.wayp or
+		st.t=="gather" or
+		st.t=="attack" or
+		(st.t=="harvest" and u.farm.ready)
 	
 	if u.dead then
 		x=ut.deadx
 		y=ut.deady or y
-	elseif u.st.t=="rest" or u.typ.inert then
-		if (u.typ==ant) anim+=1
+	elseif st.t=="rest" or ut.inert then
+		if (ut==ant) anim+=1
 		x+=(anim%restfr)*w
 	elseif move_anim then
 		x+=w+(anim%(ut.anim_fr))*w
-	elseif u.st.t=="build" then
+	elseif st.t=="build" then
 		x=24+(anim%(ut.anim_fr))*w
-	elseif u.st.t=="harvest" then
+	elseif st.t=="harvest" then
 		x=32+(anim%2)*w
 	end
-	if u.typ==farm and u.res then
+	if ut==farm and u.res then
 		if u.exp then
 			x=72
 		elseif u.ready then
@@ -1014,7 +992,7 @@ function draw_unit(u)
 			end
 		end
 	end
-	if u.typ==ant and u.res then
+	if ut==ant and u.res then
 		if u.res.typ=="r" then
 			x+=12
 		elseif u.res.typ=="g" then
@@ -1025,22 +1003,26 @@ function draw_unit(u)
 		end
 	end
 	if u.const then
-		local prog=u.const/u.typ.const
+		local prog=u.const/ut.const
 		if prog<0.5 then
-			x+=u.typ.fw*2
+			x+=ut.fw*2
 		else
-			x+=u.typ.fw
+			x+=ut.fw
 		end
 	end
+	local sel=u.sel and
+		((ut.unit and u.p==1) or
+			(ut.inert and u.p==1 and not my_sel) or
+			(u.p!=1 and not bldg_sel))
 	local col=u.p==1 and 1 or 2
 	pal(2,col)
-	if (u.sel) col=9
+	if (sel) col=9
 	pal(1,col)
 	local sdir=u.typ.dir or 1
 	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==sdir)
 	pal()
 	
-	if (u.sel and u.rx) draw_rally(u)
+	if (sel and u.rx) draw_rally(u)
 end
 
 function check_dead_target(u)
@@ -1199,13 +1181,14 @@ end
 
 function produce(u)
 	if fps%15==u.q.fps15 then
+		local b=u.q.b
 		u.q.t-=0.5
 		if u.q.t==0 then
-			if u.q.b.tech then
-				del(u.typ.prod,u.q.b)
-				u.q.b.tech()
+			if b.tech then
+				del(u.typ.prod,b)
+				b.tech()
 			else
-				local new=unit(u.q.b.typ,u.x,u.y,1)
+				local new=unit(b.typ,u.x,u.y,1)
 				add(units,new)
 				if (
 					new.typ==ant and
@@ -1219,7 +1202,7 @@ function produce(u)
 			end
 			if u.q.qty>1 then
 				u.q.qty-=1
-				u.q.t=u.q.b.t
+				u.q.t=b.t
 			else
 				u.q=nil
 			end
@@ -1229,9 +1212,9 @@ end
 
 function check_target_col(u)
 	local st=u.st
-	if (st.active) return
 	local t=st.target
 	if (
+		not st.active and
 		t and
 		intersect(u_rect(u),u_rect(t))
 	) then
@@ -1297,6 +1280,8 @@ end
 
 function intersect(r1,r2,e)
 	e=e or 0
+	--if (r1.x) r1=u_rect(r1)
+	--if (r2.x) r2=u_rect(r2)
 	local r1_x1=min(r1[1],r1[3])-e
 	local r1_x2=max(r1[1],r1[3])+e
 	local r1_y1=min(r1[2],r1[4])-e
@@ -2175,12 +2160,14 @@ function dmap_find(u,key)
 	return wayp,x,y
 end
  
-function g(a,x,y)
-	return a[x+y*r+1]
+function g(a,x,y,rows)
+	rows=rows or r
+	return a[x+y*rows+1]
 end
 
-function s(a,x,y,v)
- a[x+y*r+1]=v
+function s(a,x,y,v,rows)
+	rows=rows or r
+ a[x+y*rows+1]=v
 end
 
 function add_neigh(to,closed,x,y)
