@@ -1294,6 +1294,11 @@ function intersect(r1,r2,e)
 	)
 end
 
+--[[function p2r(x,y,o1,o2)
+	o1,o2=o1 or 0,o2 or 0
+	return {x+o1,y+o1,x+o2,y+o2}
+end]]
+
 function u_rect(u)
  return {
  	u.x-u.typ.w/2,u.y-u.typ.h/2,
@@ -1309,6 +1314,10 @@ function dist(dx,dy)
  end
  return b0*0.9609+a0*0.3984
 end
+
+--[[function fmget(x,y,f)
+	return fget(mget(x,y),f or 0)
+end]]
 
 function corner_cuttable(x,y,dx,dy)
 	return not (
@@ -1327,22 +1336,21 @@ function surrounding_tiles(x,y,n,maxx,maxy,cut)
 	local st={}
 	for dx=-n,n do
 	 for dy=-n,n do
-	 	if (
-	 		x+dx>=0 and y+dy>=0 and
-	 		x+dx<maxx and y+dy<maxy
-	 	) then
-	 		if (
-	 			not cut
-	 			or corner_cuttable(x,y,dx,dy)
-	 		) then
-			 	local v=(
-			 		dx<2 and dx>-2 and
-			 		dy<2 and dy>-2)
-				 add(st,{
-				  x+dx,y+dy,v,
-				 	diag=(dx!=0 and dy!=0)
-				 })
-				end
+	 	local xx,yy=x+dx,y+dy
+	 	if
+	 		xx>=0 and yy>=0 and
+	 		xx<maxx and yy<maxy and
+	 		(not cut or
+	 			corner_cuttable(x,y,dx,dy)
+	 		)
+	 	then
+		 	local v=(
+		 		dx<2 and dx>-2 and
+		 		dy<2 and dy>-2)
+			 add(st,{
+			  xx,yy,v,
+			 	diag=(dx!=0 and dy!=0)
+			 })
 			end
 		end
 	end
@@ -1360,7 +1368,6 @@ function tile2res(x,y)
  if (fget(tile,2)) return "r"
  if (fget(tile,3)) return "g"
  if (fget(tile,4)) return "b"
- return nil
 end
 
 function mine_nxt_res(u,res)
@@ -1412,15 +1419,13 @@ function can_attack()
 end
 
 function can_build()
-	if (
-		hoverunit and
+	return hoverunit and
 		hoverunit.typ.inert and
 		hoverunit.p==1 and
 		(hoverunit.const or
-			hoverunit.hp<hoverunit.typ.hp)
-	) then
-		return all_ants()
-	end
+			hoverunit.hp<hoverunit.typ.hp
+	 ) and
+		all_ants()
 end
 
 function rectaround(u,c)
@@ -1446,10 +1451,8 @@ function mine_res(x,y,r)
 	local n=g(restiles,x,y) or full
 	n-=1
 	if n==flr(full/3) or n==flr(full*4/5) then
-		local s=mget(x,y)
-		mset(x,y,s+16)
-	end
-	if n==0 then
+		mset(x,y,mget(x,y)+16)
+	elseif n==0 then
 		mset(x,y,72)
 		make_dmaps()
 	end
@@ -1559,10 +1562,7 @@ function get_wayp(u,x,y)
 	if (u.typ.inert) return
  local nodes=find_path(
 		{flr(u.x/mvtile),flr(u.y/mvtile)},
-		{flr(x/mvtile),flr(y/mvtile)},
-		estimate,
-  neighbors,
-  node_to_id
+		{flr(x/mvtile),flr(y/mvtile)}
  )
  local wayp={}
  for i=1,#nodes do
@@ -1576,29 +1576,26 @@ function get_wayp(u,x,y)
  return wayp
 end
 
-function estimate(n1,n2,g)
+function estimate(n1,n2)
  return dist(n1[1]-n2[1],n1[2]-n2[2])
 end
 
 function neighbor(ns,n,dx,dy)
-	if (
-		dx!=0 and dy!=0 and
-		not corner_cuttable(n[1],n[2],dx,dy)
-	) then
-		return
-	end
 	local x,y=n[1]+dx,n[2]+dy
  if (
- 	x<0 or x>=mapw/mvtile or
-		y<0 or y>=maph/mvtile or
-		not acc(x,y)
+ 	x>=0 and x<mapw/mvtile and
+		y>=0 and y<maph/mvtile and
+		acc(x,y) and
+		(
+			dx==0 or dy==0 or
+			corner_cuttable(n[1],n[2],dx,dy)
+		)
 	) then
-		return
+		add(ns,{x,y})
 	end
-	add(ns,{x,y})
 end
 
-function neighbors(n,g)
+function neighbors(n)
 	local ns={}
 	neighbor(ns,n,-1,0)
 	neighbor(ns,n,0,-1)
@@ -1612,19 +1609,14 @@ function neighbors(n,g)
 	return ns
 end
 
-function node_to_id(node,g)
+function node_to_id(node)
 	return node[1]..","..node[2]
 end
 
 --a*
 --https://t.co/nasud3d1ix
 
-function find_path
-(start,
- goal,
- estimate,
- neighbors, 
- node_to_id)
+function find_path(start,goal)
  
  -- the final step in the
  -- current shortest path
@@ -1900,14 +1892,14 @@ function draw_sel_ports(y)
 			break
 		end
 		local u=selection[i+1]
-		local onclick=nil
-		if #selection>1 then
-			onclick=function()
+		draw_port(
+			u.typ,x,y+1,nil,
+			onclick,
+			#selection>1 and function()
 				u.sel=false
 				del(selection,u)
-			end
-		end
-		draw_port(u.typ,x,y+1,nil,onclick,nil,u)
+			end,
+			nil,u)
 	end
 end
 
@@ -1923,7 +1915,7 @@ function draw_unit_section(sel)
 		else
 			draw_port(typ,3,y+2,nil,
 				function()
-					selection[1].sel=false
+					selection[1]=false
 					deli(selection,1)
 				end)
 			print("\88"..#selection,16,y+5,7)
@@ -1932,16 +1924,17 @@ function draw_unit_section(sel)
 		if (u.p!=1) return
 		
 		if #selection==1 then
-			if u.res then
+			local r=u.res
+			if r then
 				for i=0,8 do
 					local xx=20+(i%3)*3
 					local yy=y+2+flr(i/3)*3
 					rect(xx,yy,xx+3,yy+3,7)
 					local col=5
-					if u.res.qty>i then
-						if (u.res.typ=="g") col=11
-						if (u.res.typ=="r") col=8
-						if (u.res.typ=="b") col=9
+					if r.qty>i then
+						if (r.typ=="g") col=11
+						if (r.typ=="r") col=8
+						if (r.typ=="b") col=9
 					end
 					rect(xx+1,yy+1,xx+2,yy+2,col)
 				end
@@ -1969,15 +1962,16 @@ function draw_unit_section(sel)
 							to_build=b
 							return
 						end
-						if (u.q and (u.q.b!=b or u.q.qty==9)) then
+						local q=u.q
+						if q and (q.b!=b or q.qty==9) then
 							return
 						end
 						res.r-=b.r or 0
 						res.g-=b.g or 0
 						res.b-=b.b or 0
 						res.p-=1
-						if u.q then
-							u.q.qty+=1
+						if q then
+							q.qty+=1
 						else
 							u.q={
 								b=b, qty=1, t=b.t,
@@ -2043,15 +2037,13 @@ function draw_menu()
 	local y=122
 	x+=draw_resource("r",res.r,x,y,1)
 	x+=draw_resource("g",res.g,x,y,1)
-	x+=draw_resource("b",res.b,x,y,1)
-	x-=1
+	x+=draw_resource("b",res.b,x,y,1)-1
 	
 	line(x,y-1,x,y+5,5)
 	x+=1
 	line(x,y-1,x,y+5,res.p<1 and 10 or 7)
 	x+=2
-	x+=draw_resource("p",res.p,x,y,1)
-	x-=1
+	x+=draw_resource("p",res.p,x,y,1)-1
 
 	pset(x-1,y-1,5)
 	line(0,y-2,x-2,y-2,5)
@@ -2076,30 +2068,22 @@ function draw_menu()
 		line(x-1,y+1,x-1,y+h+1,5)
 		line(x,y+h+1,x+w,y+h+1,5)
 		pal()
-		--[[line(x+1,y-1,x+w,y-1,5)
-		line(x+1,y+h+1,x+w,y+h+1,5)
-		line(x,y,x,y+h,5)
-		line(x+w+1,y,x+w+1,y+h,5)
-		pset(x+1,y,5)
-		pset(x+w,y,5)
-		pset(x+1,y+h,5)
-		pset(x+w,y+h,5)]]
 	end
 end
 
 function draw_menu_bg(secs)
-	local mod=1
-	if (#secs==3) mod=0
- local x,y,mh=0,menuy,menuh+3
+	local mod=#secs==3 and 0 or 1
+ local x,y=0,menuy
  for i=1,#secs do
  	local c=i%2==mod and 15 or 4
  	local sp=i%2==mod and 129 or 128
  	local s=secs[i]
+ 	local xx=x+4+s-8
  	spr(sp,x,y)
- 	spr(sp,x+s-8,y)
- 	line(x+3,y+1,x+4+s-8,y+1,7)
- 	rectfill(x+3,y+2,x+4+s-8,y+4,c)
- 	rectfill(x,y+4,x+s,y+mh,c)
+ 	spr(sp,xx-4,y)
+ 	line(x+3,y+1,xx,y+1,7)
+ 	rectfill(x+3,y+2,xx,y+4,c)
+ 	rectfill(x,y+4,x+s,y+menuh+3,c)
  	x+=s
  end
  --assert(x==128)
@@ -2161,13 +2145,11 @@ function dmap_find(u,key)
 end
  
 function g(a,x,y,rows)
-	rows=rows or r
-	return a[x+y*rows+1]
+	return a[x+y*(rows or r)+1]
 end
 
 function s(a,x,y,v,rows)
-	rows=rows or r
- a[x+y*rows+1]=v
+ a[x+y*(rows or r)+1]=v
 end
 
 function add_neigh(to,closed,x,y)
@@ -2175,13 +2157,14 @@ function add_neigh(to,closed,x,y)
 		x,y,1,mapw/8,maph/8,true
 	)
 	for t in all(ts) do
+		local xx,yy=t[1],t[2]
 		if (
-			not (x==t[1] and y==t[2]) and
-			acc(t[1],t[2]) and
-			not g(closed,t[1],t[2])
+			not (x==xx and y==yy) and
+			acc(xx,yy) and
+			not g(closed,xx,yy)
 		) then
-			s(closed,t[1],t[2],true)
-			add(to,{t[1],t[2]})
+			s(closed,xx,yy,true)
+			add(to,{xx,yy})
 		end
 	end
 end
