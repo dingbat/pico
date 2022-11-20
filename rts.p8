@@ -29,25 +29,23 @@ mx=0
 my=0
 fps=0
 
-selbox=nil
+--selbox=nil
+--unit_sel=false
+--p1q=nil
 selection={}
 units={}
-unit_sel=false
---0.1 so res displays in readout
---but is also essentially 0
 res={r=10.1,g=10.1,b=4.1,p=7.1}
-p1q=nil
 restiles={}
 dmaps={}
-proj={} --projectiles
+proj={}
 bldgs={}
 
 --reset every frame
 buttons={}
-vizmap=nil
-hoverunit=nil
-hilite=nil
-to_build=nil
+--vizmap=nil
+--hoverunit=nil
+--hilite=nil
+--to_build=nil
 
 function unit(typ,x,y,p,const)
  return {
@@ -120,7 +118,7 @@ function _draw()
 	
 	camera(0,0)
 	
-	if (show_dmap) draw_dmap("d")
+	--if (show_dmap) draw_dmap("d")
 	
 	--menu
 	draw_menu()
@@ -132,29 +130,26 @@ function _draw()
 	--mouse
 	draw_cursor()
 	
-	if debug then
-		local s=selection[1]
+	--[[local s=selection[1]
 		if s and s.st.t=="gather" then
 			local x=g(restiles,s.st.tx,s.st.ty)
 			print(x,0,0,7)
 		end
-	end
+	end]]
 end
 
 function _update()
-	if debug and btnp(🅾️) and btnp(❎) then
+	--[[if btnp(🅾️) and btnp(❎) then
 		show_dmap=not show_dmap
-	end
+	end]]
 
 	fps+=1
 	if fps==60 then
 		fps=0
  end
  
- if hilite then
-  if t()-hilite.t>=0.5 then
-  	hilite=nil
-  end
+ if hilite and t()-hilite.t>=0.5 then
+  hilite=nil
  end
 	
  handle_input()
@@ -171,13 +166,11 @@ function draw_hilite()
 	local dt=t()-hilite.t
 	if hilite.x then
 		circ(hilite.x,hilite.y,min(1/dt/2,4),8)
-	else
-		if (dt>0.1 and dt<0.25) return
-		local tx,ty,u=hilite.tx,hilite.ty,hilite.unit
+	elseif dt<=0.1 or dt>=0.25 then
+		local x,y,u=hilite.tx*8,
+			hilite.ty*8,hilite.unit
 		if tx then
-			rect(
-				tx*8-1,ty*8-1,
-				tx*8+8,ty*8+8,8)
+			rect(x-1,y-1,x+8,y+8,8)
 		elseif u then
 			rectaround(u,8)
 		end
@@ -186,15 +179,14 @@ end
 
 function draw_to_build()
 	if to_build and amy<menuy then
-		local b=buildable()
 		local typ=to_build.typ
- 	local w,h=typ.w,typ.h
-		local x,y=to_build.x,to_build.y
+ 	local w,h,x,y=typ.w,typ.h,
+			to_build.x,to_build.y
 	 if amy<menuy then
  		rectfill(
 	 		x-1,y-1,
 	 		x+w,y+h,
-	 		b and 3 or 8
+	 		buildable() and 3 or 8
 	 	)
  	end
  	sspr(typ.x,typ.y,w,h,x,y)
@@ -735,11 +727,9 @@ function tick_unit(u)
 	end
 end
 
-function update_viz(u)
-	local tiles=mapw/fogtile
-	
-	local x=flr(u.x/fogtile)
-	local y=flr(u.y/fogtile)
+function update_viz(u)	
+	local x,y=flr(u.x/fogtile),
+		flr(u.y/fogtile)
 	local st=surrounding_tiles(
 		x,y,ceil(u.typ.los/fogtile),
 		mapw/fogtile,maph/fogtile
@@ -753,16 +743,16 @@ function update_viz(u)
 			v=d<u.typ.los
 		end
 		if v then
-			vizmap[xx*tiles+yy+1]=true
+			s(vizmap,xx,yy,true)
 		end
 	end
 end
 
 function update_projectiles()
  for p in all(proj) do
- 	local dx,dy=norm(p.to,p)
-  p.x+=dx/1.25
-  p.y+=dy/1.25
+ 	local dx,dy=norm(p.to,p,0.8)
+  p.x+=dx
+  p.y+=dy
 		if adj(
 			p.x,p.y,p.to[1],p.to[2],0.5
 		) then
@@ -1144,9 +1134,7 @@ end
 function step(u)
 	if u.st.wayp then
  	local wp=u.st.wayp[1]
- 	local dx,dy=norm(wp,u)
- 	dx*=u.typ.spd/3.5
- 	dy*=u.typ.spd/3.5
+ 	local dx,dy=norm(wp,u,u.typ.spd/3.5)
  	
 	 u.dir=sgn(dx)
  	u.x+=dx
@@ -1347,36 +1335,33 @@ end
 --returns true if coord is viz
 --in currently visible screen
 function vget(x,y)
-	local tiles=mapw/fogtile
 	x=flr(x/fogtile)
  y=flr(y/fogtile)
- if (x<0 or y<0) return true
- return vizmap[x*tiles+y+1]
+ return x<0 or y<0 or g(vizmap,x,y)
 end
 
-function norm(it,nt)
+function norm(it,nt,f)
 	local xv=it[1]-nt.x
 	local yv=it[2]-nt.y
-	local norm=1/(abs(xv)+abs(yv))
+	local norm=f/(abs(xv)+abs(yv))
 	return xv*norm,yv*norm
 end
 
 --strict=f to ignore farms+const
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
-	if	not strict and (
+	return not fget(mget(x,y),0) and
+		(not b or (not strict and (
 		b==bldg_farm or b==bldg_const
-	) then
-		b=nil
-	end
-	return not (
-		b or fget(mget(x,y),0)
-	)
+	)))
 end
 
 function buildable()
-	local x,y=to_build.x/8,to_build.y/8
-	local w,h=to_build.typ.w,to_build.typ.h
+	local x,y,w,h=
+		to_build.x/8,
+		to_build.y/8,
+		to_build.typ.w,
+		to_build.typ.h
 	return (
 		acc(x,y,true) and
 		(w<9 or acc(x+1,y,true)) and
@@ -1394,8 +1379,8 @@ end
 
 function register_bldg(b)
 	local typ=b.typ
-	local w,h=typ.w,typ.h
-	local x,y=flr((b.x-2)/8),flr((b.y-2)/8)
+	local w,h,x,y=typ.w,typ.h,
+		flr((b.x-2)/8),flr((b.y-2)/8)
 
 	local v=bldg_type(b)
 
@@ -2113,9 +2098,8 @@ function make_dmap(resf)
 	return dmap
 end
 
-function draw_dmap(res_typ)
+--[[function draw_dmap(res_typ)
 	local dmap=dmaps[res_typ]
-	local r=mapw/8
  for x=0,16 do
 		for y=0,16 do
 			local n=g(dmap,x+flr(cx/8),y+flr(cy/8))
@@ -2123,7 +2107,7 @@ function draw_dmap(res_typ)
 			print(n==0 and "-" or n,x*8,y*8,9)
 	 end
 	end
-end
+end]]
 __gfx__
 00000000d00000000000000000000000000000000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
 000000000d000000d000000000000000000000000000000000000000011000000010100000000000110001100000000011000110000000000000000000000000
