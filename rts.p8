@@ -2,7 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
 --constants
-debug=false
 
 mapw=256
 maph=256
@@ -73,9 +72,9 @@ function _init()
 		unit(ant,qx*8-8,qy*8,1),
 		unit(ant,qx*8+20,qy*8+3,1),
 		unit(ant,qx*8+2,qy*8-8,1),
-		--unit(spider,48,16,1),
-		--unit(warant,58,30,1),
-		--unit(beetle,40,36,1),
+		unit(spider,48,16,1),
+		unit(warant,58,30,1),
+		unit(beetle,40,36,1),
 		--unit(beetle,60,76,2),
 		--unit(beetle,65,81,2),
 		p1q,
@@ -165,6 +164,7 @@ function _update()
  hoverunit=nil
  buttons={}
  unit_sel=false
+ pos={}
  update_projectiles()
  
  if selbox then
@@ -232,14 +232,42 @@ end
 ant=parse([[
 w=4
 h=4
-x=0
-y=8
-deadx=24
-deady=12
-anim_fr=2
+
+xoff_r=12
+yoff_g=4
+xoff_b=12
+yoff_b=4
+
+rest_x=0
+rest_y=8
+rest_fr=2
+rest_fps=30
+
+move_x=4
+move_y=8
+move_fr=2
+move_fps=30
+
+gather_x=4
+gather_y=8
+gather_fr=2
+gather_fps=30
+
+build_x=24
+build_y=8
+build_fr=2
+build_fps=15
+
+harvest_x=32
+harvest_y=8
+harvest_fr=2
+harvest_fps=15
+
+dead_x=24
+dead_y=12
+
 portx=0
 porty=72
-fps=1
 unit=1
 
 spd=1
@@ -250,11 +278,20 @@ beetle=parse([[
 w=7
 fw=8
 h=6
-x=8
-y=0
-deadx=32
-anim_fr=2
-fps=3
+
+rest_x=8
+rest_y=0
+rest_fr=2
+rest_fps=30
+
+move_x=16
+move_y=0
+move_fr=2
+move_fps=10
+
+dead_x=32
+dead_y=0
+
 portx=26
 porty=72
 portw=9
@@ -271,11 +308,20 @@ spider=parse([[
 w=7
 fw=8
 h=4
-x=0
-y=16
-deadx=66
-anim_fr=7
-fps=10
+
+rest_x=0
+rest_y=16
+rest_fr=2
+rest_fps=30
+
+move_x=8
+move_y=16
+move_fr=7
+move_fps=3
+
+dead_x=66
+dead_y=16
+
 portx=16
 porty=72
 portw=9
@@ -293,11 +339,20 @@ warant=parse([[
 w=7
 fw=8
 h=5
-x=0
-y=25
-deadx=24
-anim_fr=2
-fps=3
+
+rest_x=0
+rest_y=25
+rest_fr=2
+rest_fps=30
+
+move_x=8
+move_y=25
+move_fr=2
+move_fps=10
+
+dead_x=24
+dead_y=25
+
 portx=35
 porty=72
 portw=9
@@ -314,15 +369,20 @@ queen=parse([[
 w=14
 h=7
 fw=16
-x=56
-y=0
-deadx=104
-anim_fr=2
-fps=2
+
+rest_x=56
+rest_y=0
+rest_fr=2
+rest_fps=30
+
+dead_x=104
+dead_y=0
+
 dir=-1
 portx=8
 porty=72
 has_q=1
+drop=1
 
 inert=1
 los=20
@@ -340,15 +400,17 @@ tower=parse([[
 w=7
 fw=8
 h=13
-x=24
-y=96
+
+rest_x=24
+rest_y=96
+
 portx=0
 porty=80
 inert=1
+
 los=30
 hp=40
 dir=-1
-restfr=1
 range=25
 const=20
 proj_yo=-2
@@ -361,48 +423,51 @@ mound=parse([[
 w=7
 fw=8
 h=7
-x=0
-y=97
+
+rest_x=0
+rest_y=97
+
 portx=0
 porty=96
+
 inert=1
 los=5
 hp=20
 dir=-1
-restfr=1
 const=12
 has_q=1
+drop=1
 ]])
 web=parse([[
 w=8
-fw=8
 h=8
-x=0
-y=99
+
 portx=8
 porty=80
 portw=9
+
 inert=1
 los=5
 hp=5
 dir=-1
-restfr=1
 const=12
 ]])
 spden=parse([[
 w=8
 fw=8
 h=8
-x=0
-y=112
+
+rest_x=0
+rest_y=112
+
 portx=0
 porty=112
 portw=9
+
 inert=1
 los=10
 hp=20
 dir=-1
-restfr=1
 const=20
 has_q=1
 ]])
@@ -410,16 +475,18 @@ btden=parse([[
 w=8
 fw=8
 h=8
-x=0
-y=104
+
+rest_x=0
+rest_y=104
+
 portx=0
 porty=104
 portw=9
+
 inert=1
 los=10
 hp=20
 dir=-1
-restfr=1
 const=20
 has_q=1
 ]])
@@ -427,15 +494,17 @@ barracks=parse([[
 w=7
 fw=8
 h=7
-x=0
-y=121
+
+rest_x=0
+rest_y=121
+
 portx=0
 porty=88
+
 inert=1
 los=10
 hp=20
 dir=-1
-restfr=1
 const=20
 has_q=1
 ]])
@@ -443,16 +512,18 @@ farm=parse([[
 w=8
 fw=8
 h=8
-x=24
-y=120
+
+rest_x=24
+rest_y=120
+
 portx=17
 porty=80
 portw=9
+
 inert=1
 los=0
 hp=10
 dir=-1
-restfr=1
 const=6
 ]])
 farm_renew_cost_b=3
@@ -537,22 +608,18 @@ function gather(u,tx,ty,wp)
 	}
 end
 
-function drop(u,res)
-	local wayp,x,y=dmap_find(u,"d")
+function drop(u,nxt_res,dropu)
+	local wayp,x,y
+	if dropu then
+		wayp=get_wayp(u,dropu.x,dropu.y)
+	else
+		wayp,x,y=dmap_find(u,"d")
+	end
 	u.st={
 		t="drop",
 		wayp=wayp,
-		nxt=res,
-		target=target_tile(x,y),
-	}
-end
-
-function drop_to_unit(u,dropu)
-	u.farm=nil
-	u.st={
-		t="drop",
-		wayp=get_wayp(u,dropu.x,dropu.y),
-		target=dropu,
+		nxt=nxt_res,
+		target=dropu or target_tile(x,y),
 	}
 end
 
@@ -685,7 +752,7 @@ function handle_click()
   	hilite={t=t(),unit=hoverunit}
   elseif can_drop() then
 	 	for u in all(selection) do
-				drop_to_unit(u,hoverunit)
+				drop(u,nil,hoverunit)
   	end
   	hilite={t=t(),unit=hoverunit}
   elseif sel1.typ.unit then
@@ -757,6 +824,7 @@ function tick_unit(u)
 	end
 	if u.hp<=0 and not u.dead then
 		u.dead=fps
+		u.st={t="dead"}
 		u.sel=false
 		del(selection,u)
 		if u.typ.inert then
@@ -780,6 +848,14 @@ function tick_unit(u)
 	
 	if u.p==1 then
 		update_viz(u)
+	end
+	
+	if u.typ.unit and u.st.t=="rest" then
+		while g(pos,u.x/4,u.y/4,mapw/4) do
+			u.x+=rnd(2)-1
+			u.y+=rnd(2)-1
+		end
+		s(pos,u.x/4,u.y/4,1,mapw/4)
 	end
 end
 
@@ -844,12 +920,8 @@ function draw_fow()
 	local yoff=flr(cy/fogtile)*fogtile
 	for x=-fogtile,128,fogtile do
 	 for y=-fogtile,128,fogtile do
-	 	local mapx=x+xoff
-	 	local mapy=y+yoff
-	 	local drawx=x-cx%fogtile
-	 	local drawy=y-cy%fogtile
-	 	if not vget(mapx,mapy) then
-	 		darken(drawx,drawy)
+	 	if not vget(x+xoff,y+yoff) then
+	 		darken(x-cx%fogtile,y-cy%fogtile)
 	 	end
 	 end
 	end
@@ -935,90 +1007,51 @@ function draw_unit(u)
 		return
 	end
 	
-	local ut=u.typ
-	local st=u.st
-	local w=ut.fw or ut.w
-	local h=ut.h
+	local ut,st,res_typ=u.typ,u.st,
+		u.res and u.res.typ or ""
+	local w,h,stt=
+	 ut.fw or ut.w,ut.h,st.t
+	if (u.st.wayp) stt="move"
+	local xoff,yoff=
+		ut["xoff_"..res_typ] or 0,
+		ut["yoff_"..res_typ] or 0
+	local x,y,ufps,fr=
+	 	ut[stt.."_x"]+xoff,
+	 	ut[stt.."_y"]+yoff,
+	 	ut[stt.."_fps"],
+	 	ut[stt.."_fr"]
 	
 	if u.const then
 		fillp(▒)
 		rectaround(u,12)
 		fillp(0)
-		local x=u.x-flr(w/2)
-		local y=u.y-flr(h/2)-1
-		local p=u.const/ut.const
-		local w=ut.w-1
-		line(x,y,x+w,y,5)
-		line(x,y,x+w*p,y,14)
+		local bx,by,p,bw=
+			u.x-flr(w/2),
+		 u.y-flr(h/2)-1,
+			u.const/ut.const,
+		 ut.w-1
+		line(bx,by,bx+bw,by,5)
+		line(bx,by,bx+bw*p,by,14)
+		x+=p<0.5 and bw*2 or bw
 		if (u.const<=1) return
+	elseif ut==farm then
+		local q=u.res.qty
+		x=u.exp and 72 or
+			u.ready and (q>4 and 48 or 64) or
+			q>6 and 48 or q>3 and 56 or x
+	elseif ufps then
+		x+=(flr(fps/ufps)%fr)*w
 	end
-	
-	local x=ut.x
-	local y=ut.y
-	
-	local ufps=ut.fps or 1
-	local restfr=ut.restfr or 2
-	if (st.t=="rest") ufps=restfr/2
-	if (st.t=="build") ufps*=2
-	local anim=flr(fps/(30/ufps))
-	local move_anim=st.wayp or
-		st.t=="gather" or
-		st.t=="attack" or
-		(st.t=="harvest" and u.farm.ready)
-	
-	if u.dead then
-		x=ut.deadx
-		y=ut.deady or y
-	elseif st.t=="rest" or ut.inert then
-		if (ut==ant) anim+=1
-		x+=(anim%restfr)*w
-	elseif move_anim then
-		x+=w+(anim%(ut.anim_fr))*w
-	elseif st.t=="build" then
-		x=24+(anim%(ut.anim_fr))*w
-	elseif st.t=="harvest" then
-		x=32+(anim%2)*w
-	end
-	if ut==farm and u.res then
-		if u.exp then
-			x=72
-		elseif u.ready then
-			x=u.res.qty>4 and 48 or 64
-		else
-			if u.res.qty>6 then
-				x=48
-			else
-				x=u.res.qty>3 and 56 or 24
-			end
-		end
-	end
-	if ut==ant and u.res then
-		if u.res.typ=="r" then
-			x+=12
-		elseif u.res.typ=="g" then
-			y+=4
-		elseif u.res.typ=="b" then
-			y+=4
-			x+=12
-		end
-	end
-	if u.const then
-		local prog=u.const/ut.const
-		if prog<0.5 then
-			x+=ut.fw*2
-		else
-			x+=ut.fw
-		end
-	end
-	local sel=u.sel and
-		((ut.unit and u.p==1) or
-			(ut.inert and u.p==1 and not my_sel) or
-			(u.p!=1 and not bldg_sel))
+	local sel=u.sel and (
+	 (u.p==1 and (ut.unit or
+	 	not my_sel)) or
+	 not (my_sel or bldg_sel)
+	)
 	local col=u.p==1 and 1 or 2
 	pal(2,col)
 	if (sel) col=9
 	pal(1,col)
-	local sdir=u.typ.dir or 1
+	local sdir=ut.dir or 1
 	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==sdir)
 	pal()
 	
@@ -1030,7 +1063,7 @@ function check_dead_target(u)
 	if t and (t.dead or (
 		u.st.t=="build" and
 		not t.const and
-		t.hp==t.typ.hp
+		t.hp>=t.typ.hp
 	)) then
 		rest(u)
 	end
@@ -1038,28 +1071,27 @@ end
 
 function update_unit(u)
 	check_dead_target(u)
-	if (u.st.t=="harvest") farmer(u)
-	if (u.st.t=="attack") fight(u)
-	if (u.st.t=="rest") aggress(u)
+	local t=u.st.t
+	if (t=="harvest") farmer(u)
+	if (t=="attack") fight(u)
+	if (t=="rest") aggress(u)
  if (u.q) produce(u)
  if (u.typ==farm) update_farm(u)
  if (u.typ.inert) return
- if (u.st.t=="build") buildrepair(u)
- if (u.st.t=="gather") mine(u)
+ if (t=="build") buildrepair(u)
+ if (t=="gather") mine(u)
  check_target_col(u)
  step(u)
 end
 
 function update_farm(u)
 	local f=u.farmer
-	if not (f and f.st.active) then
-		return
-	end
-	if f.dead or f.farm!=u then
+	if not f or f.dead or f.farm!=u then
 		u.farmer=nil
 		return
 	end
-	if not u.exp and not u.ready and fps==59 then
+	if f.st.active and not u.exp and
+		not u.ready and fps%10==0 then
 		u.res.qty+=0.5
 		if u.res.qty==9 then
 			u.ready=true
@@ -1101,8 +1133,7 @@ function aggress(u)
 end
 
 function fight(u)
-	local e=u.st.target
-	local in_range=false
+	local e,in_range=u.st.target,false
 	if (not e or fps%10!=0) return
 	if u.typ.range then
 		local d=dist(e.x-u.x,e.y-u.y)
@@ -1227,16 +1258,14 @@ function check_target_col(u)
 		if st.t=="gather" then
 			st.fps=fps
 			collect(u)
-		elseif st.t=="drop" and u.res then
-			local q=u.res.qty/3
-			if u.res.typ=="r" then
-				res.r=min(res.r+q,99)
-			elseif u.res.typ=="g" then
-				res.g=min(res.g+q,99)
-			elseif u.res.typ=="b" then
-				res.b=min(res.b+q,99)
-			end
-			u.res=nil
+		elseif st.t=="drop" then
+			local ures=u.res
+			if ures then
+				res[ures.typ]=min(
+					res[ures.typ]+
+					ures.qty/3,99)
+				u.res=nil
+			end			
 			if u.farm then
 				harvest(u,u.farm)
 			elseif (
@@ -1250,8 +1279,9 @@ function check_target_col(u)
 end
 
 function step(u)
-	if u.st.wayp then
- 	local wp=u.st.wayp[1]
+	local wayp=u.st.wayp
+	if wayp then
+ 	local wp=wayp[1]
  	local dx,dy=norm(wp,u,u.typ.spd/3.5)
  	
 	 u.dir=sgn(dx)
@@ -1259,14 +1289,14 @@ function step(u)
  	u.y+=dy	
 		
  	if adj(u.x,u.y,wp[1],wp[2],2) then
- 		if (#u.st.wayp==1) then
+ 		if (#wayp==1) then
 				if u.st.t=="harvest" then
 					u.st.wayp=nil
 				else
 					rest(u)
 				end
 			else
-			 deli(u.st.wayp,1)
+			 deli(wayp,1)
 			end
  	end
  end
@@ -1543,7 +1573,7 @@ end
 function can_drop()
  for u in all(selection) do
 		if u.res and u.typ.unit then
-			return hoverunit and (hoverunit==p1q or hoverunit.typ==mound)
+			return hoverunit and hoverunit.typ.drop
 		end
 	end
 end
@@ -1894,7 +1924,6 @@ function draw_sel_ports(y)
 		local u=selection[i+1]
 		draw_port(
 			u.typ,x,y+1,nil,
-			onclick,
 			#selection>1 and function()
 				u.sel=false
 				del(selection,u)
@@ -1908,7 +1937,6 @@ function draw_unit_section(sel)
 	if sel==1 then
 		local u=selection[1]
 		local typ=u.typ
-		local hp=u.hp/u.typ.hp
 		
 		if #selection<3 then
 			draw_sel_ports(y)
@@ -2064,10 +2092,6 @@ function draw_menu()
 			rx+=draw_resource("p",1,rx,y+2)
 		end
 		rect(x,y,x+w+1,y+h,1)
-		pal(5,0)
-		line(x-1,y+1,x-1,y+h+1,5)
-		line(x,y+h+1,x+w,y+h+1,5)
-		pal()
 	end
 end
 
@@ -2093,7 +2117,6 @@ end
 --[[
 
 todo
-- units adjst when in same spot
 - spiderweb
 - rock paper scissors (var dmg)
 - tech tree
@@ -2145,11 +2168,11 @@ function dmap_find(u,key)
 end
  
 function g(a,x,y,rows)
-	return a[x+y*(rows or r)+1]
+	return a[flr(x)+flr(y)*(rows or r)+1]
 end
 
 function s(a,x,y,v,rows)
- a[x+y*(rows or r)+1]=v
+ a[flr(x)+flr(y)*(rows or r)+1]=v
 end
 
 function add_neigh(to,closed,x,y)
@@ -2253,9 +2276,9 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000005050050500500000505005050050000505005050050000115054450504400000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000800008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000008008800088050000000000000000000000000000000000000000000000000000000000b00000000000000000000000000000000000000000000
-0000110001108800110001100110511001100110000000000000000000000000000000000000000000bbb0000000000000000000000000000000000000000000
-11110011001111110011001100110011801108110000000000000000000000000000000000000000011b11000000000000000000000000000000000000000000
+00000000000008008800088050000000000000000000080080000000000000000000000000000000000b00000000000000000000000000000000000000000000
+0000110001108800110001100110511011000110000081101100000000000000000000000000000000bbb0000000000000000000000000000000000000000000
+11110011001111110011001100110011801108110000001180110000000000000000000000000000011b11000000000000000000000000000000000000000000
 00000b0000b000000400004000000000000000000000000000000000000000000000000000000000041114000000000000000000000000000000000000000000
 0b00bb000bb004004400044000000000000000000000000000000000000000000000000000000000401110400000000000000000000000000000000000000000
 bb001100011044001100011000000000000000000000000000000000000000000000000000000000404040400000000000000000000000000000000000000000
@@ -2312,9 +2335,9 @@ fff77fff00000000ffffbfffffffffff000000000000000000000000000000000000000000000000
 007777000077770000000000000000000000000000000000000000000000000000000000bbb00006004400044000000000000000ffffffffff00000000000000
 0744447007ffff7000000000000000000000000000000000000000000000000000000000bb000066444440004000000000000000fff29f9f9f00000000000000
 744444477ffffff7000000000000000000000000000000000000000000000000000000000b000006404400404000000000000000ffff29992f00000000000000
-44444444ffffffff000000000000000000000000000000000000000000000000000000000b000666403004404000000000000000444f4444ff00000000000000
-44444444ffffffff000000000000000000000000000000000000000000000000000000000000000043334444400000000000000044444141ff00000000000000
-44444444ffffffff00000000000000000000000000000000000000000000000000000000000000004430044000000000000000004f5f444fff00000000000000
+44444444ffffffff000000000000000000000000000000000000000000000000000000000b000666407004404000000000000000444f4444ff00000000000000
+44444444ffffffff000000000000000000000000000000000000000000000000000000000000000047774444400000000000000044444141ff00000000000000
+44444444ffffffff00000000000000000000000000000000000000000000000000000000000000004470044000000000000000004f5f444fff00000000000000
 44444444ffffffff0000000000000000000000000000000000000000000000000000000000000000000000400000000000000000f5f5fff5ff00000000000000
 00000000000000000500000500000050005002002002000000000000000000000000000008000666004000000000000000000000ffffffffff00000000000000
 000200020290909250500050500000050500022d2d220000000000000000000000000000888000060044000000000000000000000ffffffff000000000000000
@@ -2331,7 +2354,7 @@ fff77fff00000000ffffbfffffffffff000000000000000000000000000000000000000000000000
 00411d40eee7e676e343775334000000000000000000000000000000000000000000000004000666404000404000000000000000505555505000000000000000
 00411d40e77e77eee453773345000000000000000000000000000000000000000000000000000000400004404000000000000000505000505000000000000000
 00444440eee6ee7ee532772453000000000000000000000000000000000000000000000000000000444044444000000000000000000505000000000000000000
-00044400eeeeeee7e342222533000000000000000000000000000000000000000000000000000000000004400000000000000000000000000000000000000000
+00044400eeeeeee7e342222534000000000000000000000000000000000000000000000000000000000004400000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000010001066000000400000000000000000000000000000000000000000
 00500050000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000000000000000000
 0575057500000000000000000000000000000000000000000000000000000000000000000c1c0006000000000000000000000000000000000000000000000000
@@ -2350,19 +2373,19 @@ fff77fff00000000ffffbfffffffffff000000000000000000000000000000000000000000000000
 0000000000000000000000000411d400041114000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000004444400044444000044400000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00444400000000000000000000414000004140000041400000000000000000000000000000000000000000000000000000000000000000000000000000000000
-04411440000000000000000000444000004440000041400000000000000000000000000000000000000000000000000000000000000000000000000000000000
-44111144000000000000000000414000004140000041400000000000000000000000000000000000000000000000000000000000000000000000000000000000
-41155114000000000000000000414550004040000040400000000000000000000000000000000000000000000000000000000000000000000000000000000000
-44155144000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-04411440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+04411440000440000000000000444000004440000041400000000000000000000000000000000000000000000000000000000000000000000000000000000000
+44111144004114000000000000414000004140000041400000000000000000000000000000000000000000000000000000000000000000000000000000000000
+41155114041511400004400000414550004040000040400000000000000000000000000000000000000000000000000000000000000000000000000000000000
+44155144041111400041440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+04411440004114000044440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07711770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-77111177000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-71166117000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-77166177000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07711770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+07711770000770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+77111177007117000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+71166117071511700007700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+77166177071111700071770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+07711770007117000077770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000000000000000000000345334533353345500000bb034533453345334533453345335534334000000000000000000000000000000000000000000000000
 0500050000000000000000004533453343434343434040b045387533453345334533453354435445000000000000000000000000000000000000000000000000
