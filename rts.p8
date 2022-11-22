@@ -53,11 +53,11 @@ function _draw()
  
 	foreach(bf1,draw_unit)
 
-	--farms ddn't highlight on sel
-	for s in all(selection) do
-		if s.typ==farm and not s.const then
-		 rectaround(s,9)
-		end
+	--highlight selected farm
+	if sel1 and
+		sel1.typ==farm and
+		not sel1.const then
+	 rectaround(sel1,9)
 	end
 
 	draw_projectiles()
@@ -103,15 +103,13 @@ function _update()
 		fps=0
  end
  
- if hilite and t()-hilite.t>=0.5 then
-  hilite=nil
- end
+ hilite,hovbtn=hilite and
+ 	t()-hilite.t<0.5 and hilite
 	
- hovbtn=nil
  handle_input()
  
- vizmap,buttons,pos,
- 	hoverunit,unit_sel={},{},{}
+ vizmap,buttons,pos,hoverunit,
+ 	sel_typ={},{},{}
  
  update_projectiles()
  
@@ -124,12 +122,18 @@ function _update()
 			bldg_sel or
 			enemy_sel or {}
 	end
+	sel1=selection[1]
+	for s in all(selection) do
+		sel_typ=(sel_typ==nil or
+			s.typ==sel_typ) and s.typ
+	end
 end
 
 function draw_hilite()
 	local dt=t()-hilite.t
 	if hilite.x then
-		circ(hilite.x,hilite.y,min(1/dt/2,4),8)
+		circ(hilite.x,hilite.y,
+		 min(1/dt/2,4),8)
 	elseif dt<=0.1 or dt>=0.25 then
 		if hilite.tx then
 			local x,y=hilite.tx*8,
@@ -327,6 +331,10 @@ dir=1
 spd=1.5
 los=30
 hp=15
+proj_xo=-2
+proj_yo=0
+proj_col=11
+range=20
 
 atk_typ=ant
 def_typ=ant
@@ -395,6 +403,7 @@ hp=40
 dir=-1
 range=25
 const=20
+proj_col=5
 proj_yo=-2
 proj_xo=-1
 
@@ -639,13 +648,13 @@ function target_tile(tx,ty)
 end
 
 function gather(u,tx,ty,wp)
-	wp=wp or get_wayp(u,tx*8+3,ty*8+3)
 	u.st={
 		t="gather",
 		tx=tx,
 		ty=ty,
 		res=tile2res(tx,ty),
-		wayp=wp,
+		wayp=wp or
+			get_wayp(u,tx*8+3,ty*8+3),
 		target=target_tile(tx,ty),
 	}
 end
@@ -661,7 +670,8 @@ function drop(u,nxt_res,dropu)
 		t="drop",
 		wayp=wayp,
 		nxt=nxt_res,
-		target=dropu or target_tile(x,y),
+		target=dropu or
+			target_tile(x,y),
 	}
 end
 
@@ -689,8 +699,10 @@ end
 --update
 
 function handle_click()
+	local lclick=btnp(5)
+
 	--check left click on button
-	if btnp(5) and hovbtn then
+	if lclick and hovbtn then
 		hovbtn.handle()
 		return
 	end
@@ -712,18 +724,19 @@ function handle_click()
 					move(u,x,y)
 				end
 				hilite={t=t(),px=amx,py=amy}
-			elseif btnp(5) then
+			elseif lclick then
 				--move camera
-				cx=mid(0,x-xoff,mapw-128)
-				cy=mid(0,y-yoff,maph-128+menuh)
+				cx,cy=
+					mid(0,x-xoff,mapw-128),
+				 mid(0,y-yoff,maph-128+menuh)
 			end
 		end
-		if (btnp(5)) to_build=nil
+		if (lclick) to_build=nil
 	 return
 	end
 
  --left click places building
- if btnp(5) and to_build then
+ if lclick and to_build then
   if (not buildable()) return
  	res.r-=to_build.r or 0
 		res.g-=to_build.g or 0
@@ -748,7 +761,7 @@ function handle_click()
  end
  
 	--left drag makes selbox
- if btn(5) and not to_build then
+ if btn(5) then
  	if not selbox then
  		selx,sely=mx,my
  	end
@@ -764,13 +777,12 @@ function handle_click()
  end
 	
  --right click
-	local sel1=selection[1]
  if btnp(4) and sel1 and sel1.p==1 then
 	 local tx,ty=flr(mx/8),flr(my/8)
 	 if can_renew_farm() then
 	 	hilite_hoverunit()
-	 	hoverunit.exp=false
-	 	hoverunit.cycles=0
+	 	hoverunit.exp,
+	 		hoverunit.cycles=false,0
 	 	res.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
 	 elseif can_gather() then
@@ -823,14 +835,15 @@ function handle_input()
  if (btn(⬆️) or btn(⬆️,1))cy-=2
  if (btn(➡️) or btn(➡️,1))cx+=2
  if (btn(⬇️) or btn(⬇️,1))cy+=2
- cx=mid(0,cx,mapw-128)
- cy=mid(0,cy,maph-128+menuh)
+ cx,cy=
+ 	mid(0,cx,mapw-128),
+  mid(0,cy,maph-128+menuh)
  
  --mouse
- amx=mid(0,stat(32),128-2)
-	amy=mid(-1,stat(33),128-2)
- mx=amx+cx
- my=amy+cy
+ amx,amy=
+ 	mid(0,stat(32),126),
+	 mid(-1,stat(33),126)
+ mx,my=amx+cx,amy+cy
  
  for b in all(buttons) do
 		if (
@@ -852,9 +865,10 @@ end
 function update_sel(u)
 	u.sel=intersect(selbox,u_rect(u))
  if u.sel then
+ 	local t=u.typ
 		if u.p!=1 then
 			enemy_sel={u}
-		elseif u.typ.unit then
+		elseif t.unit then
 			if (not my_sel) my_sel={}
 			add(my_sel,u)
 		else
@@ -881,8 +895,10 @@ function tick_unit(u)
 		return		
 	end
 	
-	local mbox={mx,my,mx,my}
-	if intersect(u_rect(u),mbox,1) then
+	if intersect(
+		u_rect(u),
+		{mx,my,mx,my},1
+	) then
 		hoverunit=u
 	end
 	
@@ -960,12 +976,17 @@ end
 function draw_fow()
 	camera()	
 	pal(1,0)
-	local xoff=flr(cx/fogtile)*fogtile
-	local yoff=flr(cy/fogtile)*fogtile
 	for x=-fogtile,128,fogtile do
 	 for y=-fogtile,128,fogtile do
-	 	if not vget(x+xoff,y+yoff) then
-	 		darken(x-cx%fogtile,y-cy%fogtile)
+	 	if
+	 		not vget(
+	 			x+flr(cx/fogtile)*fogtile,
+	 			y+flr(cy/fogtile)*fogtile
+	 		) then
+	 		darken(
+	 			x-cx%fogtile,
+	 			y-cy%fogtile
+	 		)
 	 	end
 	 end
 	end
@@ -974,80 +995,81 @@ function draw_fow()
 end
 
 function draw_minimap()
-	local w,h,x,y=mmw,mmh,mmx,mmy
-	local tilew=mapw/w
-	local tileh=maph/h
+	camera(-mmx,-mmy)
+	local tilew,tileh=
+		mapw/mmw,
+		maph/mmh
 	
 	--map tiles
-	for tx=0,w do
-	 for ty=0,h do
-	 	local mapx=tilew*tx/8
-	 	local mapy=tileh*ty/8
-	 	local t=mget(mapx,mapy)
-	 	local col=15
+	for tx=0,mmw do
+	 for ty=0,mmh do
+	 	local col,t=15,
+	 		mget(tilew*tx/8,tileh*ty/8)
 	 	if (fget(t,2)) col=8 --r
 	 	if (fget(t,3)) col=11 --g
 	 	if (fget(t,4)) col=4 --b
 	 	if (fget(t,5)) col=12 --water
-	 	pset(x+tx,y+ty,col)
+	 	pset(tx,ty,col)
 		end
 	end
 	
 	--units
 	for u in all(units) do
 		if not u.dead then
-			local ux=(u.x/mapw)*w
-			local uy=(u.y/maph)*h
-			local col=u.p==1 and 1 or 2
-			if (u.sel) col=9
-			pset(x+ux,y+uy,col)
+			pset(
+				u.x/mapw*mmw,
+				u.y/maph*mmh,
+				u.sel and 9 or
+				u.p==1 and 1 or 2
+			)
 		end
 	end
 	
 	--fog
 	pal(1,0)
-	for tx=0,w do
-	 for ty=0,h do
-	 	local mapx=tilew*tx
-	 	local mapy=tileh*ty
-	 	local v=vget(mapx,mapy)
-	 	if not v then
-				pset(tx+x,ty+y,1)
+	for tx=0,mmw do
+	 for ty=0,mmh do
+	 	if 
+	 		not vget(tilew*tx,tileh*ty)
+	 	then
+				pset(tx,ty,1)
 			end
 	 end
 	end
 	pal()
 	
 	--current view area outline
-	local vx=ceil((cx/mapw)*w)
-	local vy=ceil((cy/maph)*h)
-	local vw=(128/mapw)*w
-	local vh=(128/maph)*h
-	local vx1=x+vx-1
-	local vy1=y+vy-1
-	local vx2=x+vx+vw+1
-	local vy2=y+vy+vh+1
-	rect(vx1,vy1,vx2,vy2,10)
-
-	--corners
-	if (vx1>x or vy1>y) pset(x,y,4)
-	if (vx2<x+w or vy1>y) pset(x+w,y,4)
-	if (vx1>x or vy2<y+h) pset(x,y+h,4)
-	if (vx2<x+w or vy2<y+h) pset(x+w,y+h,4)
+	local vx,vy=
+		ceil(cx/mapw*mmw),
+	 ceil(cy/maph*mmh)
+	rect(
+		vx-1,vy-1,
+		vx+128/mapw*mmw+1,
+		vy+128/maph*mmh+1,
+		10
+	)
+	camera()
 end
 
 function draw_projectiles()
  for p in all(proj) do
- 	local c=p.from_unit.typ.proj_col or 5
-		pset(p.x,p.y,c)
+		pset(
+			p.x,p.y,
+			p.from_unit.typ.proj_col
+		)
 	end
 end
 -->8
 --units
 
 function draw_unit(u)
-	local cr={cx,cy,cx+128,cy+128}
-	if not intersect(u_rect(u),cr,1) then
+	if
+		not intersect(
+			u_rect(u),
+			{cx,cy,cx+128,cy+128},
+		 1
+		)
+	then
 		return
 	end
 	
@@ -1079,6 +1101,7 @@ function draw_unit(u)
 		x+=p<0.5 and w*2 or w
 		if (u.const<=1) return
 	elseif ut==farm then
+		--x=ut[u.res.qty..u.exp..u.ready]
 		local q=u.res.qty
 		x=u.exp and 72 or
 			u.ready and (q>4 and 48 or 64) or
@@ -1124,10 +1147,11 @@ function update_unit(u)
 	local t=u.st.t
 	if (t=="harvest") farmer(u)
 	if (t=="attack") fight(u)
-	if (t=="rest") aggress(u)
+	if t=="rest" and u.typ.atk then
+		aggress(u)
+ end
  if (u.q) produce(u)
  if (u.typ==farm) update_farm(u)
- if (u.typ.inert) return
  if (t=="build") buildrepair(u)
  if (t=="gather") mine(u)
  check_target_col(u)
@@ -1165,7 +1189,6 @@ function farmer(u)
 end
 
 function aggress(u)
-	if (not u.typ.atk) return
 	for e in all(units) do
 		if e.p!=u.p and not e.dead then
 			if dist(e.x-u.x,e.y-u.y)<=u.typ.los then
@@ -1216,8 +1239,8 @@ function buildrepair(u)
 	 				res.p+=5
 	 			elseif b.typ==farm then
 	 				harvest(u,b)
-	 				b.res={typ="r",qty=0}
-						b.cycles=0
+	 				b.res,b.cycles=
+	 					{typ="r",qty=0},0
 	 			end
 	 		end
 	 	elseif (
@@ -1258,7 +1281,9 @@ function produce(u)
 				del(u.typ.prod,b)
 				b.tech()
 			else
-				local new=unit(b.typ,u.x,u.y,1)
+				local new=unit(
+					b.typ,u.x,u.y,1
+				)
 				add(units,new)
 				if new.typ==ant and
 					u.rx and
@@ -1440,15 +1465,6 @@ function mine_nxt_res(u,res)
 	end
 end
 
-function all_ants()
-	for u in all(selection) do
-		if u.typ!=ant then
-			return false
-		end
-	end
-	return #selection>0
-end
-
 function is_res(x,y)
 	return fget(mget(mx/8,my/8),1)
 end
@@ -1464,7 +1480,7 @@ function can_gather()
 	if (not vget(mx,my)) return
 	return (is_res(mx,my) or
 		avail_farm()) and
-		all_ants()
+		sel_typ==ant
 end
 
 function can_attack()
@@ -1487,7 +1503,7 @@ function can_build()
 		(hoverunit.const or
 			hoverunit.hp<hoverunit.typ.hp
 	 ) and
-		all_ants()
+		sel_typ==ant
 end
 
 function rectaround(u,c)
@@ -1612,7 +1628,7 @@ end
 function can_renew_farm()
 	return hoverunit and
 		res.b>=farm_renew_cost_b and
-		all_ants() and
+		sel_typ==ant and
 		hoverunit.typ==farm and
 		hoverunit.exp
 end
@@ -1808,7 +1824,7 @@ function cost_len(c)
 	return	draw_resource("r",c.r)+
 		draw_resource("g",c.g)+
 		draw_resource("b",c.b)+
-		((c.typ.unit and res.p<1) and
+		(c.typ.unit and res.p<1 and
 			draw_resource("p",1) or 0)
 end
 
@@ -1882,7 +1898,10 @@ function draw_port(
 	pal()
 	
 	if onclick then
-		button(x,y,10,10,onclick,costs)
+		add(buttons,{
+			x=x,y=y,w=10,h=10,
+			handle=onclick,hover=costs
+		})
 	end
 	y+=11
 	if u or prog then
@@ -1898,8 +1917,7 @@ end
 function cursor_spr()
  --pointer (buttons)
  if (hovbtn) return 66
-	if #selection>0 and
-		selection[1].p==1 then
+	if sel1 and sel1.p==1 then
 	 --build cursor
 		if to_build or 
 			can_build() or
@@ -1925,25 +1943,16 @@ function draw_cursor()
 	end
 end
 
-function button(x,y,w,h,handle,hover)
-	add(buttons,{
-		x=x,y=y,w=w,h=h,handle=handle,
-		hover=hover
-	})
-end
-
-function draw_sel_ports(y)
-	for i=0,#selection-1 do
-		local x=3+i*13
-		local mu=6
-		if i+1>mu then
-			print("+"..(#selection-mu),x,y+4,1)
+function draw_sel_ports()
+	for i=1,#selection do
+		local x,u=i*13-10,selection[i]
+		if i>6 then
+			print("+"..#selection-6,x,menuy+6,1)
 			break
 		end
-		local u=selection[i+1]
 		draw_port(
-			u.typ,x,y+1,nil,
-			#selection>1 and function()
+			u.typ,x,menuy+3,nil,
+			function()
 				u.sel=false
 				del(selection,u)
 			end,
@@ -1951,137 +1960,121 @@ function draw_sel_ports(y)
 	end
 end
 
-function draw_unit_section(sel)
-	local y=menuy+2
-	if sel==1 then
-		local u=selection[1]
-		local typ=u.typ
-		
-		if #selection<3 then
-			draw_sel_ports(y)
-		else
-			draw_port(typ,3,y+2,nil,
+function single_unit_section()
+	local y,typ,r,q=menuy+2,
+		sel1.typ,sel1.res,sel1.q
+	
+	if #selection<3 then
+		draw_sel_ports()
+	else
+		draw_port(typ,3,y+2,nil,
+			function()
+				sel1.sel=false
+				deli(selection,1)
+			end)
+		print("\88"..#selection,16,y+5,7)
+	end
+	
+	if (sel1.p!=1) return
+	
+	if #selection==1 and r then
+		for i=0,8 do
+			local col,xx,yy=
+				5,
+				20+(i%3)*3,
+				y+2+flr(i/3)*3
+			rect(xx,yy,xx+3,yy+3,7)
+			if r.qty>i then
+				if (r.typ=="g") col=11
+				if (r.typ=="r") col=8
+				if (r.typ=="b") col=9
+			end
+			rect(xx+1,yy+1,xx+2,yy+2,col)
+		end
+	end
+
+	if sel1.cycles then
+		print(sel1.cycles.."/"..farm_cycles,37,y+5,4)
+		spr(170,50,y+3,2,2)
+	end
+	
+	if typ.prod and not sel1.const then
+		for i=0,#typ.prod-1 do
+			local b=typ.prod[i+1]
+			draw_port(
+				b.typ,
+				88-(i%4)*14,
+				y+flr(i/4)*11,
+				b,
 				function()
-					selection[1]=false
-					deli(selection,1)
-				end)
-			print("\88"..#selection,16,y+5,7)
-		end
-		
-		if (u.p!=1) return
-		
-		if #selection==1 then
-			local r=u.res
-			if r then
-				for i=0,8 do
-					local xx=20+(i%3)*3
-					local yy=y+2+flr(i/3)*3
-					rect(xx,yy,xx+3,yy+3,7)
-					local col=5
-					if r.qty>i then
-						if (r.typ=="g") col=11
-						if (r.typ=="r") col=8
-						if (r.typ=="b") col=9
+					if (not can_pay(b)) return
+					if b.typ.inert then
+						to_build=b
+						return
 					end
-					rect(xx+1,yy+1,xx+2,yy+2,col)
-				end
-			end
-			if u.cycles then
-				print(u.cycles.."/"..farm_cycles,37,y+5,4)
-				spr(170,50,y+3,2,2)
-			end
-		end
-		
-		if typ.prod and not u.const then
-			for i=1,#typ.prod do
-				local b=typ.prod[i]
-				local x=102-i*14
-				local yy=y+1
-				if (#typ.prod>4) yy-=1
-				if i>4 then
-					x+=4*14
-					yy+=11
-				end
-				draw_port(b.typ,x,yy,b,
-					function()
-						if (not can_pay(b)) return
-						if b.typ.inert then
-							to_build=b
-							return
-						end
-						local q=u.q
-						if q and (q.b!=b or q.qty==9) then
-							return
-						end
-						res.r-=b.r or 0
-						res.g-=b.g or 0
-						res.b-=b.b or 0
-						res.p-=1
-						if q then
-							q.qty+=1
-						else
-							u.q={
-								b=b, qty=1, t=b.t,
-								fps15=max(fps%15-1,0)
-							}
-						end
+					if q and
+						(q.b!=b or q.qty==9) then
+						return
 					end
-				)
-			end
-			if u.q then 
-				local b=u.q.b
-				local qty=u.q.qty
-				local x=20
-				draw_port(b.typ,x,y+1,nil,
-					function()
-						res.r+=b.r or 0
-						res.g+=b.g or 0
-						res.b+=b.b or 0
-						res.p+=1
-						if qty==1 then
-							u.q=nil
-						else
-							u.q.qty-=1
-						end
-					end,u.q.t/b.t
-				)
-				print("\88"..qty,x+12,y+4,7)
-			end
+					res.r-=b.r or 0
+					res.g-=b.g or 0
+					res.b-=b.b or 0
+					res.p-=1
+					if q then
+						q.qty+=1
+					else
+						sel1.q={
+							b=b,qty=1,t=b.t,
+							fps15=max(fps%15-1,0)
+						}
+					end
+				end
+			)
 		end
-	elseif sel==2 then
-		draw_sel_ports(y)
+		if q then 
+			local b,qty,x=q.b,q.qty,20
+			draw_port(b.typ,x,y+1,nil,
+				function()
+					res.r+=b.r or 0
+					res.g+=b.g or 0
+					res.b+=b.b or 0
+					res.p+=1
+					if qty==1 then
+						sel1.q=nil
+					else
+						q.qty-=1
+					end
+				end,q.t/b.t
+			)
+			print("\88"..qty,x+12,y+4,7)
+		end
 	end
 end
 
-function draw_menu()
- local sel=0
- for s in all(selection) do
- 	sel=1
- 	if s.typ!=selection[1].typ then
- 		sel=2
- 		break
- 	end
- end
- 
- local sections={102,26}
- if sel==1 then
- 	local t=selection[1].typ
- 	if t.has_q then
-  	sections={17,24,61,26}
- 	elseif t.prod then
-  	sections={35,67,26}
+function sections()
+	if sel_typ then
+		if sel_typ.has_q then
+  	return {17,24,61,26}
+ 	elseif sel_typ.prod then
+  	return {35,67,26}
   end
- end
- draw_menu_bg(sections)
- 
-	draw_unit_section(sel)
+	end
+	return {102,26}
+end
+
+function draw_menu()
+ draw_menu_bg(sections())
+ if sel_typ then
+		single_unit_section()
+	else
+		draw_sel_ports()
+	end
 	
 	--minimap
 	draw_minimap()
 	
 	--resources
-	local x=1
-	local y=122
+	local x,y=1,122
 	x+=draw_resource("r",res.r,x,y,1)
 	x+=draw_resource("g",res.g,x,y,1)
 	x+=draw_resource("b",res.b,x,y,1)-1
@@ -2093,14 +2086,14 @@ function draw_menu()
 	x+=draw_resource("p",res.p,x,y,1)-1
 
 	pset(x-1,y-1,5)
-	line(0,y-2,x-2,y-2,5)
-	line(x,y,x,y+5,5)
+	line(0,y-2,x-2,y-2)
+	line(x,y,x,y+5)
 	
 	if hovbtn and hovbtn.hover then
 		local b=hovbtn.hover
-		local w=cost_len(b)
-		local h=8
-		local x,y=hovbtn.x-(w-hovbtn.w)/2,
+		local w,h=cost_len(b),8
+		local x,y=
+			hovbtn.x-(w-hovbtn.w)/2,
 			hovbtn.y-h
 		rectfill(x,y,x+w,y+h,7)
 		local rx=x+2
@@ -2115,18 +2108,19 @@ function draw_menu()
 end
 
 function draw_menu_bg(secs)
-	local mod=#secs==3 and 0 or 1
  local x,y=0,menuy
  for i=1,#secs do
- 	local c=i%2==mod and 15 or 4
- 	local sp=i%2==mod and 129 or 128
- 	local s=secs[i]
- 	local xx=x+4+s-8
+ 	local mod=i%2==(#secs==3 and 0 or 1)
+ 	local c,sp,s=
+ 		mod and 15 or 4,
+ 		mod and 129 or 128,
+ 		secs[i]
+ 	local xx=x+s-4
  	spr(sp,x,y)
  	spr(sp,xx-4,y)
  	line(x+3,y+1,xx,y+1,7)
  	rectfill(x+3,y+2,xx,y+4,c)
- 	rectfill(x,y+4,x+s,y+menuh+3,c)
+ 	rectfill(x,y+4,x+s,y+menuh+3)
  	x+=s
  end
  --assert(x==128)
@@ -2137,7 +2131,8 @@ end
 
 todo
 - spiderweb
-- rock paper scissors (var dmg)
+- dmg multiplier balancing
+- costs balancing
 - tech tree
 - ai
 - map
