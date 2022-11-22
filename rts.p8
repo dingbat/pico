@@ -3,6 +3,7 @@ version 38
 __lua__
 --constants
 
+amx,amy=0,0
 mapw,maph=256,256
 fogtile,mvtile=8,8
 mmw=19
@@ -718,7 +719,7 @@ function handle_click()
 				128/(maph/128),
 				dx/mmw*mapw,
 				dy/mmh*maph
-			if btnp(4) then
+			if btnp(4) and sel1 then
 				--right click, move
 				for u in all(selection) do
 					move(u,x,y)
@@ -829,20 +830,37 @@ function hilite_hoverunit()
 	hilite={t=t(),unit=hoverunit}
 end
 
+function pan(dx,dy)
+	if dpad and not btn(4) and (
+	 (dx>0 and amx!=126) or
+	 (dx<0 and amx!=0) or
+	 (dy>0 and amy!=126) or
+	 (dy<0 and amy!=0)
+	)
+	 then
+		amx,amy=
+	 	mid(0,amx+dx,126),
+	  mid(-1,amy+dy,126)
+	else
+		cx,cy=
+	 	mid(0,cx+dx,mapw-128),
+	  mid(0,cy+dy,maph-128+menuh)
+	end
+end
+
 function handle_input()
  --arrow keys (map scroll)
- if (btn(⬅️) or btn(⬅️,1))cx-=2
- if (btn(⬆️) or btn(⬆️,1))cy-=2
- if (btn(➡️) or btn(➡️,1))cx+=2
- if (btn(⬇️) or btn(⬇️,1))cy+=2
- cx,cy=
- 	mid(0,cx,mapw-128),
-  mid(0,cy,maph-128+menuh)
+ if(btn(⬅️)or btn(⬅️,1))pan(-2,0)
+ if(btn(⬆️)or btn(⬆️,1))pan(0,-2)
+ if(btn(➡️)or btn(➡️,1))pan(2,0)
+ if(btn(⬇️)or btn(⬇️,1))pan(0,2)
  
  --mouse
- amx,amy=
- 	mid(0,stat(32),126),
-	 mid(-1,stat(33),126)
+	if not dpad then
+		amx,amy=
+	 	mid(0,stat(32),126),
+		 mid(-1,stat(33),126)
+ end
  mx,my=amx+cx,amy+cy
  
  for b in all(buttons) do
@@ -893,6 +911,12 @@ function tick_unit(u)
 			end
 		end
 		return		
+	end
+	
+	if u.typ==queen and
+		u.hp<u.typ.hp and
+		fps==0 then
+		u.hp+=0.5
 	end
 	
 	if intersect(
@@ -2291,17 +2315,22 @@ units={
 	unit(ant,qx*8-8,qy*8,1),
 	unit(ant,qx*8+20,qy*8+3,1),
 	unit(ant,qx*8+2,qy*8-8,1),
-	unit(spider,48,16,1),
-	unit(warant,58,30,1),
-	unit(beetle,40,36,1),
+	--unit(spider,48,16,1),
+	--unit(warant,58,30,1),
+	--unit(beetle,40,36,1),
 	--unit(beetle,60,76,2),
 	unit(beetle,65,81,2),
 	unit(queen,qx*8+7,qy*8+3,1),
-	unit(tower,65,65,1)
+	--unit(tower,65,65,1)
 }
 s(bldgs,qx,qy,bldg_drop)
 s(bldgs,qx+1,qy,bldg_drop)
 make_dmaps()
+
+menuitem(1,"turn mouse off",function()
+	menuitem(1,"turn mouse "..(dpad and "off" or "on"))
+	dpad=not dpad
+end)
 
 __gfx__
 00000000d00000000000000000000000000000000000000000000000000000000100010000000000000000000000000000000000000000000000000000000000
