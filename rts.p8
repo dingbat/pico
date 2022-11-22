@@ -162,17 +162,12 @@ end
 -->8
 --unit defs
 
-atk_arrow=1
-atk_acid=2
-atk_seige=3
-atk_pince=4
-
 function parse(unit)
 	local obj={}
 	for l in all(split(unit,"\n")) do
 		if #l>0 then
 			local vals=split(l,"=")
-			obj[vals[1]]=tonum(vals[2])
+			obj[vals[1]]=tonum(vals[2]) or vals[2]
 		end
 	end
 	return obj
@@ -223,6 +218,7 @@ unit=1
 spd=1
 los=20
 hp=10
+def_typ=ant
 ]])
 beetle=parse([[
 w=7
@@ -257,7 +253,8 @@ spd=1.5
 los=25
 hp=20
 
-atk_typ=3
+def_typ=beetle
+atk_typ=beetle
 atk=2
 ]])
 spider=parse([[
@@ -294,7 +291,8 @@ spd=2
 los=30
 hp=15
 
-atk_typ=4
+def_typ=spider
+atk_typ=spider
 atk=2
 ]])
 warant=parse([[
@@ -330,7 +328,8 @@ spd=1.5
 los=30
 hp=15
 
-atk_typ=2
+atk_typ=ant
+def_typ=ant
 atk=1
 ]])
 queen=parse([[
@@ -365,7 +364,8 @@ proj_col=11
 proj_xo=-4
 proj_yo=2
 
-atk_typ=2
+atk_typ=ant
+def_typ=ant
 atk=1
 ]])
 
@@ -382,7 +382,7 @@ attack_y=96
 
 fire=1
 dead_x=48
-dead_y=104
+dead_y=99
 dead_fr=7
 dead_fps=9
 
@@ -398,7 +398,8 @@ const=20
 proj_yo=-2
 proj_xo=-1
 
-atk_typ=1
+atk_typ=tower
+def_typ=building
 atk=1
 ]])
 mound=parse([[
@@ -425,6 +426,7 @@ dir=-1
 const=12
 has_q=1
 drop=1
+def_typ=building
 ]])
 web=parse([[
 w=8
@@ -439,6 +441,7 @@ los=5
 hp=5
 dir=-1
 const=12
+def_typ=building
 ]])
 spden=parse([[
 w=8
@@ -464,6 +467,7 @@ hp=20
 dir=-1
 const=20
 has_q=1
+def_typ=building
 ]])
 btden=parse([[
 w=8
@@ -489,6 +493,7 @@ hp=20
 dir=-1
 const=20
 has_q=1
+def_typ=building
 ]])
 barracks=parse([[
 w=7
@@ -513,6 +518,7 @@ hp=20
 dir=-1
 const=20
 has_q=1
+def_typ=building
 ]])
 farm=parse([[
 w=8
@@ -537,6 +543,7 @@ los=0
 hp=10
 dir=-1
 const=6
+def_typ=building
 ]])
 farm_renew_cost_b=3
 
@@ -578,6 +585,33 @@ portw=9
 	},
 }
 
+--ant
+--spider
+--beetle
+--tower
+--building
+dmg_mult=parse([[
+ant_vs_ant=1
+ant_vs_spider=1
+ant_vs_beetle=1
+ant_vs_building=1
+
+spider_vs_ant=1
+spider_vs_spider=1
+spider_vs_beetle=1
+spider_vs_building=1
+
+beetle_vs_ant=1
+beetle_vs_spider=1
+beetle_vs_beetle=1
+beetle_vs_building=2
+
+tower_vs_ant=1
+tower_vs_spider=1
+tower_vs_beetle=1
+tower_vs_building=1
+]])
+
 function rest(u)
 	u.st={t="rest"}
 end
@@ -590,8 +624,7 @@ function move(u,x,y)
 end
 
 function build(u,b)
-	u.res=nil
-	u.st={
+	u.st,u.res={
 		t="build",
 		target=b,
 		wayp=get_wayp(u,b.x,b.y),
@@ -643,7 +676,7 @@ function attack(u,e)
 end
 
 function harvest(u,f)
-	u.st={
+	f.farmer,u.st=u,{
 		t="harvest",
 		target=f,
   wayp=get_wayp(u,
@@ -651,7 +684,6 @@ function harvest(u,f)
   	f.y-3+rnd(6)),
   farm=f
 	}
-	f.farmer=u
 end
 -->8
 --update
@@ -717,7 +749,7 @@ function handle_click()
  
 	--left drag makes selbox
  if btn(5) and not to_build then
- 	if selx==nil then
+ 	if not selbox then
  		selx,sely=mx,my
  	end
 		selbox={
@@ -728,16 +760,15 @@ function handle_click()
 			7 --color when unpacking
  	}
  else
- 	selbox,selx,sely=nil
+ 	selbox=nil
  end
 	
  --right click
 	local sel1=selection[1]
  if btnp(4) and sel1 and sel1.p==1 then
-	 local tx=flr(mx/8)
-	 local ty=flr(my/8)
+	 local tx,ty=flr(mx/8),flr(my/8)
 	 if can_renew_farm() then
-	 	hilite={t=t(),unit=hoverunit}
+	 	hilite_hoverunit()
 	 	hoverunit.exp=false
 	 	hoverunit.cycles=0
 	 	res.b-=farm_renew_cost_b
@@ -756,17 +787,17 @@ function handle_click()
   	for u in all(selection) do
   		build(u,hoverunit)
   	end
-  	hilite={t=t(),unit=hoverunit}
+  	hilite_hoverunit()
 	 elseif can_attack() then
 	 	for u in all(selection) do
   		attack(u,hoverunit)
   	end
-  	hilite={t=t(),unit=hoverunit}
+  	hilite_hoverunit()
   elseif can_drop() then
 	 	for u in all(selection) do
 				drop(u,nil,hoverunit)
   	end
-  	hilite={t=t(),unit=hoverunit}
+  	hilite_hoverunit()
   elseif sel1.typ.unit then
 	 	for u in all(selection) do
 				move(u,mx,my)
@@ -780,6 +811,10 @@ function handle_click()
   	sel1.rx,sel1.ry=mx,my
   end
  end
+end
+
+function hilite_hoverunit()
+	hilite={t=t(),unit=hoverunit}
 end
 
 function handle_input()
@@ -1554,8 +1589,7 @@ function register_bldg(b)
 end
 
 function deal_dmg(from,to)
-	--todo: rps
-	to.hp-=1
+	to.hp-=from.typ.atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def_typ]
 end
 
 function collect(u,res)
@@ -2268,7 +2302,7 @@ units={
 	--unit(beetle,60,76,2),
 	unit(beetle,65,81,2),
 	unit(queen,qx*8+7,qy*8+3,1),
-	unit(mound,65,65,1)
+	unit(tower,65,65,1)
 }
 s(bldgs,qx,qy,bldg_drop)
 s(bldgs,qx+1,qy,bldg_drop)
