@@ -655,7 +655,7 @@ function gather(u,tx,ty,wp)
 		ty=ty,
 		res=tile2res(tx,ty),
 		wayp=wp or
-			get_wayp(u,tx*8+3,ty*8+3),
+			get_wayp(u,tx*8+3,ty*8+3,true),
 		target=target_tile(tx,ty),
 	}
 end
@@ -663,7 +663,8 @@ end
 function drop(u,nxt_res,dropu)
 	local wayp,x,y
 	if dropu then
-		wayp=get_wayp(u,dropu.x,dropu.y)
+		wayp=get_wayp(u,dropu.x,
+			dropu.y,true)
 	else
 		wayp,x,y=dmap_find(u,"d")
 	end
@@ -681,7 +682,7 @@ function attack(u,e)
 		u.st={
 			t="attack",
 			target=e,
-			wayp=get_wayp(u,e.x,e.y),
+			wayp=get_wayp(u,e.x,e.y,true),
 		}
 	end
 end
@@ -906,8 +907,12 @@ function tick_unit(u)
 		del(selection,u)
 		if u.typ.inert then
 			register_bldg(u)
-			if u.typ==mound and u.p==1 then
+		end
+		if u.p==1 then
+			if u.typ==mound then
 				res.p-=5
+			elseif u.typ.unit then
+				res.p-=1
 			end
 		end
 		return		
@@ -1099,8 +1104,8 @@ function draw_unit(u)
 	
 	local ut,st,res_typ=u.typ,u.st,
 		u.res and u.res.typ or ""
-	local w,h,stt=
-	 ut.fw or ut.w,ut.h,st.t
+	local w,h,stt,f=
+	 ut.fw or ut.w,ut.h,st.t,fps
 	if (u.st.wayp) stt="move"
 	local xoff,yoff=
 		ut["xoff_"..res_typ] or 0,
@@ -1131,7 +1136,6 @@ function draw_unit(u)
 			u.ready and (q>4 and 48 or 64) or
 			q>6 and 48 or q>3 and 56 or x
 	elseif ufps then
-		local f=fps
 		if u.dead then
 			f=fps-u.dead
 			if (f<0) f+=60
@@ -1154,13 +1158,12 @@ function draw_unit(u)
 	end
 	if (sel and u.rx) draw_rally(u)
 
-	--
-	pset(u.x,u.y,14)
+	--[[pset(u.x,u.y,14)
 	if u.st.wayp then
 		for wp in all(u.st.wayp) do
 			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
 		end
-	end
+	end]]
 end
 
 function check_dead_target(u)
@@ -1177,16 +1180,19 @@ end
 function update_unit(u)
 	check_dead_target(u)
 	local t=u.st.t
-	if (t=="harvest") farmer(u)
 	if (t=="attack") fight(u)
 	if t=="rest" and u.typ.atk then
 		aggress(u)
  end
  if (u.q) produce(u)
  if (u.typ==farm) update_farm(u)
- if (t=="build") buildrepair(u)
- if (t=="gather") mine(u)
- check_target_col(u)
+ if u.st.active then
+ 	if (t=="harvest") farmer(u)
+ 	if (t=="build") buildrepair(u)
+  if (t=="gather") mine(u)
+ else
+ 	check_target_col(u)
+ end
  step(u)
 end
 
@@ -1205,7 +1211,7 @@ end
 
 function farmer(u)
 	local f=u.st.farm
-	if u.st.active and f.ready and fps==0 then
+	if f.ready and fps==0 then
 		collect(u,"r")
 		f.res.qty-=1
 		if f.res.qty==0 then
@@ -1259,37 +1265,34 @@ function fight(u)
 end
 
 function buildrepair(u)
- if u.st.active then
- 	local b=u.st.target
- 	if fps%30==0 then
- 		if b.const then
-	 		b.const+=1
-	 		if b.const==b.typ.const then
-	 			b.const=nil
-	 			register_bldg(b)
-	 			if b.typ==mound and b.p==1 then
-	 				res.p+=5
-	 			elseif b.typ==farm then
-	 				harvest(u,b)
-	 				b.res,b.cycles=
-	 					{typ="r",qty=0},0
-	 			end
-	 		end
-	 	elseif (
-	 		b.hp<b.typ.hp and
-	 		res.b>=1
-	 	) then
-	 		b.hp+=1
-	 		res.b-=0.5
-	 	else
-	 		rest(u)
-	 	end
+	local b=u.st.target
+	if fps%30==0 then
+		if b.const then
+ 		b.const+=1
+ 		if b.const==b.typ.const then
+ 			b.const=nil
+ 			register_bldg(b)
+ 			if b.typ==mound and b.p==1 then
+ 				res.p+=5
+ 			elseif b.typ==farm then
+ 				harvest(u,b)
+ 				b.res,b.cycles=
+ 					{typ="r",qty=0},0
+ 			end
+ 		end
+ 	elseif (
+ 		b.hp<b.typ.hp and
+ 		res.b>=1
+ 	) then
+ 		b.hp+=1
+ 		res.b-=0.5
+ 	else
+ 		rest(u)
  	end
  end
 end
 
 function mine(u)
-	if (not u.st.active) return
 	local x,y,r=u.st.tx,u.st.ty,u.st.res
 	--if res is exhausted, goto nxt
 	--move on to the next one
@@ -1340,9 +1343,7 @@ function check_target_col(u)
 	local st=u.st
 	local t=st.target
 	if (
-		not st.active and
 		t and
-		--(st.t!="gather" or flr(u.x/8)==st.tx and flr(u.y/8)==st.ty) and
 		intersect(u_rect(u),u_rect(t))
 	) then
 		u.dir=sgn(t.x-u.x)
@@ -1511,10 +1512,11 @@ function avail_farm()
 end
 
 function can_gather()
-	if (not vget(mx,my)) return
 	return (is_res(mx,my) or
 		avail_farm()) and
-		sel_typ==ant
+		sel_typ==ant and
+		vget(mx,my) and
+		sur_acc(mx/8,my/8)
 end
 
 function can_attack()
@@ -1580,14 +1582,14 @@ end
 --returns true if coord is viz
 --in currently visible screen
 function vget(x,y)
-	x=flr(x/fogtile)
- y=flr(y/fogtile)
+	x,y=flr(x/fogtile),
+		flr(y/fogtile)
  return x<0 or y<0 or g(vizmap,x,y)
 end
 
 function norm(it,nt,f)
-	local xv=it[1]-nt.x
-	local yv=it[2]-nt.y
+	local xv,yv=
+		it[1]-nt.x,it[2]-nt.y
 	local norm=f/(abs(xv)+abs(yv))
 	return xv*norm,yv*norm
 end
@@ -1669,7 +1671,7 @@ end
 -->8
 --get_wayp
 
-function get_wayp(u,x,y)
+function get_wayp(u,x,y,enter)
 	if (u.typ.inert) return
  local destx,desty,wayp,n=
  	flr(x/mvtile),
@@ -1682,11 +1684,13 @@ function get_wayp(u,x,y)
  for i=0,#nodes-1 do
  	n=nodes[#nodes-i]
  	add(wayp,
- 		{n[1]*mvtile+mvtile/2,
- 		 n[2]*mvtile+mvtile/2}
+ 		{n[1]*mvtile+4,
+ 		 n[2]*mvtile+4}
  	)
  end
- if adj(n[1],n[2],destx,desty,1) then
+ if sur_acc(destx,desty) and (
+ 	enter or acc(destx,desty)
+ ) then
  	add(wayp,{x,y})
  end
  return wayp
@@ -2238,16 +2242,11 @@ function add_neigh(to,closed,x,y)
 	end
 end
 
-function acc_res(x,y,f)
-	return (
- 	(f=="d" and g(bldgs,x,y)==bldg_drop) or
- 	(f!="d" and fget(mget(x,y),f))
- ) and (
- 	acc(x-1,y) or
- 		acc(x+1,y) or
- 		acc(x,y-1) or
- 		acc(x,y+1)
- )
+function sur_acc(x,y)
+	return acc(x-1,y) or
+		acc(x+1,y) or
+		acc(x,y-1) or
+		acc(x,y+1)
 end
 
 function make_dmaps()
@@ -2268,7 +2267,13 @@ function make_dmap(resf)
 		local x,y=i%r,flr(i/r)
 		closed[i+1]=false
 		dmap[i+1]=9
-		if acc_res(x,y,resf) then
+		if
+			sur_acc(x,y) and
+			(
+		 	(f=="d" and g(bldgs,x,y)==bldg_drop) or
+		 	(f!="d" and fget(mget(x,y),resf))
+		 )	
+		then
 			closed[i+1]=true
 			dmap[i+1]=0
 			add(start,{x,y})
@@ -2327,7 +2332,7 @@ units={
 	--unit(warant,58,30,1),
 	--unit(beetle,40,36,1),
 	--unit(beetle,60,76,2),
-	unit(beetle,65,81,2),
+	--unit(beetle,65,81,2),
 	unit(queen,qx*8+7,qy*8+3,1),
 	--unit(tower,65,65,1)
 }
@@ -2389,22 +2394,22 @@ fff77ffffdf888dffffbbbffffbbbbffff544ffff444544ffff76ccccc6cc6ccccc67fff111ccccc
 ff7777fffdd888dfffffbffffffbbfffff9444ff499544fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d100000000ffffffffffffffffffffffffffffffff
 fff77fffffdfdfdfffffbffffffbffffff5444ff49944fffff66cccc7cccc11ccccc66ff111ccc6666ccc11100000000ffffffffffffffffffffffffffffffff
 fff77fffffffdfffffffbffffffbffffff445ffff444fffff6c7ccc1111111111ccc7c6f11ccc667766ccc1100000000fffffffffffffaffffffffffffffffff
-fff88ffffffffffffffffffffffffbfffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc1100000000ffffffffffffffffffffffffffffffff
-f887888ff8fff88fffffffffffffb3fffff4fffffffff4fff6ccc6111dd11111116ccc6f111ccc6666ccc11100000000fffffffffffffffffffffffff7ffffff
-ff8878f8f88ff888f3bfff3fffff3bbffff44ffffff4f44ff7cccc1111dd111111cccc7f1d1cccccccccc1d100000000ffffffffffffffffffffffffffffffff
-f8788fff888f8fdffffbfbffffb3fbffff494fffff44454ff6c6cc111111111111cc6c6f111cccccccccc11100000000ffffffffffffffffff7fffffffffffff
-fff77ffffdff88dffffbbbffffbbbbffff544fffff4454fff66ccc1111111dd111ccc66f1111cccccccc111100000000fffaffffffffffffffffffffffffffff
-ff77ffffffd88fdfffffbffffffbbfffff9444fff495ffffff6c6cc1111111111cc6c6ff1111111cc111111100000000ffffffffffffffffffffffffffffffff
-fff7ffffffdfdfffffffbffffffbfffffff44fff49944fffff6cccc111dd11111cccc6ff1dd1111111111dd100000000fffffffff7ffffffffffffffffffafff
-fff77fffffffdfffffffbffffffbfffffffffffff444fffff76c6c111111111111c6c67f1111d111111d111100000000ffffffffffffffffffffffffffffffff
-fffffffffffffffffffffffffffffffffffffffffffffffff6c7ccc1111111111ccc7c6fffffffffffffffff00000000ffffffffffffffffffffffffffffffff
-ffff8ffffffff8ffffffffffffffbfffffffffffffffffffff66ccccc11cccc7cccc66ffff555fffff5555ff00000000ffffffffffffffffffffffffffffffff
-ff88f8fff8ffff8fffffffffffff3bbffff44ffffff4f4fffff6ccccccc6ccc6cccc6ffff55555fff533555f00000000ffffffffffffffffffffffffffffffff
-f8788ffff88fffdffffffbffffb3fbffff494ffffff4444ffff76ccccc6cc6ccccc67ffff555565ff535535f00000000fffffffffffffaffffffffff7fffffff
-ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454ffffff67cccccccccccc76fffff565555ff555555f00000000f7ffffffffffffffffffffffffffffff
-fff7ffffffd88fdfffffbffffffbfffffff45ffff4944ffffffff766cc666cc6667ffffff566555ff53555ff00000000ffffffffffffffffffffffffffffffff
-fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffff667fff6776fffffffff5555ffff555fff00000000ffffffffffffffffffffffffffffffff
-fff77fffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffff
+fff88ffffffffffffffffffffffffbfffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc11ffffffffffffffffffffffffffffffffffffffff
+f887888ff8fff88fffffffffffffb3fffff4fffffffff4fff6ccc6111dd11111116ccc6f111ccc6666ccc111fffffffffffffffffffffffffffffffff7ffffff
+ff8878f8f88ff888f3bfff3fffff3bbffff44ffffff4f44ff7cccc1111dd111111cccc7f1d1cccccccccc1d1ffefffffffffffffffffffffffffffffffffffff
+f8788fff888f8fdffffbfbffffb3fbffff494fffff44454ff6c6cc111111111111cc6c6f111cccccccccc111fedeffffffffffffffffffffff7fffffffffffff
+fff77ffffdff88dffffbbbffffbbbbffff544fffff4454fff66ccc1111111dd111ccc66f1111cccccccc1111f3effffffffaffffffffffffffffffffffffffff
+ff77ffffffd88fdfffffbffffffbbfffff9444fff495ffffff6c6cc1111111111cc6c6ff1111111cc1111111f3ffffffffffffffffffffffffffffffffffffff
+fff7ffffffdfdfffffffbffffffbfffffff44fff49944fffff6cccc111dd11111cccc6ff1dd1111111111dd1ffffaffffffffffff7ffffffffffffffffffafff
+fff77fffffffdfffffffbffffffbfffffffffffff444fffff76c6c111111111111c6c67f1111d111111d1111ffffffffffffffffffffffffffffffffffffffff
+fffffffffffffffffffffffffffffffffffffffffffffffff6c7ccc1111111111ccc7c6fffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffff8ffffffff8ffffffffffffffbfffffffffffffffffffff66ccccc11cccc7cccc66ffff555fffff5555fffffff7ffffffffffffffffffffffffffffffffff
+ff88f8fff8ffff8fffffffffffff3bbffff44ffffff4f4fffff6ccccccc6ccc6cccc6ffff55555fff533555fffff797fffffffffffffffffffffffffffffffff
+f8788ffff88fffdffffffbffffb3fbffff494ffffff4444ffff76ccccc6cc6ccccc67ffff555565ff535535ffffff73ffffffffffffffaffffffffff7fffffff
+ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454ffffff67cccccccccccc76fffff565555ff555555fffffff3ff7ffffffffffffffffffffffffffffff
+fff7ffffffd88fdfffffbffffffbfffffff45ffff4944ffffffff766cc666cc6667ffffff566555ff53555ffffafffffffffffffffffffffffffffffffffffff
+fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffff667fff6776fffffffff5555ffff555fffffffffffffffffffffffffffffffffffffffffff
+fff77fffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0000000000000000000000000000000000000000000000000000000000000000000000000bb006660040000000000000000000000ffffffff000000000000000
 007777000077770000000000000000000000000000000000000000000000000000000000bbb00006004400040000000000000000ffffffffff00000000000000
 0744447007ffff7000000000000000000000000000000000000000000000000000000000bb000066444440004000000000000000fff29f9f9f00000000000000
@@ -2477,16 +2482,16 @@ __map__
 545454525054545f5c5d53535c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5454515454546e6f6c535253536d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 545255547c7d7e507c535052537d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5452554f4c4d4e4f4c5352534c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5452554f4c7b4e4f4c5352534c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5454555f5c5d5e5f5c5d53535c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5454546f51516e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-547d7e7f7c7d7e7f7c517e7f56575757587d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+547d7e7f7c7d7e6b7c517e7f56575757587d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4c4d4e4f5252534f4c4d4e4f66676767684d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5c5d5e525052535f5c5d56576a676767685d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 6c6d52525352526f6c6d666767676767686d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 7c7d7e52527d7e7f7c7d666767676759787d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4c4d4e4f4c4d4e4f4c4d6667676767684c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5c5d5e5f5c5d5e5f5c5d7677777777785c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5c5d5e5f5c5d795f7a797677777777785c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
