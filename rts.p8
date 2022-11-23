@@ -12,13 +12,15 @@ mmx,mmy=105,107
 menuh,menuy=21,104
 
 bldg_drop,bldg_farm,
- bldg_const,bldg_other=1,2,3,4
+ bldg_const,bldg_other=
+ "drop","farm","const","other"
 
 --global state
 cx,cy,mx,my,fps=0,0,0,0,0
 
 --tech can change this
 farm_cycles=5
+carry_capacity=6
 
 units,restiles,dmaps,selection,
 	proj,bldgs={},{},{},{},{},{}
@@ -46,7 +48,7 @@ function _draw()
  for u in all(units) do
  	if u.const and u.p==1 then
  		add(af,u)
- 	elseif u.typ.inert and u.typ!=queen then
+ 	elseif u.typ.bldg and u.typ!=queen then
 	 	add(bf1,u)
 	 else
 	 	add(bf2,u)
@@ -367,7 +369,7 @@ porty=72
 has_q=1
 drop=1
 
-inert=1
+bldg=drop
 los=20
 range=15
 hp=50
@@ -399,7 +401,7 @@ dead_fps=9
 
 portx=0
 porty=80
-inert=1
+bldg=other
 
 los=30
 hp=40
@@ -431,7 +433,7 @@ dead_y=104
 dead_fr=7
 dead_fps=9
 
-inert=1
+bldg=drop
 los=5
 hp=10
 dir=-1
@@ -448,7 +450,7 @@ portx=8
 porty=80
 portw=9
 
-inert=1
+bldg=other
 los=5
 hp=5
 dir=-1
@@ -473,7 +475,7 @@ portx=0
 porty=112
 portw=9
 
-inert=1
+bldg=other
 los=10
 hp=20
 dir=-1
@@ -499,7 +501,7 @@ portx=0
 porty=104
 portw=9
 
-inert=1
+bldg=other
 los=10
 hp=20
 dir=-1
@@ -524,7 +526,7 @@ dead_fps=9
 portx=0
 porty=88
 
-inert=1
+bldg=other
 los=10
 hp=20
 dir=-1
@@ -550,7 +552,7 @@ portx=17
 porty=80
 portw=9
 
-inert=1
+bldg=farm
 los=0
 hp=10
 dir=-1
@@ -572,12 +574,42 @@ spider.prod={
 }
 queen.prod={
 	parse("t=6\nr=2\ng=3",ant),
+	parse([[
+t=5
+g=2]],parse([[
+portx=96
+porty=80
+portw=9
+]]),function()
+			carry_capacity=9
+		end
+	),
 }
 spden.prod={
 	parse("t=8\nr=3\ng=4",spider),
+	parse([[
+t=5
+g=2]],parse([[
+portx=96
+porty=72
+portw=9
+]]),function()
+			spider[1].atk+=1
+		end
+	),
 }
 btden.prod={
 	parse("t=8\ng=4\nb=3",beetle),
+	parse([[
+t=5
+g=2]],parse([[
+portx=96
+porty=72
+portw=9
+]]),function()
+			beetle[1].atk+=1
+		end
+	),
 }
 
 mound.prod={
@@ -935,7 +967,7 @@ function tick_unit(u)
 		u.dead,u.st,u.sel=
 			fps,{t="dead"}
 		del(selection,u)
-		if typ.inert then
+		if typ.bldg then
 			register_bldg(u)
 		end
 		if u.p==1 then
@@ -1257,7 +1289,7 @@ function aggress(u)
 	for e in all(units) do
 		if e.p!=u.p and not e.dead then
 			local typ=u.typ[u.p]
-			local r=typ.inert and typ.range or typ.los
+			local r=typ.bldg and typ.range or typ.los
 			if dist(e.x-u.x,e.y-u.y)<=r then
 				attack(u,e)
 				break
@@ -1332,7 +1364,9 @@ function mine(u)
 	elseif fps==u.st.fps then
 		collect(u)
 		mine_res(x,y,r)
-		if (u.res.qty==9) drop(u,r)
+		if u.res.qty==carry_capacity then
+			drop(u,r)
+		end
 	end
 end
 
@@ -1508,12 +1542,6 @@ function surrounding_tiles(x,y,n,maxx,maxy,cut)
 	return st
 end
 
-function res2flag(res_typ)
- if (res_typ=="r") return 2
- if (res_typ=="g") return 3
- return 4
-end
-
 function tile2res(x,y)
  local tile=mget(x,y)
  if (fget(tile,2)) return "r"
@@ -1549,21 +1577,19 @@ function can_gather()
 end
 
 function can_attack()
-	if not (
-		vget(mx,my) and
+	if	vget(mx,my) and
 		hoverunit and
 	 hoverunit.p!=1
-	) then
-		return
-	end
-	for u in all(selection) do
-		if (u.typ.atk) return true
+	then
+		for u in all(selection) do
+			if (u.typ.atk) return true
+		end
 	end
 end
 
 function can_build()
 	return hoverunit and
-		hoverunit.typ.inert and
+		hoverunit.typ.bldg and
 		hoverunit.p==1 and
 		(hoverunit.const or
 			hoverunit.hp<hoverunit.typ.hp
@@ -1572,13 +1598,12 @@ function can_build()
 end
 
 function rectaround(u,c)
-	local w=u.typ.fw or u.typ.w
-	local h=u.typ.h
+	local w,h=u.typ.w,u.typ.h
 	rect(
 		u.x-ceil(w/2)-1,
 		u.y-ceil(h/2)-1,
-		u.x+ceil(w/2)-1,
-		u.y+ceil(h/2)-1,
+		u.x+ceil(w/2),
+		u.y+ceil(h/2),
 		c
 	)
 end
@@ -1646,20 +1671,14 @@ function buildable()
 	)
 end
 
-function bldg_type(b)
-	if (b.dead) return
-	if (b.const) return bldg_const
-	if (b.typ==mound) return bldg_drop
-	if (b.typ==farm) return bldg_farm
-	return bldg_other
-end
-
 function register_bldg(b)
 	local typ=b.typ
 	local w,h,x,y=typ.w,typ.h,
 		flr((b.x-2)/8),flr((b.y-2)/8)
 
-	local v=bldg_type(b)
+	local v=not b.dead and
+		(b.const and bldg_const or
+		b.typ.bldg)
 	s(bldgs,x,y,v)
 	if (w>8) s(bldgs,x+1,y,v)
 	if (h>8) s(bldgs,x,y+1,v)
@@ -1701,7 +1720,7 @@ end
 --get_wayp
 
 function get_wayp(u,x,y,enter)
-	if (u.typ.inert) return
+	if (u.typ.bldg) return
  local destx,desty,wayp,n=
  	flr(x/mvtile),
  	flr(y/mvtile),
@@ -1944,7 +1963,7 @@ function can_pay(costs)
  return res.r>=(costs.r or 0) and
  	res.g>=(costs.g or 0) and
  	res.b>=(costs.b or 0) and
- 	(costs.typ.inert or res.p>=1)
+ 	(costs.typ.bldg or res.p>=1)
 end
 
 function draw_port(
@@ -2046,7 +2065,7 @@ function single_unit_section()
 	if (sel1.p!=1) return
 	
 	if #selection==1 and r then
-		for i=0,8 do
+		for i=0,carry_capacity-1 do
 			local col,xx,yy=
 				5,
 				20+(i%3)*3,
@@ -2076,7 +2095,7 @@ function single_unit_section()
 				b,
 				function()
 					if (not can_pay(b)) return
-					if b.typ.inert then
+					if b.typ.bldg then
 						to_build=b
 						return
 					end
@@ -2466,14 +2485,14 @@ fff77fffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 444044404504400050500050502222dddd0444044400000000000000000000000000000000000000440444440000000000a44450000000000000000000000000
 05050405505005000005050000505050500050504050000000000000000000000000000000000000000044000000000000a44050000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000050000000000000000000000000000
-0000b000eee7eeeee000000000000000000000000000000000000000000000000000000004000666004000000000000000000000000000000000000000000000
-000b3500eee7ee6ee000870000000000000000000000000000000000000000000000000044000006004400000000000000000000000000000000000000000000
-00b33350ee6e77e6e087887800000000000000000000000000000000000000000000000004000066444440440000000000000000000000000000000000000000
-0b444445e6e76e7ee078888800000000000000000000000000000000000000000000000004400006404400004000000000000000000000000000000000000000
-00411d40eee7e676e343775334000000000000000000000000000000000000000000000004000666404000404000000000000000000000000000000000000000
-00411d40e77e77eee453773345000000000000000000000000000000000000000000000000000000400004404000000000000000000000000000000000000000
-00444440eee6ee7ee532772453000000000000000000000000000000000000000000000000000000044044444000000000000000000000000000000000000000
-00044400eeeeeee7e342222534000000000000000000000000000000000000000000000000000000000004400000000000000000000000000000000000000000
+0000b000eee7eeeee000000000000000000000000000000000000000000000000000000004000666004000000000000000555550000000000000000000000000
+000b3500eee7ee6ee000870000000000000000000000000000000000000000000000000044000006004400000000000005500055000000000000000000000000
+00b33350ee6e77e6e087887800000000000000000000000000000000000000000000000004000066444440440000000050000000500000000000000000000000
+0b444445e6e76e7ee078888800000000000000000000000000000000000000000000000004400006404400004000000050880bb0500000000000000000000000
+00411d40eee7e676e34377533400000000000000000000000000000000000000000000000400066640400040400000005488bbb4500000000000000000000000
+00411d40e77e77eee453773345000000000000000000000000000000000000000000000000000000400004404000000057949494500000000000000000000000
+00444440eee6ee7ee532772453000000000000000000000000000000000000000000000000000000044044444000000077749494500000000000000000000000
+00044400eeeeeee7e342222534000000000000000000000000000000000000000000000000000000000004400000000007555555000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000010001066000000400000000000000000000000000000000000000000
 00500050000000000000000000000000000000000000000000000000000000000000000001010000000000000000000000000000000000000000000000000000
 0575057500000000000000000000000000000000000000000000000000000000000000000c1c0006000000000000000000000000000000000000000000000000
