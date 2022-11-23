@@ -840,9 +840,7 @@ function handle_click()
 		--minimap
 		if dx>=0 and dy>=0 and
 			dx<mmw and dy<mmh+1	then
-			local xoff,yoff,x,y=
-				128/(mapw/128),
-				128/(maph/128),
+			local x,y=
 				dx/mmw*mapw,
 				dy/mmh*maph
 			if btnp(4) and sel1 then
@@ -854,8 +852,8 @@ function handle_click()
 			elseif lclick then
 				--move camera
 				cx,cy=
-					mid(0,x-xoff,mapw-128),
-				 mid(0,y-yoff,maph-128+menuh)
+					mid(0,x-64,mapw-128),
+				 mid(0,y-64,maph-128+menuh)
 			end
 		end
 		if (lclick) to_build=nil
@@ -2035,10 +2033,12 @@ function draw_port(
 	
 	if onclick then
 		add(buttons,{
-			r={x,y,x+10,y+10},
-			handle=onclick,hover=costs
+			r={x,y,x+10,y+8},
+			handle=onclick,
+			costs=costs,
 		})
 	end
+
 	y+=11
 	if u or prog then
 		local lw=10
@@ -2138,13 +2138,12 @@ function single_unit_section()
 				y+flr(i/4)*11,
 				b,
 				function()
-					if (not can_pay(b)) return
-					if b.typ.bldg then
-						to_build=b
+					if not can_pay(b) or q and
+						(q.b!=b or b.tech) then
 						return
 					end
-					if q and
-						(q.b!=b or b.tech) then
+					if b.typ.bldg then
+						to_build=b
 						return
 					end
 					pay(b,-1)
@@ -2195,18 +2194,18 @@ function draw_menu()
 	line(len+1,122,len+1,128)
 	draw_res(res,1,122,2)
 	
-	if hovbtn and hovbtn.hover then
-		local b,h=hovbtn.hover,8
+	if hovbtn and hovbtn.costs then
 		local pop=res.p<1 and
-			b.typ.unit
-		local len=
-			draw_res(b,0,150,1,true,pop)
+			hovbtn.costs.typ.unit
+		local len=draw_res(
+		 hovbtn.costs,0,150,1,true,pop)
 		local x,y=
 			hovbtn.r[1]-(len-10)/2,
-			hovbtn.r[2]-h
-		rectfill(x,y,x+len,y+h,7)
-		rect(x,y,x+len+1,y+h,1)
-		draw_res(b,x+2,y+2,1,true,pop)
+			hovbtn.r[2]-8
+		rectfill(x,y,x+len,y+8,7)
+		rect(x,y,x+len+1,y+8,1)
+		draw_res(hovbtn.costs
+		 ,x+2,y+2,1,true,pop)
 	end
 end
 
