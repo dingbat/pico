@@ -78,8 +78,6 @@ function _draw()
 	if (hilite) draw_hilite()
 		
 	camera()
-
-	--draw_dmap("d")
 	
 	draw_menu()
 	draw_to_build()
@@ -204,7 +202,7 @@ move_fps=30
 gather_x=8
 gather_y=8
 gather_fr=2
-gather_fps=30
+gather_fps=15
 
 build_x=40
 build_y=8
@@ -615,9 +613,9 @@ b=0
 ]],ant),
 
 	parse([[
-t=5
+t=10
 r=0
-g=2
+g=12
 b=0
 ]],parse([[
 portx=96
@@ -992,12 +990,10 @@ function handle_input()
  mx,my=amx+cx,amy+cy
  
  for b in all(buttons) do
-		if (
-			amx>=b.x and amx<=b.x+b.w and
-			amy>=b.y and amy<=b.y+b.h
-		) then
+ 	if intersect(b.r,
+ 		{amx,amy,amx,amy},1) then
 			hovbtn=b
-		end
+ 	end
 	end
  
  handle_click()
@@ -1536,33 +1532,26 @@ end
 
 function intersect(r1,r2,e)
 	e=e or 0
-	--if (r1.x) r1=u_rect(r1)
-	--if (r2.x) r2=u_rect(r2)
 	return r1[1]-e<r2[3] and
 		r1[3]+e>r2[1] and
 		r1[2]-e<r2[4] and
 		r1[4]+e>r2[2]
 end
 
---[[function p2r(x,y,o1,o2)
-	o1,o2=o1 or 0,o2 or 0
-	return {x+o1,y+o1,x+o2,y+o2}
-end]]
-
 function u_rect(u)
+	local w2,h2=u.typ.w/2,u.typ.h/2
  return {
- 	u.x-u.typ.w/2,u.y-u.typ.h/2,
- 	u.x+u.typ.w/2,u.y+u.typ.h/2
+ 	u.x-w2,u.y-h2,
+ 	u.x+w2,u.y+h2
  }
 end
 
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
- if a0>b0 then
-  return a0*0.9609+b0*0.3984
- end
- return b0*0.9609+a0*0.3984
+ return a0>b0 and
+ 	a0*0.9609+b0*0.3984 or
+  b0*0.9609+a0*0.3984
 end
 
 --[[function fmget(x,y,f)
@@ -1987,17 +1976,18 @@ f33=12
 function draw_res(rsc,x,y,s,hide_0,pop_icon)
 	for i=1,#resorder do
 		local r=resorder[i]
-		local v=rsc[r]
+		local v=rsc[r] or ""
 		if v!=0 or not hide_0 then
-			if v or pop_icon then
-				if not v or res[r]<v then
+			if v!="" or pop_icon then
+				if v=="" or res[r]<v then
 					rectfill(x-1,y-1,
-						x+i==4 and 3 or 7,y+5,10)
+						x+3+#tostr(v)*4,y+5,
+						10)
 				end
 				spr(129+i,x,y)
 				x+=4+flr(i/4)
 			end
-			if v then
+			if v!="" then
 				x=print(v,x,y,rescol[r])+s
 				if not hide_0 and i==3 then
 					line(x-1,y-1,x-1,y+5,5)
@@ -2013,7 +2003,16 @@ function can_pay(costs)
  return res.r>=costs.r and
  	res.g>=costs.g and
  	res.b>=costs.b and
- 	(costs.typ.bldg or res.p>=1)
+ 	(not costs.typ.unit or res.p>=1)
+end
+
+function pay(costs,dir)
+ res.r+=costs.r*dir
+	res.g+=costs.g*dir
+	res.b+=costs.b*dir
+	if costs.typ.unit then
+		res.p+=dir
+	end
 end
 
 function draw_port(
@@ -2036,7 +2035,7 @@ function draw_port(
 	
 	if onclick then
 		add(buttons,{
-			x=x,y=y,w=10,h=10,
+			r={x,y,x+10,y+10},
 			handle=onclick,hover=costs
 		})
 	end
@@ -2148,10 +2147,7 @@ function single_unit_section()
 						(q.b!=b or b.tech) then
 						return
 					end
-					res.r-=b.r
-					res.g-=b.g
-					res.b-=b.b
-					res.p-=1
+					pay(b,-1)
 					if q then
 						q.qty+=1
 					else
@@ -2167,10 +2163,7 @@ function single_unit_section()
 			local b,qty,x=q.b,q.qty,20
 			draw_port(b.typ,x,y+1,nil,
 				function()
-					res.r+=b.r
-					res.g+=b.g
-					res.b+=b.b
-					res.p+=1
+					pay(b,-1)
 					if qty==1 then
 						sel1.q=nil
 					else
@@ -2183,19 +2176,8 @@ function single_unit_section()
 	end
 end
 
-function sections()
-	if sel_typ then
-		if sel_typ.has_q then
-  	return {17,24,61,26}
- 	elseif sel_typ.prod then
-  	return {35,67,26}
-  end
-	end
-	return {102,26}
-end
-
 function draw_menu()
- draw_menu_bg(sections())
+ draw_menu_bg()
  if sel_typ then
 		single_unit_section()
 	else
@@ -2217,33 +2199,41 @@ function draw_menu()
 		local b,h=hovbtn.hover,8
 		local pop=res.p<1 and
 			b.typ.unit
-		local len=draw_res(
-			b,0,150,1,true,pop
-		)
+		local len=
+			draw_res(b,0,150,1,true,pop)
 		local x,y=
-			hovbtn.x-(len-hovbtn.w)/2,
-			hovbtn.y-h		
+			hovbtn.r[1]-(len-10)/2,
+			hovbtn.r[2]-h
 		rectfill(x,y,x+len,y+h,7)
 		rect(x,y,x+len+1,y+h,1)
 		draw_res(b,x+2,y+2,1,true,pop)
 	end
 end
 
-function draw_menu_bg(secs)
- local x,y=0,menuy
+function draw_menu_bg()
+ local x,secs,modstart=
+ 	0,{102,26},1
+ if sel_typ then
+		if sel_typ.has_q then
+  	secs={17,24,61,26}
+ 	elseif sel_typ.prod then
+  	secs,modstart={35,67,26},0
+  end
+	end
  for i=1,#secs do
- 	local mod=i%2==(#secs==3 and 0 or 1)
- 	local c,sp,s=
- 		mod and 15 or 4,
+ 	local mod=i%2==modstart
+ 	local sp,xx=
  		mod and 129 or 128,
- 		secs[i]
- 	local xx=x+s-4
- 	spr(sp,x,y)
- 	spr(sp,xx-4,y)
- 	line(x+3,y+1,xx,y+1,7)
- 	rectfill(x+3,y+2,xx,y+4,c)
- 	rectfill(x,y+4,x+s,y+menuh+3)
- 	x+=s
+ 		secs[i]+x-4
+ 	--104="y"=menuy
+ 	spr(sp,x,104)
+ 	spr(sp,xx-4,104)
+ 	line(x+3,105,xx,105,7)
+ 	rectfill(x+3,106,xx,108,
+ 		mod and 15 or 4)
+ 	xx+=4
+ 	rectfill(x,108,xx,128)
+ 	x=xx
  end
  --assert(x==128)
 end
@@ -2280,32 +2270,28 @@ spider takes time to eat them.
 
 ]]
 -->8
---djikstra maps
+--dmaps
 
 r=mapw/8
 
 function dmap_find(u,key)
-	local x,y=flr(u.x/8),flr(u.y/8)
-	local dmap=dmaps[key]
-	local wayp={}
-	while true do
-		local n=g(dmap,x,y)
+	local x,y,dmap,wayp,lowest=
+		flr(u.x/8),
+		flr(u.y/8),
+		dmaps[key],
+		{},9
+	while lowest>=1 do
 		local ts=surrounding_tiles(
-			x,y,1,mapw/8,maph/8
-		)
-		local lowest=n
+				x,y,1,mapw/8,maph/8)
 		for t in all(ts) do
 			local w=g(dmap,t[1],t[2])
 			if (t.diag) w+=0.4
 			if w<lowest then
-				x=t[1]
-				y=t[2]
-				lowest=w
+				x,y,lowest=t[1],t[2],w
 			end
 		end
-		if (lowest>=n) return nil
+		if (lowest>=6) return
 		add(wayp,{x*8+3,y*8+3})
-		if (lowest<1) break
 	end
 	return wayp,x,y
 end
@@ -2351,56 +2337,55 @@ function make_dmaps()
 	}
 end
 
-function make_dmap(resf)
-	local dmap={}
-	local closed,start,open={},{},{}
+--based off
+--https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
 
-	--1st pass
-	for i=0,(mapw/8*maph)-1 do
-		local x,y=i%r,flr(i/r)
-		closed[i+1]=false
-		dmap[i+1]=9
+function make_dmap(resf)
+	local dmap,closed,start,open,c=
+	 {},{},{},{},1
+
+	--initialize start
+	for i=1,mapw/8*maph do
+		local x,y=(i-1)%r,flr((i-1)/r)
+		closed[i],dmap[i]=false,9
 		if
 			sur_acc(x,y) and
 			(
-		 	(resf=="d" and g(bldgs,x,y)==bldg_drop) or
-		 	(resf!="d" and fget(mget(x,y),resf))
+		 	resf=="d" and 
+		 		g(bldgs,x,y)==bldg_drop or
+		 	resf!="d" and 
+		 		fget(mget(x,y),resf)
 		 )	
 		then
-			closed[i+1]=true
-			dmap[i+1]=0
+			closed[i],dmap[i]=true,0
 			add(start,{x,y})
 		elseif not acc(x,y) then
-		 closed[i+1]=true
+		 closed[i]=true
 		end
 	end
 	
-	--2nd pass
+	--create initial open list
 	for st in all(start) do
 		add_neigh(open,closed,st[1],st[2])
 	end
 	
- --3rd pass
-	local c=1
- while c<6 and #open>0 do
+ --flood
+ while c<7 do
  	local nxt_open={}
  	for op in all(open) do
  		s(dmap,op[1],op[2],c)
- 		add_neigh(nxt_open,closed,op[1],op[2])
+ 		if c<6 then
+	 		add_neigh(nxt_open,closed,op[1],op[2])
+ 		end
  	end
  	open=nxt_open
  	c+=1
  end
- 
- --last pass
- for op in all(open) do
-		s(dmap,op[1],op[2],c)
-	end
 	
 	return dmap
 end
-
---[[function draw_dmap(res_typ)
+--[[
+function draw_dmap(res_typ)
 	local dmap=dmaps[res_typ]
  for x=0,16 do
 		for y=0,16 do
@@ -2409,6 +2394,11 @@ end
 			print(n==0 and "-" or n,x*8,y*8,9)
 	 end
 	end
+end
+draw=_draw
+_draw=function()
+	draw()
+	draw_dmap("d")
 end]]
 -->8
 --init
@@ -2422,8 +2412,8 @@ units={
 	unit(ant,qx*8-8,qy*8,1),
 	unit(ant,qx*8+20,qy*8+3,1),
 	unit(ant,qx*8+2,qy*8-8,1),
-	--unit(spider,48,26,1),
-	unit(warant,58,30,1),
+	unit(spider,48,26,1),
+	--unit(warant,58,30,1),
 	--unit(beetle,40,36,1),
 	--unit(beetle,60,76,2),
 	unit(beetle,65,81,2),
@@ -2572,14 +2562,14 @@ __gff__
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007070b0b13130121012121000000000007070b0b13132121212121000000000007070b0b131301210101010000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000707070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007070707070707070700000000
 __map__
-545454545454544f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+54545454545454554c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 545454525054545f5c5d53535c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5454515454546e6f6c535253536d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 545255547c7d7e507c535052537d7e7f7c7d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5452554f4c7b4e4f4c5352534c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5454555f5c5d5e5f5c5d53535c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5454555f5c5d7e5f5c5d53535c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5454546f51516e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-547d7e7f7c7d7e6b7c517e7f56575757587d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+54557e7f7c7d7e6b7c517e7f56575757587d7e7f7c7d7e7f7c7d7e7f7c7d7e7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4c4d4e4f5252534f4c4d4e4f66676767684d4e4f4c4d4e4f4c4d4e4f4c4d4e4f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5c5d5e525052535f5c5d56576a676767685d5e5f5c5d5e5f5c5d5e5f5c5d5e5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 6c6d52525352526f6c6d666767676767686d6e6f6c6d6e6f6c6d6e6f6c6d6e6f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
