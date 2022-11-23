@@ -80,7 +80,7 @@ function _draw()
 	camera()
 	
 	draw_menu()
-	draw_to_build()
+	if (to_build) draw_to_build()
 	
 	if hilite and hilite.px then
 		circ(hilite.px,hilite.py,2,8)
@@ -102,7 +102,7 @@ function _update()
 		fps=0
  end
  
- hilite,hovbtn=hilite and
+ hilite=hilite and
  	t()-hilite.t<0.5 and hilite
 	
  handle_input()
@@ -123,6 +123,8 @@ function _update()
 	end
 	sel1=selection[1]
 	for s in all(selection) do
+		--must explicitly check for
+		--nil bc it can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end
@@ -145,22 +147,21 @@ function draw_hilite()
 end
 
 function draw_to_build()
-	if to_build then
-		local typ=to_build.typ
- 	local w,h,x,y=typ.w,typ.h,
-			to_build.x-cx,to_build.y-cy
-			
-		if amy>=menuy then
-			x,y=amx-3,amy-3
-		else
-			rectfill(
-	 		x-1,y-1,
-	 		x+w,y+h,
-	 		buildable() and 3 or 8
-	 	)
-	 end
- 	sspr(typ.rest_x,typ.rest_y,w,h,x,y)
-	end
+	local typ=to_build.typ
+	local w,h,x,y=typ.w,typ.h,
+		to_build.x-cx,to_build.y-cy
+		
+	if amy>=menuy then
+		x,y=amx-3,amy-3
+	else
+		rectfill(
+ 		x-1,y-1,
+ 		x+w,y+h,
+ 		buildable() and 3 or 8
+ 	)
+ end
+	sspr(typ.rest_x,typ.rest_y,
+	 w,h,x,y)
 end
 -->8
 --unit defs/states
@@ -982,7 +983,7 @@ function handle_input()
  end
  
  --mouse-based calculations
- mx,my=amx+cx,amy+cy
+ mx,my,hovbtn=amx+cx,amy+cy
  if to_build then
 	 to_build.x,to_build.y=
 	 	flr(mx/8)*8,flr(my/8)*8
@@ -1239,6 +1240,7 @@ function draw_unit(u)
 		x+=p<0.5 and w*2 or w
 		if (u.const<=1) return
 	elseif ut==farm then
+	 --in case of emergency
 		--x=ut[u.res.qty..u.exp..u.ready]
 		local q=u.res.qty
 		x=u.exp and 72 or
@@ -1265,7 +1267,11 @@ function draw_unit(u)
 	if not u.dead and ut.fire and u.hp<=ut.hp/2 then
 		spr(230+fps/20,u.x-3,u.y-8)
 	end
-	if (sel and u.rx) draw_rally(u)
+	--rally pt
+	if sel and u.rx then
+		spr(70+(fps/5)%3,
+			u.rx-2,u.ry-5)
+	end
 
 	--[[pset(u.x,u.y,14)
 	if u.st.wayp then
@@ -1349,19 +1355,22 @@ function aggress(u)
 end
 
 function fight(u)
-	local e,in_range=u.st.target
-	if u.typ.range then
-		in_range=dist(e.x-u.x,e.y-u.y)<=u.typ[u.p].range
+	local typ,e,in_range=
+		u.typ[u.p],u.st.target
+	local d=dist(e.x-u.x,e.y-u.y)
+	if typ.range then
+		in_range=d<=typ.range
 		if in_range and fps%30==0 then
  		add(proj,{
  			from_unit=u,
- 			x=u.x-u.dir*u.typ.proj_xo,
- 			y=u.y+u.typ.proj_yo,
+ 			x=u.x-u.dir*typ.proj_xo,
+ 			y=u.y+typ.proj_yo,
  			to={e.x,e.y},to_unit=e,
  		})
  	end
  else
- 	in_range=intersect(u_rect(u),u_rect(e),1)
+ 	in_range=intersect(u_rect(u),
+ 	 u_rect(e),1)
 		if in_range and fps%30==0 then
 		 deal_dmg(u,e)
 		end
@@ -1369,7 +1378,9 @@ function fight(u)
  if in_range then
 		u.st.wayp=nil
 		u.dir=sgn(e.x-u.x)
-	elseif fps%30==0 then
+	elseif fps%30==0 and 
+		typ.los>=d then
+		--pursue enemy
  	attack(u,e)
  	deli(u.st.wayp,1)
  end
@@ -1459,8 +1470,8 @@ function check_target_col(u)
 		t and
 		intersect(u_rect(u),u_rect(t))
 	) then
-		u.dir=sgn(t.x-u.x)
-		st.active=true
+		u.dir,st.active=
+			sgn(t.x-u.x),true
 		if st.t=="harvest" then
 			if (st.farm.exp)	rest(u)	
 		else
@@ -1480,7 +1491,7 @@ function check_target_col(u)
 			if st.farm then
 				harvest(u,st.farm)
 			elseif (
-				not u.st.nxt or
+				not st.nxt or
 				not mine_nxt_res(u,st.nxt)
 			) then
 				rest(u)
@@ -1511,10 +1522,6 @@ function step(u)
 			end
  	end
  end
-end
-
-function draw_rally(u)
-	spr(70+(fps/5)%3,u.rx-2,u.ry-5)
 end
 -->8
 --utils
