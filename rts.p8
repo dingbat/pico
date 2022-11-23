@@ -863,14 +863,12 @@ function handle_click()
  --left click places building
  if lclick and to_build then
   if (not buildable()) return
- 	res.r-=to_build.r
-		res.g-=to_build.g
-		res.b-=to_build.b
+  pay(to_build,-1)
 		local typ=to_build.typ
 		local w,h,x,y=
 			typ.w,typ.h,
 		 to_build.x,to_build.y
-		local new=unit(
+		local new,to_build=unit(
 			typ,x+flr(w/2),
 			y+flr(h/2),
 			1,0)
@@ -881,8 +879,6 @@ function handle_click()
 		for u in all(selection) do
 		 build(u,new)
 		end
-		
-	 to_build=nil
  end
  
 	--left drag makes selbox
@@ -956,10 +952,10 @@ end
 
 function pan(dx,dy)
 	if dpad and not btn(4) and (
-	 (dx>0 and amx!=126) or
-	 (dx<0 and amx!=0) or
-	 (dy>0 and amy!=126) or
-	 (dy<0 and amy!=0)
+	 dx>0 and amx!=126 or
+	 dx<0 and amx!=0 or
+	 dy>0 and amy!=126 or
+	 dy<0 and amy!=0
 	)
 	 then
 		amx,amy=
@@ -973,7 +969,6 @@ function pan(dx,dy)
 end
 
 function handle_input()
- --arrow keys (map scroll)
  if(btn(⬅️)or btn(⬅️,1))pan(-2,0)
  if(btn(⬆️)or btn(⬆️,1))pan(0,-2)
  if(btn(➡️)or btn(➡️,1))pan(2,0)
@@ -985,8 +980,13 @@ function handle_input()
 	 	mid(0,stat(32),126),
 		 mid(-1,stat(33),126)
  end
- mx,my=amx+cx,amy+cy
  
+ --mouse-based calculations
+ mx,my=amx+cx,amy+cy
+ if to_build then
+	 to_build.x,to_build.y=
+	 	flr(mx/8)*8,flr(my/8)*8
+	end
  for b in all(buttons) do
  	if intersect(b.r,
  		{amx,amy,amx,amy},1) then
@@ -995,21 +995,15 @@ function handle_input()
 	end
  
  handle_click()
- 
- if to_build then
-	 to_build.x,to_build.y=
-	 	flr(mx/8)*8,flr(my/8)*8
-	end
 end
 
 function update_sel(u)
 	u.sel=intersect(selbox,u_rect(u))
  if u.sel then
- 	local t=u.typ
 		if u.p!=1 then
 			enemy_sel={u}
-		elseif t.unit then
-			if (not my_sel) my_sel={}
+		elseif u.typ.unit then
+			my_sel=my_sel or {}
 			add(my_sel,u)
 		else
 			bldg_sel={u}
@@ -1040,6 +1034,7 @@ function tick_unit(u)
 		return		
 	end
 	
+	--queen slowly regens
 	if u.typ==queen and
 		u.hp<typ.hp and
 		fps==0 then
@@ -1067,15 +1062,11 @@ function tick_unit(u)
 			mapw/fogtile,maph/fogtile
 		)
 		for t in all(st) do
-			local xx,yy,v=t[1],t[2],t[3]
-			if not v then
-				local mx=(xx+0.5)*fogtile
-				local my=(yy+0.5)*fogtile
-				local d=dist(u.x-mx,u.y-my)
-				v=d<typ.los
-			end
-			if v then
-				s(vizmap,xx,yy,true)
+			if dist(
+				u.x-(t[1]+0.5)*fogtile,
+				u.y-(t[2]+0.5)*fogtile
+			)<typ.los then
+				s(vizmap,t[1],t[2],true)
 			end
 		end
 	end
@@ -1581,11 +1572,8 @@ function surrounding_tiles(x,y,n,maxx,maxy,cut)
 	 			corner_cuttable(x,y,dx,dy)
 	 		)
 	 	then
-		 	local v=(
-		 		dx<2 and dx>-2 and
-		 		dy<2 and dy>-2)
 			 add(st,{
-			  xx,yy,v,
+			  xx,yy,
 			 	diag=(dx!=0 and dy!=0)
 			 })
 			end
