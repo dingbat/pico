@@ -24,7 +24,7 @@ carry_capacity=6
 
 units,restiles,dmaps,selection,
 	proj,bldgs={},{},{},{},{},{}
-res={r=10,g=10,b=10,p=2}
+res={r=4,g=6,b=0,p=2}
 
 function unit(typ,x,y,p,const)
  return {
@@ -779,7 +779,7 @@ function gather(u,tx,ty,wp)
 		t="gather",
 		tx=tx,
 		ty=ty,
-		res=tile2res(tx,ty),
+		res=f2res["f"..fget(mget(tx,ty))],
 		wayp=wp or
 			get_wayp(u,tx*8+3,ty*8+3,true),
 		target=target_tile(tx,ty),
@@ -869,7 +869,7 @@ function handle_click()
 		local w,h,x,y=
 			typ.w,typ.h,
 		 to_build.x,to_build.y
-		local new,to_build=unit(
+		local new=unit(
 			typ,x+flr(w/2),
 			y+flr(h/2),
 			1,0)
@@ -880,6 +880,7 @@ function handle_click()
 		for u in all(selection) do
 		 build(u,new)
 		end
+		to_build=nil
  end
  
 	--left drag makes selbox
@@ -984,10 +985,6 @@ function handle_input()
  
  --mouse-based calculations
  mx,my,hovbtn=amx+cx,amy+cy
- if to_build then
-	 to_build.x,to_build.y=
-	 	flr(mx/8)*8,flr(my/8)*8
-	end
  for b in all(buttons) do
  	if intersect(b.r,
  		{amx,amy,amx,amy},1) then
@@ -996,6 +993,13 @@ function handle_input()
 	end
  
  handle_click()
+ --should happen after click
+ --because click could be on a
+ --to_build
+ if to_build then
+	 to_build.x,to_build.y=
+	 	flr(mx/8)*8,flr(my/8)*8
+	end
 end
 
 function update_sel(u)
@@ -1468,7 +1472,8 @@ function check_target_col(u)
 	local t=st.target
 	if (
 		t and
-		intersect(u_rect(u),u_rect(t))
+		intersect(u_rect(t),u_rect(u),
+			st.t=="gather" and -3 or 0)
 	) then
 		u.dir,st.active=
 			sgn(t.x-u.x),true
@@ -1589,13 +1594,6 @@ function surrounding_tiles(x,y,n,maxx,maxy,cut)
 	return st
 end
 
-function tile2res(x,y)
- local tile=mget(x,y)
- if (fget(tile,2)) return "r"
- if (fget(tile,3)) return "g"
- if (fget(tile,4)) return "b"
-end
-
 function mine_nxt_res(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
@@ -1605,7 +1603,7 @@ function mine_nxt_res(u,res)
 end
 
 function is_res(x,y)
-	return fget(mget(mx/8,my/8),1)
+	return fget(mget(x/8,y/8),1)
 end
 
 function avail_farm()
@@ -1965,16 +1963,23 @@ f11=11
 f19=4
 f33=12
 ]])
+f2res=parse([[
+f7=r
+f11=g
+f19=b
+]])
 
-function draw_res(rsc,x,y,s,hide_0,pop_icon)
+function print_res(rsc,x,y,s,hide_0,pop)
 	for i=1,#resorder do
 		local r=resorder[i]
-		local v=rsc[r] or ""
+		local v=pop and i==4 and "" or flr(rsc[r])
+		local no_pop=v==0 and i==4
+		local xoff=no_pop and 6 or 3
 		if v!=0 or not hide_0 then
-			if v!="" or pop_icon then
-				if v=="" or res[r]<v then
-					rectfill(x-1,y-1,
-						x+3+#tostr(v)*4,y+5,
+			if v!="" or pop then
+				if v=="" or res[r]<v or no_pop then
+					rectfill(x-xoff/3,y-1,
+						x+xoff+#tostr(v)*4,y+5,
 						10)
 				end
 				spr(129+i,x,y)
@@ -2182,24 +2187,24 @@ function draw_menu()
 	draw_minimap()
 	
 	--resources
-	local len=draw_res(res,0,150,2)
+	local len=print_res(res,0,150,2)
 	rectfill(0,121,len,128,7)
+	print_res(res,1,122,2)
 	line(0,120,len-1,120,5)
 	pset(len,121)
 	line(len+1,122,len+1,128)
-	draw_res(res,1,122,2)
 	
 	if hovbtn and hovbtn.costs then
 		local pop=res.p<1 and
 			hovbtn.costs.typ.unit
-		local len=draw_res(
+		local len=print_res(
 		 hovbtn.costs,0,150,1,true,pop)
 		local x,y=
 			hovbtn.r[1]-(len-10)/2,
 			hovbtn.r[2]-8
 		rectfill(x,y,x+len,y+8,7)
 		rect(x,y,x+len+1,y+8,1)
-		draw_res(hovbtn.costs
+		print_res(hovbtn.costs
 		 ,x+2,y+2,1,true,pop)
 	end
 end
