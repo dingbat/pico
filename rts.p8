@@ -375,7 +375,7 @@ drop=1
 
 bldg=drop
 los=20
-range=15
+range=20
 hp=50
 proj_col=11
 proj_xo=-4
@@ -439,7 +439,7 @@ dead_fps=9
 
 bldg=drop
 los=5
-hp=100
+hp=30
 dir=-1
 const=12
 has_q=1
@@ -1064,7 +1064,7 @@ function tick_unit(u)
 	update_unit(u)
 	
 	--update viz
-	if u.p==1 then
+	if u.p==1 or u.st.t=="attack" and not u.st.wayp then
 		local x,y=flr(u.x/fogtile),
 			flr(u.y/fogtile)
 		local st=surrounding_tiles(
@@ -1075,7 +1075,7 @@ function tick_unit(u)
 			if dist(
 				u.x-(t[1]+0.5)*fogtile,
 				u.y-(t[2]+0.5)*fogtile
-			)<typ.los then
+			)<(u.p==1 and typ.los or 8) then
 				s(vizmap,t[1],t[2],true)
 			end
 		end
@@ -1225,6 +1225,10 @@ function draw_unit(u)
 		u.res and u.res.typ or ""
 	local w,h,stt,f=
 	 ut.fw or ut.w,ut.h,st.t,fps
+	if stt=="attack" and
+		not st.active then
+		stt="rest"
+	end
 	if (u.st.wayp) stt="move"
 	local xoff,yoff=
 		ut["xoff_"..res_typ] or 0,
@@ -1272,17 +1276,16 @@ function draw_unit(u)
 		col=9
 	end
 	pal(1,col)
-	sspr(x,y,w,h,u.x-w/2,u.y-h/2,w,h,u.dir==ut.dir)
+	local xx,yy=u.x-flr(w/2),
+		u.y-flr(h/2)
+	sspr(x,y,w,h,xx,yy,w,h,u.dir==ut.dir)
 	pal()
 	local hp=u.hp/u.typ.hp
-	if not u.dead and hp<0.5 then			
+	if not u.dead and hp<=0.5 then			
 	 if ut.fire then
 			spr(230+fps/20,u.x-3,u.y-8)
 		end
-		local w2=flr(w/2)
-		local x,y=u.x-w2,u.y-h/2-1
-	 line(x,y,x+w-1,y,8)
-		line(x,y,x+flr(w*hp),y,11)
+		bar(xx,yy-1,w,hp)
 	end
 
 	--[[pset(u.x,u.y,14)
@@ -1387,6 +1390,7 @@ function fight(u)
 		 deal_dmg(u,e)
 		end
  end
+ u.st.active=in_range
  if in_range then
 		u.dir,u.st.wayp=sgn(e.x-u.x)
 	elseif fps%30==0 and 
@@ -1766,6 +1770,12 @@ function can_renew_farm()
 		hoverunit.typ==farm and
 		hoverunit.exp
 end
+
+function bar(x,y,w,prog,fg,bg)
+	line(x,y,x+w,y,bg or 8)
+	line(x,y,x+flr(w*prog),y,
+		fg or 11)
+end
 -->8
 --get_wayp
 
@@ -2042,13 +2052,12 @@ function draw_port(
 		})
 	end
 
-	y+=11
 	if u or prog then
-		line(x,y,x+10,y,
-			prog and 5 or 8)
-		line(x,y,
-			x+10*(prog or u.hp/u.typ.hp),
-			y,prog and 12 or 11)
+		bar(x,y+11,10,
+			prog or u.hp/u.typ.hp,
+			prog and 12,
+			prog and 5
+		)
 	end
 end
 
@@ -2419,7 +2428,11 @@ units={
 	--unit(warant,58,30,1),
 	--unit(beetle,40,36,1),
 	--unit(beetle,60,76,2),
+	unit(spider,65,81,2),
+		unit(warant,65,81,2),
+
 	unit(beetle,65,81,2),
+
 	--unit(tower,65,65,1)
 }
 s(bldgs,qx,qy,bldg_drop)
