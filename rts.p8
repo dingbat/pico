@@ -1824,16 +1824,16 @@ function get_wayp(u,x,y,enter)
  	destx,desty=nearest_acc(
 	 	destx,desty,u.x,u.y)
 	end
- for n in all(
- 	find_path({
+	local path,exists=find_path({
  		flr(u.x/mvtile),
  		flr(u.y/mvtile)},
- 		{destx,desty})) do
+ 		{destx,desty})
+ for n in all(path) do
  	add(wayp,
  		{n[1]*mvtile+4,
  		 n[2]*mvtile+4},1)
  end
- if enter or dest_acc then
+ if exists and (enter or dest_acc) then
  	add(wayp,{x,y})
  end
  return wayp
@@ -1938,7 +1938,7 @@ function find_path(start,goal)
    end
 
    -- we've found the shortest path
-   return p
+   return p,true
   end -- if
 
   -- consider each neighbor n of
