@@ -1288,12 +1288,13 @@ function draw_unit(u)
 		bar(xx,yy-1,w,hp)
 	end
 
-	--[[pset(u.x,u.y,14)
-	if u.st.wayp then
-		for wp in all(u.st.wayp) do
-			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
-		end
-	end]]
+	--ctrl-b to uncomment
+--	pset(u.x,u.y,14)
+--	if u.st.wayp then
+--		for wp in all(u.st.wayp) do
+--			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
+--		end
+--	end
 end
 
 function check_dead_target(u)
@@ -1706,6 +1707,8 @@ end
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0) and
+		--x>=0 and y>=0 and
+		--x<mapw/8 and y<maph/8 and
 		(not b or (not strict and (
 		b==bldg_farm or b==bldg_const
 	)))
@@ -1776,8 +1779,39 @@ function bar(x,y,w,prog,fg,bg)
 	line(x,y,x+flr(w*prog),y,
 		fg or 11)
 end
+
+function sur_acc(x,y)
+	return acc(x-1,y) or
+		acc(x+1,y) or
+		acc(x,y-1) or
+		acc(x,y+1)
+end
+
 -->8
 --get_wayp
+
+function nearest_acc(x,y,sx,sy)
+	for n=1,999 do
+		local best_t,best_d
+		for t in all(
+			surrounding_tiles(
+				x,y,n,mapw/8,maph/8)) do
+			if acc(unpack(t)) then
+				local d=dist(
+					t[1]*8+4-sx,
+					t[2]*8+4-sy
+				)
+				if not best_t or
+					d<best_d then
+					best_t,best_d=t,d
+				end
+			end
+		end
+		if best_t then
+			return unpack(best_t)
+		end
+	end
+end
 
 function get_wayp(u,x,y,enter)
 	if (u.typ.bldg) return
@@ -1785,18 +1819,21 @@ function get_wayp(u,x,y,enter)
  	flr(x/mvtile),
  	flr(y/mvtile),
  	{}
+	local dest_acc=acc(destx,desty)
+ if not dest_acc then
+ 	destx,desty=nearest_acc(
+	 	destx,desty,u.x,u.y)
+	end
  for n in all(
  	find_path({
  		flr(u.x/mvtile),
- 		flr(u.y/mvtile)
- 	},{destx,desty})) do
+ 		flr(u.y/mvtile)},
+ 		{destx,desty})) do
  	add(wayp,
  		{n[1]*mvtile+4,
  		 n[2]*mvtile+4},1)
  end
- if sur_acc(destx,desty) and (
- 	enter or acc(destx,desty)
- ) then
+ if enter or dest_acc then
  	add(wayp,{x,y})
  end
  return wayp
@@ -2331,14 +2368,7 @@ function add_neigh(to,closed,x,y)
 		end
 	end
 end
-
-function sur_acc(x,y)
-	return acc(x-1,y) or
-		acc(x+1,y) or
-		acc(x,y-1) or
-		acc(x,y+1)
-end
-
+	
 function make_dmaps()
 	dmaps={
 		r=make_dmap(2),
