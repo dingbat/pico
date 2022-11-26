@@ -65,7 +65,7 @@ function _draw()
 
 	draw_projectiles()
 	foreach(bf2,draw_unit)
-	draw_fow()
+--	draw_fow()
 	foreach(af,draw_unit)
 	
 	--rally flag
@@ -1741,7 +1741,14 @@ function register_bldg(b)
 	if (h>8) s(bldgs,x,y+1,v)
 	if (w>8 and h>8) s(bldgs,x+1,y+1,v)
 	if v!=bldg_farm and not b.const then
-		make_dmaps()
+		add_dmap_obs("r",x,y)
+		add_dmap_obs("g",x,y)
+		add_dmap_obs("b",x,y)
+		if v==bldg_drop then			
+			dmaps.d=make_dmap("d")
+		else
+			add_dmap_obs("d",x,y)
+		end
 	end
 end
 
@@ -1820,6 +1827,9 @@ function get_wayp(u,x,y,enter)
  	flr(y/mvtile),
  	{}
 	local dest_acc=acc(destx,desty)
+ --this if can be removed if oot
+ --as nearest_acc will return
+ --destx,desty if its acc anyway
  if not dest_acc then
  	destx,desty=nearest_acc(
 	 	destx,desty,u.x,u.y)
@@ -2320,7 +2330,7 @@ spider takes time to eat them.
 -->8
 --dmaps
 
-r=mapw/8
+r,dmap_limit=mapw/8,7
 
 function dmap_find(u,key)
 	local x,y,dmap,wayp,lowest=
@@ -2338,7 +2348,7 @@ function dmap_find(u,key)
 				x,y,lowest=t[1],t[2],w
 			end
 		end
-		if (lowest>=6) return
+		if (lowest>=dmap_limit) return
 		add(wayp,{x*8+3,y*8+3})
 	end
 	return wayp,x,y
@@ -2353,16 +2363,15 @@ function s(a,x,y,v,rows)
 end
 
 function add_neigh(to,closed,x,y)
-	local ts=surrounding_tiles(
+	for t in all(
+		surrounding_tiles(
 		x,y,1,mapw/8,maph/8,true
-	)
-	for t in all(ts) do
+	)) do
 		local xx,yy=t[1],t[2]
-		if (
-			not (x==xx and y==yy) and
-			acc(xx,yy) and
-			not g(closed,xx,yy)
-		) then
+		if
+			not g(closed,xx,yy) and
+			acc(xx,yy)
+		then
 			s(closed,xx,yy,true)
 			add(to,{xx,yy})
 		end
@@ -2371,17 +2380,43 @@ end
 	
 function make_dmaps()
 	dmaps={
-		r=make_dmap(2),
-		g=make_dmap(3),
-		b=make_dmap(4),
+		r=make_dmap("r"),
+		g=make_dmap("g"),
+		b=make_dmap("b"),
 		d=make_dmap("d"),
 	}
+end
+
+function add_dmap_obs(key,x,y)
+	local dmap=dmaps[key]
+	for t in all(
+		surrounding_tiles(x,y,1,
+			mapw/8,maph/8)) do
+		if (t[1]!=x or t[2]!=y) and
+			g(dmap,t[1],t[2])==
+    g(dmap,x,y) then
+				
+				s(dmap,x,y,9)
+				return true
+		end
+	end
+	--regen
+		printh("regenerating "..key,"log")
+	dmaps[key]=make_dmap(key)
 end
 
 --based off
 --https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
 
-function make_dmap(resf)
+key2res=parse([[
+r=2
+g=3
+b=4
+d=d
+]])
+
+function make_dmap(key)
+	local resf=key2res[key]
 	local dmap,closed,start,open,c=
 	 {},{},{},{},1
 
@@ -2396,7 +2431,9 @@ function make_dmap(resf)
 		 		g(bldgs,x,y)==bldg_drop or
 		 	resf!="d" and 
 		 		fget(mget(x,y),resf)
-		 )	
+		 )
+		 --optimization (not so great)
+		 --	and g(vizmap,x,y)
 		then
 			closed[i],dmap[i]=true,0
 			add(start,{x,y})
@@ -2411,11 +2448,11 @@ function make_dmap(resf)
 	end
 	
  --flood
- while c<7 do
+ while c<dmap_limit do
  	local nxt_open={}
  	for op in all(open) do
  		s(dmap,op[1],op[2],c)
- 		if c<6 then
+ 		if c<dmap_limit-1 then
 	 		add_neigh(nxt_open,closed,op[1],op[2])
  		end
  	end
@@ -2425,7 +2462,7 @@ function make_dmap(resf)
 	
 	return dmap
 end
---[[
+
 function draw_dmap(res_typ)
 	local dmap=dmaps[res_typ]
  for x=0,16 do
@@ -2439,8 +2476,8 @@ end
 draw=_draw
 _draw=function()
 	draw()
-	draw_dmap("d")
-end]]
+	draw_dmap("r")
+end
 -->8
 --init
 --init() func wastes tokens
