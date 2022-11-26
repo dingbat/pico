@@ -1729,23 +1729,35 @@ function buildable()
 end
 
 function register_bldg(b)
-	local typ=b.typ
+	local typ,upd,v=
+		b.typ,
+		not b.const,
+		not b.dead and
+		(b.const and bldg_const or
+		b.typ.bldg)
 	local w,h,x,y=typ.w,typ.h,
 		flr((b.x-2)/8),flr((b.y-2)/8)
 
-	local v=not b.dead and
-		(b.const and bldg_const or
-		b.typ.bldg)
+	add_building(v,x,y,upd)
+	if w>8 then
+		add_building(v,x+1,y,upd)
+		if h>8 then
+			add_building(v,x+1,y+1,upd)
+		end
+	end
+	if h>8 then
+		add_building(v,x,y+1,upd)
+	end
+end
+
+function add_building(v,x,y,up_dmap)
 	s(bldgs,x,y,v)
-	if (w>8) s(bldgs,x+1,y,v)
-	if (h>8) s(bldgs,x,y+1,v)
-	if (w>8 and h>8) s(bldgs,x+1,y+1,v)
-	if v!=bldg_farm and not b.const then
+	if v!=bldg_farm and up_dmap then
 		add_dmap_obs("r",x,y)
 		add_dmap_obs("g",x,y)
 		add_dmap_obs("b",x,y)
-		if v==bldg_drop then			
-			dmaps.d=make_dmap("d")
+		if v==bldg_drop then
+			add_dmap_sink("d",x,y)
 		else
 			add_dmap_obs("d",x,y)
 		end
@@ -2405,6 +2417,25 @@ function add_dmap_obs(key,x,y)
 	dmaps[key]=make_dmap(key)
 end
 
+function add_dmap_sink(key,x,y)
+	local dmap,fr,c=dmaps[key],
+		{},
+		1
+	s(dmap,x,y,0)
+	add_neigh(fr,{},x,y)
+	while #fr>0 do
+		local new_fr={}
+		for t in all(fr) do
+		 if g(dmap,t[1],t[2])>c then
+		 	s(dmap,t[1],t[2],c)
+		 	add_neigh(new_fr,{},t[1],t[2])
+		 end
+		end
+		fr=new_fr
+		c+=1
+	end
+end
+
 --based off
 --https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
 
@@ -2469,14 +2500,15 @@ function draw_dmap(res_typ)
 		for y=0,16 do
 			local n=g(dmap,x+flr(cx/8),y+flr(cy/8))
 			n=min(n,9)
-			print(n==0 and "-" or n,x*8,y*8,9)
+			print(n==0 and "" or n,
+				x*8+2,y*8+2,14)
 	 end
 	end
 end
 draw=_draw
 _draw=function()
 	draw()
-	draw_dmap("r")
+	draw_dmap("d")
 end
 -->8
 --init
