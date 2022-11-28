@@ -22,8 +22,8 @@ cx,cy,mx,my,fps=0,0,0,0,0
 farm_cycles=5
 carry_capacity=6
 
-units,restiles,dmaps,selection,
-	proj,bldgs={},{},{},{},{},{}
+units,restiles,selection,
+	proj,bldgs={},{},{},{},{}
 res={r=15,g=15,b=15,p=7}
 
 function unit(typ,x,y,p,const)
@@ -1072,13 +1072,17 @@ function handle_click()
  --right click
  if btnp(4) and sel1 and sel1.p==1 then
 	 local tx,ty=mx\8,my\8
+	 
 	 if can_renew_farm() then
+	 
 	 	hilite_hoverunit()
 	 	hoverunit.exp,
 	 		hoverunit.cycles=false,0
 	 	res.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
+	 	
 	 elseif can_gather() then
+	 
 	 	hilite={t=t(),tx=tx,ty=ty}
 	  for u in all(selection) do
 			 if avail_farm() then
@@ -1088,26 +1092,35 @@ function handle_click()
 			 	gather(u,tx,ty)
   		end
   	end
+  	
   elseif can_build() then
+  
   	for u in all(selection) do
   		build(u,hoverunit)
   	end
   	hilite_hoverunit()
+  	
 	 elseif can_attack() then
+	 
 	 	for u in all(selection) do
   		attack(u,hoverunit)
   	end
   	hilite_hoverunit()
+  	
   elseif can_drop() then
+  
 	 	for u in all(selection) do
 				drop(u,nil,hoverunit)
   	end
   	hilite_hoverunit()
+  	
   elseif sel1.typ.unit then
+  
 	 	for u in all(selection) do
 				move(u,mx,my)
   	end
   	hilite={t=t(),x=mx,y=my}
+  	
   elseif sel1.typ.prod then
   	--set rally
   	if is_res(mx,my) then
@@ -1246,11 +1259,11 @@ function tick_unit(u)
 	end
 	
 	if typ.unit and not u.st.wayp then
-		while g(pos,u.x/4,u.y/4) do
+		while g(pos,u.x\4,u.y\4) do
 			u.x+=rnd(2)-1
 			u.y+=rnd(2)-1
 		end
-		s(pos,u.x/4,u.y/4,1)
+		s(pos,u.x\4,u.y\4,true)
 	end
 end
 
@@ -1283,14 +1296,13 @@ end
 
 function darken(x,y)
 	fillp(▒)
-	rectfill(x-1,y-1,x+fogtile,y+fogtile,1)
+	rectfill(x-1,y-1,x+fogtile,y+fogtile,nil)
 	fillp()
-	rectfill(x,y,x+fogtile-1,y+fogtile-1,1)
+	rectfill(x,y,x+fogtile-1,y+fogtile-1,nil)
 end
 
 function draw_fow()
 	camera()	
-	pal(1,0)
 	for x=-fogtile,128,fogtile do
 	 for y=-fogtile,128,fogtile do
 	 	if
@@ -1305,15 +1317,13 @@ function draw_fow()
 	 	end
 	 end
 	end
-	pal()
 	camera(cx,cy)
 end
 
 function draw_minimap()
 	camera(-mmx,-mmy)
-	local tilew,tileh=
-		mapw/mmw,
-		maph/mmh
+	local tilew,tileh=mapw/mmw,
+	 maph/mmh
 	
 	--map tiles
 	for tx=0,mmw do
@@ -1340,17 +1350,15 @@ function draw_minimap()
 	end
 	
 	--fog
-	pal(1,0)
 	for tx=0,mmw do
 	 for ty=0,mmh do
 	 	if 
 	 		not vget(tilew*tx,tileh*ty)
 	 	then
-				pset(tx,ty,1)
+				pset(tx,ty,nil)
 			end
 	 end
 	end
-	pal()
 	
 	--current view area outline
 	local vx,vy=
@@ -1416,7 +1424,7 @@ function draw_unit(u)
 	
 	if u.const then
 		fillp(▒)
-		rectaround(u,12)
+		rectaround(u,u==sel1 and 9 or 12)
 		fillp()
 		local bx,by,p=
 			u.x-fw/2,
@@ -1791,7 +1799,7 @@ function mine_nxt_res(u,res)
 end
 
 function is_res(x,y)
-	return fget(mget(x/8,y/8),1)
+	return fget(mget(x\8,y\8),1)
 end
 
 function avail_farm()
@@ -1806,7 +1814,7 @@ function can_gather()
 		avail_farm()) and
 		sel_typ==ant and
 		vget(mx,my) and
-		sur_acc(mx/8,my/8)
+		sur_acc(mx\8,my\8)
 end
 
 function can_attack()
@@ -1914,7 +1922,7 @@ end
 function register_bldg(b)
 	local typ,upd,v=
 		b.typ,
-		not b.const,
+		not b.const and dmaps,
 		not b.dead and
 			(b.const and bldg_const or
 			b.typ.bldg)
@@ -1994,7 +2002,7 @@ end
 --get_wayp
 
 function nearest_acc(x,y,sx,sy)
-	for n=1,999 do
+	for n=0,999 do
 		local best_t,best_d
 		for t in all(
 			surrounding_tiles(x,y,n)) do
@@ -2010,35 +2018,27 @@ function nearest_acc(x,y,sx,sy)
 			end
 		end
 		if best_t then
-			return unpack(best_t)
+			return n==0,unpack(best_t)
 		end
 	end
 end
 
 function get_wayp(u,x,y,enter)
 	if (u.typ.bldg) return
- local destx,desty,wayp=
- 	x\mvtile,
- 	y\mvtile,
- 	{}
-	local dest_acc=acc(destx,desty)
- --this if can be removed if oot
- --as nearest_acc will return
- --destx,desty if its acc anyway
- if not dest_acc then
- 	destx,desty=nearest_acc(
-	 	destx,desty,u.x,u.y)
-	end
-	local path,exists=find_path({
- 		u.x\mvtile,
- 		u.y\mvtile},
- 		{destx,desty})
+ local wayp,d_acc,destx,desty=
+ 	{},
+ 	nearest_acc(
+ 		x\mvtile,y\mvtile,
+ 		u.x,u.y)
+	local path,exists=find_path(
+	 {u.x\mvtile,u.y\mvtile},
+ 	{destx,desty})
  for n in all(path) do
  	add(wayp,
  		{n[1]*mvtile+4,
  		 n[2]*mvtile+4},1)
  end
- if exists and (enter or dest_acc) then
+ if exists and (enter or d_acc) then
  	add(wayp,{x,y})
  end
  return wayp
@@ -2276,8 +2276,7 @@ function draw_port(
 	rect(x,y,x+10,y+9,
 		u and u.p!=1 and 2 or
 		cant_pay and 6 or
-		costs and
-		3 or 1
+		costs and 3 or 1
 	)
 	rectfill(x+1,y+1,x+9,y+8,
 		cant_pay and 7 or costs and
@@ -2417,18 +2416,17 @@ function single_unit_section()
 			)
 		end
 		if q then 
-			local b,qty,x=q.b,q.qty,20
-			draw_port(b.typ,x,y+1,nil,
+			draw_port(q.b.typ,20,y+1,nil,
 				function()
-					pay(b,1)
-					if qty==1 then
+					pay(q.b,1)
+					if q.qty==1 then
 						sel1.q=nil
 					else
 						q.qty-=1
 					end
-				end,q.t/b.t
+				end,q.t/q.b.t
 			)
-			print("\88"..qty,x+12,y+4,7)
+			print("\88"..q.qty,32,y+4,7)
 		end
 	end
 end
@@ -2526,8 +2524,7 @@ spider takes time to eat them.
 -->8
 --dmaps
 
-rows,dmap_limit,dmap_st=
-	mapw/4,7,{}
+rows,dmap_st=mapw/4,{}
 
 function dmap_find(u,key)
 	local x,y,dmap,wayp,lowest=
@@ -2544,42 +2541,42 @@ function dmap_find(u,key)
 				lowest,x,y=w,unpack(t)
 			end
 		end
-		if (lowest>=dmap_limit) return
+		if (lowest>=9) return
 		add(wayp,{x*8+3,y*8+3})
 	end
 	return wayp,x,y
 end
  
 function g(a,x,y,def)
-	return a[flr(x)+
-		flr(y)*rows+1] or def
+	return a[x+y*rows+1] or def
 end
 
 function s(a,x,y,v)
- a[flr(x)+flr(y)*rows+1]=v
+ a[x+y*rows+1]=v
 end
 
-function add_neigh(to,closed,x,y)
+function add_neigh(dmap,to,closed,x,y)
 	for t in all(
 		surrounding_tiles(x,y,1,true)
 	) do
 		local xx,yy=unpack(t)
-		if
-			not g(closed,xx,yy) and
-			acc(xx,yy)
-		then
-			s(closed,xx,yy,true)
-			add(to,{xx,yy})
+		if not g(closed,xx,yy) then
+			if acc(xx,yy) then
+				add(to,t)
+			else
+				s(dmap,xx,yy,9)
+			end
 		end
+		s(closed,xx,yy,true)
 	end
 end
 	
 function make_dmaps()
 	dmaps={
-		r=make_dmap("r"),
-		g=make_dmap("g"),
-		b=make_dmap("b"),
-		d=make_dmap("d"),
+		r=make_dmap"r",
+		g=make_dmap"g",
+		b=make_dmap"b",
+		d=make_dmap"d",
 	}
 end
 
@@ -2591,11 +2588,11 @@ function add_dmap_obs(key,x,y)
 			g(dmap,unpack(t))==
     g(dmap,x,y)
   then
-			s(dmap,x,y,nil)
+			s(dmap,x,y,9)
 			return
 		end
 	end
-	--regen
+	--cant update, must regen
 	dmaps[key]=make_dmap(key)
 end
 
@@ -2603,19 +2600,19 @@ function add_dmap_sink(key,x,y)
 	local dmap,fr,c=dmaps[key],
 		{},
 		1
-	s(dmap,x,y,0)
-	add_neigh(fr,{},x,y)
+	add_neigh(dmap,fr,{},x,y)
 	while #fr>0 do
 		local new_fr={}
 		for t in all(fr) do
-		 if c<g(dmap,t[1],t[2],-1) then
+		 if c<g(dmap,t[1],t[2],9) then
 		 	s(dmap,t[1],t[2],c)
-		 	add_neigh(new_fr,{},unpack(t))
+		 	add_neigh(dmap,new_fr,{},unpack(t))
 		 end
 		end
 		fr=new_fr
 		c+=1
 	end
+	s(dmap,x,y,0)
 end
 
 --based off
@@ -2654,12 +2651,7 @@ function make_dmap(key)
 
 	--initialize start
 	for i,t in pairs(starts) do
-		--closed[i],dmap[i]=false,9
-		if
-			sur_acc(unpack(t))
-		 --optimization (not so great)
-		 --	and g(vizmap,x,y)
-		then
+		if	sur_acc(unpack(t)) then
 			closed[i],dmap[i]=true,0
 			add(start,t)
 		elseif not acc(unpack(t)) then
@@ -2669,16 +2661,16 @@ function make_dmap(key)
 	
 	--create initial open list
 	for st in all(start) do
-		add_neigh(open,closed,unpack(st))
+		add_neigh(dmap,open,closed,unpack(st))
 	end
 	
  --flood
- while c<dmap_limit do
+ while c<9 do
  	local nxt_open={}
  	for op in all(open) do
  		s(dmap,op[1],op[2],c)
- 		if c<dmap_limit-1 then
-	 		add_neigh(nxt_open,closed,unpack(op))
+ 		if c<8 then
+	 		add_neigh(dmap,nxt_open,closed,unpack(op))
  		end
  	end
  	open=nxt_open
@@ -2701,7 +2693,7 @@ end
 --draw=_draw
 --_draw=function()
 --	draw()
---	draw_dmap("r")
+--	draw_dmap("d")
 --end
 -->8
 --init
@@ -2711,8 +2703,10 @@ end
 poke(0x5f2d,0x1|0x2)
 
 local qx,qy=6,5
+local q=unit(queen,
+	qx*8+9,qy*8+4,1)
 units={
-	unit(queen,qx*8+9,qy*8+4,1),
+	q,
 	unit(ant,qx*8-8,qy*8,1),
 	unit(ant,qx*8+20,qy*8+3,1),
 	unit(ant,qx*8+2,qy*8-8,1),
@@ -2732,16 +2726,15 @@ units={
 	--unit(beetle,40,36,1),
 	--unit(cat,40,36,1),
 
-	unit(beetle,60,76,2),
-	unit(spider,65,81,2),
-	unit(archer,70,84,2),
+--	unit(beetle,60,76,2),
+--	unit(spider,65,81,2),
+--	unit(archer,70,84,2),
 	--unit(beetle,65,81,2),
 	--unit(tower,65,81,2),
 
 	--unit(tower,65,65,1)
 }
-s(bldgs,qx,qy,bldg_drop)
-s(bldgs,qx+1,qy,bldg_drop)
+register_bldg(q)
 make_dmaps()
 
 menuitem(1,"turn mouse off",function()
@@ -2761,11 +2754,11 @@ __gfx__
 00000000000000000800000008000080000000000000000000000000000000000000000010050000000000000000000000000000000000000000000000000000
 000000000000000088000800880008800000000050000000000080000000000000000000115000000000000000000000000000000000000000d0000000000000
 11000000110001101100880011000110110001100110511081101100000000000000000003300000000000000000000000d00000000000000d00000000000000
-001111110011001100111111001100118011081100110011001100110000000000d000000011500000d00000000000100d000000000000003310000000000000
-0b0000000b0000b00400000004000040000000000000000000000000000000000d100000001300000d1000000001131133100000000000003311310000000000
-bb000b00bb000bb04400040044000440000000000000000000000000000000003311311331350000331131131131135033113113113113100011311311311310
+0011111100110011001111110011001180110811001100110011001100000000000000000011500000d00000000000100d000000000000003310000000000000
+0b0000000b0000b004000000040000400000000000000000000000000000000000d00000001300000d0000000001131133100000000000003311310000000000
+bb000b00bb000bb04400040044000440000000000000000000000000000000000d11311331350000331131131131135033113113113113100011311311311310
 1100bb00110001101100440011000110000000000000000000000000000000003311311331105000331131131130500000113113113113110505001311311311
-00111111001100110011111100110011000000000155000000000000000000000505005050500000050500505050000000505050505050500000005050505050
+00111111001100110011111100110011000000000155000000000000000000003305005050500000050500505050000000505050505050500000005050505050
 00000000000000000000000000000000000000000000000000000000000000000050500000000000000505000000000000000000000000000000000000000000
 05050500000000000000000000000000000000000000000000000000000000000501515000505050055015100000000000000000000000000000000000000000
 50151050050505000050505000505050005050500505050005050500000000000501515005015105500615150000000000000000000000000000000000000000
