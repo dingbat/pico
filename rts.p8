@@ -99,12 +99,9 @@ function _draw()
 	
 	draw_cursor()
 	
-	--[[local s=selection[1]
-		if s and s.st.t=="gather" then
-			local x=g(restiles,s.st.tx,s.st.ty)
-			print(x,0,0,7)
-		end
-	end]]
+--	if sel1 then
+--		print(sel1.st.t,0,0,7)
+--	end
 end
 
 function _update()
@@ -127,6 +124,15 @@ function _update()
  	bldg_sel,my_sel,enemy_sel=nil
  end
  foreach(units,tick_unit)
+ --fighting has to happen after
+ --tick because viz is involved
+ for u in all(units) do
+	 if u.st.t=="rest" and
+	  u.typ.atk then
+			aggress(u)
+	 end
+ 	if (u.st.t=="attack") fight(u)
+ end
  if selbox then
 		selection=my_sel or
 			bldg_sel or
@@ -1319,6 +1325,7 @@ function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.dead then
 		if (u.dead==fps) del(units,u)
+		if (typ.bldg) mset(u.x/8,u.y/8,73)
 		return
 	end
 	if u.hp<=0 and not u.dead then
@@ -1581,9 +1588,9 @@ function draw_unit(u)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
-	sspr(x,y,w,h,xx,yy,w,h,u.dir==ut.dir)
+	sspr(x,y,w,h,xx,yy,w,h,not ut.fire and u.dir==ut.dir)
 	pal()
-	local hp=u.hp/u.typ.hp
+	local hp=u.hp/ut.hp
 	if not u.dead and hp<=0.5 then			
 	 if ut.fire then
 			spr(230+fps/20,u.x-3,u.y-8)
@@ -1592,7 +1599,11 @@ function draw_unit(u)
 	end
 
 	--ctrl-b to uncomment
---	pset(u.x,u.y,14)
+--	if u.sel and u.typ.range then
+--		circ(u.x,u.y,u.typ.los,13)
+--		circ(u.x,u.y,u.typ.range,8)
+--	end
+--	pset(u.x,u.y,13)
 --	if u.st.wayp then
 --		for wp in all(u.st.wayp) do
 --			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
@@ -1631,10 +1642,6 @@ function update_unit(u)
 			end
 		end
 	end
-	if (t=="attack") fight(u)
-	if t=="rest" and u.typ.atk then
-		aggress(u)
- end
  if (u.q) produce(u)
  if (u.typ==farm) update_farm(u)
  if u.st.active then
@@ -1680,11 +1687,13 @@ end
 
 function aggress(u)
 	for e in all(units) do
-		if e.p!=u.p and not e.dead then
+		if vget(e.x,e.y) and
+			e.p!=u.p and not e.dead then
 			local typ=u.typ[u.p]
-			local r=typ.bldg and
-				typ.range or max(typ.los,typ.range)
-			if dist(e.x-u.x,e.y-u.y)<=r then
+			if dist(e.x-u.x,e.y-u.y)<=
+				max(
+					typ.bldg and 0 or typ.los,
+					typ.range) then
 				attack(u,e)
 				break
 			end
@@ -1697,7 +1706,7 @@ function fight(u)
 		u.typ[u.p],u.st.target
 	local d=dist(e.x-u.x,e.y-u.y)
 	if typ.range then
-		in_range=d<=typ.range
+		in_range=d<=typ.range and vget(e.x,e.y)
 		if in_range and fps%typ.proj_freq==0 then
  		add(proj,{
  			from_unit=u,
@@ -1714,14 +1723,14 @@ function fight(u)
 		end
  end
  u.st.active=in_range
- if in_range and not typ.fire then
+ if in_range then
 		u.dir,u.st.wayp=sgn(e.x-u.x)
 	elseif fps%30==0 then
-		if typ.los>=d then
+		if typ.los>=d and not typ.bldg then
 			--pursue enemy
 	 	attack(u,e)
 	 	deli(u.st.wayp,1)
-	 else
+	 elseif not u.st.wayp then
 	 	rest(u)
 	 end
  end
@@ -1864,7 +1873,8 @@ function step(u)
 							{st.x2,st.y2}
 						},true
 					end
-				elseif st.t!="harvest" then
+				elseif st.t!="harvest" and
+					st.t!="attack" then
 					rest(u)
 				end
 			else
@@ -2844,13 +2854,13 @@ units={
 --	unit(ant,qx*8+20,qy*8+3,1),
 --	unit(ant,qx*8+2,qy*8-8,1),
 
-	unit(castle,48,56,1),
+	unit(cat,48,56,1),
 	--unit(beetle,58,56,1),
 	--unit(archer,58,30,1),
 	--unit(beetle,40,36,1),
 	--unit(cat,40,36,1),
 
-	unit(beetle,60,106,2),
+	unit(tower,60,106,2),
 --	unit(spider,65,81,2),
 --	unit(archer,70,84,2),
 	--unit(beetle,65,81,2),
