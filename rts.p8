@@ -10,6 +10,7 @@ mmw=19
 mmh=maph\(mapw/mmw)
 mmx,mmy=105,107
 menuh,menuy=21,104
+bldg_bmap=0
 
 bldg_drop,bldg_farm,
  bldg_const,bldg_other=
@@ -24,7 +25,7 @@ carry_capacity=6
 
 units,restiles,selection,
 	proj,bldgs={},{},{},{},{}
-res={r=15,g=15,b=15,p=7}
+res={r=55,g=55,b=55,p=7}
 
 function unit(typ,x,y,p,const)
  return {
@@ -184,9 +185,19 @@ end
 -->8
 --unit defs/states
 
+--bitmaps:
+--tower:1
+--mound:2
+--den:4
+--barracks:8
+--farm:16
+--castle:32
+
 function parse(unit,typ,tech)
-	local obj={typ=typ,tech=tech}
-	obj[1],obj[2]={},{}
+	local obj={
+		typ=typ,tech=tech,
+		[1]={},[2]={}
+	}
 	for l in all(split(unit,"\n")) do
 		if #l>0 then
 			local vals=split(l,"=")
@@ -217,7 +228,7 @@ rest_fps=30
 move_x=8
 move_y=8
 move_fr=2
-move_fps=30
+move_fps=15
 
 gather_x=8
 gather_y=8
@@ -283,7 +294,7 @@ hp=20
 
 def_typ=beetle
 atk_typ=beetle
-atk=2
+atk=1
 ]])
 spider=parse([[
 w=8
@@ -488,10 +499,12 @@ def_typ=ant
 atk=1
 ]])
 
+--#########----
+
 tower=parse([[
-w=7
+w=8
 fw=8
-h=13
+h=14
 
 rest_x=24
 rest_y=96
@@ -524,11 +537,12 @@ proj_s=0
 atk_typ=tower
 def_typ=building
 atk=1
+bitmap=1
 ]])
 mound=parse([[
-w=7
+w=8
 fw=8
-h=7
+h=8
 
 rest_x=0
 rest_y=97
@@ -551,9 +565,10 @@ const=12
 has_q=1
 drop=1
 def_typ=building
+bitmap=2
 ]])
 
-btden=parse([[
+den=parse([[
 w=8
 fw=8
 h=8
@@ -578,11 +593,12 @@ dir=-1
 const=20
 has_q=1
 def_typ=building
+bitmap=4
 ]])
 barracks=parse([[
-w=7
+w=8
 fw=8
-h=7
+h=8
 
 rest_x=0
 rest_y=121
@@ -604,6 +620,7 @@ dir=-1
 const=20
 has_q=1
 def_typ=building
+bitmap=8
 ]])
 farm=parse([[
 w=8
@@ -629,6 +646,7 @@ hp=10
 dir=-1
 const=6
 def_typ=building
+bitmap=16
 ]])
 farm_renew_cost_b=3
 
@@ -670,6 +688,7 @@ proj_freq=20
 atk_typ=tower
 def_typ=building
 atk=1
+bitmap=32
 ]])
 
 
@@ -684,13 +703,8 @@ b=2
 r=1
 g=3
 b=0
+breq=2
 ]],farm),
-
-	parse([[
-r=0
-g=3
-b=8
-]],btden),
 
 	parse([[
 r=0
@@ -702,25 +716,24 @@ b=5
 r=0
 g=3
 b=8
-]],tower),
+breq=8
+]],den),
 
 	parse([[
 r=0
 g=3
+b=8
+]],tower),
+
+--cstl breq=1|4|8 (twr,den,bar)
+	parse([[
+r=0
+g=3
 b=3
+breq=13
 ]],castle),
 }
-web=parse([[
-t=4
-r=0
-g=2
-b=0
-]],parse([[
-portx=8
-porty=80
-portw=9
-]]))
-spider.prod={web}
+
 queen.prod={
 	parse([[
 t=6
@@ -744,7 +757,21 @@ portw=8
 	),
 }
 
-btden.prod={
+web=parse([[
+t=4
+r=0
+g=2
+b=0
+breq=1000
+]],parse([[
+portx=8
+porty=80
+portw=9
+]]))
+
+spider.prod={web}
+
+den.prod={
 	parse([[
 t=8
 r=0
@@ -785,6 +812,19 @@ portw=9
 			spider[1].atk+=1
 		end
 	),
+	parse([[
+t=5
+r=0
+g=2
+b=0
+]],parse([[
+portx=114
+porty=72
+portw=9
+]]),function()
+			web.breq=nil
+		end
+	),
 }
 
 mound.prod={
@@ -809,31 +849,17 @@ t=10
 r=1
 g=2
 b=1
-]],archer),
-
+]],warant),
 	parse([[
 t=10
 r=1
 g=2
 b=1
-]],warant),
-	{},{},
-	parse([[
-t=5
-r=0
-g=2
-b=0
-]],parse([[
-portx=96
-porty=64
-portw=9
-]]),function()
-			archer[1].range+=5
-			archer[1].los+=5
-		end
-	),
+]],archer),
 
-	parse([[
+	{},{},
+	
+		parse([[
 t=5
 r=0
 g=2
@@ -846,7 +872,7 @@ portw=9
 			warant[1].atk+=1
 		end
 	),
-		
+	
 	parse([[
 t=5
 r=0
@@ -858,6 +884,20 @@ porty=72
 portw=9
 ]]),function()
 			archer[1].atk+=1
+		end
+	),
+	parse([[
+t=5
+r=0
+g=2
+b=0
+]],parse([[
+portx=96
+porty=64
+portw=9
+]]),function()
+			archer[1].range+=5
+			archer[1].los+=5
 		end
 	),
 }
@@ -880,7 +920,7 @@ ant_vs_cat=1
 
 spider_vs_ant=1
 spider_vs_spider=1
-spider_vs_beetle=1
+spider_vs_beetle=1.5
 spider_vs_building=1
 spider_vs_cat=1
 
@@ -1639,6 +1679,7 @@ function buildrepair(u)
  		b.const+=1
  		if b.const==b.typ.const then
  			b.const=nil
+ 			bldg_bmap|=b.typ.bitmap
  			register_bldg(b)
  			if b.typ==mound and b.p==1 then
  				res.p+=5
@@ -1748,9 +1789,7 @@ function step(u)
 	local st=u.st
 	local wayp,spd=st.wayp,u.typ.spd
 	if wayp then
- 	if st.t=="web" and st.first_pt then
- 		spd/=2
- 	end
+ 	if (st.first_pt) spd/=2
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		spd/3.5)
  	
@@ -1798,32 +1837,22 @@ function u_rect(u)
  }
 end
 
-function dist(dx,dy)
- local maskx,masky=dx>>31,dy>>31
- local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
- return a0>b0 and
- 	a0*0.9609+b0*0.3984 or
-  b0*0.9609+a0*0.3984
+--faster but >tok
+--function _dist(dx,dy)
+-- local maskx,masky=dx>>31,dy>>31
+-- local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
+-- return a0>b0 and
+-- 	a0*0.9609+b0*0.3984 or
+--  b0*0.9609+a0*0.3984
+--end
+
+function dist(a,b)
+ local a0,b0=abs(a),abs(b)
+ return max(a0,b0)*0.9609+
+ 	min(a0,b0)*0.3984
 end
 
---[[function fmget(x,y,f)
-	return fget(mget(x,y),f or 0)
-end]]
-
-function corner_cuttable(x,y,dx,dy)
-	return not (
-		(
-		 x+dx<0 or x+dx>=mapw/8 or
-		 fget(mget(x+dx,y),0)
-		) and
-		(
-		 y+dy<0 or y+dy>=maph/8 or
-		 fget(mget(x,y+dy),0)
-		)
-	)
-end
-
-function surrounding_tiles(x,y,n,cut)
+function surrounding_tiles(x,y,n,chk_acc)
 	local st={}
 	for dx=-n,n do
 	 for dy=-n,n do
@@ -1831,13 +1860,14 @@ function surrounding_tiles(x,y,n,cut)
 	 	if
 	 		xx>=0 and yy>=0 and
 	 		xx<mapw/8 and yy<maph/8 and
-	 		(not cut or
-	 			corner_cuttable(x,y,dx,dy)
+	 		(not chk_acc or
+	 			acc(xx,yy) and
+	 			(acc(x+dx,y) or acc(x,y+dy))
 	 		)
 	 	then
 			 add(st,{
 			  xx,yy,
-			 	diag=(dx!=0 and dy!=0)
+			 	diag=dx!=0 and dy!=0
 			 })
 			end
 		end
@@ -1894,12 +1924,11 @@ function can_build()
 end
 
 function rectaround(u,c)
-	local w,h=u.typ.w,u.typ.h
 	rect(
-		u.x-ceil(w/2)-1,
-		u.y-ceil(h/2)-1,
-		u.x+ceil(w/2),
-		u.y+ceil(h/2),
+		u.x-u.typ.w\2-1,
+		u.y-u.typ.h\2-1,
+		u.x+u.typ.w\2,
+		u.y+u.typ.h\2,
 		c
 	)
 end
@@ -1936,9 +1965,8 @@ end
 --returns true if coord is viz
 --in currently visible screen
 function vget(x,y)
- return x<0 or
-  y<0 or
-  g(vizmap,x\fogtile,y\fogtile)
+ return g(vizmap,x\fogtile,
+  y\fogtile)
 end
 
 function norm(it,nt,f)
@@ -1968,12 +1996,10 @@ function buildable()
 		to_build.y/8,
 		to_build.typ.w,
 		to_build.typ.h
-	return (
-		acc(x,y,true) and
+	return	acc(x,y,true) and
 		(w<9 or acc(x+1,y,true)) and
 		(h<9 or acc(x,y+1,true)) and
 		(h<9 or w<9 or acc(x+1,y+1,true))
-	)
 end
 
 function register_bldg(b)
@@ -2001,6 +2027,8 @@ end
 function add_building(v,x,y,up_dmap)
 	s(bldgs,x,y,v)
 	if v!=bldg_farm and up_dmap then
+		--slower, but saves 176 tok
+		--make_dmaps()
 		add_dmap_obs("r",x,y)
 		add_dmap_obs("g",x,y)
 		add_dmap_obs("b",x,y)
@@ -2059,7 +2087,7 @@ end
 --get_wayp
 
 function nearest_acc(x,y,sx,sy)
-	for n=0,999 do
+	for n=0,99 do
 		local best_t,best_d
 		for t in all(
 			surrounding_tiles(x,y,n)) do
@@ -2103,35 +2131,6 @@ end
 
 function estimate(n1,n2)
  return dist(n1[1]-n2[1],n1[2]-n2[2])
-end
-
-function neighbor(ns,n,dx,dy)
-	local x,y=n[1]+dx,n[2]+dy
- if (
- 	x>=0 and x<mapw/mvtile and
-		y>=0 and y<maph/mvtile and
-		acc(x,y) and
-		(
-			dx==0 or dy==0 or
-			corner_cuttable(n[1],n[2],dx,dy)
-		)
-	) then
-		add(ns,{x,y})
-	end
-end
-
-function neighbors(n)
-	local ns={}
-	neighbor(ns,n,-1,0)
-	neighbor(ns,n,0,-1)
-	neighbor(ns,n,0,1)
-	neighbor(ns,n,1,0)
-	
-	neighbor(ns,n,-1,1)
-	neighbor(ns,n,1,-1)
-	neighbor(ns,n,1,1)
-	neighbor(ns,n,-1,-1)
-	return ns
 end
 
 function node_to_id(node)
@@ -2206,7 +2205,9 @@ function find_path(start,goal)
   -- consider each neighbor n of
   -- p which is still in the
   -- frontier queue
-  for n in all(neighbors(p)) do
+  for n in all(surrounding_tiles(
+  	p[1],p[2],1,true
+  )) do
    -- find the current-best
    -- known way to n (or
    -- create it, if there isn't
@@ -2282,8 +2283,7 @@ f19=b
 ]])
 
 function print_res(rsc,x,y,s,hide_0,pop)
-	for i=1,#resorder do
-		local r=resorder[i]
+	for i,r in pairs(resorder) do
 		local v=pop and i==4 and "" or flr(rsc[r])
 		local no_pop=v==0 and i==4
 		local xoff=no_pop and 6 or 3
@@ -2309,11 +2309,17 @@ function print_res(rsc,x,y,s,hide_0,pop)
 	return x
 end
 
+function breq_satisfied(costs)
+	return not costs.breq or
+ 	bldg_bmap&costs.breq==costs.breq
+end
+
 function can_pay(costs)
  return res.r>=costs.r and
  	res.g>=costs.g and
  	res.b>=costs.b and
- 	(not costs.typ.unit or res.p>=1)
+ 	(not costs.typ.unit or res.p>=1) and
+ 	breq_satisfied(costs)
 end
 
 function pay(costs,dir)
@@ -2342,6 +2348,10 @@ function draw_port(
 	pal(14,0)
 	if cant_pay then
 		pal(split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	end
+	if not costs then
+		--gray bg, turn gray to white
+		pal(6,7)
 	end
 	sspr(typ.portx,typ.porty,typ.portw,8,x+1,y+1)
 	pal()
@@ -2400,8 +2410,8 @@ function draw_cursor()
 end
 
 function draw_sel_ports()
-	for i=1,#selection do
-		local x,u=i*13-10,selection[i]
+	for i,u in pairs(selection) do
+		local x=i*13-10
 		if i>6 then
 			print("+"..#selection-6,x,menuy+6,1)
 			break
@@ -2449,14 +2459,12 @@ function single_unit_section()
 		print(sel1.cycles.."/"..farm_cycles,36,y+4,4)
 		spr(170,49,y+2,2,2)
 	end
-	
 	if typ.prod and not sel1.const then
-		for i=0,#typ.prod-1 do
-			local b=typ.prod[i+1]
+		for i,b in pairs(typ.prod) do
 			draw_port(
 				b.typ,
-				88-i%4*13,
-				y+i\4*11,
+				88-(i-1)%4*13,
+				y+(i-1)\4*11,
 				b,
 				function()
 					if not can_pay(b) or q and
@@ -2520,7 +2528,8 @@ function draw_menu()
 	pset(len-1,121)
 	line(len,122,len,128)
 	
-	if hovbtn and hovbtn.costs then
+	if hovbtn and hovbtn.costs and
+		breq_satisfied(hovbtn.costs) then
 		local pop=res.p<1 and
 			hovbtn.costs.typ.unit
 		local len=print_res(
@@ -2545,11 +2554,11 @@ function draw_menu_bg()
   	secs,modstart={35,67,26},0
   end
 	end
- for i=1,#secs do
+ for i,sec in pairs(secs) do
  	if i%2==modstart then
  		pal(4,15)
  	end
- 	local xx=secs[i]+x-4
+ 	local xx=sec+x-4
  	--104="y"=menuy
  	spr(128,x,104)
  	spr(128,xx-4,104)
@@ -2631,13 +2640,9 @@ function add_neigh(dmap,to,closed,x,y)
 	) do
 		local xx,yy=unpack(t)
 		if not g(closed,xx,yy) then
-			if acc(xx,yy) then
-				add(to,t)
-			else
-				s(dmap,xx,yy,9)
-			end
+			add(to,t)
+			s(closed,xx,yy,true)
 		end
-		s(closed,xx,yy,true)
 	end
 end
 	
@@ -2696,9 +2701,9 @@ d=d
 ]])
 
 function make_dmap(key)
-	local dmap,closed,start,
+	local dmap,closed,
 		open,c,starts=
-	 {},{},{},{},1,
+	 {},{},{},1,
 	 dmap_st[key]
 	 
 	--ensure starts exists
@@ -2719,19 +2724,12 @@ function make_dmap(key)
 		dmap_st[key]=starts	
 	end
 
-	--initialize start
+	--create initial open list
 	for i,t in pairs(starts) do
 		if	sur_acc(unpack(t)) then
-			closed[i],dmap[i]=true,0
-			add(start,t)
-		elseif not acc(unpack(t)) then
-		 closed[i]=true
+			dmap[i]=0
+			add_neigh(dmap,open,closed,unpack(t))
 		end
-	end
-	
-	--create initial open list
-	for st in all(start) do
-		add_neigh(dmap,open,closed,unpack(st))
 	end
 	
  --flood
@@ -2831,9 +2829,9 @@ bb000b00bb000bb04400040044000440000000000000000000000000000000000d11311331350000
 00111111001100110011111100110011000000000155000000000000000000003305005050500000050500505050000000505050505050500000005050505050
 00000000000000000000000000000000000000000000000000000000000000000050500000000000000505000005050000000000000000000000000000000000
 05050500000000000000000000000000000000000000000000000000000000000501515000505050055015100051515000000000000000000000000000000000
-50151050050505000050505000505050005050500505050005050500000000000501515005015105500615150051515000000000000000000000000000000000
-50151050501510500501510505051105050511505015150050115050005050005060600505015105000065050005150000000000000000000000000000000000
-50050050501510505001510550051105050511505015150050115050551515500000000505660005000000050000000000000000000000000000000000000000
+50151050050505000050505000505050005050500505050005050500000000000501515005015105500d15150051515000000000000000000000000000000000
+501510505015105005015105050511050505115050151500501150500050500050d0d005050151050000d5050005150000000000000000000000000000000000
+50050050501510505001510550051105050511505015150050115050551515500000000505dd0005000000050000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003d11311311311310
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000033d1515351515351
@@ -2885,22 +2883,22 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 444444440000000000000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000000000000000430000b00000504d00dddd2462000000
 4444444400000000000000000000000000000000000000000000000000000000000000000000000000000000000000004300b000b50504040005054045000000
 44444444000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000
-0000000000000000050000050000000000000000d0000000000000000000000000000000dd000000000000000000000000022000000d00d00000000000000000
-0002000202909092505000505000005000500d00d00d002200022000d0000d00dd600000060000000000000000000000202000b00d777d000000000000000000
-00002020002999205055555050000005050000d777d00000202000000d00d000005100610510001600000000000000004440b00dd7555700dd00000000000000
-0000404040444400055e5e55000222250500007555700000444000000333300005d100665d1000660000000000000000e4e400d7d544450d7d00000000000000
-44047474444e4e0050555550502622dddd0d005444500004e4e400000b33b000505d661000d16610000000000000000044404d7d04e4e4d7d000000000000000
-444044404504400050500050502266d5d507d04e4e40444044400133133330000000d1d005001d100000000000000000043304d00044404d0000000000000000
-050504055050050050050500502222dddd04440444004403040301331110000000000000000000000000000000000000b0b04040050404040000000000000000
+0000000000000000050000050000000000000000d0000000000000000000000000000000dd000000000000000000000000022000000d00d00000005000000000
+0002000202909092505000505000005000500d00d00d002200022000d0000d00dd600000060000000000000000000000202000b00d777d000050057506000000
+00002020002999205055555050000005050000d777d00000202000000d00d000005100610510001600000000000000004440b00dd7555700dd55560770600000
+0000404040444400055e5e55000222250500007555700000444000000333300005d100665d1000660000000000000000e4e400d7d544450d7de5e57607000000
+44047474444e4e0050555550502622dddd0d005444500004e4e400000b33b000505d661000d16610000000000000000044404d7d04e4e4d7d055567067600000
+444044404504400050500050502266d5d507d04e4e40444044400133133330000000d1d005001d100000000000000000043304d00044404d0006650770000000
+050504055050050050050500502222dddd04440444004403040301331110000000000000000000000000000000000000b0b04040050404040050506006000000
 000000000000000005000005005050505000505040505050b0b00050500000000000000000000000000000000000000000000000000000000000000000000000
-0000b000eee7eeeee000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000
-000b3500eee7ee6ee000870000700007070000000000000000000000000000000000000000000000004400440000000000000000000000000000000000000000
-00b33350ee6e77e6e087887800074444700000000000000000000000000000000000000000000000044440444000000000000000000000000000000000000000
-0b444445e6e76e7ee078888800744114400000040000000000000000000000000000000000000000404400004000000000000000000000000000000000000000
-00411d40eee7e676e343775334441111440000411000000000000000000000000000000000000000404000404000000000000000000000000000000000000000
-00411d40e77e77eee453773345471551147004511400000000000000000000000000000000000000400004404000000000000000000000000000000000000000
-00444440eee6ee7ee532772453741551470045544540000000000000000000000000000000000000444044440000000000000000000000000000000000000000
-00044400eeeeeee7e342222534074114407054545450000000000000000000000000000000000000044004400000000000000000000000000000000000000000
+0000b000444744444000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000
+000b3500444744644000870000700007070000000000000000000000000000000000000000000000004400440000000000000000000000000000000000000000
+00b33350446477464087887800074444700000000000000000000000000000000000000000000000044440444000000000000000000000000000000000000000
+0b444445464764744078888800744114400000040000000000000000000000000000000000000000404400004000000000000000000000000000000000000000
+00411d40444746764343775334441111440000411000000000000000000000000000000000000000404000404000000000000000000000000000000000000000
+00411d40477477444453773345471551147004511400000000000000000000000000000000000000400004404000000000000000000000000000000000000000
+00444440444644744532772453741551470045544540000000000000000000000000000000000000444044440000000000000000000000000000000000000000
+00044400444444474342222534074114407054545450000000000000000000000000000000000000044004400000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000004000440000000000000000
 00500050000505050000000000000000000000000000000000000000000000000000000000000000000000000000000000055500004400444000000000000000
 05750575000404040000000000000000000000000000000000000000000000000000000000000000000000000000000000500050444440004000000000000000
