@@ -3,42 +3,6 @@ version 38
 __lua__
 --main loop
 
---constants
-mapw,maph=256,256
-fogtile,mvtile=8,8
-mmw=19
-mmh=maph\(mapw/mmw)
-mmx,mmy=105,107
-menuh,menuy=21,104
-bldg_bmap=0
-
-bldg_drop,bldg_farm,
- bldg_const,bldg_other=
- "drop","farm","const","other"
-
---global state
-cx,cy,mx,my,fps=0,0,0,0,0
-
---tech can change this
-farm_cycles,carry_capacity,
-	units_heal=5,6,{}
-
-units,restiles,selection,
-	proj,bldgs={},{},{},{},{}
-res={r=55,g=55,b=55,p=7}
-
-function unit(typ,x,y,p)
- return {
-		typ=typ,
-		x=x,
-		y=y,
-		st={t="rest"},
-		dir=1,
-		p=p,
-		hp=typ.hp,
-	}
-end
-
 function _draw()
  cls()
  
@@ -200,6 +164,15 @@ todo
 - dmg multiplier balancing
 - costs balancing
 - menu/wincond
+
+could optimize dmap update by
+only updating 9-tile region
+around the tile that needs
+updating (since we max out at
+9 tile distance anyway)
+
+seems hard as add/del a tile
+could have far-reaching effects
 
 ]]
 
@@ -1168,7 +1141,6 @@ function handle_click()
 			to_build.y+to_build.typ.h\2,
 			1)
 		new.const=0
-		add(units,new)
 		register_bldg(new)
 
 		--make selected units build it
@@ -1321,8 +1293,7 @@ function update_sel(u)
 		if u.p!=1 then
 			enemy_sel={u}
 		elseif u.typ.unit then
-			my_sel=my_sel or {}
-			add(my_sel,u)
+			my_sel=add(my_sel or {},u)
 		else
 			bldg_sel={u}
 		end
@@ -1798,7 +1769,6 @@ function produce(u)
 				local new=unit(
 					b.typ,u.x,u.y,1
 				)
-				add(units,new)
 				if new.typ==ant and
 					u.rx and
 					is_res(u.rx,u.ry)
@@ -2154,6 +2124,18 @@ function sur_acc(x,y)
 		acc(x+1,y) or
 		acc(x,y-1) or
 		acc(x,y+1)
+end
+
+function unit(typ,x,y,p)
+ return add(units,{
+		typ=typ,
+		x=x,
+		y=y,
+		st={t="rest"},
+		dir=1,
+		p=p,
+		hp=typ.hp,
+	})
 end
 
 -->8
@@ -2646,8 +2628,6 @@ end
 -->8
 --dmaps
 
-rows,dmap_st=mapw/4,{d={}}
-
 function dmap_find(u,key)
 	local x,y,dmap,wayp,lowest=
 		u.x\8,
@@ -2669,11 +2649,11 @@ function dmap_find(u,key)
 end
  
 function g(a,x,y,def)
-	return a[x+y*rows+1] or def
+	return a[x+y*mapw/4+1] or def
 end
 
 function s(a,x,y,v)
- a[x+y*rows+1]=v
+ a[x+y*mapw/4+1]=v
 end
 
 function add_neigh(to,closed,x,y)
@@ -2812,43 +2792,71 @@ end
 --enable mouse & mouse btns
 poke(0x5f2d,0x1|0x2)
 
+--constants
+mapw,maph=256,256
+fogtile,mvtile=8,8
+mmw=19
+mmh=maph\(mapw/mmw)
+mmx,mmy=105,107
+menuh,menuy=21,104
+bldg_bmap=0
+
+bldg_drop,bldg_farm,
+ bldg_const,bldg_other=
+ "drop","farm","const","other"
+
+--global state
+cx,cy,mx,my,fps=0,0,0,0,0
+
+--tech can change this
+farm_cycles,carry_capacity,
+	units_heal=5,6,{}
+
+units,restiles,selection,
+	proj,bldgs,dmap_st,res=
+	{},{},{},{},{},{d={}},
+ parse([[
+r=55
+g=55
+b=55
+p=7
+]])
+
 local qx,qy=6,5
 local q,t=
 	unit(queen,qx*8+9,qy*8+4,1),
 	unit(castle,60,106,2)
-units={
-	q,
-	unit(ant,qx*8-8,qy*8,1),
-	unit(ant,qx*8+20,qy*8+3,1),
-	unit(ant,qx*8+2,qy*8-8,1),
-	
---	unit(ant,qx*8-8,qy*8,1),
---	unit(ant,qx*8+20,qy*8+3,1),
---	unit(ant,qx*8+2,qy*8-8,1),
---	unit(ant,qx*8-8,qy*8,1),
---	unit(ant,qx*8+20,qy*8+3,1),
---	unit(ant,qx*8+2,qy*8-8,1),
---	unit(ant,qx*8-8,qy*8,1),
---	unit(ant,qx*8+20,qy*8+3,1),
---	unit(ant,qx*8+2,qy*8-8,1),
 
-	unit(cat,48,56,1),
-	--unit(beetle,58,56,1),
-	--unit(archer,58,30,1),
-	--unit(beetle,40,36,1),
-	--unit(cat,40,36,1),
-
-	t,
---	unit(spider,65,81,2),
---	unit(archer,70,84,2),
-	--unit(beetle,65,81,2),
-	--unit(tower,65,81,2),
-
-	--unit(tower,65,65,1)
-}
 register_bldg(q)
 register_bldg(t)
 make_dmaps()
+
+unit(ant,qx*8-8,qy*8,1)
+unit(ant,qx*8+20,qy*8+3,1)
+unit(ant,qx*8+2,qy*8-8,1)
+
+--unit(ant,qx*8-8,qy*8,1)
+--unit(ant,qx*8+20,qy*8+3,1)
+--unit(ant,qx*8+2,qy*8-8,1)
+--unit(ant,qx*8-8,qy*8,1)
+--unit(ant,qx*8+20,qy*8+3,1)
+--unit(ant,qx*8+2,qy*8-8,1)
+--unit(ant,qx*8-8,qy*8,1)
+--unit(ant,qx*8+20,qy*8+3,1)
+--unit(ant,qx*8+2,qy*8-8,1)
+
+unit(cat,48,56,1)
+--unit(beetle,58,56,1)
+--unit(archer,58,30,1)
+--unit(beetle,40,36,1)
+--unit(cat,40,36,1)
+
+--	unit(spider,65,81,2)
+--	unit(archer,70,84,2)
+--unit(beetle,65,81,2)
+--unit(tower,65,81,2)
+
+--unit(tower,65,65,1)
 
 menuitem(1,"turn mouse off",function()
 	menuitem(1,"turn mouse "..(dpad and "off" or "on"))
