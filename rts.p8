@@ -3,10 +3,15 @@ version 38
 __lua__
 --main loop
 
+--draw_menu: .13
+--draw_map: .12
+--draw_fow: .14
+
 function _draw()
  cls()
  
- draw_map()
+ --if (true) return
+	draw_map()
  
  local bf1,bf2,af={},{},{}
  for u in all(units) do
@@ -71,7 +76,6 @@ end
 
 function _update()
 	async_task()
-
 	fps+=1
 	if fps==60 then
 		fps=0
@@ -81,7 +85,8 @@ function _update()
  	t()-hilite.t<0.5 and hilite
 	
  handle_input()
- 
+ --if (fps>1) return
+
  vizmap,buttons,pos,hoverunit,
  	sel_typ={},{},{}
  
@@ -2003,7 +2008,7 @@ function mine_res(x,y,r)
 		mset(x,y,73)
 		s(dmap_st[r],x,y)
 		s(dmaps[r],x,y)
-		make_dmaps()
+		make_dmaps(r)
 	end
 	s(restiles,x,y,n)
 end
@@ -2076,7 +2081,7 @@ function register_bldg(b)
 	
 	if not b.const and
 	 v!=bldg_farm then 
-		make_dmaps()
+		make_dmaps"d"
 	end
 end
 
@@ -2677,12 +2682,20 @@ function add_neigh(to,closed,x,y)
 		end
 	end
 end
+
+dmap_queue=parse([[
+r=r,g,b,d
+g=g,r,b,d
+b=b,g,r,d
+d=d,r,g,b
+]])
 	
-function make_dmaps()
-	queue=split"r,g,b,d"
+function make_dmaps(r)
+	queue=split(dmap_queue[r])
 end
 
 function async_task()
+	--local x=stat(1)
 	local q=queue[1]
 	if q then
 		if #q!=1 then
@@ -2694,6 +2707,7 @@ function async_task()
 		else
 	 	queue[1]=make_dmap(q)
 		end
+		--printh(stat(1)-x,"log")
 	end
 end
 
@@ -2879,21 +2893,21 @@ p1q,twr=
 
 register_bldg(p1q)
 register_bldg(twr)
-make_dmaps()
+make_dmaps"d"
 
 unit(ant,qx*8-8,qy*8,1)
 unit(ant,qx*8+20,qy*8+3,1)
 unit(ant,qx*8+2,qy*8-8,1)
 
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
+unit(ant,qx*8-8,qy*8,1)
+unit(ant,qx*8+20,qy*8+3,1)
+unit(ant,qx*8+2,qy*8-8,1)
+unit(ant,qx*8-8,qy*8,1)
+unit(ant,qx*8+20,qy*8+3,1)
+unit(ant,qx*8+2,qy*8-8,1)
+unit(ant,qx*8-8,qy*8,1)
+unit(ant,qx*8+20,qy*8+3,1)
+unit(ant,qx*8+2,qy*8-8,1)
 
 unit(cat,48,56,1)
 --unit(beetle,58,56,1)
