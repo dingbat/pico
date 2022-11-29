@@ -3,7 +3,7 @@ version 38
 __lua__
 --main loop
 
---draw_menu: .13
+--draw_menu:.13 (.11 is minimap)
 --draw_map: .12
 --draw_fow: .14
 
@@ -207,7 +207,7 @@ function parse(unit,typ,tech)
 	return obj
 end
 
-ant=parse([[
+ant=parse[[
 w=4
 fw=4
 h=4
@@ -260,8 +260,8 @@ spd=1
 los=20
 hp=10
 def_typ=worker
-]])
-beetle=parse([[
+]]
+beetle=parse[[
 w=8
 fw=8
 h=6
@@ -297,8 +297,8 @@ hp=20
 def_typ=beetle
 atk_typ=beetle
 atk=1
-]])
-spider=parse([[
+]]
+spider=parse[[
 w=8
 fw=8
 h=5
@@ -337,8 +337,8 @@ hp=15
 def_typ=spider
 atk_typ=spider
 atk=2
-]])
-archer=parse([[
+]]
+archer=parse[[
 w=7
 fw=8
 h=6
@@ -380,8 +380,8 @@ range=20
 atk_typ=archer
 def_typ=archer
 atk=1
-]])
-warant=parse([[
+]]
+warant=parse[[
 w=8
 fw=8
 h=6
@@ -417,8 +417,8 @@ hp=15
 atk_typ=warant
 def_typ=warant
 atk=1
-]])
-cat=parse([[
+]]
+cat=parse[[
 w=16
 fw=16
 h=8
@@ -460,8 +460,8 @@ range=50
 atk_typ=cat
 def_typ=cat
 atk=2
-]])
-queen=parse([[
+]]
+queen=parse[[
 w=15
 h=7
 fw=16
@@ -499,11 +499,11 @@ proj_s=0
 atk_typ=archer
 def_typ=queen
 atk=1
-]])
+]]
 
 --#########----
 
-tower=parse([[
+tower=parse[[
 w=8
 fw=8
 h=14
@@ -540,8 +540,8 @@ atk_typ=tower
 def_typ=building
 atk=1
 bitmap=1
-]])
-mound=parse([[
+]]
+mound=parse[[
 w=8
 fw=8
 h=8
@@ -568,9 +568,9 @@ has_q=1
 drop=1
 def_typ=building
 bitmap=2
-]])
+]]
 
-den=parse([[
+den=parse[[
 w=8
 fw=8
 h=8
@@ -596,8 +596,8 @@ const=20
 has_q=1
 def_typ=building
 bitmap=4
-]])
-barracks=parse([[
+]]
+barracks=parse[[
 w=8
 fw=8
 h=8
@@ -623,8 +623,8 @@ const=20
 has_q=1
 def_typ=building
 bitmap=8
-]])
-farm=parse([[
+]]
+farm=parse[[
 w=8
 fw=8
 h=8
@@ -649,11 +649,11 @@ dir=-1
 const=6
 def_typ=building
 bitmap=16
-]])
+]]
 farm_renew_cost_b=3
 
 
-castle=parse([[
+castle=parse[[
 w=15
 fw=16
 h=13
@@ -691,8 +691,7 @@ atk_typ=tower
 def_typ=building
 atk=1
 bitmap=32
-]])
-
+]]
 
 ant.prod={
 	parse([[
@@ -749,11 +748,11 @@ t=10
 r=0
 g=12
 b=0
-]],parse([[
+]],parse[[
 portx=96
 porty=88
 portw=8
-]]),function()
+]],function()
 			carry_capacity=9
 		end
 	),
@@ -765,11 +764,11 @@ r=0
 g=2
 b=0
 breq=1000
-]],parse([[
+]],parse[[
 portx=8
 porty=80
 portw=9
-]]))
+]])
 
 spider.prod={web}
 
@@ -793,11 +792,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=114
 porty=64
 portw=9
-]]),function()
+]],function()
 			beetle[1].atk+=1
 		end
 	),
@@ -806,11 +805,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=105
 porty=64
 portw=9
-]]),function()
+]],function()
 			spider[1].atk+=1
 		end
 	),
@@ -819,11 +818,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=114
 porty=72
 portw=9
-]]),function()
+]],function()
 			web.breq=nil
 		end
 	),
@@ -835,11 +834,11 @@ t=12
 r=5
 g=5
 b=1
-]],parse([[
+]],parse[[
 portx=104
 porty=88
 portw=9
-]]),function()
+]],function()
 			farm_cycles=10
 		end
 	),
@@ -866,11 +865,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=105
 porty=72
 portw=9
-]]),function()
+]],function()
 			warant[1].atk+=1
 		end
 	),
@@ -880,11 +879,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=96
 porty=72
 portw=9
-]]),function()
+]],function()
 			archer[1].atk+=1
 		end
 	),
@@ -893,11 +892,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=96
 porty=64
 portw=9
-]]),function()
+]],function()
 			archer[1].range+=5
 			archer[1].los+=5
 		end
@@ -917,11 +916,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=96
 porty=80
 portw=8
-]]),function()
+]],function()
 			units_heal[1]=true
 		end
 	),
@@ -930,11 +929,11 @@ t=5
 r=0
 g=2
 b=0
-]],parse([[
+]],parse[[
 portx=104
 porty=80
 portw=9
-]]),function()
+]],function()
 			for x in all{tower,castle,
 				den,barracks} do
 				x[1].los+=5
@@ -943,7 +942,7 @@ portw=9
 	),
 }
 
-dmg_mult=parse([[
+dmg_mult=parse[[
 warant_vs_worker=1
 warant_vs_archer=1
 warant_vs_warant=1
@@ -997,7 +996,7 @@ archer_vs_spider=1
 archer_vs_beetle=1
 archer_vs_building=1
 archer_vs_cat=1
-]])
+]]
 
 function rest(u)
 	u.st={t="rest"}
@@ -1082,7 +1081,8 @@ end
 --update
 
 function handle_click()
-	local lclick=btnp(5)
+	local lclick,rclick=btnp(5),
+		btnp(4)
 
 	--check left click on button
 	if lclick and hovbtn then
@@ -1099,7 +1099,7 @@ function handle_click()
 			local x,y=
 				dx/mmw*mapw,
 				dy/mmh*maph
-			if btnp(4) and sel1 then
+			if rclick and sel1 then
 				--right click, move
 				for u in all(selection) do
 					move(u,x,y)
@@ -1117,7 +1117,7 @@ function handle_click()
 	end
 	
 	--right click cancels place
- if btnp(4) and (to_build or
+ if rclick and (to_build or
  	webbing) then
  	to_build,webbing,webx=nil
  	return
@@ -1128,15 +1128,15 @@ function handle_click()
  	if lclick and acc(wmx\8,wmy\8) then
 	 	if webx then
 				pay(web,-1)
-	 		sel1.st={
+	 		sel1.st,webbing,webx={
 	 		 t="web",
-	 		 wayp=get_wayp(sel1,webx,weby),
+	 		 wayp=get_wayp(
+	 		 	sel1,webx,weby),
 	 		 x1=webx,
 	 		 y1=weby,
 	 		 x2=wmx,
 	 		 y2=wmy,
 	 		}
-	 		webbing,webx=nil
 	 	else
 	 		webx,weby=wmx,wmy
 	 	end
@@ -1145,20 +1145,20 @@ function handle_click()
  end
 
  if lclick and to_build then
-  if (not buildable()) return
-  pay(to_build,-1)
-		local new=unit(to_build.typ,
-			to_build.x+to_build.typ.w\2,
-			to_build.y+to_build.typ.h\2,
-			1)
-		new.const=0
-		register_bldg(new)
-
-		--make selected units build it
-		for u in all(selection) do
-		 build(u,new)
+  if buildable() then
+	  pay(to_build,-1)
+			local new=unit(to_build.typ,
+				to_build.x+to_build.typ.w\2,
+				to_build.y+to_build.typ.h\2,
+				1)
+			new.const=0
+			register_bldg(new)
+				for u in all(selection) do
+			 build(u,new)
+			end
+			to_build=nil
 		end
-		to_build=nil
+		return
  end
  
 	--left drag makes selbox
@@ -1178,7 +1178,7 @@ function handle_click()
  end
 	
  --right click
- if btnp(4) and sel1 and sel1.p==1 then
+ if rclick and sel1 and sel1.p==1 then
 	 local tx,ty=mx\8,my\8
 	 
 	 if can_renew_farm() then
@@ -1357,9 +1357,12 @@ function tick_unit(u)
 	
 	--update viz
 	if u.p==1 or u.st.t=="attack" and not u.st.wayp then
-		local los=u.p==1 and typ.los or 8
 		for t in all(
-		 viztiles(u.x,u.y,los)) do
+		 viztiles(
+		 	u.x,u.y,
+		 	u.p==1 and typ.los or 8
+		 )
+		) do
 			s(vizmap,u.x\8+t[1],
 				u.y\8+t[2],true)
 		end
@@ -1376,8 +1379,8 @@ end
 
 vcache={}
 function viztiles(x,y,los)
-	local xo,yo,vlos=x%8\2,y%8\2,
-		vcache[los]
+	local xo,yo,vlos,l=x%8\2,y%8\2,
+		vcache[los],ceil(los/8)
 	if not vlos then
 		vlos={}
 		vcache[los]=vlos
@@ -1386,7 +1389,6 @@ function viztiles(x,y,los)
 	if not viz then
 		viz={}
 		vlos[xo+yo*4+1]=viz
-		local l=ceil(los/8)
 		for dx=-l,l do
 		 for dy=-l,l do
 				if dist(
@@ -1405,8 +1407,10 @@ function update_projectiles()
  for p in all(proj) do
  	p.x,p.y=norm(p.to,p,0.8)
   if adj(p.to,p,0.5) then
-   if intersect(u_rect(p.to_unit),
-  	{p.x,p.y,p.x,p.y},0) then
+   if intersect(
+   	u_rect(p.to_unit),
+  		{p.x,p.y,p.x,p.y},0
+  	) then
  	 	deal_dmg(p.from_unit,p.to_unit)
 			end
   	del(proj,p)
@@ -1416,7 +1420,6 @@ end
 -->8
 --map
 
---beat 0.74
 --function _fast_draw_map()
 -- camera(cx,cy)
 --	for i in pairs(vizmap) do
@@ -1485,7 +1488,7 @@ function draw_minimap()
 				u.x/mapw*mmw,
 				u.y/maph*mmh,
 				u.sel and 9 or
-				u.p==1 and 1 or 2
+				 u.p==1 and 1 or 2
 			)
 		end
 	end
@@ -1873,6 +1876,7 @@ function step(u)
 	local st=u.st
 	local wayp,spd=st.wayp,u.typ.spd
 	if wayp then
+	 --spider making web is slow
  	if (st.first_pt) spd/=2
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		spd/3.5)
@@ -2003,7 +2007,6 @@ end
 function can_build()
 	return hoverunit and
 		hoverunit.typ.bldg and
-		hoverunit.p==1 and
 		(hoverunit.const or
 			hoverunit.hp<hoverunit.typ.hp
 	 ) and
@@ -2021,11 +2024,11 @@ function rectaround(u,c)
 	)
 end
 
-res_full_qty=parse([[
+res_full_qty=parse[[
 r=40
 g=35
 b=50
-]])
+]]
 
 function mine_res(x,y,r)
 	local full=res_full_qty[r]
@@ -2364,7 +2367,7 @@ end
 --menu/cursor
 
 resorder=split"r,g,b,p"
-rescol=parse([[
+rescol=parse[[
 r=8
 g=11
 b=4
@@ -2376,12 +2379,12 @@ f7=8
 f11=11
 f19=4
 f33=12
-]])
-f2res=parse([[
+]]
+f2res=parse[[
 f7=r
 f11=g
 f19=b
-]])
+]]
 
 function print_res(rsc,x,y,s,hide_0,pop)
 	for i,r in pairs(resorder) do
@@ -2468,7 +2471,7 @@ function draw_port(
 
 	if u or prog then
 		bar(x,y+11,10,
-			prog or u.hp/u.typ.hp,
+			prog or u.hp/typ.hp,
 			prog and 12,
 			prog and 5
 		)
@@ -2537,9 +2540,7 @@ function single_unit_section()
 			end)
 		print("\88"..#selection,16,y+5,7)
 	end
-	
-	if (sel1.p!=1) return
-	
+		
 	if #selection==1 and r then
 		for i=0,sel1.typ==ant and 
 			carry_capacity-1 or 8 do
@@ -2610,8 +2611,10 @@ end
 
 function draw_menu()
  draw_menu_bg()
- if sel_typ and not 
- 	(#selection>1 and sel_typ==spider)
+ if sel_typ and
+ 	(#selection==1 or
+ 		sel_typ!=spider) and
+ 	sel1.p==1
  then
 		single_unit_section()
 	else
@@ -2714,12 +2717,12 @@ function add_neigh(to,closed,x,y)
 	end
 end
 
-dmap_queue=parse([[
+dmap_queue=parse[[
 r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
 d=d,r,g,b
-]])
+]]
 	
 function make_dmaps(r)
 	queue=split(dmap_queue[r])
@@ -2729,40 +2732,25 @@ function async_task()
 	--local x=stat(1)
 	local q=queue[1]
 	if q then
-		if #q!=1 then
+		if #q==1 then
+	 	queue[1]=make_dmap(q)
+		else
 			dmapcc(q)
 			if q.c==9 then
 				dmaps[q.key]=q.dmap
 				deli(queue,1)
 			end
-		else
-	 	queue[1]=make_dmap(q)
 		end
 		--printh(stat(1)-x,"log")
 	end
 end
 
---function _update()
---	async_task()
---	if #queue==0 then
---		make_dmaps()
---	end
---end
---
---function _draw()
---	cls()
---	print(#queue,0,0,7)
---end
-
---based off
---https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
-
-key2res=parse([[
+key2res=parse[[
 r=2
 g=3
 b=4
 d=d
-]])
+]]
 
 function dmapcc(q)
 	local nxt,off=q.nxt or {},
@@ -2775,13 +2763,16 @@ function dmapcc(q)
 		end
 		s(q.dmap,op[1],op[2],q.c)
 		if q.c<8 then
- 		add_neigh(nxt,
- 			q.closed,unpack(op))
+ 		add_neigh(nxt,q.closed,
+ 			unpack(op))
 		end
 	end
 
-	q.open,q.c,q.nxt,q.offset=
-		nxt,q.c+1
+	q.open,
+	q.c,
+	q.nxt,q.offset=
+		nxt,
+		q.c+1
 end
 
 function make_dmap(key)
@@ -2793,6 +2784,7 @@ function make_dmap(key)
 	--ensure starts exists
 	if not starts then
 		starts={}
+		dmap_st[key]=starts
 		for x=0,mapw/8 do
 			for y=0,maph/8 do
 				if 
@@ -2801,14 +2793,13 @@ function make_dmap(key)
 			 	key!="d" and 
 			 		fget(mget(x,y),key2res[key])
 			 then
-			 	s(starts,x,y,{x,y})
+			 	add(starts,{x,y})
 			 end
 			end
 		end
-		dmap_st[key]=starts
 	end
 
-	for i,t in pairs(starts) do
+	for t in all(starts) do
 		if	sur_acc(unpack(t)) then
 			--don't need to set closed[i]
 			--here bc add_neigh won't
@@ -2910,12 +2901,12 @@ queue={}
 units,restiles,selection,
 	proj,bldgs,dmap_st,res=
 	{},{},{},{},{},{d={}},
- parse([[
+ parse[[
 r=55
 g=55
 b=55
 p=7
-]])
+]]
 
 local qx,qy=6,5
 p1q,twr=
@@ -2940,7 +2931,7 @@ unit(ant,qx*8+2,qy*8-8,1)
 --unit(ant,qx*8+20,qy*8+3,1)
 --unit(ant,qx*8+2,qy*8-8,1)
 
-unit(cat,48,56,1)
+unit(warant,48,56,1)
 --unit(beetle,58,56,1)
 --unit(archer,58,30,1)
 --unit(beetle,40,36,1)
