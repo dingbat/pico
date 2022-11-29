@@ -1293,7 +1293,8 @@ function update_sel(u)
 		if u.p!=1 then
 			enemy_sel={u}
 		elseif u.typ.unit then
-			my_sel=add(my_sel or {},u)
+			my_sel=my_sel or {}
+			add(my_sel,u)
 		else
 			bldg_sel={u}
 		end
@@ -1899,10 +1900,10 @@ function all_surr(x,y,n,chk_acc)
 	 	local xx,yy=x+dx,y+dy
 	 	if
 	 		xx>=0 and yy>=0 and
-	 		xx<mapw/8 and yy<maph/8 and
-	 		(not chk_acc or
+	 		xx<mapw/8 and yy<maph/8
+	 		and (not chk_acc or
 	 			acc(xx,yy) and
-	 			(acc(x+dx,y) or acc(x,y+dy))
+	 			(acc(xx,y) or acc(x,yy))
 	 		)
 	 	then
 			 add(st,{
