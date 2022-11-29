@@ -33,6 +33,7 @@ function _draw()
 	draw_projectiles()
 	foreach(bf2,draw_unit)
 	draw_fow()
+	draw_hiviz()
 	foreach(af,draw_unit)
 	
 	--rally flag
@@ -1363,6 +1364,8 @@ function tick_unit(u)
 		 	u.p==1 and typ.los or 8
 		 )
 		) do
+			s(hiviz,u.x\8+t[1],
+				u.y\8+t[2],true)
 			s(vizmap,u.x\8+t[1],
 				u.y\8+t[2],true)
 		end
@@ -1376,7 +1379,7 @@ function tick_unit(u)
 		s(pos,u.x\4,u.y\4,true)
 	end
 end
-
+hiviz={}
 vcache={}
 function viztiles(x,y,los)
 	local xo,yo,vlos,l=x%8\2,y%8\2,
@@ -1438,15 +1441,22 @@ function draw_map()
  camera(cx,cy)
 end
 
-function darken(x,y)
-	fillp(▒)
-	rectfill(x-1,y-1,x+fogtile,y+fogtile,nil)
-	fillp()
-	rectfill(x,y,x+fogtile-1,y+fogtile-1,nil)
+function draw_hiviz()
+	pal(split"0,5,5,13,13,13,6,2,15,6,13,13,13,5,5")
+	for i in pairs(hiviz) do
+		i-=1
+ 	local xx,yy=i%(mapw/4),i\(mapw/4)
+		if not vizmap[i+1] and
+			xx>=cx\8 and xx<cx\8+16 and
+			yy>=cy\8 and yy<cx\8+16 then
+			map(xx,yy,xx*8,yy*8,1,1)
+		end
+	end	
+	pal()
 end
 
 function draw_fow()
-	camera()	
+	camera(cx%fogtile,cy%fogtile)	
 	for x=-fogtile,128,fogtile do
 	 for y=-fogtile,128,fogtile do
 	 	if
@@ -1454,10 +1464,10 @@ function draw_fow()
 	 			x+cx\fogtile*fogtile,
 	 			y+cy\fogtile*fogtile
 	 		) then
-	 		darken(
-	 			x-cx%fogtile,
-	 			y-cy%fogtile
-	 		)
+		 		fillp(▒)
+					rectfill(x-1,y-1,x+fogtile,y+fogtile,nil)
+					fillp()
+					rectfill(x,y,x+fogtile-1,y+fogtile-1,nil)
 	 	end
 	 end
 	end
@@ -1472,18 +1482,24 @@ function draw_minimap()
 	--map tiles
 	for tx=0,mmw do
 	 for ty=0,mmh do
+	 	local x,y=tilew*tx\8,
+	 		tileh*ty\8
+	 	local rf=
 	 	pset(
 	 		tx,ty,
-	 		rescol["f"..fget(
-	 			mget(tilew*tx/8,tileh*ty/8)
-	 		)]
+				rescol[
+					(g(hiviz,x,y) and "" or "_")..
+					(g(vizmap,x,y) and "f" or "h")..
+					fget(mget(x,y))
+				]
 	 	)
 		end
 	end
 	
 	--units
 	for u in all(units) do
-		if not u.dead then
+		if vget(u.x,u.y) and
+			not u.dead then
 			pset(
 				u.x/mapw*mmw,
 				u.y/maph*mmh,
@@ -1491,17 +1507,6 @@ function draw_minimap()
 				 u.p==1 and 1 or 2
 			)
 		end
-	end
-	
-	--fog
-	for tx=0,mmw do
-	 for ty=0,mmh do
-	 	if 
-	 		not vget(tilew*tx,tileh*ty)
-	 	then
-				pset(tx,ty,nil)
-			end
-	 end
 	end
 	
 	--current view area outline
@@ -2379,6 +2384,13 @@ f7=8
 f11=11
 f19=4
 f33=12
+
+h0=5
+h1=5
+h7=8
+h11=3
+h19=4
+h33=13
 ]]
 f2res=parse[[
 f7=r
