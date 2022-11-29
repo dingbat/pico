@@ -70,6 +70,8 @@ function _draw()
 end
 
 function _update()
+	async_task()
+
 	fps+=1
 	if fps==60 then
 		fps=0
@@ -215,6 +217,11 @@ rest_x=0
 rest_y=8
 rest_fr=2
 rest_fps=30
+
+drop_x=0
+drop_y=8
+drop_fr=2
+drop_fps=30
 
 move_x=8
 move_y=8
@@ -536,7 +543,7 @@ fw=8
 h=8
 
 rest_x=0
-rest_y=97
+rest_y=96
 
 portx=35
 porty=80
@@ -1028,23 +1035,23 @@ end
 
 function drop(u,nxt_res,dropu)
 	local wayp,x,y
+	if not dropu then
+		wayp,x,y=dmap_find(u,"d")
+		if not wayp then
+			dropu=p1q
+		end
+	end
 	if dropu then
 		wayp=get_wayp(u,dropu.x,
 			dropu.y,true)
-	else
-		wayp,x,y=dmap_find(u,"d")
 	end
-	if wayp then
-		u.st={
-			t="drop",
-			wayp=wayp,
-			nxt=nxt_res,
-			target=dropu or
-				target_tile(x,y),
-		}
-	else
-		rest(u)
-	end
+	u.st={
+		t="drop",
+		wayp=wayp,
+		nxt=nxt_res,
+		target=dropu or
+			target_tile(x,y),
+	}
 end
 
 function attack(u,e)
@@ -1626,6 +1633,9 @@ function update_unit(u)
  	if (t=="harvest") farmer(u)
  	if (t=="build") buildrepair(u)
   if (t=="gather") mine(u)
+  if t=="drop" and u.st.nxt then
+  	mine_nxt_res(u,u.st.nxt)
+		end
  else
  	check_target_col(u)
  end
@@ -1747,7 +1757,7 @@ function mine(u)
 	local x,y,r=u.st.tx,u.st.ty,u.st.res
 	if g(restiles,x,y)==0 then
 		if not mine_nxt_res(u,r) then
-		 drop(u)
+		 drop(u,r)
 		end
 	elseif fps==u.st.fps then
 		collect(u)
@@ -1813,13 +1823,10 @@ function check_target_col(u)
 			if ures then
 				res[ures.typ]+=ures.qty/3
 				u.res=nil
-			end			
+			end
 			if st.farm then
 				harvest(u,st.farm)
-			elseif (
-				not st.nxt or
-				not mine_nxt_res(u,st.nxt)
-			) then
+			elseif not st.nxt then
 				rest(u)
 			end
 		end
@@ -1918,7 +1925,9 @@ end
 
 function mine_nxt_res(u,res)
 	local wp,x,y=dmap_find(u,res)
-	if wp then
+	--dmap may be outdated, have to
+	--check that res is still there
+	if wp and is_res(x*8,y*8) then
 		gather(u,x,y,wp)
 		return true
 	end
@@ -1993,6 +2002,7 @@ function mine_res(x,y,r)
 	elseif n==0 then
 		mset(x,y,73)
 		s(dmap_st[r],x,y)
+		s(dmaps[r],x,y)
 		make_dmaps()
 	end
 	s(restiles,x,y,n)
@@ -2064,8 +2074,8 @@ function register_bldg(b)
 	end
 	if (h>8) reg(x,y+1)
 	
-	if dmaps and not b.const and
-		v!=bldg_farm then 
+	if not b.const and
+	 v!=bldg_farm then 
 		make_dmaps()
 	end
 end
@@ -2636,6 +2646,7 @@ function dmap_find(u,key)
 		dmaps[key],
 		{},9
 	while lowest>=1 do
+		local orig=max(1,g(dmap,x,y,9))
 		for t in all_surr(x,y,1) do
 			local w=g(dmap,t[1],t[2],9)
 			if (t.diag) w+=0.4
@@ -2643,7 +2654,7 @@ function dmap_find(u,key)
 				lowest,x,y=w,unpack(t)
 			end
 		end
-		if (lowest>=9) return
+		if (lowest>=orig) return
 		add(wayp,{x*8+3,y*8+3})
 	end
 	return wayp,x,y
@@ -2668,13 +2679,108 @@ function add_neigh(to,closed,x,y)
 end
 	
 function make_dmaps()
-	dmaps={
-		r=make_dmap"r",
-		g=make_dmap"g",
-		b=make_dmap"b",
-		d=make_dmap"d",
+	queue=split"r,g,b,d"
+end
+
+function async_task()
+	local q=queue[1]
+	if q then
+		if #q!=1 then
+			dmapcc(q)
+			if q.c==9 then
+				dmaps[q.key]=q.dmap
+				deli(queue,1)
+			end
+		else
+	 	queue[1]=make_dmap(q)
+		end
+	end
+end
+
+--function _update()
+--	async_task()
+--	if #queue==0 then
+--		make_dmaps()
+--	end
+--end
+--
+--function _draw()
+--	cls()
+--	print(#queue,0,0,7)
+--end
+
+--based off
+--https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
+
+key2res=parse([[
+r=2
+g=3
+b=4
+d=d
+]])
+
+function dmapcc(q)
+	local nxt,off=q.nxt or {},
+		q.offset or 1
+	for i=off,#q.open do
+		local op=q.open[i]
+		if i-off>20 then
+			q.offset,q.nxt=i,nxt
+			return
+		end
+		s(q.dmap,op[1],op[2],q.c)
+		if q.c<8 then
+ 		add_neigh(nxt,
+ 			q.closed,unpack(op))
+		end
+	end
+
+	q.open,q.c,q.nxt,q.offset=
+		nxt,q.c+1
+end
+
+function make_dmap(key)
+	local dmap,
+		open,starts=
+	 {},{},
+	 dmap_st[key]
+	 
+	--ensure starts exists
+	if not starts then
+		starts={}
+		for x=0,mapw/8 do
+			for y=0,maph/8 do
+				if 
+			 	key=="d" and 
+			 		g(bldgs,x,y)==bldg_drop or
+			 	key!="d" and 
+			 		fget(mget(x,y),key2res[key])
+			 then
+			 	s(starts,x,y,{x,y})
+			 end
+			end
+		end
+		dmap_st[key]=starts
+	end
+
+	for i,t in pairs(starts) do
+		if	sur_acc(unpack(t)) then
+			--don't need to set closed[i]
+			--here bc add_neigh won't
+			--add inaccessible tiles
+			add(open,t)
+		end
+	end
+	
+	return {
+		key=key,
+		dmap=dmap,
+		open=open,
+		c=0,
+		closed={},
 	}
 end
+
 
 --function add_dmap_obs(key,x,y)
 --	local dmap=dmaps[key]
@@ -2710,66 +2816,6 @@ end
 --	s(dmap,x,y,0)
 --end
 
---based off
---https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
-
-key2res=parse([[
-r=2
-g=3
-b=4
-d=d
-]])
-
-function make_dmap(key)
-	local dmap,closed,
-		open,c,starts=
-	 {},{},{},1,
-	 dmap_st[key]
-	 
-	--ensure starts exists
-	if not starts then
-		starts={}
-		for x=0,mapw/8 do
-			for y=0,maph/8 do
-				if 
-			 	key=="d" and 
-			 		g(bldgs,x,y)==bldg_drop or
-			 	key!="d" and 
-			 		fget(mget(x,y),key2res[key])
-			 then
-			 	s(starts,x,y,{x,y})
-			 end
-			end
-		end
-		dmap_st[key]=starts	
-	end
-
-	--create initial open list
-	for i,t in pairs(starts) do
-		if	sur_acc(unpack(t)) then
-			--don't need to set closed[i]
-			--here bc add_neigh won't
-			--add inaccessible tiles
-			dmap[i]=0
-			add_neigh(open,closed,unpack(t))
-		end
-	end
-	
- --flood
- while c<9 do
- 	local nxt_open={}
- 	for op in all(open) do
- 		s(dmap,op[1],op[2],c)
- 		if c<8 then
-	 		add_neigh(nxt_open,closed,unpack(op))
- 		end
- 	end
- 	open=nxt_open
- 	c+=1
- end
-	
-	return dmap
-end
 
 --function draw_dmap(res_typ)
 --	local dmap=dmaps[res_typ]
@@ -2784,7 +2830,7 @@ end
 --draw=_draw
 --_draw=function()
 --	draw()
---	draw_dmap("d")
+--	draw_dmap("r")
 --end
 -->8
 --init
@@ -2813,6 +2859,9 @@ cx,cy,mx,my,fps=0,0,0,0,0
 farm_cycles,carry_capacity,
 	units_heal=5,6,{}
 
+dmaps={r={},g={},b={},d={}}
+queue={}
+
 units,restiles,selection,
 	proj,bldgs,dmap_st,res=
 	{},{},{},{},{},{d={}},
@@ -2824,12 +2873,12 @@ p=7
 ]])
 
 local qx,qy=6,5
-local q,t=
+p1q,twr=
 	unit(queen,qx*8+9,qy*8+4,1),
 	unit(castle,60,106,2)
 
-register_bldg(q)
-register_bldg(t)
+register_bldg(p1q)
+register_bldg(twr)
 make_dmaps()
 
 unit(ant,qx*8-8,qy*8,1)
