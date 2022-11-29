@@ -1447,8 +1447,8 @@ function draw_hiviz()
 		i-=1
  	local xx,yy=i%(mapw/4),i\(mapw/4)
 		if not vizmap[i+1] and
-			xx>=cx\8 and xx<cx\8+16 and
-			yy>=cy\8 and yy<cx\8+16 then
+			xx>=cx\8 and xx<=cx\8+16 and
+			yy>=cy\8 and yy<=cy\8+16 then
 			map(xx,yy,xx*8,yy*8,1,1)
 		end
 	end	
@@ -1456,22 +1456,29 @@ function draw_hiviz()
 end
 
 function draw_fow()
-	camera(cx%fogtile,cy%fogtile)	
-	for x=-fogtile,128,fogtile do
-	 for y=-fogtile,128,fogtile do
-	 	if
-	 		not vget(
-	 			x+cx\fogtile*fogtile,
-	 			y+cy\fogtile*fogtile
-	 		) then
-		 		fillp(▒)
-					rectfill(x-1,y-1,x+fogtile,y+fogtile,nil)
-					fillp()
-					rectfill(x,y,x+fogtile-1,y+fogtile-1,nil)
+	for x=cx\8,cx\8+16 do
+	 for y=cy\8,cy\8+16 do
+	 	if not g(vizmap,x,y) then
+	 		local xx,yy=x*8,y*8
+				fillp(▒)
+				local c=g(hiviz,x,y) and 5 or 0
+				if g(vizmap,x-1,y) then
+		 		line(xx-1,yy,xx-1,yy+7,c)
+				end
+				if g(vizmap,x,y-1) then
+		 		line(xx,yy-1,xx+7,yy-1,c)
+				end
+				if g(vizmap,x,y+1) then
+		 		line(xx,yy+8,xx+7,yy+8,c)
+				end
+				if g(vizmap,x+1,y) then
+		 		line(xx+8,yy,xx+8,yy+7,c)
+				end
+				fillp()
+				rectfill(xx,yy,xx+7,yy+7,nil)
 	 	end
 	 end
 	end
-	camera(cx,cy)
 end
 
 function draw_minimap()
