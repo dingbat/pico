@@ -192,6 +192,17 @@ end
 -->8
 --unit defs/states
 
+--notes
+--[[
+
+todo
+- ai
+- dmg multiplier balancing
+- costs balancing
+- menu/wincond
+
+]]
+
 --bitmaps:
 --tower:1
 --mound:2
@@ -2062,45 +2073,45 @@ function buildable()
 end
 
 function register_bldg(b)
-	local typ,upd,v=
+	local typ,v=
 		b.typ,
-		not b.const and dmaps and not b.dead,
 		not b.dead and
 			(b.const and bldg_const or
 			b.typ.bldg)
 	local w,h,x,y=typ.w,typ.h,
 		(b.x-2)\8,(b.y-2)\8
 
-	add_building(v,x,y,upd)
+	local reg=function(x,y)
+		s(bldgs,x,y,v)
+		s(dmap_st.d,x,y,
+			v==bldg_drop and {x,y} or nil)
+	end
+	reg(x,y)
 	if w>8 then
-		add_building(v,x+1,y,upd)
-		if h>8 then
-			add_building(v,x+1,y+1,upd)
-		end
+		reg(x+1,y)
+		if (h>8) reg(x+1,y+1)
 	end
-	if h>8 then
-		add_building(v,x,y+1,upd)
-	end
-	if not v then
+	if (h>8) reg(x,y+1)
+	
+	if dmaps and not b.const and
+		v!=bldg_farm then 
 		make_dmaps()
 	end
 end
 
-function add_building(v,x,y,up_dmap)
-	s(bldgs,x,y,v)
-	--just doing make_dmaps() is
-	--slower, but saves 176 tok
-	if up_dmap and v!=bldg_farm then
-		add_dmap_obs("r",x,y)
-		add_dmap_obs("g",x,y)
-		add_dmap_obs("b",x,y)
-		if v==bldg_drop then
-			add_dmap_sink("d",x,y)
-		else
-			add_dmap_obs("d",x,y)
-		end
-	end
-end
+--function add_building(v,x,y,up_dmap)
+--	s(bldgs,x,y,v)
+--	if up_dmap and  then
+--		add_dmap_obs("r",x,y)
+--		add_dmap_obs("g",x,y)
+--		add_dmap_obs("b",x,y)
+--		if v==bldg_drop then
+--			add_dmap_sink("d",x,y)
+--		else
+--			add_dmap_obs("d",x,y)
+--		end
+--	end
+--end
 
 function deal_dmg(from,to)
 	to.hp-=from.typ[from.p].atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def_typ]
@@ -2633,38 +2644,9 @@ function draw_menu_bg()
  --assert(x==128)
 end
 -->8
---notes
---[[
-
-todo
-- map
-- ai
-- spiderweb?
-- dmg multiplier balancing
-- costs balancing
-- tech tree
-- min range for cat+tower?
-- menu/wincond
-
-pathfinding:
-- if destination tile is impass,
- draw line from unit to tile to
- find the furthest passable tile
- along that line, then a* there
-
-spider: can build "web", spans
-limited length but is just a
-white line. spider must station
-on the web. takes time to do and
-undo web. if any enemy crosses
-the web, they are stuck and
-spider takes time to eat them.
-
-]]
--->8
 --dmaps
 
-rows,dmap_st=mapw/4,{}
+rows,dmap_st=mapw/4,{d={}}
 
 function dmap_find(u,key)
 	local x,y,dmap,wayp,lowest=
@@ -2694,7 +2676,7 @@ function s(a,x,y,v)
  a[x+y*rows+1]=v
 end
 
-function add_neigh(dmap,to,closed,x,y)
+function add_neigh(to,closed,x,y)
 	for t in all_surr(x,y,1,true) do
 		local xx,yy=unpack(t)
 		if not g(closed,xx,yy) then
@@ -2713,40 +2695,39 @@ function make_dmaps()
 	}
 end
 
-function add_dmap_obs(key,x,y)
-	local dmap=dmaps[key]
-	for t in all_surr(x,y,1) do
-		if (t[1]!=x or t[2]!=y) and
-			g(dmap,unpack(t))==
-    g(dmap,x,y)
-  then
-			s(dmap,x,y,9)
-			return
-		end
-	end
-	printh("regen","log")
-	--cant update, must regen
-	dmaps[key]=make_dmap(key)
-end
-
-function add_dmap_sink(key,x,y)
-	local dmap,fr,c=dmaps[key],
-		{},
-		1
-	add_neigh(dmap,fr,{},x,y)
-	while #fr>0 do
-		local new_fr={}
-		for t in all(fr) do
-		 if c<g(dmap,t[1],t[2],9) then
-		 	s(dmap,t[1],t[2],c)
-		 	add_neigh(dmap,new_fr,{},unpack(t))
-		 end
-		end
-		fr=new_fr
-		c+=1
-	end
-	s(dmap,x,y,0)
-end
+--function add_dmap_obs(key,x,y)
+--	local dmap=dmaps[key]
+--	for t in all_surr(x,y,1) do
+--		if (t[1]!=x or t[2]!=y) and
+--			g(dmap,unpack(t))==
+--    g(dmap,x,y)
+--  then
+--			s(dmap,x,y,9)
+--			return
+--		end
+--	end
+--	--cant update, must regen
+--	dmaps[key]=make_dmap(key)
+--end
+--
+--function add_dmap_sink(key,x,y)
+--	local dmap,fr,c=dmaps[key],
+--		{},
+--		1
+--	add_neigh(fr,{},x,y)
+--	while #fr>0 do
+--		local new_fr={}
+--		for t in all(fr) do
+--		 if c<g(dmap,t[1],t[2],9) then
+--		 	s(dmap,t[1],t[2],c)
+--		 	add_neigh(new_fr,{},unpack(t))
+--		 end
+--		end
+--		fr=new_fr
+--		c+=1
+--	end
+--	s(dmap,x,y,0)
+--end
 
 --based off
 --https://github.com/henryxz/dijkstra-map/blob/main/dijkstra_map.py
@@ -2785,8 +2766,11 @@ function make_dmap(key)
 	--create initial open list
 	for i,t in pairs(starts) do
 		if	sur_acc(unpack(t)) then
+			--don't need to set closed[i]
+			--here bc add_neigh won't
+			--add inaccessible tiles
 			dmap[i]=0
-			add_neigh(dmap,open,closed,unpack(t))
+			add_neigh(open,closed,unpack(t))
 		end
 	end
 	
@@ -2796,7 +2780,7 @@ function make_dmap(key)
  	for op in all(open) do
  		s(dmap,op[1],op[2],c)
  		if c<8 then
-	 		add_neigh(dmap,nxt_open,closed,unpack(op))
+	 		add_neigh(nxt_open,closed,unpack(op))
  		end
  	end
  	open=nxt_open
@@ -2819,7 +2803,7 @@ end
 --draw=_draw
 --_draw=function()
 --	draw()
---	draw_dmap("g")
+--	draw_dmap("d")
 --end
 -->8
 --init
@@ -2837,6 +2821,7 @@ units={
 	unit(ant,qx*8-8,qy*8,1),
 	unit(ant,qx*8+20,qy*8+3,1),
 	unit(ant,qx*8+2,qy*8-8,1),
+	
 --	unit(ant,qx*8-8,qy*8,1),
 --	unit(ant,qx*8+20,qy*8+3,1),
 --	unit(ant,qx*8+2,qy*8-8,1),
@@ -2846,8 +2831,6 @@ units={
 --	unit(ant,qx*8-8,qy*8,1),
 --	unit(ant,qx*8+20,qy*8+3,1),
 --	unit(ant,qx*8+2,qy*8-8,1),
-	unit(cat,48,56,1),
-	unit(cat,48,56,1),
 
 	unit(cat,48,56,1),
 	--unit(beetle,58,56,1),
