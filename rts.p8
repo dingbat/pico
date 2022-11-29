@@ -27,7 +27,7 @@ units,restiles,selection,
 	proj,bldgs={},{},{},{},{}
 res={r=55,g=55,b=55,p=7}
 
-function unit(typ,x,y,p,const)
+function unit(typ,x,y,p)
  return {
 		typ=typ,
 		x=x,
@@ -36,7 +36,6 @@ function unit(typ,x,y,p,const)
 		dir=1,
 		p=p,
 		hp=typ.hp,
-		const=const,
 	}
 end
 
@@ -97,10 +96,12 @@ function _draw()
 		circ(hilite.px,hilite.py,2,8)
 	end
 	
-	draw_cursor()
+	--cursor
+	spr(cursor_spr(),amx,amy)
+	pal()
 	
 --	if sel1 then
---		print(sel1.st.t,0,0,7)
+--		print(sel1.st.t.." "..(sel1.st.active and "active" or ""),0,0,7)
 --	end
 end
 
@@ -1018,7 +1019,7 @@ function build(u,b)
 	u.st,u.res={
 		t="build",
 		target=b,
-		wayp=get_wayp(u,b.x,b.y),
+		wayp=get_wayp(u,b.x,b.y,true),
 	}
 end
 
@@ -1148,18 +1149,14 @@ function handle_click()
  	return
  end
 
- --left click places building
  if lclick and to_build then
   if (not buildable()) return
   pay(to_build,-1)
-		local typ=to_build.typ
-		local w,h,x,y=
-			typ.w,typ.h,
-		 to_build.x,to_build.y
-		local new=unit(
-			typ,x+w\2,
-			y+h\2,
-			1,0)
+		local new=unit(to_build.typ,
+			to_build.x+to_build.typ.w\2,
+			to_build.y+to_build.typ.h\2,
+			1)
+		new.const=0
 		add(units,new)
 		register_bldg(new)
 
@@ -1308,7 +1305,7 @@ function handle_input()
 end
 
 function update_sel(u)
-	u.sel=intersect(selbox,u_rect(u))
+	u.sel=intersect(selbox,u_rect(u),0)
  if u.sel then
 		if u.p!=1 then
 			enemy_sel={u}
@@ -1345,7 +1342,6 @@ function tick_unit(u)
 		return		
 	end
 	
-	--units+queen slowly regen
 	if units_heal[u.p] and
 		not u.fire and
 	 u.hp<typ.hp and
@@ -1367,11 +1363,10 @@ function tick_unit(u)
 	
 	--update viz
 	if u.p==1 or u.st.t=="attack" and not u.st.wayp then
-		local x,y=u.x\fogtile,
-			u.y\fogtile
-		for t in all(
-			surrounding_tiles(
-			x,y,ceil(typ.los/fogtile))
+		for t in all_surr(
+			u.x\fogtile,
+			u.y\fogtile,
+			ceil(typ.los/fogtile)
 		) do
 			if dist(
 				u.x-(t[1]+0.5)*fogtile,
@@ -1396,7 +1391,7 @@ function update_projectiles()
  	p.x,p.y=norm(p.to,p,0.8)
   if adj(p.to,p,0.5) then
    if intersect(u_rect(p.to_unit),
-  	{p.x,p.y,p.x,p.y}) then
+  	{p.x,p.y,p.x,p.y},0) then
  	 	deal_dmg(p.from_unit,p.to_unit)
 			end
   	del(proj,p)
@@ -1717,7 +1712,7 @@ function fight(u)
  	end
  else
  	in_range=intersect(u_rect(u),
- 	 u_rect(e))
+ 	 u_rect(e),0)
 		if in_range and fps%30==0 then
 		 deal_dmg(u,e)
 		end
@@ -1887,7 +1882,6 @@ end
 --utils
 
 function intersect(r1,r2,e)
-	e=e or 0
 	return r1[1]-e<r2[3] and
 		r1[3]+e>r2[1] and
 		r1[2]-e<r2[4] and
@@ -1917,7 +1911,7 @@ function dist(a,b)
  	min(a0,b0)*0.3984
 end
 
-function surrounding_tiles(x,y,n,chk_acc)
+function all_surr(x,y,n,chk_acc)
 	local st={}
 	for dx=-n,n do
 	 for dy=-n,n do
@@ -1937,7 +1931,7 @@ function surrounding_tiles(x,y,n,chk_acc)
 			end
 		end
 	end
-	return st
+	return all(st)
 end
 
 function mine_nxt_res(u,res)
@@ -1968,12 +1962,13 @@ function can_gather()
 end
 
 function can_attack()
-	if	vget(mx,my) and
-		hoverunit and
-	 hoverunit.p!=1
-	then
-		for u in all(selection) do
-			if (u.typ.atk) return true
+	for u in all(selection) do
+		if u.typ.atk and
+			vget(mx,my) and
+			hoverunit and
+		 hoverunit.p!=1
+		then
+			return true
 		end
 	end
 end
@@ -1989,11 +1984,12 @@ function can_build()
 end
 
 function rectaround(u,c)
+	local w2,h2=u.typ.w\2,u.typ.h\2
 	rect(
-		u.x-u.typ.w\2-1,
-		u.y-u.typ.h\2-1,
-		u.x+u.typ.w\2,
-		u.y+u.typ.h\2,
+		u.x-w2-1,
+		u.y-h2-1,
+		u.x+w2,
+		u.y+h2,
 		c
 	)
 end
@@ -2009,13 +2005,12 @@ function mine_res(x,y,r)
 	--could add +10 to full if
 	--mget(x,y) has flag x
 	--(give alt res more capacity)
-	local n=g(restiles,x,y) or full
-	n-=1
+	local n=g(restiles,x,y,full)-1
 	if n==full\3 or n==full*4\5 then
 		mset(x,y,mget(x,y)+16)
 	elseif n==0 then
 		mset(x,y,73)
-		s(dmap_st[r],x,y,nil)
+		s(dmap_st[r],x,y)
 		make_dmaps()
 	end
 	s(restiles,x,y,n)
@@ -2047,9 +2042,8 @@ end
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0) and
-		--somehow unnecessary
-		--x>=0 and y>=0 and
-		--x<mapw/8 and y<maph/8 and
+		x>=0 and y>=0 and
+		x<mapw/8 and y<maph/8 and
 		(not b or (not strict and (
 		b==bldg_farm or b==bldg_const
 	)))
@@ -2070,7 +2064,7 @@ end
 function register_bldg(b)
 	local typ,upd,v=
 		b.typ,
-		not b.const and dmaps,
+		not b.const and dmaps and not b.dead,
 		not b.dead and
 			(b.const and bldg_const or
 			b.typ.bldg)
@@ -2087,13 +2081,16 @@ function register_bldg(b)
 	if h>8 then
 		add_building(v,x,y+1,upd)
 	end
+	if not v then
+		make_dmaps()
+	end
 end
 
 function add_building(v,x,y,up_dmap)
 	s(bldgs,x,y,v)
-	if v!=bldg_farm and up_dmap then
-		--slower, but saves 176 tok
-		--make_dmaps()
+	--just doing make_dmaps() is
+	--slower, but saves 176 tok
+	if up_dmap and v!=bldg_farm then
 		add_dmap_obs("r",x,y)
 		add_dmap_obs("g",x,y)
 		add_dmap_obs("b",x,y)
@@ -2154,8 +2151,7 @@ end
 function nearest_acc(x,y,sx,sy)
 	for n=0,99 do
 		local best_t,best_d
-		for t in all(
-			surrounding_tiles(x,y,n)) do
+		for t in all_surr(x,y,n) do
 			if acc(unpack(t)) then
 				local d=dist(
 					t[1]*8+4-sx,
@@ -2270,9 +2266,9 @@ function find_path(start,goal)
   -- consider each neighbor n of
   -- p which is still in the
   -- frontier queue
-  for n in all(surrounding_tiles(
+  for n in all_surr(
   	p[1],p[2],1,true
-  )) do
+  ) do
    -- find the current-best
    -- known way to n (or
    -- create it, if there isn't
@@ -2409,7 +2405,7 @@ function draw_port(
 	)
 	rectfill(x+1,y+1,x+9,y+8,
 		cant_pay and 7 or costs and
- 	(costs.tech and 10 or 6) or 6
+ 	costs.tech and 10 or 6
 	)
 	pal(14,0)
 	if cant_pay then
@@ -2447,7 +2443,11 @@ function cursor_spr()
  	end
  	return 74
  end
- if (hovbtn) return 66
+ if hovbtn then
+ 	--pointer spr missing 1px
+		pset(amx-1,amy+4,5)
+  return 66
+	end
 	if sel1 and sel1.p==1 then
 	 --build cursor
 		if to_build or 
@@ -2464,15 +2464,6 @@ function cursor_spr()
 	end
 	--default
 	return 64
-end
-
-function draw_cursor()
-	local mspr=cursor_spr()
- spr(mspr,amx,amy)
- pal()
-	if mspr==66 then --pointer
-		pset(amx-1,amy+4,5)
-	end
 end
 
 function draw_sel_ports()
@@ -2558,7 +2549,12 @@ function single_unit_section()
 			)
 		end
 		if q then 
-			draw_port(q.b.typ,20,y+1,nil,
+			draw_port(
+			 q.b.typ,
+			 q.b.tech and 24 or
+			 	print("\88"..q.qty,32,
+			 		y+4,7) and 20,
+			 y+1,nil,
 				function()
 					pay(q.b,1)
 					if q.qty==1 then
@@ -2568,7 +2564,6 @@ function single_unit_section()
 					end
 				end,q.t/q.b.t
 			)
-			print("\88"..q.qty,32,y+4,7)
 		end
 	end
 end
@@ -2678,8 +2673,7 @@ function dmap_find(u,key)
 		dmaps[key],
 		{},9
 	while lowest>=1 do
-		for t in all(
-		 surrounding_tiles(x,y,1)) do
+		for t in all_surr(x,y,1) do
 			local w=g(dmap,t[1],t[2],9)
 			if (t.diag) w+=0.4
 			if w<lowest then
@@ -2701,9 +2695,7 @@ function s(a,x,y,v)
 end
 
 function add_neigh(dmap,to,closed,x,y)
-	for t in all(
-		surrounding_tiles(x,y,1,true)
-	) do
+	for t in all_surr(x,y,1,true) do
 		local xx,yy=unpack(t)
 		if not g(closed,xx,yy) then
 			add(to,t)
@@ -2723,8 +2715,7 @@ end
 
 function add_dmap_obs(key,x,y)
 	local dmap=dmaps[key]
-	for t in all(
-		surrounding_tiles(x,y,1)) do
+	for t in all_surr(x,y,1) do
 		if (t[1]!=x or t[2]!=y) and
 			g(dmap,unpack(t))==
     g(dmap,x,y)
@@ -2733,6 +2724,7 @@ function add_dmap_obs(key,x,y)
 			return
 		end
 	end
+	printh("regen","log")
 	--cant update, must regen
 	dmaps[key]=make_dmap(key)
 end
@@ -2827,7 +2819,7 @@ end
 --draw=_draw
 --_draw=function()
 --	draw()
---	draw_dmap("d")
+--	draw_dmap("g")
 --end
 -->8
 --init
@@ -2837,8 +2829,9 @@ end
 poke(0x5f2d,0x1|0x2)
 
 local qx,qy=6,5
-local q=unit(queen,
-	qx*8+9,qy*8+4,1)
+local q,t=
+	unit(queen,qx*8+9,qy*8+4,1),
+	unit(castle,60,106,2)
 units={
 	q,
 	unit(ant,qx*8-8,qy*8,1),
@@ -2853,6 +2846,8 @@ units={
 --	unit(ant,qx*8-8,qy*8,1),
 --	unit(ant,qx*8+20,qy*8+3,1),
 --	unit(ant,qx*8+2,qy*8-8,1),
+	unit(cat,48,56,1),
+	unit(cat,48,56,1),
 
 	unit(cat,48,56,1),
 	--unit(beetle,58,56,1),
@@ -2860,7 +2855,7 @@ units={
 	--unit(beetle,40,36,1),
 	--unit(cat,40,36,1),
 
-	unit(tower,60,106,2),
+	t,
 --	unit(spider,65,81,2),
 --	unit(archer,70,84,2),
 	--unit(beetle,65,81,2),
@@ -2869,6 +2864,7 @@ units={
 	--unit(tower,65,65,1)
 }
 register_bldg(q)
+register_bldg(t)
 make_dmaps()
 
 menuitem(1,"turn mouse off",function()
