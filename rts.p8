@@ -3,10 +3,6 @@ version 38
 __lua__
 --main loop
 
---draw_menu:.13 (.11 is minimap)
---draw_map: .12
---draw_fow: .14
-
 function _draw()
  cls()
  draw_map()
@@ -197,9 +193,8 @@ function parse(unit,typ,tech)
 	}
 	for l in all(split(unit,"\n")) do
 		if #l>0 then
-			local vals=split(l,"=")
-			local v1,v2=vals[1],
-				tonum(vals[2]) or vals[2]
+			local v1,v2=unpack(
+				split(l,"="))
 			obj[v1],obj[1][v1],
 				obj[2][v1]=v2,v2,v2
 		end
@@ -208,6 +203,7 @@ function parse(unit,typ,tech)
 end
 
 ant=parse[[
+idx=1
 w=4
 fw=4
 h=4
@@ -262,6 +258,7 @@ hp=10
 def_typ=worker
 ]]
 beetle=parse[[
+idx=2
 w=8
 fw=8
 h=6
@@ -299,6 +296,7 @@ atk_typ=beetle
 atk=1
 ]]
 spider=parse[[
+idx=3
 w=8
 fw=8
 h=5
@@ -339,6 +337,7 @@ atk_typ=spider
 atk=2
 ]]
 archer=parse[[
+idx=4
 w=7
 fw=8
 h=6
@@ -381,6 +380,7 @@ def_typ=archer
 atk=1
 ]]
 warant=parse[[
+idx=5
 w=8
 fw=8
 h=6
@@ -418,6 +418,7 @@ def_typ=warant
 atk=1
 ]]
 cat=parse[[
+idx=6
 w=16
 fw=16
 h=8
@@ -460,6 +461,7 @@ def_typ=cat
 atk=2
 ]]
 queen=parse[[
+idx=7
 w=15
 h=8
 fw=16
@@ -496,11 +498,13 @@ proj_s=4
 atk_typ=archer
 def_typ=queen
 atk=1
+bitmap=0
 ]]
 
 --#########----
 
 tower=parse[[
+idx=8
 w=8
 fw=8
 h=14
@@ -539,6 +543,7 @@ atk=1
 bitmap=1
 ]]
 mound=parse[[
+idx=9
 w=8
 fw=8
 h=8
@@ -569,6 +574,7 @@ bitmap=2
 ]]
 
 den=parse[[
+idx=10
 w=8
 fw=8
 h=8
@@ -597,6 +603,7 @@ def_typ=building
 bitmap=4
 ]]
 barracks=parse[[
+idx=11
 w=8
 fw=8
 h=8
@@ -625,6 +632,7 @@ def_typ=building
 bitmap=8
 ]]
 farm=parse[[
+idx=12
 w=8
 fw=8
 h=8
@@ -655,6 +663,7 @@ farm_renew_cost_b=3
 
 
 castle=parse[[
+idx=13
 w=15
 fw=16
 h=16
@@ -1149,10 +1158,8 @@ function handle_click()
 			local new=unit(to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1)
-			new.const=0
-			register_bldg(new)
-				for u in all(selection) do
+				1,nil,nil,0)
+			for u in all(selection) do
 			 build(u,new)
 			end
 			to_build=nil
@@ -1492,6 +1499,7 @@ function draw_fow()
 	end
 end
 
+-- 0.11 cpu
 function draw_minimap()
 	camera(-mmx,-mmy)
 	
@@ -1783,7 +1791,6 @@ function buildrepair(u)
  		b.const+=1
  		if b.const==b.typ.const then
  			b.const=nil
- 			bldg_bmap|=b.typ.bitmap
  			register_bldg(b)
  			if b.typ==mound and b.p==1 then
  				res.p+=5
@@ -2107,6 +2114,10 @@ function register_bldg(b)
 	
 	if not b.const and typ!=farm then 
 		make_dmaps"d"
+		if b.p==1 then
+			bldg_bmap|=typ.bitmap
+			if (typ==queen) p1q=b
+		end
 	end
 end
 
@@ -2166,16 +2177,22 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
-function unit(typ,x,y,p)
- return add(units,{
+function unit(typ,x,y,p,hp,id,
+	const)
+ uid+=1
+ local u=add(units,{
 		typ=typ,
 		x=x,
 		y=y,
 		st={t="rest"},
 		dir=1,
 		p=p,
-		hp=typ.hp,
+		hp=hp or typ.hp,
+		const=const,
+		uid=id or uid,
 	})
+	if (typ.bldg) register_bldg(u)
+	return u
 end
 
 -->8
@@ -2350,7 +2367,7 @@ end
 --menu/cursor
 
 resorder,f2res,resqty,key2resf,
-	rescol=
+	dmap_queue,rescol=
 	split"r,g,b,p",parse[[
 f7=r
 f11=g
@@ -2364,6 +2381,11 @@ r=2
 g=3
 b=4
 d=d
+]],parse[[
+r=r,g,b,d
+g=g,r,b,d
+b=b,g,r,d
+d=d,r,g,b
 ]],parse[[
 r=8
 g=11
@@ -2612,12 +2634,12 @@ end
 
 function draw_menu()
 	local x,secs,modstart=
- 	0,{102,26},1
+ 	0,split"102,26",1
  if sel_typ then
 		if sel_typ.has_q then
-  	secs={17,24,61,26}
+  	secs=split"17,24,61,26"
  	elseif sel_typ.prod then
-  	secs,modstart={35,67,26},0
+  	secs,modstart=split"35,67,26",0
   end
 	end
  for i,sec in pairs(secs) do
@@ -2707,13 +2729,6 @@ end
 function s(a,x,y,v)
  a[pt2key{x,y}]=v
 end
-
-dmap_queue=parse[[
-r=r,g,b,d
-g=g,r,b,d
-b=b,g,r,d
-d=d,r,g,b
-]]
 	
 function make_dmaps(r)
 	queue=split(dmap_queue[r])
@@ -2821,44 +2836,43 @@ end
 --end
 -->8
 --init
---init() func wastes tokens
 
 --enable mouse & mouse btns
 poke(0x5f2d,3)
 
---constants
-mapw,maph=256,256
-mmw=19
-mmh=maph\(mapw/mmw)
-mmx,mmy,menuh,menuy=
-	105,107,21,104
-
---global state
-cx,cy,mx,my,fps,bldg_bmap=
-	0,0,0,0,0,0
-
---tech can change this
-farm_cycles,carry_capacity,
-	units_heal=5,6,{}
-
-queue,hiviz,vcache,dmaps,
-units,restiles,selection,
-	proj,bldgs,dmap_st,res=
-	{},{},{},{},
-	{},{},{},{},{},{d={}},
- parse[[
-r=55
-g=55
-b=55
+function init()
+	--constants
+	mapw,maph,mmx,mmy,menuh,menuy=
+		split"256,256,105,107,21,104"
+	mmw=19
+	mmh=maph\(mapw/mmw)
+	
+	--global state
+	cx,cy,mx,my,fps,bldg_bmap,uid=
+		split"0,0,0,0,0,0,1"
+	
+	--tech can change this
+	farm_cycles,carry_capacity,
+		units_heal=5,6,{}
+	
+	queue,hiviz,vcache,dmaps,
+	units,restiles,selection,
+		proj,bldgs,dmap_st,res=
+		{},{},{},{},
+		{},{},{},{},{},{d={}},
+	 parse[[
+r=5
+g=5
+b=5
 p=7
 ]]
+end
+
+init()
 
 local qx,qy=6*8,5*8
-p1q,twr=
-	unit(queen,qx+9,qy+4,1),
-	unit(castle,55,102,2)
-register_bldg(p1q)
-register_bldg(twr)
+unit(queen,qx+9,qy+4,1)
+unit(castle,55,102,2)
 
 make_dmaps"d"
 
@@ -2893,6 +2907,107 @@ menuitem(1,"turn mouse off",function()
 	menuitem(1,"turn mouse "..(dpad and "off" or "on"))
 	dpad=not dpad
 end)
+
+-->8
+--clipboard saving
+
+--[[
+the following will not be saved:
+- unit states
+- resource count in partially
+  mined resource tiles
+- units in production, along w/
+  the used resources+pop count
+- research
+- if a prereq building was built
+  but there are none left when
+  saving, the prereq won't save
+]]
+menuitem(2,"save to clpbrd",function()
+	local str=""
+	--res
+	for r in all(resorder) do
+		str=str..res[r]..","
+	end
+	str=str.."\n"
+	--map
+	for x=0,mapw/8-1 do
+		for y=0,maph/8-1 do
+			str=str..mget(x,y)..","
+		end
+	end
+	str=str.."\n"
+	--hiviz
+	for k,v in pairs(hiviz) do
+		if (v!=1) v=v.uid
+		str=str..k.."="..v..","
+	end
+	--units
+	str=str.."\n"
+	for u in all(units) do
+		str=str..
+		 u.typ.idx..","..
+			u.x..","..
+			u.y..","..
+			u.p..","..
+			u.hp..","..
+			u.uid..
+			(u.const and ","..u.const or "")..
+			"\n"
+	end
+	printh(str,"@clip")
+end)
+
+menuitem(3,"load from clpbrd",function()
+	init()
+
+	local lines,uids=
+		split(stat(4),"\n"),
+		{}
+	local r,m,hvz=
+		split(deli(lines,1)),
+		split(deli(lines,1)),
+		split(deli(lines,1))
+	for i,k in pairs(resorder) do
+		res[k]=r[i]
+	end
+	for i,tile in pairs(m) do
+		mset(i%(mapw/8),i/mapw/8,tile)
+	end
+	for l in all(lines) do
+		if #l>0 then
+			local udef=split(l)
+			udef[1]=typs[udef[1]]
+			local u=unit(unpack(udef))
+			uids[u.uid]=u
+			uid=max(uid,u.uid)
+		end
+	end
+	for pair in all(hvz) do
+		local k,v=unpack(split(pair,"="))
+		if v and v>1 then
+			v=uids[v]
+		end
+		hiviz[k]=v
+	end
+	make_dmaps"d"
+end)
+
+typs={
+ant,
+beetle,
+spider,
+archer,
+warant,
+cat,
+queen,
+tower,
+mound,
+den,
+barracks,
+farm,
+castle,
+}
 
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
