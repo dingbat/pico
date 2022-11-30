@@ -98,11 +98,15 @@ function _update()
  --fighting has to happen after
  --tick because viz is involved
  for u in all(units) do
-	 if u.st.t=="rest" and
-	  u.typ.atk then
-			aggress(u)
+ 	if not (u.const or u.dead) then
+		 if u.st.t=="rest" and
+		  u.typ.atk then
+				aggress(u)
+		 end
+	 	if u.st.t=="attack" then
+	 		fight(u)
+	 	end
 	 end
- 	if (u.st.t=="attack") fight(u)
  end
  if selbox then
 		selection=my_sel or
@@ -487,7 +491,7 @@ portw=8
 has_q=1
 drop=1
 
-bldg=drop
+bldg=1
 los=20
 range=20
 hp=50
@@ -524,7 +528,7 @@ dead_fps=9
 portx=0
 porty=80
 portw=8
-bldg=other
+bldg=1
 
 los=30
 hp=40
@@ -560,7 +564,7 @@ dead_y=104
 dead_fr=7
 dead_fps=9
 
-bldg=drop
+bldg=1
 los=5
 hp=30
 dir=-1
@@ -589,7 +593,7 @@ portx=26
 porty=80
 portw=9
 
-bldg=other
+bldg=1
 los=10
 hp=20
 dir=-1
@@ -616,7 +620,7 @@ portx=0
 porty=88
 portw=8
 
-bldg=other
+bldg=1
 los=10
 hp=20
 dir=-1
@@ -643,7 +647,7 @@ portx=17
 porty=80
 portw=9
 
-bldg=farm
+bldg=1
 los=0
 hp=10
 dir=-1
@@ -674,7 +678,7 @@ dead_fps=15
 portx=8
 porty=88
 portw=9
-bldg=other
+bldg=1
 has_q=1
 
 los=40
@@ -1366,8 +1370,10 @@ function tick_unit(u)
 		) do
 			local x,y=u.x\8+t[1],
 				u.y\8+t[2]
-			s(hiviz,x,y,g(bldgs,x,y,true))
-			s(vizmap,x,y,true)
+			s(hiviz,x,y,g(bldgs,x,y,1))
+			--"f" bc it's used for concat
+			--in theory can be any truthy
+			s(vizmap,x,y,"f")
 		end
 	end
 
@@ -1376,7 +1382,7 @@ function tick_unit(u)
 			u.x+=rnd(2)-1
 			u.y+=rnd(2)-1
 		end
-		s(pos,u.x\4,u.y\4,true)
+		s(pos,u.x\4,u.y\4,u.p)
 	end
 end
 hiviz={}
@@ -1450,15 +1456,11 @@ function draw_hiviz()
 			xx>=cx\8 and xx<=cx\8+16 and
 			yy>=cy\8 and yy<=cy\8+16 then
 			map(xx,yy,xx*8,yy*8,1,1)
-			if v!=true and v!=bldg_const then
-				clip(xx*8-cx,yy*8-cy,8,8)
-				sspr(
-					v.typ.rest_x,
-					v.typ.rest_y,
-					v.typ.w,
-					v.typ.h,
-					v.x-v.typ.w\2,v.y-v.typ.h\2
-				)
+			if v!=1 then
+				clip(xx*8-cx,yy*8-cy,7,7)
+				_pal,pal=pal,max
+				draw_unit(v)
+				pal=_pal
 				clip()
 			end
 		end
@@ -1502,12 +1504,11 @@ function draw_minimap()
 	 for ty=0,mmh do
 	 	local x,y=tilew*tx\8,
 	 		tileh*ty\8
-	 	local rf=
 	 	pset(
 	 		tx,ty,
 				rescol[
 					(g(hiviz,x,y) and "" or "_")..
-					(g(vizmap,x,y) and "f" or "h")..
+					g(vizmap,x,y,"h")..
 					fget(mget(x,y))
 				]
 	 	)
@@ -1516,13 +1517,13 @@ function draw_minimap()
 	
 	--units
 	for u in all(units) do
-		if vget(u.x,u.y) and
+		if g(hiviz,u.x\8,u.y\8) and
 			not u.dead then
 			pset(
 				u.x/mapw*mmw,
 				u.y/maph*mmh,
 				u.sel and 9 or
-				 u.p==1 and 1 or 2
+				 u.p==1 and 1 or 14
 			)
 		end
 	end
@@ -1737,7 +1738,7 @@ end
 
 function aggress(u)
 	for e in all(units) do
-		if vget(e.x,e.y) and
+		if g(vizmap,e.x\8,e.y\8) and
 			e.p!=u.p and not e.dead then
 			local typ=u.typ[u.p]
 			if dist(e.x-u.x,e.y-u.y)<=
@@ -1756,7 +1757,8 @@ function fight(u)
 		u.typ[u.p],u.st.target
 	local d=dist(e.x-u.x,e.y-u.y)
 	if typ.range then
-		in_range=d<=typ.range and vget(e.x,e.y)
+		in_range=d<=typ.range and
+			g(vizmap,e.x\8,e.y\8)
 		if in_range and fps%typ.proj_freq==0 then
  		add(proj,{
  			from_unit=u,
@@ -2075,14 +2077,6 @@ function adj(it,nt,n)
 		abs(it[2]-nt.y)<=n
 end
 
---x y are absolute coords, 0-128
---returns true if coord is viz
---in currently visible screen
-function vget(x,y)
- return g(vizmap,x\fogtile,
-  y\fogtile)
-end
-
 function norm(it,nt,f)
 	local xv,yv=
 		it[1]-nt.x,it[2]-nt.y
@@ -2123,8 +2117,12 @@ function register_bldg(b)
 	local reg=function(xx,yy)
 		s(bldgs,xx,yy,
 			not b.dead and b or nil)
-		add(dmap_st.d,
-			typ.drop and {xx,yy} or nil)
+		if b.dead then
+			del(dmap_st.d,b.dmap_ref)
+		elseif	typ.drop then
+			b.dmap_ref=add(dmap_st.d,
+				{xx,yy})
+		end
 	end
 	if w>8 then
 		reg(x+1,y)
@@ -2401,7 +2399,7 @@ f33=12
 
 h0=5
 h1=5
-h7=8
+h7=2
 h11=3
 h19=4
 h33=13
@@ -2807,8 +2805,9 @@ function make_dmap(key)
 	 {},{},
 	 dmap_st[key]
 	 
-	--ensure starts exists
-	if not starts and key!="d" then
+	--ensure starts exists (we
+	--won't enter the if for "d")
+	if not starts then
 		starts={}
 		dmap_st[key]=starts
 		for x=0,mapw/8 do
@@ -2931,7 +2930,7 @@ local qx,qy=6,5
 p1q,twr=
 	unit(queen,qx*8+9,qy*8+4,1),
 	unit(castle,6*8+7,12*8+6,2)
-
+twr.const=5
 register_bldg(p1q)
 register_bldg(twr)
 make_dmaps"d"
@@ -2995,10 +2994,10 @@ bb000b00bb000bb04400040044000440000000000000000000000000000000000d11311331350000
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000033d1515351515351
 0000000000000000000000000000000000000000d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0d000000000000000000000000000000dd0000000d00000000d0000000000000000000000000000000d000000000000000000000000000000000000000000000
-d00001100d0000000dd000000000000000b1001100b100110d0000000000000000d00000000000000d0000000000000000d000000000000000d0000000000000
-b1000110d0000110d00001100000000005d1001105d1001133000000000000000d0000000000000033100000000000000d000000000000000000000000000000
-00111100b1111110b11111100d000110505d1110000d111033100000000000013310000000000000331131000000000033100013113000000d10000000011310
-001d1d000d1d1d0001d1d1d0d1d1d1100000d1d00050d1d001113113113113113311311311311310001131131131131033113113113113103311311311311311
+d00001100d0000000dd000000000000000310011003100110d0000000000000000d00000000000000d0000000000000000d000000000000000d0000000000000
+31000110d0000110d00001100000000005d1001105d1001133000000000000000d0000000000000033100000000000000d000000000000000000000000000000
+0011110031111110311111100d000110505d1110000d111033100000000000013310000000000000331131000000000033100013113000000d10000000011310
+001d1d000d1d1d0001d1d1d0d3d1d1100000d1d00050d1d001113113113113113311311311311310001131131131131033113113113113103311311311311311
 00000000000000000000000000000000000000000000000000513113113113500011311311311311050500131131131100113105050113113311311311350505
 00000000000000000000000000000000000000000000000005005050505050000050505050505050000000505050505000505000000050500050505050500000
 050000005550000000500000005555000000500000555500000000000000000000000000ffffffff0070000000000000ffffffffffffffffffffffffffffffff
