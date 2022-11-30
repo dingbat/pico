@@ -38,7 +38,7 @@ function _draw()
 	
 	--rally flag
 	if sel1 and sel1.rx then
-		spr(70+(fps/5)%3,
+		spr(70+fps/5%3,
 			sel1.rx-2,sel1.ry-5)
 	end
 
@@ -66,6 +66,8 @@ function _draw()
 	
 	--cursor
 	spr(cursor_spr(),amx,amy)
+	--cursor can change pal, so
+	--reset
 	pal()
 	
 --	if sel1 then
@@ -75,16 +77,9 @@ end
 
 function _update()
 	async_task()
-	fps+=1
-	if fps==60 then
-		fps=0
- end
+	fps=(fps+1)%60
  
- hilite=hilite and
- 	t()-hilite.t<0.5 and hilite
-	
  handle_input()
- --if (fps>1) return
 
  vizmap,buttons,pos,hoverunit,
  	sel_typ={},{},{}
@@ -124,7 +119,9 @@ end
 
 function draw_hilite()
 	local dt=t()-hilite.t
-	if hilite.x then
+	if dt>0.5 then
+		hilite=nil
+	elseif hilite.x then
 		circ(hilite.x,hilite.y,
 		 min(1/dt/2,4),8)
 	elseif dt<=0.1 or dt>=0.25 then
@@ -152,8 +149,8 @@ function draw_to_build()
 		fillp(▒)
 		rect(
  		x-1,y-1,
- 		x+ceil(w/8)*8-h%2,
- 		y+ceil(h/8)*8,
+ 		x+typ.fw,
+ 		y+typ.fh,
  		3
  	)
  	fillp()
@@ -373,14 +370,13 @@ unit=1
 dir=1
 
 spd=1.5
-los=30
+los=35
 hp=15
 proj_xo=-2
 proj_yo=0
-proj_col=11
 proj_freq=30
-proj_s=0
-range=20
+proj_s=4
+range=30
 
 atk_typ=archer
 def_typ=archer
@@ -458,8 +454,7 @@ hp=15
 proj_freq=60
 proj_xo=1
 proj_yo=-4
-proj_col=5
-proj_s=1
+proj_s=8
 range=50
 
 atk_typ=cat
@@ -495,11 +490,10 @@ bldg=1
 los=20
 range=20
 hp=50
-proj_col=11
 proj_xo=-4
 proj_yo=2
 proj_freq=30
-proj_s=0
+proj_s=4
 
 atk_typ=archer
 def_typ=queen
@@ -512,6 +506,7 @@ tower=parse[[
 w=8
 fw=8
 h=14
+fh=16
 
 rest_x=24
 rest_y=96
@@ -535,7 +530,6 @@ hp=40
 dir=-1
 range=25
 const=20
-proj_col=5
 proj_yo=-2
 proj_xo=-1
 proj_freq=30
@@ -550,6 +544,7 @@ mound=parse[[
 w=8
 fw=8
 h=8
+fh=8
 
 rest_x=0
 rest_y=96
@@ -579,6 +574,7 @@ den=parse[[
 w=8
 fw=8
 h=8
+fh=8
 
 rest_x=0
 rest_y=104
@@ -606,6 +602,7 @@ barracks=parse[[
 w=8
 fw=8
 h=8
+fh=8
 
 rest_x=0
 rest_y=121
@@ -633,6 +630,7 @@ farm=parse[[
 w=8
 fw=8
 h=8
+fh=8
 
 rest_x=24
 rest_y=120
@@ -661,17 +659,18 @@ farm_renew_cost_b=3
 castle=parse[[
 w=15
 fw=16
-h=13
+h=15
+fh=16
 
 rest_x=80
-rest_y=115
+rest_y=113
 
 attack_x=80
-attack_y=115
+attack_y=113
 
 fire=1
 dead_x=48
-dead_y=99
+dead_y=97
 dead_fr=4
 dead_fps=15
 
@@ -686,7 +685,6 @@ hp=70
 dir=-1
 range=30
 const=20
-proj_col=5
 proj_yo=0
 proj_xo=0
 proj_s=0
@@ -990,7 +988,7 @@ cat_vs_warant=1
 cat_vs_queen=1
 cat_vs_spider=1
 cat_vs_beetle=1
-cat_vs_building=1
+cat_vs_building=2.5
 cat_vs_cat=1
 
 archer_vs_worker=1
@@ -1324,7 +1322,7 @@ function tick_unit(u)
 		if (typ.bldg) mset(u.x/8,u.y/8,73)
 		return
 	end
-	if u.hp<=0 and not u.dead then
+	if u.hp<=0 then
 		u.dead,u.st,u.sel=
 			fps,{t="dead"}
 		del(selection,u)
@@ -1357,11 +1355,14 @@ function tick_unit(u)
 	
 	if (selbox) update_sel(u)
 	if (u.const) return
-
+	if u.st.target and u.st.target.dead then
+		rest(u)
+	end
+	
 	update_unit(u)
 	
 	--update viz
-	if u.p==1 or u.st.t=="attack" and not u.st.wayp then
+	if u.p==1 or u.st.t=="attack" then
 		for t in all(
 		 viztiles(
 		 	u.x,u.y,
@@ -1382,11 +1383,10 @@ function tick_unit(u)
 			u.x+=rnd(2)-1
 			u.y+=rnd(2)-1
 		end
-		s(pos,u.x\4,u.y\4,u.p)
+		s(pos,u.x\4,u.y\4,1)
 	end
 end
-hiviz={}
-vcache={}
+
 function viztiles(x,y,los)
 	local xo,yo,vlos,l=x%8\2,y%8\2,
 		vcache[los],ceil(los/8)
@@ -1394,10 +1394,10 @@ function viztiles(x,y,los)
 		vlos={}
 		vcache[los]=vlos
 	end
-	local viz=vlos[xo+yo*4+1]
+	local viz=vlos[pt2key{xo,yo}]
 	if not viz then
 		viz={}
-		vlos[xo+yo*4+1]=viz
+		vlos[pt2key{xo,yo}]=viz
 		for dx=-l,l do
 		 for dy=-l,l do
 				if dist(
@@ -1429,18 +1429,6 @@ end
 -->8
 --map
 
---function _fast_draw_map()
--- camera(cx,cy)
---	for i in pairs(vizmap) do
---		i-=1
--- 	local xx,yy=i%(mapw/4),i\(mapw/4)
---		if xx>=cx\8 and xx<cx\8+16 and
---			yy>=cy\8 and yy<cx\8+16 then
---			map(xx,yy,xx*8,yy*8,1,1)
---		end
---	end
---end
-
 function draw_map()
  camera(cx%8,cy%8)
  map(cx/8,cy/8,0,0,17,17)
@@ -1448,16 +1436,18 @@ function draw_map()
 end
 
 function draw_hiviz()
-	pal(split"0,5,13,13,13,13,6,2,15,6,13,13,13,5,5")
+	pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,5,5")
 	for i,v in pairs(hiviz) do
 		i-=1
  	local xx,yy=i%(mapw/4),i\(mapw/4)
-		if not vizmap[i+1] and
-			xx>=cx\8 and xx<=cx\8+16 and
-			yy>=cy\8 and yy<=cy\8+16 then
+		if not vizmap[i+1]
+		--tokens, no perf impact
+--			and xx>=cx\8 and xx<=cx\8+16
+--			and yy>=cy\8 and yy<=cy\8+16
+		then
 			map(xx,yy,xx*8,yy*8,1,1)
 			if v!=1 then
-				clip(xx*8-cx,yy*8-cy,7,7)
+				clip(xx*8-cx,yy*8-cy,8,8)
 				_pal,pal=pal,max
 				draw_unit(v)
 				pal=_pal
@@ -1474,19 +1464,29 @@ function draw_fow()
 	 	if not g(vizmap,x,y) then
 	 		local xx,yy=x*8,y*8
 				fillp(▒)
-				local c=g(hiviz,x,y) and 5 or 0
-				if g(vizmap,x-1,y) then
-		 		line(xx-1,yy,xx-1,yy+7,c)
-				end
-				if g(vizmap,x,y-1) then
-		 		line(xx,yy-1,xx+7,yy-1,c)
-				end
-				if g(vizmap,x,y+1) then
-		 		line(xx,yy+8,xx+7,yy+8,c)
-				end
-				if g(vizmap,x+1,y) then
-		 		line(xx+8,yy,xx+8,yy+7,c)
-				end
+				--make it so … doesn't
+				--draw on black
+				poke(0x5f5e,158)
+				rectfill(xx-1,yy-1,
+					xx+8,yy+8,0)
+				poke(0x5f5e,255)
+				
+				-- nicer … but more tok
+--				color(
+--					g(hiviz,x,y) and 5 or 0)
+--				if g(vizmap,x-1,y) then
+--		 		line(xx-1,yy,xx-1,yy+7)
+--				end
+--				if g(vizmap,x,y-1) then
+--		 		line(xx,yy-1,xx+7,yy-1)
+--				end
+--				if g(vizmap,x,y+1) then
+--		 		line(xx,yy+8,xx+7,yy+8)
+--				end
+--				if g(vizmap,x+1,y) then
+--		 		line(xx+8,yy,xx+8,yy+7)
+--				end
+
 				fillp()
 				rectfill(xx,yy,xx+7,yy+7,nil)
 	 	end
@@ -1496,14 +1496,12 @@ end
 
 function draw_minimap()
 	camera(-mmx,-mmy)
-	local tilew,tileh=mapw/mmw,
-	 maph/mmh
 	
 	--map tiles
 	for tx=0,mmw do
 	 for ty=0,mmh do
-	 	local x,y=tilew*tx\8,
-	 		tileh*ty\8
+	 	local x,y=mapw/mmw*tx\8,
+	 		maph/mmh*ty\8
 	 	pset(
 	 		tx,ty,
 				rescol[
@@ -1517,8 +1515,7 @@ function draw_minimap()
 	
 	--units
 	for u in all(units) do
-		if g(hiviz,u.x\8,u.y\8) and
-			not u.dead then
+		if g(hiviz,u.x\8,u.y\8) then
 			pset(
 				u.x/mapw*mmw,
 				u.y/maph*mmh,
@@ -1543,19 +1540,11 @@ end
 
 function draw_projectiles()
  for p in all(proj) do
---		if p.s==1 then
-		local typ=p.from_unit.typ
-		rectfill(
-			p.x,p.y,
-			p.x+typ.proj_s,
-			p.y+typ.proj_s,
-			typ.proj_col
+		sspr(
+			p.from_unit.typ.proj_s+
+				fps\5%2*2,
+			112,2,2,p.x,p.y
 		)
---		else
---			sspr(
---				48+flr((fps%15)/3.75)*2,64,2,2,p.x,p.y,2,2
---			)
---		end
 	end
 end
 -->8
@@ -1600,14 +1589,16 @@ function draw_unit(u)
 		fillp(▒)
 		rectaround(u,u==sel1 and 9 or 12)
 		fillp()
-		local bx,by,p=
+		local p=u.const/ut.const
+		bar(
 			u.x-fw/2,
-		 u.y-ceil(h/2),
-			u.const/ut.const
-		line(bx,by,bx+fw-1,by,5)
-		line(bx,by,bx+fw*p,by,14)
+			u.y-h\2,
+			fw-1,
+			p,
+			14,5
+		)
 		x+=p<0.5 and fw*2 or fw
-		if (u.const<=1) return
+		if (p<=0.1) return
 	elseif ut==farm then
 	 --in case of emrgncy (37 tok)
 		--x=ut[u.res.qty..u.exp..u.ready]
@@ -1646,7 +1637,6 @@ function draw_unit(u)
 		bar(xx,yy-1,w,hp)
 	end
 
-	--ctrl-b to uncomment
 --	if u.sel and u.typ.range then
 --		circ(u.x,u.y,u.typ.los,13)
 --		circ(u.x,u.y,u.typ.range,8)
@@ -1659,27 +1649,16 @@ function draw_unit(u)
 --	end
 end
 
-function check_dead_target(u)
-	local t=u.st.target
-	if t and (t.dead or (
-		u.st.t=="build" and
-		not t.const and
-		t.hp>=t.typ.hp
-	)) then
-		rest(u)
-	end
-end
-
 function update_unit(u)
-	if u.st.webbed then
-		if (fps==0) u.st.webbed-=1
-		if (u.st.webbed==0) rest(u)
+	local st=u.st
+	if st.webbed then
+		if (fps==0) st.webbed-=1
+		if (st.webbed==0) rest(u)
 	end
-	check_dead_target(u)
-	local t=u.st.t
-	if t=="web" and u.st.ready then
-		line(u.st.x1,u.st.y1,
-			u.st.x2,u.st.y2,12)
+	local t=st.t
+	if t=="web" and st.ready then
+		line(st.x1,st.y1,
+			st.x2,st.y2,12)
 		for e in all(units) do
 			if e.p!=u.p and
 				(pget(e.x,e.y)==12 or
@@ -1692,12 +1671,12 @@ function update_unit(u)
 	end
  if (u.q) produce(u)
  if (u.typ==farm) update_farm(u)
- if u.st.active then
+ if st.active then
  	if (t=="harvest") farmer(u)
  	if (t=="build") buildrepair(u)
   if (t=="gather") mine(u)
-  if t=="drop" and u.st.nxt then
-  	mine_nxt_res(u,u.st.nxt)
+  if t=="drop" and st.nxt then
+  	mine_nxt_res(u,st.nxt)
 		end
  else
  	check_target_col(u)
@@ -2118,6 +2097,7 @@ function register_bldg(b)
 		s(bldgs,xx,yy,
 			not b.dead and b or nil)
 		if b.dead then
+			s(hiviz,xx,yy,1)
 			del(dmap_st.d,b.dmap_ref)
 		elseif	typ.drop then
 			b.dmap_ref=add(dmap_st.d,
@@ -2234,28 +2214,20 @@ function get_wayp(u,x,y,enter)
  local wayp,d_acc,destx,desty=
  	{},
  	nearest_acc(
- 		x\mvtile,y\mvtile,
+ 		x\8,y\8,
  		u.x,u.y)
 	local path,exists=find_path(
-	 {u.x\mvtile,u.y\mvtile},
+	 {u.x\8,u.y\8},
  	{destx,desty})
  for n in all(path) do
  	add(wayp,
- 		{n[1]*mvtile+4,
- 		 n[2]*mvtile+4},1)
+ 		{n[1]*8+4,
+ 		 n[2]*8+4},1)
  end
  if exists and (enter or d_acc) then
  	add(wayp,{x,y})
  end
  return wayp
-end
-
-function estimate(n1,n2)
- return dist(n1[1]-n2[1],n1[2]-n2[2])
-end
-
-function node_to_id(node)
-	return node[1]..","..node[2]
 end
 
 --a*
@@ -2272,25 +2244,26 @@ function find_path(start,goal)
  best_table = {
   last = start,
   cost_from_start = 0,
-  cost_to_goal = estimate(start, goal)
+  cost_to_goal = 32767
  }, {}
 
- best_table[node_to_id(start)] = shortest
-	--dh
-	closest=shortest
+ best_table[pt2key(start)] = shortest
 
  -- array of frontier paths each
  -- represented by their last
  -- step, used as a priority
  -- queue. elements past
  -- frontier_len are ignored
- local frontier, frontier_len, goal_id, max_number = {shortest}, 1, node_to_id(goal), 32767.99
+	-- 'closest'- dh
+ local frontier, frontier_len,
+ 	closest = {shortest}, 1,
+ 	shortest
 
  -- while there are frontier paths
  while frontier_len > 0 do
 
   -- find and extract the shortest path
-  local cost, index_of_min = max_number
+  local cost, index_of_min = 32767
   for i = 1, frontier_len do
    local temp = frontier[i].cost_from_start + frontier[i].cost_to_goal
    if (temp <= cost) index_of_min,cost = i,temp
@@ -2307,7 +2280,7 @@ function find_path(start,goal)
   -- shortest path
   local p = shortest.last
   
-  if node_to_id(p) == goal_id then
+  if pt2key(p) == pt2key(goal) then
    -- we're done.  generate the
    -- path to the goal by
    -- retracing steps. reuse
@@ -2315,7 +2288,7 @@ function find_path(start,goal)
    p = {goal}
 
    while shortest.prev do
-    shortest = best_table[node_to_id(shortest.prev)]
+    shortest = best_table[pt2key(shortest.prev)]
     add(p, shortest.last)
    end
 
@@ -2333,9 +2306,8 @@ function find_path(start,goal)
    -- known way to n (or
    -- create it, if there isn't
    -- one)
-   local id = node_to_id(n)
    local old_best, new_cost_from_start =
-    best_table[id],
+    best_table[pt2key(n)],
     shortest.cost_from_start + 1
    
    if not old_best then
@@ -2346,13 +2318,14 @@ function find_path(start,goal)
     -- overwritten
     old_best = {
      last = n,
-     cost_from_start = max_number,
-     cost_to_goal = estimate(n, goal)
+     cost_from_start = 32767,
+     cost_to_goal = 
+     	dist(n[1]-goal[1],n[2]-goal[2])
     }
 
     -- insert into queue
     frontier_len += 1
-    frontier[frontier_len], best_table[id] = old_best, old_best
+    frontier[frontier_len], best_table[pt2key(n)] = old_best, old_best
    end -- if old_best was nil
 
    -- have we discovered a new
@@ -2374,7 +2347,7 @@ function find_path(start,goal)
 	--dhstart
  local p = {closest.last}
  while closest.prev do
-  closest = best_table[node_to_id(closest.prev)]
+  closest = best_table[pt2key(closest.prev)]
   add(p, closest.last)
  end
  return p
@@ -2383,8 +2356,12 @@ end
 -->8
 --menu/cursor
 
-resorder=split"r,g,b,p"
-rescol=parse[[
+resorder,f2res,rescol=
+	split"r,g,b,p",parse[[
+f7=r
+f11=g
+f19=b
+]],parse[[
 r=8
 g=11
 b=4
@@ -2403,11 +2380,6 @@ h7=2
 h11=3
 h19=4
 h33=13
-]]
-f2res=parse[[
-f7=r
-f11=g
-f19=b
 ]]
 
 function print_res(rsc,x,y,s,hide_0,pop)
@@ -2482,7 +2454,8 @@ function draw_port(
 		--gray bg, turn gray to white
 		pal(6,7)
 	end
-	sspr(typ.portx,typ.porty,typ.portw,8,x+1,y+1)
+	sspr(typ.portx,typ.porty,
+	 typ.portw,8,x+1,y+1)
 	pal()
 	
 	if onclick then
@@ -2562,7 +2535,7 @@ function single_unit_section()
 				sel1.sel=false
 				deli(selection,1)
 			end)
-		print("\88"..#selection,16,y+5,7)
+		print("X"..#selection,16,y+5,7)
 	end
 		
 	if #selection==1 and r then
@@ -2617,7 +2590,7 @@ function single_unit_section()
 			draw_port(
 			 q.b.typ,
 			 q.b.tech and 24 or
-			 	print("\88"..q.qty,32,
+			 	print("X"..q.qty,32,
 			 		y+4,7) and 20,
 			 y+1,nil,
 				function()
@@ -2634,7 +2607,31 @@ function single_unit_section()
 end
 
 function draw_menu()
- draw_menu_bg()
+	local x,secs,modstart=
+ 	0,{102,26},1
+ if sel_typ then
+		if sel_typ.has_q then
+  	secs={17,24,61,26}
+ 	elseif sel_typ.prod then
+  	secs,modstart={35,67,26},0
+  end
+	end
+ for i,sec in pairs(secs) do
+ 	if i%2==modstart then
+ 		pal(4,15)
+ 	end
+ 	local xx=sec+x-4
+ 	--104="y"=menuy
+ 	spr(128,x,104)
+ 	spr(128,xx-4,104)
+ 	line(x+3,105,xx,105,7)
+ 	rectfill(x+3,106,xx,108,4)
+ 	xx+=4
+ 	rectfill(x,108,xx,128)
+ 	x=xx
+ 	pal()
+ end
+ 
  if sel_typ and
  	(#selection==1 or
  		sel_typ!=spider) and
@@ -2671,34 +2668,6 @@ function draw_menu()
 		 ,x+2,y+2,1,true,pop)
 	end
 end
-
-function draw_menu_bg()
- local x,secs,modstart=
- 	0,{102,26},1
- if sel_typ then
-		if sel_typ.has_q then
-  	secs={17,24,61,26}
- 	elseif sel_typ.prod then
-  	secs,modstart={35,67,26},0
-  end
-	end
- for i,sec in pairs(secs) do
- 	if i%2==modstart then
- 		pal(4,15)
- 	end
- 	local xx=sec+x-4
- 	--104="y"=menuy
- 	spr(128,x,104)
- 	spr(128,xx-4,104)
- 	line(x+3,105,xx,105,7)
- 	rectfill(x+3,106,xx,108,4)
- 	xx+=4
- 	rectfill(x,108,xx,128)
- 	x=xx
- 	pal()
- end
- --assert(x==128)
-end
 -->8
 --dmaps
 
@@ -2722,13 +2691,17 @@ function dmap_find(u,key)
 	end
 	return wayp,x,y
 end
+
+function pt2key(pt)
+	return pt[1]+pt[2]*mapw/4+1
+end
  
 function g(a,x,y,def)
-	return a[x+y*mapw/4+1] or def
+	return a[pt2key{x,y}] or def
 end
 
 function s(a,x,y,v)
- a[x+y*mapw/4+1]=v
+ a[pt2key{x,y}]=v
 end
 
 function add_neigh(to,closed,x,y)
@@ -2895,29 +2868,27 @@ end
 --init() func wastes tokens
 
 --enable mouse & mouse btns
-poke(0x5f2d,0x1|0x2)
+poke(0x5f2d,3)
 
 --constants
 mapw,maph=256,256
-fogtile,mvtile=8,8
 mmw=19
 mmh=maph\(mapw/mmw)
-mmx,mmy=105,107
-menuh,menuy=21,104
-bldg_bmap=0
+mmx,mmy,menuh,menuy=
+	105,107,21,104
 
 --global state
-cx,cy,mx,my,fps=0,0,0,0,0
+cx,cy,mx,my,fps,bldg_bmap=
+	0,0,0,0,0,0
 
 --tech can change this
 farm_cycles,carry_capacity,
 	units_heal=5,6,{}
 
-dmaps={r={},g={},b={},d={}}
-queue={}
-
+queue,hiviz,vcache,dmaps,
 units,restiles,selection,
 	proj,bldgs,dmap_st,res=
+	{},{},{},{},
 	{},{},{},{},{},{d={}},
  parse[[
 r=55
@@ -2926,18 +2897,18 @@ b=55
 p=7
 ]]
 
-local qx,qy=6,5
+local qx,qy=6*8,5*8
 p1q,twr=
-	unit(queen,qx*8+9,qy*8+4,1),
-	unit(castle,6*8+7,12*8+6,2)
-twr.const=5
+	unit(queen,qx+9,qy+4,1),
+	unit(castle,55,102,2)
 register_bldg(p1q)
 register_bldg(twr)
+
 make_dmaps"d"
 
-unit(ant,qx*8-8,qy*8,1)
-unit(ant,qx*8+20,qy*8+3,1)
-unit(ant,qx*8+2,qy*8-8,1)
+unit(ant,qx-8,qy,1)
+unit(ant,qx+20,qy+3,1)
+unit(ant,qx+2,qy-8,1)
 
 --unit(ant,qx*8-8,qy*8,1)
 --unit(ant,qx*8+20,qy*8+3,1)
@@ -3025,9 +2996,9 @@ ff77ffffffd88fdfffffbffffffbbfffff9444fff495ffffff6c6cc1111111111cc6c6ff1111111c
 fff7ffffffdfdfffffffbffffffbfffffff44fff49944fffff6cccc111dd11111cccc6ff1dd1111111111dd1ffffaffffffffffff7ffffffffffffffffffafff
 fff77fffffffdfffffffbffffffbfffffffffffff444fffff76c6c111111111111c6c67f1111d111111d1111ffffffffffffffffffffffffffffffffffffffff
 fffffffffffffffffffffffffffffffffffffffffffffffff6c7ccc1111111111ccc7c6fffffff5ffffffff5ffffffffffffffffffffffffffffffffffffffff
-ffff8ffffffff8ffffffffffffffbfffffffffffffffffffff66ccccc11cccc7cccc66ff6f555fff6f5555fffffff7ffffffffffffffffffffffffffffffffff
-ff88f8fff8ffff8fffffffffffff3bbffff44ffffff4f4fffff6ccccccc6ccc6cccc6ffff55555f5f533555fffff797fffffffffffffffffffffffffffffffff
-f8788ffff88fffdffffffbffffb3fbffff494ffffff4444ffff76ccccc6cc6ccccc67ffff555565ff535535ffffff73ffffffffffffffaffffffffff7fffffff
+ffff8ffffffff8ffffffffffffffbfffffffffffffffffffff66ccccc11cccc7cccc66ff6f555fff6f5555fffffffdffffffffffffffffffffffffffffffffff
+ff88f8fff8ffff8fffffffffffff3bbffff44ffffff4f4fffff6ccccccc6ccc6cccc6ffff55555f5f533555fffffd9dfffffffffffffffffffffffffffffffff
+f8788ffff88fffdffffffbffffb3fbffff494ffffff4444ffff76ccccc6cc6ccccc67ffff555565ff535535ffffffd3ffffffffffffffaffffffffff7fffffff
 ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454ffffff67cccccccccccc76fffff565555ff555555fffffff3ff7ffffffffffffffffffffffffffffff
 fff7ffffffd88fdfffffbffffffbfffffff45ffff4944ffffffff766cc666cc6667ffffff566555ff53555f6ffafffffffffffffffffffffffffffffffffffff
 fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffff667fff6776fffffffff5555f6ff555fffffffffffffffffffffffffffffffffffffffffff
@@ -3080,22 +3051,22 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 7415514604111140004144000000000000000000000000000a9aa9a50a99a9950a95a9a5059a59a505a65a650075050000750500007505000000000000000000
 0741144007411400004444000000000000000000000000005989989559899895598998955a89a895569a69a50576576005765760057657600000000000000000
 00000000000000000000000000000000000000000000000028222822288288222282828225228522552852525657657556576575565765750000000000000000
-00000000112233bb0000000000000000000000000000000000000000000600600005060000000000000000000000000000000000000000000000000000000000
-00000000112233bb22aaa22000030000000000000000000000060500000500060006000000000000000000000000000000000000000000000000000000000000
-00000000eeaa00002a999a2000333000000000000000000000056060000060500000060000000000000000000000000000000000000000000000000000000000
-00000000eeaa0000a99899a00113110000000000000000000050500000a000000000600000000000505050000050505000000000000000000000000000000000
-0000000000000000a98689a004111400000000000000000000a0a000000a0a0000a00a0000000000404040000040404000000000000000000000000000000000
-0000000000000000a99899a04011104000000000000000000a9aa9000099a9000099a000000000000444000b0004440000400000000000000000000000000000
-00000000000000002a999a20404040400000000000000000098890000a8990000a88900000000000041400b35004140004140000000000000000000000000000
-000000000000000022aaa2200000000000000000000000000029000000280000009200000000000004140b333504140004140003000000000000000000000000
-000000000000000000000000345334533353345500000bb0345334533453345334533453030334500444b3313354440004440331330000000000000000000000
-0500050000000000000000004533453343434343434040b045387533453345334533453343434345041405111504140004140511150400000000000000000000
-575057500000000000000000533453345543553343b3000058788784533453345338873455435533041455555554140004145555555404000000000000000000
-7470747000000000000000003345334534435343044043b037888885334788453387884534435340044454545454440004445454545444000000040404000000
-04000400040004000000000034533453333343550300b0b434377453345887533453745303344355044444454444450004444444444444000000044444400400
-4111114001111100001110004533453345533453b0b0044045377533453375334537353345533453045444515444440004444441444444000000444144404400
-4011104040111040401110405334533445444533b04b400053577534533473345334733445444533044445111544540004444411144444000400441114404400
-4040404040404040404040403345334535335543030033b033555545334533453345334505035540044545111544440004444411144444000440441114404400
+509030b0505500000000000000000000000000000000000000000000000600600005060000000000000000000000000000000000000000000000000000000000
+0000000055050000000000000000000022aaa2200003000000060500000500060006000000000000000000000000000000000000000000000000000000000000
+000000000000000000000000000000002a999a200033300000056060000060500000060000000000505050000050505000000000000000000000000000000000
+00000000000000000000000000000000a99899a0011311000050500000a000000000600000000000404040000040404000000000000000000000000000000000
+00000000000000000000000000000000a98689a00411140000a0a000000a0a0000a00a00000000000444000b0004440000400000000000000000000000000000
+00000000000000000000000000000000a99899a0401110400a9aa9000099a9000099a00000000000041400b35004140004140000000000000000000000000000
+000000000000000000000000000000002a999a2040404040098890000a8990000a8890000000000004140b333504140004140003000000000000000000000000
+0000000000000000000000000000000022aaa22000000000002900000028000000920000000000000444b3313354440004440331330000000000000000000000
+000000000000000000000000345334533353345500000bb034533453345334533453345303033450041405111504140004140511150400000000000000000000
+0500050000000000000000004533453343434343434040b045387533453345334533453343434345041455555554140004145555555404000000000000000000
+575057500000000000000000533453345543553343b3000058788784533453345338873455435533044454545454440004445454545444000000040404000000
+7470747000000000000000003345334534435343044043b037888885334788453387884534435340044444454444450004444444444444000000044444400400
+04000400040004000000000034533453333343550300b0b434377453345887533453745303344355045444515444440004444441444444000000444144404400
+4111114001111100001110004533453345533453b0b0044045377533453375334537353345533453044445111544540004444411144444000400441114404400
+4011104040111040401110405334533445444533b04b400053577534533473345334733445444533044545111544440004444411144444000440441114404400
+4040404040404040404040403345334535335543030033b033555545334533453345334505035540000000000000000000000000000000000000000000000000
 __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
