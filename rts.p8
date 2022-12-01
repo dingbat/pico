@@ -1285,13 +1285,14 @@ end
 function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.dead then
-		if (u.dead==fps) del(units,u)
+		u.dead+=1
+		if (u.dead==60) del(units,u)
 		if (typ.bldg) mset(u.x/8,u.y/8,74)
 		return
 	end
 	if u.hp<=0 then
 		u.dead,u.st,u.sel=
-			fps,{t="dead"}
+			0,{t="dead"}
 		del(selection,u)
 		if typ.bldg then
 			register_bldg(u)
@@ -1544,12 +1545,14 @@ function draw_unit(_ENV)
 		 st.wayp and "move" or st.t,
 		 hp/typ.hp
 	
-	local xx,yy,sx,sy,ufps,fr=
+	local xx,yy,sx,sy,ufps,fr,f=
 		x-w/2,y-h\2,
 	 typ[stt.."_x"]+max(typ["xoff_"..res_typ]),
 	 typ[stt.."_y"]+max(typ["yoff_"..res_typ]),
 	 typ[stt.."_fps"],
-	 typ[stt.."_fr"]
+	 typ[stt.."_fr"],
+  --can't use fps bc of _ENV
+		dead or time()*30%60
 
 	if stt=="web" and st.first_pt then
 		line(st.x1,st.y1,
@@ -1575,19 +1578,13 @@ function draw_unit(_ENV)
 		sx+=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif typ==farm then
-	 --in case of emrgncy (37 tok)
-		--x=ut[u.res.qty..u.exp..u.ready]
+	 --maybe can turn this to be
+	 --stateful?
 		local q=res.qty
 		sx=exp and 72 or
 			ready and (q>4 and 48 or 64) or
 			q>6 and 48 or q>3 and 56 or sx
 	elseif ufps then
-		--can't use fps bc of _ENV
-		local f=time()*30%60
-		if dead then
-			f-=dead 
-			if (f<0) f+=60
-		end
 		sx+=f\ufps%fr*fw
 	end
 	pal(2,col)
@@ -1607,7 +1604,7 @@ function draw_unit(_ENV)
 	pal()
 	if not dead and hpp<=0.5 then			
 	 if typ.fire then
-			spr(230+fps/20,x-3,y-8)
+			spr(230+f/20,x-3,y-8)
 		end
 		bar(xx,yy-1,w,hpp)
 	end
@@ -2776,16 +2773,16 @@ init()
 local qx,qy=6*8,5*8
 --qx=6*8, qy=5*8, +9, +4
 unit(queen,unspl"57,44,1")
-unit(castle,unspl"55,102,2")
+unit(mound,unspl"55,102,2")
 
 make_dmaps"d"
 
 unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
-unit(warant,unspl"48,56,1")--0,16
+unit(beetle,unspl"48,56,1")--0,16
 
-unit(beetle,unspl"65,81,2")
+--unit(beetle,unspl"65,81,2")
 
 -->8
 --clipboard saving
