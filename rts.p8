@@ -1225,37 +1225,22 @@ function hilite_hoverunit()
 	hilite={t=t(),unit=hoverunit}
 end
 
-function pan(dx,dy)
-	if dpad and not btn(4) and (
-	 dx>0 and amx!=126 or
-	 dx<0 and amx!=0 or
-	 dy>0 and amy!=126 or
-	 dy<0 and amy!=0
-	)
-	 then
-		amx,amy=
-	 	mid(0,amx+dx,126),
-	  mid(-1,amy+dy,126)
-	else
-		cx,cy=
-	 	mid(0,cx+dx,mapw-128),
-	 	--menuh=21
-	  mid(0,cy+dy,maph-107)
-	end
-end
-
 function handle_input()
- if(btn(⬅️)or btn(⬅️,1))pan(-2,0)
- if(btn(⬆️)or btn(⬆️,1))pan(0,-2)
- if(btn(➡️)or btn(➡️,1))pan(2,0)
- if(btn(⬇️)or btn(⬇️,1))pan(0,2)
- 
- --mouse
-	if not dpad then
-		amx,amy=
-	 	mid(0,stat(32),126),
-		 mid(-1,stat(33),126)
- end
+	local b=btn()
+	--make p1=p2, allowing esdf
+	if (b>32) b>>=8
+	cx,cy,amx,amy=
+ 	mid(0,
+ 		cx+band(b,0x2)-band(b,0x1)*2,
+ 		mapw-128
+ 	),
+ 	mid(0,
+ 		cy+band(b,0x8)/4-band(b,0x4)/2,
+	 	--menuh=21
+ 		maph-107
+ 	),
+ 	mid(0,stat(32),126),
+	 mid(-1,stat(33),126)
  
  --mouse-based calculations
  --buttons are actually added
@@ -1557,16 +1542,12 @@ function draw_unit(_ENV)
 		 st.wayp and "move" or st.t,
 		 hp/typ.hp
 	
-	local xx,yy,xoff,yoff=
+	local xx,yy,sx,sy,ufps,fr=
 		x-w/2,y-h\2,
-		typ["xoff_"..res_typ] or 0,
-		typ["yoff_"..res_typ] or 0
-		
-	local sx,sy,ufps,fr=
-	 	typ[stt.."_x"]+xoff,
-	 	typ[stt.."_y"]+yoff,
-	 	typ[stt.."_fps"],
-	 	typ[stt.."_fr"]
+	 typ[stt.."_x"]+max(typ["xoff_"..res_typ]),
+	 typ[stt.."_y"]+max(typ["yoff_"..res_typ]),
+	 typ[stt.."_fps"],
+	 typ[stt.."_fr"]
 
 	if stt=="web" and st.first_pt then
 		line(st.x1,st.y1,
@@ -2803,11 +2784,6 @@ unit(ant,unspl"50,32,1")-- 2,-8
 unit(warant,unspl"48,56,1")--0,16
 
 unit(beetle,unspl"65,81,2")
-
-menuitem(1,"turn mouse off",function()
-	menuitem(1,"turn mouse "..(dpad and "off" or "on"))
-	dpad=not dpad
-end)
 
 -->8
 --clipboard saving
