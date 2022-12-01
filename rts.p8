@@ -157,35 +157,6 @@ end
 -->8
 --unit defs/states
 
---notes
---[[
-
-todo
-- ai
-- dmg multiplier balancing
-- costs balancing
-- menu/wincond
-- 100 unit pop limit
-
-could optimize dmap update by
-only updating 9-tile region
-around the tile that needs
-updating (since we max out at
-9 tile distance anyway)
-
-seems hard as add/del a tile
-could have far-reaching effects
-
-]]
-
---bitmaps:
---tower:1
---mound:2
---den:4
---barracks:8
---farm:16
---castle:32
-
 typs={}
 function parse(unit,typ,tech)
 	local obj={
@@ -1559,16 +1530,16 @@ end
 --units
 
 function draw_unit(u)
-	if
-		not intersect(
-			u_rect(u),
-			{cx,cy,cx+128,cy+128},
-		 1
-		)
-	then
-		return
-	end
-	
+-- possibly unnecessary opt
+--	if
+--		not intersect(
+--			u_rect(u),
+--			{cx,cy,cx+128,cy+128},
+--		 1
+--		)
+--	then
+--		return
+--	end
 	local
 		ut,st,
 		res_typ,
@@ -1946,14 +1917,6 @@ function u_rect(u,e)
 end
 
 -- musurca - https://www.lexaloffle.com/bbs/?tid=36059
---function _dist(dx,dy)
--- local maskx,masky=dx>>31,dy>>31
--- local a0,b0=(dx+maskx)^^maskx,(dy+masky)^^masky
--- return a0>b0 and
---	 a0*0.9609+b0*0.3984 or
---	 b0*0.9609+a0*0.3984
---end
---less tokens but slightly slower
 function dist(a,b)
  local a0,b0=abs(a),abs(b)
  return max(a0,b0)*0.9609+
@@ -2123,20 +2086,6 @@ function register_bldg(b)
 	end
 end
 
---function add_building(v,x,y,up_dmap)
---	s(bldgs,x,y,v)
---	if up_dmap and  then
---		add_dmap_obs("r",x,y)
---		add_dmap_obs("g",x,y)
---		add_dmap_obs("b",x,y)
---		if v==bldg_drop then
---			add_dmap_sink("d",x,y)
---		else
---			add_dmap_obs("d",x,y)
---		end
---	end
---end
-
 function deal_dmg(from,to)
 	to.hp-=from.typ[from.p].atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def_typ]
 end
@@ -2249,12 +2198,7 @@ end
 
 function find_path(start,goal)
  
- -- the final step in the
- -- current shortest path
  local shortest, 
- -- maps each node to the step
- -- on the best known path to
- -- that node
  best_table = {
   last = start,
   cost_from_start = 0,
@@ -2262,43 +2206,21 @@ function find_path(start,goal)
  }, {}
 
  best_table[pt2key(start)] = shortest
-
- -- array of frontier paths each
- -- represented by their last
- -- step, used as a priority
- -- queue. elements past
- -- frontier_len are ignored
-	-- 'closest'- dh
  local frontier, frontier_len,
  	closest = {shortest}, 1,
  	shortest
-
- -- while there are frontier paths
  while frontier_len > 0 do
-
-  -- find and extract the shortest path
   local cost, index_of_min = 32767
   for i = 1, frontier_len do
    local temp = frontier[i].cost_from_start + frontier[i].cost_to_goal
    if (temp <= cost) index_of_min,cost = i,temp
   end
- 
-  -- efficiently remove the path 
-  -- with min_index from the
-  -- frontier path set
   shortest = frontier[index_of_min]
   frontier[index_of_min], shortest.dead = frontier[frontier_len], true
   frontier_len -= 1
-
-  -- last node on the currently
-  -- shortest path
   local p = shortest.last
   
   if pt2key(p) == pt2key(goal) then
-   -- we're done.  generate the
-   -- path to the goal by
-   -- retracing steps. reuse
-   -- 'p' as the path
    p = {goal}
 
    while shortest.prev do
@@ -2306,30 +2228,16 @@ function find_path(start,goal)
     add(p, shortest.last)
    end
 
-   -- we've found the shortest path
    return p,true
   end -- if
-
-  -- consider each neighbor n of
-  -- p which is still in the
-  -- frontier queue
   for n in all_surr(
   	p[1],p[2],1,true
   ) do
-   -- find the current-best
-   -- known way to n (or
-   -- create it, if there isn't
-   -- one)
    local old_best, new_cost_from_start =
     best_table[pt2key(n)],
     shortest.cost_from_start + 1
    
    if not old_best then
-    -- create an expensive
-    -- dummy path step whose
-    -- cost_from_start will
-    -- immediately be
-    -- overwritten
     old_best = {
      last = n,
      cost_from_start = 32767,
@@ -2337,35 +2245,24 @@ function find_path(start,goal)
      	dist(n[1]-goal[1],n[2]-goal[2])
     }
 
-    -- insert into queue
     frontier_len += 1
     frontier[frontier_len], best_table[pt2key(n)] = old_best, old_best
-   end -- if old_best was nil
-
-   -- have we discovered a new
-   -- best way to n?
+   end
    if not old_best.dead and old_best.cost_from_start > new_cost_from_start then
-    -- update the step at this
-    -- node
     old_best.cost_from_start, old_best.prev = new_cost_from_start, p
    end -- if
-			--dhstart
 			if old_best.cost_to_goal < closest.cost_to_goal then
 				closest = old_best
 			end
-			--dhend
-  end -- for each neighbor
-  
- end -- while frontier not empty
-
-	--dhstart
+			
+  end
+ end
  local p = {closest.last}
  while closest.prev do
   closest = best_table[pt2key(closest.prev)]
   add(p, closest.last)
  end
  return p
-	--dhend
 end
 -->8
 --menu/cursor
@@ -2553,18 +2450,20 @@ function draw_sel_ports()
 end
 
 function single_unit_section()
-	local y,typ,r,q=menuy+2,
+	local typ,r,q=
 		sel1.typ,sel1.res,sel1.q
 	
 	if #selection<3 then
 		draw_sel_ports()
 	else
-		draw_port(typ,3,y+2,nil,
+		--menuy+4
+		draw_port(typ,3,108,nil,
 			function()
 				sel1.sel=false
 				deli(selection,1)
 			end)
-		print("X"..#selection,16,y+5,7)
+		--menuy+7
+		print("X"..#selection,unspl"16,111,7")
 	end
 		
 	if #selection==1 and r then
@@ -2572,7 +2471,8 @@ function single_unit_section()
 			carry_capacity-1 or 8 do
 			local xx,yy=
 				20+i%3*3,
-				y+2+i\3*3
+				--menuy+4
+				108+i\3*3
 			rect(xx,yy,xx+3,yy+3,7)
 			rect(xx+1,yy+1,xx+2,yy+2,
 				r.qty>i and rescol[r.typ] or 5)
@@ -2580,15 +2480,19 @@ function single_unit_section()
 	end
 
 	if sel1.cycles then
-		print(sel1.cycles.."/"..farm_cycles,36,y+4,4)
-		spr(170,49,y+2,2,2)
+		--menuy+6
+		print(sel1.cycles.."/"..farm_cycles,unspl"36,110,4")
+		--menuy+4
+		spr(unspl"170,49,108,2,2")
 	end
 	if typ.prod and not sel1.const then
 		for i,b in pairs(typ.prod) do
+			i-=1
 			draw_port(
 				b.typ,
-				88-(i-1)%4*13,
-				y+(i-1)\4*11,
+				88-i%4*13,
+				--menuy+2
+				106+i\4*11,
 				b,
 				function()
 					if not can_pay(b) or q and
@@ -2620,9 +2524,11 @@ function single_unit_section()
 			draw_port(
 			 q.b.typ,
 			 q.b.tech and 24 or
-			 	print("X"..q.qty,32,
-			 		y+4,7) and 20,
-			 y+1,nil,
+			  print("X"..q.qty,
+			   --menuy+6
+			   unspl"32,110,7") and 20,
+			 --menuy+3
+			 107,nil,
 				function()
 					pay(q.b,1)
 					if q.qty==1 then
@@ -2638,12 +2544,12 @@ end
 
 function draw_menu()
 	local x,secs,modstart=
- 	0,{102,26},1
+ 	0,split"102,26",1
  if sel_typ then
 		if sel_typ.has_q then
-  	secs={17,24,61,26}
+  	secs=split"17,24,61,26"
  	elseif sel_typ.prod then
-  	secs,modstart={35,67,26},0
+  	secs,modstart=split"35,67,26",0
   end
 	end
  for i,sec in pairs(secs) do
@@ -2676,10 +2582,11 @@ function draw_menu()
 	draw_minimap()
 	
 	--resources
-	local len=print_res(res,0,150,2)
-	rectfill(0,121,len-1,128,7)
-	print_res(res,1,122,2)
-	line(0,120,len-2,120,5)
+	local len=print_res(res,
+		unspl"0,150,2")
+	rectfill(len-1,unspl"121,0,128,7")
+	print_res(res,unspl"1,122,2")
+	line(len-2,unspl"120,0,120,5")
 	pset(len-1,121)
 	line(len,122,len,128)
 	
@@ -2841,13 +2748,15 @@ end
 -->8
 --init
 
---enable mouse & mouse btns
 poke(0x5f2d,3)
 
+function unspl(...)
+	return unpack(split(...))
+end
+
 function init()
-	--constants
 	mapw,maph,mmx,mmy,menuh,menuy=
-		unpack(split"256,256,105,107,21,104")
+		unspl"256,256,105,107,21,104"
 	mmw=19
 	mmh,mapw8,maph8=
 		maph\(mapw/mmw),
@@ -2855,7 +2764,7 @@ function init()
 	
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,uid=
-		unpack(split"0,0,0,0,0,0,1")
+		unspl"0,0,0,0,0,0,1"
 	
 	--tech can change this
 	farm_cycles,carry_capacity,
@@ -2877,37 +2786,18 @@ end
 init()
 
 local qx,qy=6*8,5*8
-unit(queen,qx+9,qy+4,1)
-unit(castle,55,102,2)
+--qx=6*8, qy=5*8, +9, +4
+unit(queen,unspl"57,44,1")
+unit(castle,unspl"55,102,2")
 
 make_dmaps"d"
 
-unit(ant,qx-8,qy,1)
-unit(ant,qx+20,qy+3,1)
-unit(ant,qx+2,qy-8,1)
+unit(ant,unspl"40,40,1")-- -8,0
+unit(ant,unspl"68,43,1")-- 20,3
+unit(ant,unspl"50,32,1")-- 2,-8
+unit(warant,unspl"48,56,1")--0,16
 
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
---unit(ant,qx*8-8,qy*8,1)
---unit(ant,qx*8+20,qy*8+3,1)
---unit(ant,qx*8+2,qy*8-8,1)
-
-unit(warant,48,56,1)
---unit(beetle,58,56,1)
---unit(archer,58,30,1)
---unit(beetle,40,36,1)
---unit(cat,40,36,1)
-
---	unit(spider,65,81,2)
---	unit(archer,70,84,2)
-unit(beetle,65,81,2)
---unit(tower,65,81,2)
-
---unit(tower,65,65,1)
+unit(beetle,unspl"65,81,2")
 
 menuitem(1,"turn mouse off",function()
 	menuitem(1,"turn mouse "..(dpad and "off" or "on"))
@@ -2924,7 +2814,7 @@ the following will not be saved:
   mined resource tiles
 - units in production, along w/
   the used resources+pop count
-- research
+- techs (research, upgrades)
 - if a prereq building was built
   but there are none left when
   saving, the prereq won't save
@@ -2957,7 +2847,8 @@ menuitem(2,"save to clpbrd",function()
 	str=str.."\n"
 	--map
 	for i=1,mapw8*maph8-1 do
-		str=str..mget(i%mapw8,i/mapw8)..","
+		str=str..
+		 mget(i%mapw8,i/mapw8)..","
 	end
 	printh(str,"@clip")
 end)
@@ -2979,13 +2870,13 @@ menuitem(3,"load from clpbrd",function()
 		res[k]=r[i]
 	end
 	for l in all(lines) do
-		local u=unit(unpack(split(l)))
+		local u=unit(unspl(l))
 		uids[u.uid],uid=u,
 			max(uid,u.uid)
 	end
 	for kv in all(hvz) do
-		local k,v=unpack(split(kv,"="))
-		hiviz[k]=v!=1 and uids[v] or v
+		local k,v=unspl(kv,"=")
+		hiviz[k]=v==1 and 1 or uids[v]
 	end
 	make_dmaps"d"
 end)
