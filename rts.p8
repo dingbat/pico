@@ -186,6 +186,7 @@ could have far-reaching effects
 --farm:16
 --castle:32
 
+typs={}
 function parse(unit,typ,tech)
 	local obj={
 		typ=typ,tech=tech,
@@ -199,7 +200,7 @@ function parse(unit,typ,tech)
 				obj[2][v1]=v2,v2,v2
 		end
 	end
-	return obj
+	return add(typs,obj)
 end
 
 ant=parse[[
@@ -1155,7 +1156,8 @@ function handle_click()
  if lclick and to_build then
   if buildable() then
 	  pay(to_build,-1)
-			local new=unit(to_build.typ,
+			local new=unit(
+				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
 				1,nil,nil,0)
@@ -1965,7 +1967,7 @@ function all_surr(x,y,n,chk_acc)
 	 	local xx,yy=x+dx,y+dy
 	 	if
 	 		xx>=0 and yy>=0 and
-	 		xx<mapw/8 and yy<maph/8
+	 		xx<mapw8 and yy<maph8
 	 		and (not chk_acc or
 	 			acc(xx,yy) and
 	 			(acc(xx,y) or acc(x,yy))
@@ -2070,7 +2072,7 @@ function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0) and
 		x>=0 and y>=0 and
-		x<mapw/8 and y<maph/8 and
+		x<mapw8 and y<maph8 and
 		(not b or (not strict and (
 			b.const or b.typ==farm
 	)))
@@ -2177,11 +2179,11 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
-function unit(typ,x,y,p,hp,id,
-	const)
+function unit(typ,x,y,p,hp,
+	id,const)
  uid+=1
  local u=add(units,{
-		typ=typ,
+		typ=typs[typ] or typ,
 		x=x,
 		y=y,
 		st={t="rest"},
@@ -2191,7 +2193,9 @@ function unit(typ,x,y,p,hp,id,
 		const=const,
 		uid=id or uid,
 	})
-	if (typ.bldg) register_bldg(u)
+	if u.typ.bldg then
+		register_bldg(u)
+	end
 	return u
 end
 
@@ -2634,12 +2638,12 @@ end
 
 function draw_menu()
 	local x,secs,modstart=
- 	0,split"102,26",1
+ 	0,{102,26},1
  if sel_typ then
 		if sel_typ.has_q then
-  	secs=split"17,24,61,26"
+  	secs={17,24,61,26}
  	elseif sel_typ.prod then
-  	secs,modstart=split"35,67,26",0
+  	secs,modstart={35,67,26},0
   end
 	end
  for i,sec in pairs(secs) do
@@ -2789,8 +2793,8 @@ function make_dmap(key)
 	if not starts then
 		starts={}
 		dmap_st[key]=starts
-		for x=0,mapw/8 do
-			for y=0,maph/8 do
+		for x=0,mapw8 do
+			for y=0,maph8 do
 				if
 					fget(mget(x,y),key2resf[key])
 			 then
@@ -2843,13 +2847,15 @@ poke(0x5f2d,3)
 function init()
 	--constants
 	mapw,maph,mmx,mmy,menuh,menuy=
-		split"256,256,105,107,21,104"
+		unpack(split"256,256,105,107,21,104")
 	mmw=19
-	mmh=maph\(mapw/mmw)
+	mmh,mapw8,maph8=
+		maph\(mapw/mmw),
+		mapw/8,maph/8
 	
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,uid=
-		split"0,0,0,0,0,0,1"
+		unpack(split"0,0,0,0,0,0,1")
 	
 	--tech can change this
 	farm_cycles,carry_capacity,
@@ -2922,38 +2928,36 @@ the following will not be saved:
 - if a prereq building was built
   but there are none left when
   saving, the prereq won't save
+- top-left tree will regrow :-)
 ]]
 menuitem(2,"save to clpbrd",function()
 	local str=""
+	--units
+	for _ENV in all(units) do
+		str=str..
+		 typ.idx..","..
+			x..","..
+			y..","..
+			p..","..
+			hp..","..
+			uid..
+			(const and ","..const or "")..
+			"\n"
+	end
+	--hiviz
+	for k,v in pairs(hiviz) do
+		if (v!=1) v=v.uid
+		str=str..k.."="..v..","
+	end
+	str=str.."\n"
 	--res
 	for r in all(resorder) do
 		str=str..res[r]..","
 	end
 	str=str.."\n"
 	--map
-	for x=0,mapw/8-1 do
-		for y=0,maph/8-1 do
-			str=str..mget(x,y)..","
-		end
-	end
-	str=str.."\n"
-	--hiviz
-	for k,v in pairs(hiviz) do
-		if (v!=1) v=v.uid
-		str=str..k.."="..v..","
-	end
-	--units
-	str=str.."\n"
-	for u in all(units) do
-		str=str..
-		 u.typ.idx..","..
-			u.x..","..
-			u.y..","..
-			u.p..","..
-			u.hp..","..
-			u.uid..
-			(u.const and ","..u.const or "")..
-			"\n"
+	for i=1,mapw8*maph8-1 do
+		str=str..mget(i%mapw8,i/mapw8)..","
 	end
 	printh(str,"@clip")
 end)
@@ -2964,51 +2968,29 @@ menuitem(3,"load from clpbrd",function()
 	local lines,uids=
 		split(stat(4),"\n"),
 		{}
-	local r,m,hvz=
-		split(deli(lines,1)),
-		split(deli(lines,1)),
-		split(deli(lines,1))
+		
+	for i,t in pairs(split(deli(lines))) do
+		mset(i%mapw8,i/mapw8,t)
+	end
+	local r,hvz=
+		split(deli(lines)),
+		split(deli(lines))
 	for i,k in pairs(resorder) do
 		res[k]=r[i]
 	end
-	for i,tile in pairs(m) do
-		mset(i%(mapw/8),i/mapw/8,tile)
-	end
 	for l in all(lines) do
-		if #l>0 then
-			local udef=split(l)
-			udef[1]=typs[udef[1]]
-			local u=unit(unpack(udef))
-			uids[u.uid]=u
-			uid=max(uid,u.uid)
-		end
+		local u=unit(unpack(split(l)))
+		uids[u.uid],uid=u,
+			max(uid,u.uid)
 	end
-	for pair in all(hvz) do
-		local k,v=unpack(split(pair,"="))
-		if v and v>1 then
-			v=uids[v]
-		end
-		hiviz[k]=v
+	for kv in all(hvz) do
+		local k,v=unpack(split(kv,"="))
+		hiviz[k]=v!=1 and uids[v] or v
 	end
 	make_dmaps"d"
 end)
 
-typs={
-ant,
-beetle,
-spider,
-archer,
-warant,
-cat,
-queen,
-tower,
-mound,
-den,
-barracks,
-farm,
-castle,
-}
-
+menuitem(4," (do ctrl-v 1st)")
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
