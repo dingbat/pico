@@ -1340,6 +1340,7 @@ function tick_unit(u)
 				u.y\8+t[2]
 			s(hiviz,x,y,g(bldgs,x,y,1))
 			--"f" bc it's used for concat
+			--when drawing minimap
 			--in theory can be any truthy
 			s(vizmap,x,y,"f")
 		end
@@ -1368,9 +1369,9 @@ function viztiles(x,y,los)
 		for dx=-l,l do
 		 for dy=-l,l do
 				if dist(
-					xo*2-(dx+0.5)*8,
-					yo*2-(dy+0.5)*8
-				)<los then
+					xo-dx*4-2,
+					yo-dy*4-2
+				)<los/2 then
 					add(viz,{dx,dy})
 				end
 			end
@@ -1387,7 +1388,8 @@ function update_projectiles()
    	u_rect(p.to_unit),
   		{p.x,p.y,p.x,p.y},0
   	) then
- 	 	deal_dmg(p.from_unit,p.to_unit)
+ 	 	deal_dmg(p.from_unit,
+ 	 		p.to_unit)
 			end
   	del(proj,p)
   end
