@@ -138,7 +138,8 @@ function draw_to_build()
 	pal(buildable() or
 	 split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 	)
-	if amy>=menuy then
+	--menuy
+	if amy>=104 then
 		x,y=amx-3,amy-3
 	else
 		fillp(▒)
@@ -1071,7 +1072,8 @@ function handle_click()
 	end
 	
 	--click in menubar
-	if amy>menuy and not selbox then
+	--menuy
+	if amy>104 and not selbox then
 		local dx,dy=amx-mmx,amy-mmy
 		--minimap
 		if dx>=0 and dy>=0 and
@@ -1089,7 +1091,8 @@ function handle_click()
 				--move camera
 				cx,cy=
 					mid(0,x-64,mapw-128),
-				 mid(0,y-64,maph-128+menuh)
+					--menuh=21
+				 mid(0,y-64,maph-107)
 			end
 		end
 		if (lclick) to_build=nil
@@ -1236,7 +1239,8 @@ function pan(dx,dy)
 	else
 		cx,cy=
 	 	mid(0,cx+dx,mapw-128),
-	  mid(0,cy+dy,maph-128+menuh)
+	 	--menuh=21
+	  mid(0,cy+dy,maph-107)
 	end
 end
 
@@ -1529,7 +1533,7 @@ end
 -->8
 --units
 
-function draw_unit(u)
+function draw_unit(_ENV)
 -- possibly unnecessary opt
 --	if
 --		not intersect(
@@ -1541,45 +1545,41 @@ function draw_unit(u)
 --		return
 --	end
 	local
-		ut,st,
 		res_typ,
 		col=
-			u.typ,u.st,
-			u.res and u.res.typ or "",
-			u.p==1 and 1 or 2
-			
+			res and res.typ or "",
+			p==1 and 1 or 2
+
 	local fw,w,h,
 	 stt,
-	 f,
-	 hp=
-		 ut.fw,ut.w,ut.h,
+	 hpp=
+		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 fps,
-		 u.hp/ut.hp
+		 hp/typ.hp
 	
 	local xx,yy,xoff,yoff=
-		u.x-w/2,u.y-h\2,
-		ut["xoff_"..res_typ] or 0,
-		ut["yoff_"..res_typ] or 0
+		x-w/2,y-h\2,
+		typ["xoff_"..res_typ] or 0,
+		typ["yoff_"..res_typ] or 0
 		
-	local x,y,ufps,fr=
-	 	ut[stt.."_x"]+xoff,
-	 	ut[stt.."_y"]+yoff,
-	 	ut[stt.."_fps"],
-	 	ut[stt.."_fr"]
+	local sx,sy,ufps,fr=
+	 	typ[stt.."_x"]+xoff,
+	 	typ[stt.."_y"]+yoff,
+	 	typ[stt.."_fps"],
+	 	typ[stt.."_fr"]
 
 	if stt=="web" and st.first_pt then
-		ine(st.x1,st.y1,
-			st.second_pt and st.x2 or u.x,
-			st.second_pt and st.y2 or u.y,
+		line(st.x1,st.y1,
+			st.second_pt and st.x2 or x,
+			st.second_pt and st.y2 or y,
 			7)
 	end
 	
-	if u.const then
+	if const then
 		fillp(▒)
-		rectaround(u,u==sel1 and 9 or 12)
+		rectaround(_ENV,_ENV==sel1 and 9 or 12)
 		fillp()
-		local p=u.const/ut.const
+		local p=const/typ.const
 		bar(
 			xx,
 			yy,
@@ -1589,25 +1589,27 @@ function draw_unit(u)
 		)
 		--construction sprite
 		--(switches after 0.5)
-		x+=fw*ceil(p*2)
+		sx+=fw*ceil(p*2)
 		if (p<=0.1) return
-	elseif ut==farm then
+	elseif typ==farm then
 	 --in case of emrgncy (37 tok)
 		--x=ut[u.res.qty..u.exp..u.ready]
-		local q=u.res.qty
-		x=u.exp and 72 or
-			u.ready and (q>4 and 48 or 64) or
-			q>6 and 48 or q>3 and 56 or x
+		local q=res.qty
+		sx=exp and 72 or
+			ready and (q>4 and 48 or 64) or
+			q>6 and 48 or q>3 and 56 or sx
 	elseif ufps then
-		if u.dead then
-			f=fps-u.dead
+		--can't use fps bc of _ENV
+		local f=time()*30%60
+		if dead then
+			f-=dead 
 			if (f<0) f+=60
 		end
-		x+=f\ufps%fr*fw
+		sx+=f\ufps%fr*fw
 	end
 	pal(2,col)
-	if u.sel and (
-	 (u.p==1 and (ut.unit or
+	if sel and (
+	 (p==1 and (typ.unit or
 	 	not my_sel)) or
 	 not (my_sel or bldg_sel)
 	) then
@@ -1617,14 +1619,14 @@ function draw_unit(u)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
-	sspr(x,y,w,h,xx,yy,w,h,
-		not ut.fire and u.dir==ut.dir)
+	sspr(sx,sy,w,h,xx,yy,w,h,
+		not typ.fire and dir==typ.dir)
 	pal()
-	if not u.dead and hp<=0.5 then			
-	 if ut.fire then
-			spr(230+fps/20,u.x-3,u.y-8)
+	if not dead and hpp<=0.5 then			
+	 if typ.fire then
+			spr(230+fps/20,x-3,y-8)
 		end
-		bar(xx,yy-1,w,hp)
+		bar(xx,yy-1,w,hpp)
 	end
 
 --	if u.sel and u.typ.range then
@@ -1750,7 +1752,6 @@ function fight(u)
 		if typ.los>=d and not typ.bldg then
 			--pursue enemy
 	 	attack(u,e)
-	 	deli(u.st.wayp,1)
 	 elseif not u.st.wayp then
 	 	rest(u)
 	 end
@@ -2141,6 +2142,9 @@ function unit(typ,x,y,p,hp,
 		hp=hp or typ.hp,
 		const=const,
 		uid=id or uid,
+		--allow calling from ENV
+		bar=bar,
+		rectaround=rectaround
 	})
 	if u.typ.bldg then
 		register_bldg(u)
@@ -2404,7 +2408,8 @@ end
 function cursor_spr()
  --pointer (buttons)
  if webbing then
- 	if amy<menuy and not acc(wmx\8,wmy\8) then
+ 	--menuy
+ 	if amy<104 and not acc(wmx\8,wmy\8) then
 			pal(split"8,8,8,8,8,8,8")
  	end
  	return 70
@@ -2436,11 +2441,13 @@ function draw_sel_ports()
 	for i,u in pairs(selection) do
 		local x=i*13-10
 		if i>6 then
-			print("+"..#selection-6,x,menuy+6,1)
+			--menuy+6
+			print("+"..#selection-6,x,110,1)
 			break
 		end
 		draw_port(
-			u.typ,x,menuy+3,nil,
+			--menuy+3
+			u.typ,x,107,nil,
 			function()
 				u.sel=false
 				del(selection,u)
@@ -2755,20 +2762,18 @@ function unspl(...)
 end
 
 function init()
-	mapw,maph,mmx,mmy,menuh,menuy=
-		unspl"256,256,105,107,21,104"
-	mmw=19
+	mapw,maph,mmx,mmy,mmw=
+		unspl"256,256,105,107,19"
 	mmh,mapw8,maph8=
 		maph\(mapw/mmw),
 		mapw/8,maph/8
 	
+	--tech can change this
+	units_heal,farm_cycles,
+	carry_capacity,
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,uid=
-		unspl"0,0,0,0,0,0,1"
-	
-	--tech can change this
-	farm_cycles,carry_capacity,
-		units_heal=5,6,{}
+		{},unspl"5,6,0,0,0,0,0,0,1"
 	
 	queue,hiviz,vcache,dmaps,
 	units,restiles,selection,
