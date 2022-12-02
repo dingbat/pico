@@ -1,7 +1,17 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
---main loop
+--age of bugs(?)
+
+--[[
+todo:
+- ai
+- ~100 unit pop limit
+- dmg mult balancing
+- costs balancing
+- menu/wincond
+- addtl map?
+]]
 
 --acct={}
 --times={}
@@ -238,6 +248,14 @@ function parse(unit,typ,tech)
 	end
 	return add(typs,obj)
 end
+
+--bitmaps:
+--tower:1
+--mound:2
+--den:4
+--barracks:8
+--farm:16
+--castle:32
 
 ant=parse[[
 idx=1
