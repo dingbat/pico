@@ -1352,6 +1352,8 @@ function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.dead then
 		u.dead+=1
+		--clear unit's viz after 1s
+		if (u.dead==30) update_viz(u)
 		if (u.dead==60) del(units,u)
 		if (typ.bldg) mset(u.x/8,u.y/8,74)
 		return
@@ -1395,17 +1397,30 @@ function tick_unit(u)
 	
 	update_unit(u)
 	
-	local xx,yy=u.x\8,u.y\8
+	update_viz(u)
+	
+	if typ.unit and not u.st.wayp then
+		while g(pos,u.x\4,u.y\4) do
+			u.x+=rnd(2)-1
+			u.y+=rnd(2)-1
+		end
+		s(pos,u.x\4,u.y\4,1)
+	end
+end
+
+function update_viz(u)
+	local xx,yy,los=u.x\8,u.y\8,
+		u.typ[u.p].los
 	if u.p==1 or u.st.t=="attack" then
 		for t in all(
 		 viztiles(
 		 	u.x,u.y,
-		 	u.p==1 and typ.los or 8
+		 	u.p==1 and los or 8
 		 )
 		) do
 			local x,y=xx+t[1],yy+t[2]
 			local i=x|(y<<8)
-			if t[3] then
+			if not u.dead and t[3] then
 				local b=bldgs[i]
 				if (b) b.discovered=1
 				--"f" bc it's used for concat
@@ -1423,14 +1438,6 @@ function tick_unit(u)
 		  mset(x+32,y,mget(x,y))
 		 end
 		end
-	end
-	
-	if typ.unit and not u.st.wayp then
-		while g(pos,u.x\4,u.y\4) do
-			u.x+=rnd(2)-1
-			u.y+=rnd(2)-1
-		end
-		s(pos,u.x\4,u.y\4,1)
 	end
 end
 
