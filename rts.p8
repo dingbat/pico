@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
---age of bugs(?)
+--main loop
 
 --[[
 todo:
@@ -133,9 +133,9 @@ function _update()
  
  handle_input()
 
- vizmap,buttons,pos,fps30,
+ vizmap,buttons,pos,
  	hoverunit,sel_typ=
- 	{},{},{},fps%30
+ 	{},{},{}
  
  update_projectiles()
  
@@ -155,7 +155,7 @@ function _update()
 	 	--run it across frames (each
 	 	--unit gets checked once per
 	 	--second)
-		 if fps30==i%30 and
+		 if fps%30==i%30 and
 		  u.st.t=="rest" and
 		  u.typ.atk 
 		 then
@@ -1193,17 +1193,16 @@ function handle_click()
  
  --left click places web
  if webbing then
- 	if lclick and acc(wmx\8,wmy\8) then
+ 	if lclick and
+ 	 can_finish_web() then
 	 	if webx then
 				pay(web,-1)
 	 		sel1.st,webbing,webx={
 	 		 t="web",
 	 		 wayp=get_wayp(
-	 		 	sel1,webx,weby),
-	 		 x1=webx,
-	 		 y1=weby,
-	 		 x2=wmx,
-	 		 y2=wmy,
+	 		 	sel1,webx,weby,true),
+	 		 p1={webx,weby},
+	 		 p2={wmx,wmy},
 	 		}
 	 	else
 	 		webx,weby=wmx,wmy
@@ -1334,14 +1333,16 @@ function handle_input()
  mx,my,wmx,wmy,hovbtn=
  	amx+cx,amy+cy,mx+3,my+3
  for b in all(buttons) do
- 	if intersect(b.r,
- 		{amx,amy,amx,amy},1) then
+ 	if intersect(b.r,{amx,amy},1) then
 			hovbtn=b
  	end
 	end
-	if webx and dist(webx-wmx,weby-wmy)>18 then
+	if webx then
+		webd=mid(10,
+		 dist(webx-wmx,weby-wmy),
+		 25)
 		wmx,wmy=norm({wmx,wmy},
-			{x=webx,y=weby},20)
+			{x=webx,y=weby},webd)
 	end
  
  handle_click()
@@ -1402,10 +1403,8 @@ function tick_unit(u)
 		u.hp+=0.5
 	end
 	
-	if intersect(
-		u_rect(u),
-		{mx,my,mx,my},1
-	) then
+	if intersect(u_rect(u),
+	 {mx,my},1) then
 		hoverunit=u
 	end
 	
@@ -1498,7 +1497,7 @@ function update_projectiles()
   if adj(p.to,p,0.5) then
    if intersect(
    	u_rect(p.to_unit),
-  		{p.x,p.y,p.x,p.y},0
+  		{p.x,p.y},0
   	) then
  	 	deal_dmg(p.from_unit,
  	 		p.to_unit)
@@ -1578,44 +1577,47 @@ end
 -->8
 --units
 
-function draw_unit(_ENV)
-	local
+function draw_unit(u)
+	local typ,st,
 		res_typ,
 		col=
-			res and res.typ or "",
-			p==1 and 1 or 2
+			u.typ,u.st,
+			u.res and u.res.typ or "",
+			u.p
 
 	local fw,w,h,
 	 stt,
 	 hpp=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 hp/typ.hp
+		 u.hp/typ.hp
 	
 	local xx,yy,sx,sy,ufps,fr,f=
-		x-w/2,y-h\2,
+		u.x-w/2,u.y-h\2,
 	 typ[stt.."_x"]+
 	 	max(typ["xoff_"..res_typ])+
-	 	sproff\8*8,
+	 	u.sproff\8*8,
 	 typ[stt.."_y"]+max(typ["yoff_"..res_typ]),
 	 typ[stt.."_fps"],
 	 typ[stt.."_fr"],
-		dead or _g.fps
+		u.dead or fps
 
-	if stt=="web" and st.first_pt then
-		line(st.x1,st.y1,
-			st.second_pt and st.x2 or x,
-			st.second_pt and st.y2 or y,
-			7)
+	--cant use stt bc it'll be move
+	if st.t=="web" and st.first_pt then
+		color"7"
+		line()
+		line(unpack(st.p1))
+		line(unpack(st.second_pt or
+			{u.x,u.y}))
 	end
 	
-	if const then
-		fillp(0x5a5a.8000) --▒
-		_g.rectaround(_ENV,
-			_ENV==_g.sel1 and 9 or 12)
+	if u.const then
+		fillp(▒)
+		rectaround(u,
+			u==sel1 and 9 or 12)
 		fillp()
-		local p=const/typ.const
-		_g.bar(
+		local p=u.const/typ.const
+		bar(
 			xx,
 			yy,
 			fw-1,
@@ -1630,10 +1632,10 @@ function draw_unit(_ENV)
 		sx+=f\ufps%fr*fw
 	end
 	pal(2,col)
-	if sel and (
-	 (p==1 and (typ.unit or
-	 	not _g.my_sel)) or
-	 not (_g.my_sel or _g.bldg_sel)
+	if u.sel and (
+	 (u.p==1 and (typ.unit or
+	 	not my_sel)) or
+	 not (my_sel or bldg_sel)
 	) then
 		col=9
 	end
@@ -1642,13 +1644,13 @@ function draw_unit(_ENV)
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
 	sspr(sx,sy,w,h,xx,yy,w,h,
-		not typ.fire and dir==typ.dir)
+		not typ.fire and u.dir==typ.dir)
 	pal()
-	if not dead and hpp<=0.5 then			
+	if not u.dead and hpp<=0.5 then			
 	 if typ.fire then
-			spr(230+f/20,x-3,y-8)
+			spr(230+f/20,u.x-3,u.y-8)
 		end
-		_g.bar(xx,yy-1,w,hpp)
+		bar(xx,yy-1,w,hpp)
 	end
 
 --	if u.sel and u.typ.range then
@@ -1670,19 +1672,6 @@ function update_unit(u)
 		if (st.webbed==0) rest(u)
 	end
 	local t=st.t
-	if t=="web" and st.ready then
-		line(st.x1,st.y1,
-			st.x2,st.y2,12)
-		for e in all(units) do
-			if e.p!=u.p and
-				(pget(e.x,e.y)==12 or
-					pget(e.x+1,e.y)==12) then
-				e.st={t="dead",webbed=5}
-				attack(u,e)
-				break
-			end
-		end
-	end
  if (u.q) produce(u)
  if (u.typ.farm) update_farm(u)
  if st.active then
@@ -1696,6 +1685,41 @@ function update_unit(u)
  	check_target_col(u)
  end
  step(u)
+ --check spider webs
+ local r=u_rect(u,1)
+ for i,sp in pairs(spiders) do
+ 	local ss=sp.st
+ 	if not ss.ready then
+ 		deli(spiders,i)
+ 	elseif fps%30==i%30 and
+ 		sp.p!=u.p then
+ 		if
+ 			intersect(r,ss.p1,0) or
+ 			intersect(r,ss.p2,0) or
+ 			intersect(r,u_rect(sp),-2)
+ 		then
+ 			u.st={t="dead",webbed=5}
+	 		attack(sp,u)
+	 		return
+		 end
+		end
+	end
+ if not st.wayp then
+ 	if t=="move" then
+ 		rest(u)
+ 	elseif t=="web" and not st.ready then
+			if st.second_pt then
+				st.ready=add(spiders,u)
+			elseif st.first_pt then
+				st.wayp,st.second_pt=
+					{{norm(st.p1,u,webd/2)}},
+					st.p2
+			else
+				st.wayp,st.first_pt=
+					{st.p2},true
+			end
+		end
+ end
 end
 
 function update_farm(u)
@@ -1898,23 +1922,6 @@ function step(u)
  	if adj(wayp[1],u,2) then
  		if #wayp==1 then
  			st.wayp=nil
-				if st.t=="web" then
-					if st.second_pt then
-						st.ready=true
-					elseif st.first_pt then
-						st.wayp,st.second_pt={
-							{u.x-(st.x2-st.x1)/2,
-							 u.y-(st.y2-st.y1)/2}
-						},true
-					else
-						st.wayp,st.first_pt={
-							{st.x2,st.y2}
-						},true
-					end
-				elseif st.t!="harvest" and
-					st.t!="attack" then
-					rest(u)
-				end
 			else
 			 deli(wayp,1)
 			end
@@ -1928,10 +1935,20 @@ function unspl(...)
 	return unpack(split(...))
 end
 
+ --x=(k<<8)>>8
+--y=(k>>20)<<12
+function g(a,x,y,def)
+	return a[x|(y<<8)] or def
+end
+
+function s(a,x,y,v)
+ a[x|(y<<8)]=v
+end
+
 function intersect(r1,r2,e)
-	return r1[1]-e<r2[3] and
+	return r1[1]-e<(r2[3] or r2[1]) and
 		r1[3]+e>r2[1] and
-		r1[2]-e<r2[4] and
+		r1[2]-e<(r2[4] or r2[2]) and
 		r1[4]+e>r2[2]
 end
 
@@ -2142,6 +2159,10 @@ function can_drop()
 	end
 end
 
+function can_finish_web()
+ return acc(wmx\8,wmy\8)
+end
+
 function can_renew_farm()
 	return hoverunit and
 		res.b>=farm_renew_cost_b and
@@ -2177,8 +2198,6 @@ function unit(typ,x,y,p,hp,
 		discovered=discovered or 0,
 		--currently just used by farm
 		sproff=0,
-		--allow gloabl access from ENV
-		_g=_ENV
 	})
 	if u.typ.farm then
 		u.res,cycles=
@@ -2455,7 +2474,7 @@ function cursor_spr()
  --pointer (buttons)
  if webbing then
  	--menuy
- 	if amy<104 and not acc(wmx\8,wmy\8) then
+ 	if amy<104 and not can_finish_web() then
 			pal(split"8,8,8,8,8,8,8")
  	end
  	return 70
@@ -2679,16 +2698,6 @@ function dmap_find(u,key)
 	end
 	return wayp,x,y
 end
- 
---x=(k<<8)>>8
---y=(k>>20)<<12
-function g(a,x,y,def)
-	return a[x|(y<<8)] or def
-end
-
-function s(a,x,y,v)
- a[x|(y<<8)]=v
-end
 	
 function make_dmaps(r)
 	queue=split(dmap_queue[r])
@@ -2815,9 +2824,10 @@ function init()
 	
 	queue,hiviz,vcache,dmaps,
 	units,restiles,selection,
-		proj,bldgs,dmap_st,res=
+		proj,bldgs,spiders,dmap_st,
+		res=
 		{},{},{},{},
-		{},{},{},{},{},{d={}},
+		{},{},{},{},{},{},{d={}},
 	 parse[[
 r=5
 g=5
@@ -2837,7 +2847,7 @@ make_dmaps"d"
 unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
-unit(warant,unspl"48,56,1")--0,16
+unit(spider,unspl"48,56,1")--0,16
 
 --x-w/2,y-h\2
 unit(castle,8*8+15/2,16*8+8,2)
@@ -2916,7 +2926,7 @@ menuitem(3,"load from clpbrd",function()
 		end
 	end
 --	unit(archer,unspl"65,81,2")
---unit(archer,unspl"65,181,2")
+--unit(warant,unspl"65,181,2")
 --unit(archer,unspl"65,181,2")
 --unit(archer,unspl"65,181,2")
 --unit(archer,unspl"65,181,2")
