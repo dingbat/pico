@@ -3,31 +3,31 @@ version 38
 __lua__
 --main loop
 
-acct={}
-times={}
-function flush_time(str,f)
-	if acct[str] and not f or fps%f==0 then
-		printh(str..": "..acct[str],"log")
-	end
-	acct[str]=0
-end
-function time(str,run_at_fps)
-	local s=stat(1)
-	if times[str] then
-	 local prev,f=unpack(times[str])
-	 if f==true or not f or fps%f==0 then
-			if f==true then
-				acct[str]=acct[str] or 0
-				acct[str]+=s-prev
-			else
-				printh(str..": "..(s-prev),"log")
-			end
-		end
-		times[str]=nil
-	else
-		times[str]={s,run_at_fps}
-	end
-end
+--acct={}
+--times={}
+--function flush_time(str,f)
+--	if acct[str] and not f or fps%f==0 then
+--		printh(str..": "..acct[str],"log")
+--	end
+--	acct[str]=0
+--end
+--function time(str,run_at_fps)
+--	local s=stat(1)
+--	if times[str] then
+--	 local prev,f=unpack(times[str])
+--	 if f==true or not f or fps%f==0 then
+--			if f==true then
+--				acct[str]=acct[str] or 0
+--				acct[str]+=s-prev
+--			else
+--				printh(str..": "..(s-prev),"log")
+--			end
+--		end
+--		times[str]=nil
+--	else
+--		times[str]={s,run_at_fps}
+--	end
+--end
 
 function _draw()
 --	time("_draw",15)
@@ -149,16 +149,18 @@ function _update()
 		  u.st.t=="rest" and
 		  u.typ.atk 
 		 then
-			aggress(u)
-	 end
+				aggress(u)
+	 	end
+	 	--same principle for fight,
+	 	--but it needs to manage
+	 	--timing a bit more closely
+	 	--so units stop as soon as
+	 	--they need to
 	 	if u.st.t=="attack" then
---			 time(" fight",true)
-	 		fight(u)
---			 time(" fight",true)
+	 		fight(u,i%30)
 	 	end
 	 end
  end
--- flush_time(" fight",30)
 
  if selbox then
 		selection=my_sel or
@@ -1725,13 +1727,18 @@ function aggress(u)
 	end
 end
 
-function fight(u)
-	local typ,e,in_range=
-		u.typ[u.p],u.st.target
-	local d=dist(e.x-u.x,e.y-u.y)
+function fight(u,i)
+	local typ,e,in_range,d=
+		u.typ[u.p],u.st.target,
+		u.st.active
+	local dx,dy=
+		e.x-u.x,e.y-u.y
 	if typ.range then
-		in_range=d<=typ.range and
-			g(vizmap,e.x\8,e.y\8)
+		if fps%10==i%10 then
+			d=dist(dx,dy)
+			in_range=d<=typ.range and
+				g(vizmap,e.x\8,e.y\8)	
+		end
 		if in_range and fps%typ.proj_freq==0 then
  		add(proj,{
  			from_unit=u,
@@ -1743,15 +1750,16 @@ function fight(u)
  else
  	in_range=intersect(u_rect(u),
  	 u_rect(e),0)
-		if in_range and fps%30==0 then
+		if in_range and fps%30==i then
 		 deal_dmg(u,e)
 		end
  end
  u.st.active=in_range
  if in_range then
-		u.dir,u.st.wayp=sgn(e.x-u.x)
-	elseif fps%30==0 then
-		if typ.los>=d and not typ.bldg then
+		u.dir,u.st.wayp=sgn(dx)
+	elseif fps%30==i then
+		if (not d)	d=dist(dx,dy)
+		if typ.los>=d and typ.unit then
 			--pursue enemy
 	 	attack(u,e)
 	 elseif not u.st.wayp then
@@ -2198,8 +2206,12 @@ function get_wayp(u,x,y,enter)
 	local path,exists=find_path(
 	 {u.x\8,u.y\8},
  	{destx,desty})
+ 	
+	if (#path==1) return
+	--del last element (the start)
+	deli(path)
  for n in all(path) do
- 	add(wayp,
+		add(wayp,
  		{n[1]*8+4,
  		 n[2]*8+4},1)
  end
@@ -2885,37 +2897,37 @@ menuitem(3,"load from clpbrd",function()
 	  mset(x+32,y,mget(x,y))
 		end
 	end
-	unit(beetle,unspl"65,81,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
-unit(beetle,unspl"65,181,2")
+--	unit(archer,unspl"65,81,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
 
 --	make_dmaps"d"
 end)
