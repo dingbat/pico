@@ -42,7 +42,7 @@ todo:
 function _draw()
 --	time("_draw",15)
  cls()
- draw_map()
+ draw_map(0) --mainmap
  
  local bf1,bf2,af={},{},{}
  for u in all(units) do
@@ -76,16 +76,37 @@ function _draw()
 
 	foreach(proj,draw_projectile)
 	foreach(bf2,draw_unit)
-	draw_fog()
+ pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
+	draw_map(32) --draw fogmap
 	
-	--don't want draw_unit resetting
-	--pal
+	--don't want draw_unit
+	--resetting fog pal
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
 	pal=_pal
-	
 	pal()
-
+	
+	fillp(▒)
+	for x=cx\8,cx\8+16 do
+	 for y=cy\8,cy\8+16 do
+	 	local i=x|(y<<8)
+	  if not vizmap[i] then
+	  	camera(x*-8+cx,y*-8+cy)
+			 color(hiviz[i] and 5 or 0)
+			 function border(dx,dy,...)
+			  if vizmap[i+dx+(dy<<8)] then
+				  line(...)
+			  end
+			 end
+			 border(unspl"-1,0,-1,0,-1,7")
+			 border(unspl"0,-1,0,-1,7,-1")
+			 border(unspl"0,1,0,8,7,8")
+			 border(unspl"1,0,8,0,8,7")
+			end
+		end
+	end
+	fillp()
+	
 	--rally flag
 	if sel1 and sel1.rx then
 		spr(71+fps/5%3,
@@ -1509,16 +1530,9 @@ end
 -->8
 --map
 
-function draw_map()
+function draw_map(offset)
  camera(cx%8,cy%8)
- map(cx/8,cy/8,0,0,17,17)
- camera(cx,cy)
-end
-
-function draw_fog()
- pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	camera(cx%8,cy%8)
-	map(cx/8+32,cy/8,0,0,17,17)
+ map(cx/8+offset,cy/8,0,0,17,17)
  camera(cx,cy)
 end
 
