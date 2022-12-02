@@ -3,8 +3,34 @@ version 38
 __lua__
 --main loop
 
+acct={}
+times={}
+function flush_time(str,f)
+	if acct[str] and not f or fps%f==0 then
+		printh(str..": "..acct[str],"log")
+	end
+	acct[str]=0
+end
+function time(str,run_at_fps)
+	local s=stat(1)
+	if times[str] then
+	 local prev,f=unpack(times[str])
+	 if f==true or not f or fps%f==0 then
+			if f==true then
+				acct[str]=acct[str] or 0
+				acct[str]+=s-prev
+			else
+				printh(str..": "..(s-prev),"log")
+			end
+		end
+		times[str]=nil
+	else
+		times[str]={s,run_at_fps}
+	end
+end
+
 function _draw()
---	local x=stat(1)
+--	time("_draw",15)
  cls()
  draw_map()
  
@@ -84,22 +110,22 @@ function _draw()
 	--reset
 	pal()
 	
---	if (fps%15==0) printh(" draw "..(stat(1)-x),"log")
+--	time("_draw")
 --	if sel1 then
 --		print(sel1.discovered,0,0,7)
 --	end
 end
 
 function _update()
---	local x=stat(1)
+--	time("_update",60)
 	async_task()
 	fps=(fps+1)%60
  
  handle_input()
 
- vizmap,buttons,pos,
+ vizmap,buttons,pos,fps30,
  	hoverunit,sel_typ=
- 	{},{},{}
+ 	{},{},{},fps%30
  
  update_projectiles()
  
@@ -108,21 +134,32 @@ function _update()
  end
  
  foreach(units,tick_unit)
- 
+
  --fighting has to happen after
  --tick because viz is involved
- for _ENV in all(units) do
- 	if not (const or dead) then
-		 if st.t=="rest" and
-		  typ.atk then
-				_g.aggress(_ENV)
-		 end
-	 	if st.t=="attack" then
-	 		_g.fight(_ENV)
+ --_ENV
+ for i,u in pairs(units) do
+ 	if not (u.const or u.dead) then
+	  --aggress is expensive, so
+	 	--distribute which units
+	 	--run it across frames (each
+	 	--unit gets checked once per
+	 	--second)
+		 if fps30==i%30 and
+		  u.st.t=="rest" and
+		  u.typ.atk 
+		 then
+			aggress(u)
+	 end
+	 	if u.st.t=="attack" then
+--			 time(" fight",true)
+	 		fight(u)
+--			 time(" fight",true)
 	 	end
 	 end
  end
- 
+-- flush_time(" fight",30)
+
  if selbox then
 		selection=my_sel or
 			bldg_sel or
@@ -135,7 +172,8 @@ function _update()
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end
---	if (fps%15==0) printh(" update "..(stat(1)-x),"log")
+
+--	time("_update",60)
 end
 
 function draw_hilite()
@@ -1357,6 +1395,7 @@ function tick_unit(u)
 	
 	update_unit(u)
 	
+	local xx,yy=u.x\8,u.y\8
 	if u.p==1 or u.st.t=="attack" then
 		for t in all(
 		 viztiles(
@@ -1364,21 +1403,20 @@ function tick_unit(u)
 		 	u.p==1 and typ.los or 8
 		 )
 		) do
-			local x,y=u.x\8+t[1],
-				u.y\8+t[2]
+			local x,y=xx+t[1],yy+t[2]
+			local i=x|(y<<8)
 			if t[3] then
-				local b=g(bldgs,x,y)
+				local b=bldgs[i]
 				if (b) b.discovered=1
-				s(hiviz,x,y,1)
 				--"f" bc it's used for concat
 				--when drawing minimap
 				--in theory can be any truthy
-				s(vizmap,x,y,"f")
+				hiviz[i],vizmap[i]=1,"f"
 			 --clear fog from fogmap
-			 mset(x+32,y,0)
+				mset(x+32,y,0)
 			elseif
-				not g(vizmap,x,y) and
-				g(hiviz,x,y)
+				not vizmap[i] and
+				hiviz[i]
 		 then
 		 	--cant see but explored, set
 		 	--tile to explored in fogmap
@@ -1386,7 +1424,7 @@ function tick_unit(u)
 		 end
 		end
 	end
-
+	
 	if typ.unit and not u.st.wayp then
 		while g(pos,u.x\4,u.y\4) do
 			u.x+=rnd(2)-1
@@ -1405,7 +1443,7 @@ function viztiles(x,y,los)
 		vcache[los]=vlos
 	end
 	local viz,l=g(vlos,xo,yo),
-		--add 1 to ensure that we
+		--add extra to ensure that we
 		--mark *all* unseen territory
 		--as explored
 		ceil(los/8)+1
@@ -1665,17 +1703,17 @@ function farmer(u)
 end
 
 function aggress(u)
+	local typ=u.typ[u.p]
+	local los=max(
+		typ.unit and typ.los,
+		typ.range)
 	for e in all(units) do
-		if g(vizmap,e.x\8,e.y\8) and
-			e.p!=u.p and not e.dead then
-			local typ=u.typ[u.p]
-			if dist(e.x-u.x,e.y-u.y)<=
-				max(
-					typ.bldg and 0 or typ.los,
-					typ.range) then
-				attack(u,e)
-				break
-			end
+		if e.p!=u.p and not e.dead and
+			vizmap[(e.x\8)|(e.y\8<<8)] and
+			dist(e.x-u.x,e.y-u.y)<=los
+		then
+			attack(u,e)
+			break
 		end
 	end
 end
@@ -1853,6 +1891,10 @@ end
 -->8
 --utils
 
+function unspl(...)
+	return unpack(split(...))
+end
+
 function intersect(r1,r2,e)
 	return r1[1]-e<r2[3] and
 		r1[3]+e>r2[1] and
@@ -1869,11 +1911,14 @@ function u_rect(u,e)
  }
 end
 
--- musurca - https://www.lexaloffle.com/bbs/?tid=36059
-function dist(a,b)
- local a0,b0=abs(a),abs(b)
- return max(a0,b0)*0.9609+
- 	min(a0,b0)*0.3984
+-- musurca/freds - https://www.lexaloffle.com/bbs/?tid=36059
+function dist(dx,dy)
+ local maskx,masky=dx>>31,dy>>31
+ local a0,b0=(dx+maskx)^^maskx,
+ 	(dy+masky)^^masky
+ return a0>b0 and
+ 	a0*0.9609+b0*0.3984 or
+  b0*0.9609+a0*0.3984
 end
 
 function all_surr(x,y,n,chk_acc)
@@ -1927,11 +1972,12 @@ function can_gather()
 end
 
 function can_attack()
+	local viz=g(vizmap,mx\8,my\8)
 	for u in all(selection) do
-		if u.typ.atk and
-			g(hiviz,mx\8,my\8) and
-			hoverunit and
-		 hoverunit.p!=1
+		if hoverunit and
+		 hoverunit.p!=1 and
+			u.typ.atk and
+			(viz or hoverunit.discovered==1)
 		then
 			return true
 		end
@@ -2158,6 +2204,10 @@ end
 
 --a*
 --https://t.co/nasud3d1ix
+
+function pt2key(pt)
+	return pt[1]|(pt[2]<<8)
+end
 
 function find_path(start,goal)
  
@@ -2592,10 +2642,6 @@ function dmap_find(u,key)
 	end
 	return wayp,x,y
 end
-
-function pt2key(pt)
-	return pt[1]+pt[2]*mapw4+1
-end
  
 --x=(k<<8)>>8
 --y=(k>>20)<<12
@@ -2716,16 +2762,12 @@ end
 
 poke(0x5f2d,3)
 
-function unspl(...)
-	return unpack(split(...))
-end
-
 function init()
 	mapw,maph,mmx,mmy,mmw=
 		unspl"256,256,105,107,19"
-	mmh,mapw4,mapw8,maph8=
+	mmh,mapw8,maph8=
 		maph\(mapw/mmw),
-		mapw/4,mapw/8,maph/8
+		mapw/8,maph/8
 	
 	--tech can change this
 	units_heal,farm_cycles,
@@ -2836,7 +2878,39 @@ menuitem(3,"load from clpbrd",function()
 	  mset(x+32,y,mget(x,y))
 		end
 	end
-	make_dmaps"d"
+	unit(beetle,unspl"65,81,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+unit(beetle,unspl"65,181,2")
+
+--	make_dmaps"d"
 end)
 
 menuitem(4," (do ctrl-v 1st)")
