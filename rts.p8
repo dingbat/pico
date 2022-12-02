@@ -19,7 +19,7 @@ function _draw()
 --		then
 			if 
 			 not g(vizmap,u.x\8,u.y\8)
-			 and (u.discovered or u.const)
+			 and (u.discovered==1 or u.const)
 			then
 	 		add(af,u)
 	 	elseif u.typ.bldg then
@@ -41,7 +41,13 @@ function _draw()
 	foreach(proj,draw_projectile)
 	foreach(bf2,draw_unit)
 	draw_fog()
+	
+	--don't want draw_unit resetting
+	--pal
+	_pal,pal=pal,max
 	foreach(af,draw_unit)
+	pal=_pal
+	
 	pal()
 
 	--rally flag
@@ -80,7 +86,7 @@ function _draw()
 	
 --	if (fps%15==0) printh(" draw "..(stat(1)-x),"log")
 --	if sel1 then
---		print(sel1.st.t.." "..(sel1.st.active and "active" or ""),0,0,7)
+--		print(sel1.discovered,0,0,7)
 --	end
 end
 
@@ -279,7 +285,7 @@ portw=9
 unit=1
 dir=1
 
-spd=1.5
+spd=0.9
 los=20
 hp=20
 
@@ -1361,9 +1367,9 @@ function tick_unit(u)
 			local x,y=u.x\8+t[1],
 				u.y\8+t[2]
 			if t[3] then
-				local b=g(bldgs,x,y,1)
-				if (b!=1) b.discovered=true
-				s(hiviz,x,y,b)
+				local b=g(bldgs,x,y)
+				if (b) b.discovered=1
+				s(hiviz,x,y,1)
 				--"f" bc it's used for concat
 				--when drawing minimap
 				--in theory can be any truthy
@@ -1450,14 +1456,6 @@ function draw_fog()
 	camera(cx%8,cy%8)
 	map(cx/8+32,cy/8,0,0,17,17)
  camera(cx,cy)
-	
---	if v!=1 then
---		clip(xx*8-cx-1,yy*8-cy,9,8)
---		_pal,pal=pal,max
---		draw_unit(v)
---		pal=_pal
---		clip()
---	end
 end
 
 -- 0.11 cpu
@@ -1482,7 +1480,7 @@ function draw_minimap()
 	
 	--units
 	for u in all(units) do
-		if u.discovered or
+		if u.discovered==1 or
 			g(vizmap,u.x\8,u.y\8) then
 			pset(
 				u.x/mapw*mmw,
@@ -2087,8 +2085,7 @@ function sur_acc(x,y)
 end
 
 function unit(typ,x,y,p,hp,
-	id,const)
- uid+=1
+	discovered,const)
  local u=add(units,{
 		typ=typs[typ] or typ,
 		x=x,
@@ -2098,7 +2095,7 @@ function unit(typ,x,y,p,hp,
 		p=p,
 		hp=hp or typ.hp,
 		const=const,
-		uid=id or uid,
+		discovered=discovered or 0,
 		--currently just used by farm
 		sproff=0,
 		--allow gloabl access from ENV
@@ -2734,8 +2731,8 @@ function init()
 	units_heal,farm_cycles,
 	carry_capacity,
 	--global state
-	cx,cy,mx,my,fps,bldg_bmap,uid=
-		{},unspl"5,6,0,0,0,0,0,0,1"
+	cx,cy,mx,my,fps,bldg_bmap=
+		{},unspl"5,6,0,0,0,0,0,0"
 	
 	queue,hiviz,vcache,dmaps,
 	units,restiles,selection,
@@ -2793,14 +2790,13 @@ menuitem(2,"save to clpbrd",function()
 			y..","..
 			p..","..
 			hp..","..
-			uid..
+			discovered..
 			(const and ","..const or "")..
 			"\n"
 	end
 	--hiviz
-	for k,v in pairs(hiviz) do
-		if (v!=1) v=v.uid
-		str=str..k.."="..v..","
+	for k in pairs(hiviz) do
+		str=str..k..","
 	end
 	str=str.."\n"
 	--res
@@ -2819,10 +2815,7 @@ end)
 menuitem(3,"load from clpbrd",function()
 	init()
 
-	local lines,uids=
-		split(stat(4),"\n"),
-		{}
-		
+	local lines=split(stat(4),"\n")	
 	for i,t in pairs(split(deli(lines))) do
 		mset(i%mapw8,i/mapw8,t)
 	end
@@ -2833,14 +2826,11 @@ menuitem(3,"load from clpbrd",function()
 		res[k]=r[i]
 	end
 	for l in all(lines) do
-		local u=unit(unspl(l))
-		uids[u.uid],uid=u,
-			max(uid,u.uid)
+		unit(unspl(l))
 	end
-	for kv in all(hvz) do
-		local k,v=unspl(kv,"=")
-		if v then
-			hiviz[k]=uids[v] or v
+	for k in all(hvz) do
+		if k!="" then
+			hiviz[k]=1
 			local x,y=(k<<8)>>8,
 				(k>>20)<<12
 	  mset(x+32,y,mget(x,y))
