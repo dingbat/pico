@@ -10,14 +10,17 @@ function _draw()
  
  local bf1,bf2,af={},{},{}
  for u in all(units) do
-	 -- possibly unnecessary opt
+	 -- doesn't seem to affect much
 --		if intersect(
 --				u_rect(u),
 --				{cx,cy,cx+128,cy+128},
 --			 1
 --			)
 --		then
-			if u.const and u.p==1 then
+			if 
+			 not g(vizmap,u.x\8,u.y\8)
+			 and (u.discovered or u.const)
+			then
 	 		add(af,u)
 	 	elseif u.typ.bldg then
 		 	add(bf1,u)
@@ -30,7 +33,7 @@ function _draw()
 	foreach(bf1,draw_unit)
 
 	--highlight selected farm
-	if sel1 and sel1.typ==farm and
+	if sel1 and sel1.typ.farm and
 		not sel1.const then
 	 rectaround(sel1,9)
 	end
@@ -39,7 +42,8 @@ function _draw()
 	foreach(bf2,draw_unit)
 	draw_fog()
 	foreach(af,draw_unit)
-	
+	pal()
+
 	--rally flag
 	if sel1 and sel1.rx then
 		spr(71+fps/5%3,
@@ -87,9 +91,9 @@ function _update()
  
  handle_input()
 
- vizmap,buttons,pos,xxx,
+ vizmap,buttons,pos,
  	hoverunit,sel_typ=
- 	{},{},{},{}
+ 	{},{},{}
  
  update_projectiles()
  
@@ -238,6 +242,7 @@ porty=72
 portw=8
 dir=1
 unit=1
+carry=6
 
 spd=1
 los=20
@@ -639,6 +644,7 @@ porty=80
 portw=9
 
 farm=1
+carry=9
 bldg=1
 los=0
 hp=10
@@ -751,7 +757,7 @@ portx=96
 porty=88
 portw=8
 ]],function()
-			carry_capacity=9
+			ant[1].carry=9
 		end
 	),
 }
@@ -1362,10 +1368,14 @@ function tick_unit(u)
 				--when drawing minimap
 				--in theory can be any truthy
 				s(vizmap,x,y,"f")
+			 --clear fog from fogmap
 			 mset(x+32,y,0)
-			 s(xxx,x,y,1)
-			elseif not g(xxx,x,y) and
-				g(hiviz,x,y) then
+			elseif
+				not g(vizmap,x,y) and
+				g(hiviz,x,y)
+		 then
+		 	--cant see but explored, set
+		 	--tile to explored in fogmap
 		  mset(x+32,y,mget(x,y))
 		 end
 		end
@@ -1381,14 +1391,18 @@ function tick_unit(u)
 end
 
 function viztiles(x,y,los)
-	local xo,yo,vlos,l=
+	local xo,yo,vlos=
 		x%8\2,y%8\2,
-		vcache[los],ceil(los/8)
+		vcache[los]
 	if not vlos then
 		vlos={}
 		vcache[los]=vlos
 	end
-	local viz=g(vlos,xo,yo)
+	local viz,l=g(vlos,xo,yo),
+		--add 1 to ensure that we
+		--mark *all* unseen territory
+		--as explored
+		ceil(los/8)+1
 	if not viz then
 		viz={}
 		s(vlos,xo,yo,viz)
@@ -1397,9 +1411,9 @@ function viztiles(x,y,los)
 				add(viz,{
 					dx,dy,
 					dist(
-						xo-dx*4-2,
-						yo-dy*4-2
-					)<los/2
+						xo*2-dx*8-4,
+						yo*2-dy*8-4
+					)<los
 				})
 			end
 		end
@@ -1436,7 +1450,6 @@ function draw_fog()
 	camera(cx%8,cy%8)
 	map(cx/8+32,cy/8,0,0,17,17)
  camera(cx,cy)
-	pal()
 	
 --	if v!=1 then
 --		clip(xx*8-cx-1,yy*8-cy,9,8)
@@ -1608,7 +1621,7 @@ function update_unit(u)
 		end
 	end
  if (u.q) produce(u)
- if (u.typ==farm) update_farm(u)
+ if (u.typ.farm) update_farm(u)
  if st.active then
  	if (t=="harvest") farmer(u)
  	if (t=="build") buildrepair(u)
@@ -1714,10 +1727,8 @@ function buildrepair(u)
  			register_bldg(b)
  			if b.typ==mound and b.p==1 then
  				res.p+=5
- 			elseif b.typ==farm then
+ 			elseif b.typ.farm then
  				harvest(u,b)
- 				b.res,b.cycles=
- 					{typ="r",qty=0},0
  			end
  		end
  	elseif (
@@ -1904,7 +1915,7 @@ end
 
 function avail_farm()
 	return hoverunit and
-		hoverunit.typ==farm and
+		hoverunit.typ.farm and
 		not hoverunit.farmer and
 		not hoverunit.const
 end
@@ -1981,7 +1992,7 @@ function acc(x,y,strict)
 		x>=0 and y>=0 and
 		x<mapw8 and y<maph8 and
 		(not b or (not strict and (
-			b.const or b.typ==farm
+			b.const or b.typ.farm
 	)))
 end
 
@@ -2040,7 +2051,7 @@ function collect(u,res)
 	else 
 		u.res={typ=res,qty=1}
 	end
-	if u.res.qty>=carry_capacity then
+	if u.res.qty>=u.typ.carry then
 		drop(u,res)
 	end
 end
@@ -2058,7 +2069,7 @@ function can_renew_farm()
 	return hoverunit and
 		res.b>=farm_renew_cost_b and
 		sel_typ==ant and
-		hoverunit.typ==farm and
+		hoverunit.typ.farm and
 		hoverunit.exp
 end
 
@@ -2088,10 +2099,15 @@ function unit(typ,x,y,p,hp,
 		hp=hp or typ.hp,
 		const=const,
 		uid=id or uid,
-		sproff=0,--for farm
+		--currently just used by farm
+		sproff=0,
 		--allow gloabl access from ENV
 		_g=_ENV
 	})
+	if u.typ.farm then
+		u.res,cycles=
+			{typ="r",qty=0},0
+	end		
 	if u.typ.bldg then
 		register_bldg(u)
 	end
@@ -2420,16 +2436,14 @@ function single_unit_section()
 	end
 		
 	if #selection==1 and r then
-		for i=0,sel1.typ==ant and 
-			carry_capacity-1 or 8 do
-			local xx,yy=
-				20+i%3*3,
-				--menuy+4
-				108+i\3*3
-			rect(xx,yy,xx+3,yy+3,7)
-			rect(xx+1,yy+1,xx+2,yy+2,
-				r.qty>i and rescol[r.typ] or 5)
+		for i=0,sel_typ.carry-1 do
+			--menuy+4
+			camera(i%3*-3-20,i\3*-3-108)
+			rect(unspl"0,0,3,3,7")
+			rect(1,1,2,2,r.qty>i and
+				rescol[r.typ] or 5)
 		end
+		camera()
 	end
 
 	if sel1.cycles then
@@ -2826,11 +2840,11 @@ menuitem(3,"load from clpbrd",function()
 	for kv in all(hvz) do
 		local k,v=unspl(kv,"=")
 		if v then
-			hiviz[k]=v==1 and 1 or uids[v]
+			hiviz[k]=uids[v] or v
 			local x,y=(k<<8)>>8,
 				(k>>20)<<12
 	  mset(x+32,y,mget(x,y))
-	end
+		end
 	end
 	make_dmaps"d"
 end)
