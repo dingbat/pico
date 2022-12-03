@@ -69,8 +69,8 @@ function _draw()
 	 rectaround(sel1,9)
 	end
 
-	foreach(proj,draw_projectile)
 	foreach(bf2,draw_unit)
+	foreach(proj,draw_projectile)
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(32) --draw fogmap
 	
@@ -1704,11 +1704,11 @@ function update_unit(u)
  	local ss=sp.st
  	if not ss.ready then
  		deli(spiders,i)
- 	elseif fps%30==i%30 and
+ 	elseif fps%10==i%10 and
  		sp.p!=u.p then
  		if
- 			intersect(r,ss.p1,0) or
- 			intersect(r,ss.p2,0) or
+ 			intersect(r,ss.p1,1) or
+ 			intersect(r,ss.p2,1) or
  			intersect(r,u_rect(sp),-2)
  		then
  			u.st={t="dead",webbed=5}
@@ -1796,12 +1796,15 @@ function fight(u)
 		end
 		if in_range and
 			fps%typ.proj_freq==
-			(typ==cat and 0 or id%typ.proj_freq) then
+			(u.typ==cat and 0 or
+			 id%typ.proj_freq)
+		then
  		add(proj,{
  			from_unit=u,
  			x=u.x-u.dir*typ.proj_xo,
  			y=u.y+typ.proj_yo,
- 			to={e.x,e.y},to_unit=e,
+ 			to={e.x,e.y},
+ 			to_unit=e,
  		})
  	end
  else
@@ -1961,10 +1964,11 @@ function s(a,x,y,v)
 end
 
 function intersect(r1,r2,e)
-	return r1[1]-e<(r2[3] or r2[1]) and
-		r1[3]+e>r2[1] and
-		r1[2]-e<(r2[4] or r2[2]) and
-		r1[4]+e>r2[2]
+	local a,b,c,d=unpack(r2)
+	return r1[1]-e<(c or a) and
+		r1[3]+e>a and
+		r1[2]-e<(d or b) and
+		r1[4]+e>b
 end
 
 function u_rect(u,e)
@@ -2257,6 +2261,12 @@ function get_wayp(u,x,y,enter)
  	nearest_acc(
  		x\8,y\8,
  		u.x,u.y)
+	--if spare tokens, this will
+	--allow units from getting
+	--unstuck from an inaccessible
+	--tile (e.g. from clumping)
+--	local acc,xx,yy=nearest_acc(
+--	 u.x\8,u.y\8,u.x,u.y)
 	local path,exists=find_path(
 	 {u.x\8,u.y\8},
  	{destx,desty})
@@ -2865,7 +2875,7 @@ unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
 unit(spider,unspl"48,56,1")--0,16
---web.breq=0
+web.breq=0
 --x-w/2,y-h\2
 unit(castle,8*8+15/2,16*8+8,2)
 --unit(beetle,unspl"65,81,2")
@@ -2943,68 +2953,68 @@ menuitem(3,"load from clpbrd",function()
 			exp[k]=1
 		end
 	end
---	unit(archer,unspl"65,81,2")
---unit(warant,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---
---unit(warant,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
---unit(archer,unspl"185,181,1")
+	unit(archer,unspl"65,81,2")
+unit(warant,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+
+unit(warant,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
 
 --	make_dmaps"d"
 end)
