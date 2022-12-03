@@ -13,31 +13,31 @@ todo:
 - addtl map?
 ]]
 
---acct={}
---times={}
---function flush_time(str,f)
---	if acct[str] and (not f or fps%f==0) then
---		printh(str..": "..acct[str],"log")
---	end
---	acct[str]=0
---end
---function time(str,run_at_fps)
---	local s=stat(1)
---	if times[str] then
---	 local prev,f=unpack(times[str])
---	 if f==true or not f or fps%f==0 then
---			if f==true then
---				acct[str]=acct[str] or 0
---				acct[str]+=s-prev
---			else
---				printh(str..": "..(s-prev),"log")
---			end
---		end
---		times[str]=nil
---	else
---		times[str]={s,run_at_fps}
---	end
---end
+acct={}
+times={}
+function flush_time(str,f)
+	if acct[str] and (not f or fps%f==0) then
+		printh(str..": "..acct[str],"log")
+	end
+	acct[str]=0
+end
+function time(str,run_at_fps)
+	local s=stat(1)
+	if times[str] then
+	 local prev,f=unpack(times[str])
+	 if f==true or not f or fps%f==0 then
+			if f==true then
+				acct[str]=acct[str] or 0
+				acct[str]+=s-prev
+			else
+				printh(str..": "..(s-prev),"log")
+			end
+		end
+		times[str]=nil
+	else
+		times[str]={s,run_at_fps}
+	end
+end
 
 function _draw()
 --	time("_draw",60)
@@ -136,10 +136,29 @@ function _draw()
 --	end
 end
 
+function modify_totalu(diff)
+-- 75-99: 60 --.37
+-- 70-75: 30 --.36
+-- 55-70: 15 --.35
+-- 45-55: 10 --.37
+-- 35-45:  5 --.33
+-- 25-35:  3 --.34
+--  0-25:  2 --.36
+	totalu+=diff
+	upcycle=totalu>=75 and 60 or
+		totalu>=70 and 30 or
+		totalu>=55 and 15 or
+		totalu>=45 and 10 or
+		totalu>=35 and 5 or
+		totalu>=25 and 3 or 2
+	--printh("upc="..upcycle,"log")
+end
+
 function _update()
---	time("_update",60)
+	time("_update",60)
 	async_task()
 	fps=(fps+1)%60
+	upc=fps%upcycle
  
  handle_input()
  buttons,pos,
@@ -148,11 +167,8 @@ function _update()
  	
  --turn over the viz that's
  --been built up for the last
- --x frames
- --todo: base on # of units
- --~50 p1 units needs %10
- --~80 might need %20,%30?
- if fps%5==0 then
+ --<upcycle> frames
+ if upc==0 then
  	viz,new_viz=new_viz,{}
 		for k in pairs(exp) do
  		local x,y=(k<<8)>>8,
@@ -183,7 +199,7 @@ function _update()
 	 	--unit gets checked 3x per
 	 	--second)
 	 	--todo: base on # of units
-		 if fps%5==i%5 and
+		 if upc==i%upcycle and
 		  u.st.t=="rest" and
 		  u.typ.atk 
 		 then
@@ -213,7 +229,7 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end
 
---	time("_update",60)
+	time("_update",60)
 end
 
 function draw_hilite()
@@ -1415,9 +1431,9 @@ function tick_unit(u)
 		end
 		if u.p==1 then
 			if u.typ==mound then
-				res.p-=5
+				res.pl-=5
 			elseif typ.unit then
-				res.p+=1
+				res.p-=1
 			end
 		end
 	end
@@ -1426,7 +1442,10 @@ function tick_unit(u)
 		--continue to provide viz
 		--while dead
 		update_viz(u)
-		if (u.dead==60) del(units,u)
+		if u.dead==60 then
+			del(units,u)
+			modify_totalu(u.p-2)
+		end
 		return
 	end
 	
@@ -1462,9 +1481,8 @@ function tick_unit(u)
 end
 
 function update_viz(u)
- --todo: base on # of units
 	if u.p==1 and
-			u.uid%5==fps%5 then
+			u.uid%upcycle==upc then
 		local xx,yy=u.x\8,u.y\8
 		for t in all(
 		 viztiles(
@@ -1789,7 +1807,7 @@ function fight(u)
 	local dx,dy=
 		e.x-u.x,e.y-u.y
 	if typ.range then
-		if fps%10==id%10 then
+		if upc==id%upcycle then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
 				g(viz,e.x\8,e.y\8)	
@@ -1817,7 +1835,7 @@ function fight(u)
  u.st.active=in_range
  if in_range then
  	u.dir,u.st.wayp=sgn(dx)
-	elseif fps%10==id%10 then
+	elseif upc==id%upcycle then
 		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
 			--pursue enemy
@@ -1837,7 +1855,7 @@ function buildrepair(u)
  			b.const=nil
  			register_bldg(b)
  			if b.typ==mound and b.p==1 then
- 				res.p+=5
+ 				res.pl+=5
  			elseif b.typ.farm then
  				harvest(u,b)
  			end
@@ -2226,6 +2244,8 @@ function unit(typ,x,y,p,hp,
 	end		
 	if u.typ.bldg then
 		register_bldg(u)
+	else
+		modify_totalu(2-u.p)
 	end
 	return u
 end
@@ -2403,13 +2423,13 @@ h19=4
 h33=13
 ]]
 
-function print_res(rsc,x,y,s,hide_0,pop)
+function print_res(rsc,x,y,s,hide_0,oop)
 	for i,r in pairs(resorder) do
-		local v=pop and i==4 and "" or flr(rsc[r])
+		local v=oop and i==4 and "" or flr(rsc[r])
 		local no_pop=v==0 and i==4
 		local xoff=no_pop and 6 or 3
 		if v!=0 or not hide_0 then
-			if v!="" or pop then
+			if v!="" or oop then
 				if v=="" or res[r]<v or no_pop then
 					rectfill(x-xoff/3,y-1,
 						x+xoff+#tostr(v)*4-s\2,y+5,
@@ -2440,7 +2460,7 @@ function can_pay(costs)
  return res.r>=costs.r and
  	res.g>=costs.g and
  	res.b>=costs.b and
- 	(not costs.typ.unit or res.p>=1) and
+ 	(not costs.typ.unit or res.p<res.pl) and
  	breq_satisfied(costs)
 end
 
@@ -2449,7 +2469,7 @@ function pay(costs,dir)
 	res.g+=costs.g*dir
 	res.b+=costs.b*dir
 	if costs.typ.unit then
-		res.p+=dir
+		res.p-=dir
 	end
 end
 
@@ -2688,17 +2708,17 @@ function draw_menu()
 	
 	if hovbtn and hovbtn.costs and
 		breq_satisfied(hovbtn.costs) then
-		local pop=res.p<1 and
+		local oop=res.p<1 and
 			hovbtn.costs.typ.unit
 		local len=print_res(
-		 hovbtn.costs,0,150,1,true,pop)
+		 hovbtn.costs,0,150,1,true,oop)
 		local x,y=
 			hovbtn.r[1]-(len-10)/2,
 			hovbtn.r[2]-8
 		rectfill(x,y,x+len,y+8,7)
 		rect(x,y,x+len+1,y+8,1)
 		print_res(hovbtn.costs
-		 ,x+2,y+2,1,true,pop)
+		 ,x+2,y+2,1,true,oop)
 	end
 end
 -->8
@@ -2845,8 +2865,9 @@ function init()
 	units_heal,farm_cycles,
 	carry_capacity,
 	--global state
-	cx,cy,mx,my,fps,bldg_bmap,uid=
-		{},unspl"5,6,0,0,0,0,0,0,0"
+	cx,cy,mx,my,fps,bldg_bmap,
+	uid,totalu=
+		{},unspl"5,6,0,0,0,0,0,0,0,0"
 	
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
@@ -2859,7 +2880,8 @@ function init()
 r=5
 g=5
 b=5
-p=7
+p=11
+pl=12
 ]]
 end
 
@@ -2953,69 +2975,10 @@ menuitem(3,"load from clpbrd",function()
 			exp[k]=1
 		end
 	end
-	unit(archer,unspl"65,81,2")
-unit(warant,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-
-unit(warant,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-
+	for i=1,50	do
+		unit(archer,unspl"65,181,2")
+		unit(warant,unspl"185,181,1")
+	end
 --	make_dmaps"d"
 end)
 
