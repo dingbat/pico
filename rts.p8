@@ -46,15 +46,11 @@ function _draw()
  
  local bf1,bf2,af={},{},{}
  for u in all(units) do
-	 -- doesn't seem to affect much
---		if intersect(
---				u_rect(u),
---				{cx,cy,cx+128,cy+128},
---			 1
---			)
---		then
+	 -- doesn't seem to affect 
+	 -- perf much
+--	if intersect(u_rect(u),{cx,cy,cx+128,cy+128},1) then
 			if 
-			 not g(vizmap,u.x\8,u.y\8)
+			 not g(viz,u.x\8,u.y\8)
 			 and (u.discovered==1 or u.const)
 			then
 	 		add(af,u)
@@ -63,7 +59,6 @@ function _draw()
 		 else
 		 	add(bf2,u)
 		 end
---	 end
  end
  
 	foreach(bf1,draw_unit)
@@ -86,49 +81,38 @@ function _draw()
 	pal=_pal
 	pal()
 	
-	--draw borders around fog
-	fillp(▒)
-	for x=cx\8,cx\8+16 do
-	 for y=cy\8,cy\8+16 do
-	 	local i=x|(y<<8)
-	  if not vizmap[i] then
-				camera(x*-8+cx,y*-8+cy)
-			 color(hiviz[i] and 5 or 0)
-			 if vizmap[i-1] then
-				 line(-1,0,-1,7)
-				end
-			 if vizmap[i-256] then
-			 	line(0,-1,7,-1)
-			 end
-			 if vizmap[i+256] then
-				 line(0,8,7,8)
-				end
-				if vizmap[i+1] then
-				 line(8,0,8,7)
-				end
-			end
-		end
-	end
-	fillp()
-	camera(cx,cy)
-	
 	--rally flag
 	if sel1 and sel1.rx then
 		spr(71+fps/5%3,
 			sel1.rx-2,sel1.ry-5)
 	end
 
-	if selbox then
-		fillp(▒)
-		rect(unpack(selbox))
-		fillp()
-	end
-	
 	if (hilite) draw_hilite()
 	if webx then
 		line(webx,weby,wmx,wmy,
 		 acc(wmx\8,wmy\8) and 7 or 8)
 	end
+	
+	fillp(▒)
+	if selbox then
+		rect(unpack(selbox))
+	end
+	
+	--draw borders around fog
+	for x=cx\8,cx\8+16 do
+	 for y=cy\8,cy\8+16 do
+	 	local i=x|(y<<8)
+	  if not viz[i] then
+				camera(x*-8+cx,y*-8+cy)
+			 color(exp[i] and 5 or 0)
+			 if (viz[i-1]) line(-1,0,-1,7)
+			 if (viz[i-256]) line(0,-1,7,-1)
+			 if (viz[i+256]) line(0,8,7,8)
+				if (viz[i+1]) line(8,0,8,7)
+			end
+		end
+	end
+	fillp()
 	
 	camera()
 	
@@ -162,21 +146,21 @@ function _update()
  	hoverunit,sel_typ=
  	{},{}
  	
- --turn over the vizmap that's
+ --turn over the viz that's
  --been built up for the last
  --x frames
  --todo: base on # of units
  --~50 p1 units needs %10
  --~80 might need %20,%30?
  if fps%5==0 then
- 	vizmap,new_vizmap=new_vizmap,{}
-		for k in pairs(hiviz) do
+ 	viz,new_viz=new_viz,{}
+		for k in pairs(exp) do
  		local x,y=(k<<8)>>8,
 				(k>>24)<<16
 			--if can see, clear fog (0)
 			--else, no viz but explored,
 	 	--copy map tile to fogmap
-	  mset(x+32,y,vizmap[k] and
+	  mset(x+32,y,viz[k] and
 	   0 or mget(x,y))
 		end
  end
@@ -199,7 +183,7 @@ function _update()
 	 	--unit gets checked 3x per
 	 	--second)
 	 	--todo: base on # of units
-		 if fps%10==i%10 and
+		 if fps%5==i%5 and
 		  u.st.t=="rest" and
 		  u.typ.atk 
 		 then
@@ -1425,6 +1409,9 @@ function tick_unit(u)
 		if typ.bldg then
 			register_bldg(u)
 			mset(u.x/8,u.y/8,91)
+			if typ.w>8 then
+				mset(u.x/8+1,u.y/8,91)
+			end
 		end
 		if u.p==1 then
 			if u.typ==mound then
@@ -1492,7 +1479,7 @@ function update_viz(u)
 			--"f" bc it's used for concat
 			--when drawing minimap
 			--in theory can be any truthy
-			hiviz[i],new_vizmap[i]=1,"f"
+			exp[i],new_viz[i]=1,"f"
 		end
 	end
 end
@@ -1505,23 +1492,23 @@ function viztiles(x,y,los)
 		vlos={}
 		vcache[los]=vlos
 	end
-	local viz,l=g(vlos,xo,yo),
+	local v,l=g(vlos,xo,yo),
 		ceil(los/8)
-	if not viz then
-		viz={}
-		s(vlos,xo,yo,viz)
+	if not v then
+		v={}
+		s(vlos,xo,yo,v)
 		for dx=-l,l do
 		 for dy=-l,l do
 			 if dist(
 					xo*2-dx*8-4,
 					yo*2-dy*8-4
 				)<los then
-					add(viz,{dx,dy})
+					add(v,{dx,dy})
 				end
 			end
 		end
 	end
-	return viz
+	return v
 end
 
 function update_projectiles()
@@ -1544,7 +1531,7 @@ end
 
 function draw_map(offset)
  camera(cx%8,cy%8)
- map(cx/8+offset,cy/8,0,0,17,17)
+ map(cx/8+offset,cy/8,unspl"0,0,17,17")
  camera(cx,cy)
 end
 
@@ -1560,8 +1547,8 @@ function draw_minimap()
 	 	pset(
 	 		tx,ty,
 				rescol[
-					(g(hiviz,x,y) and "" or "_")..
-					g(vizmap,x,y,"h")..
+					(g(exp,x,y) and "" or "_")..
+					g(viz,x,y,"h")..
 					fget(mget(x,y))
 				]
 	 	)
@@ -1571,7 +1558,7 @@ function draw_minimap()
 	--units
 	for u in all(units) do
 		if u.discovered==1 or
-			g(vizmap,u.x\8,u.y\8) then
+			g(viz,u.x\8,u.y\8) then
 			pset(
 				u.x/mapw*mmw,
 				u.y/maph*mmh,
@@ -1786,7 +1773,7 @@ function aggress(u)
 		typ.range)
 	for e in all(units) do
 		if e.p!=u.p and not e.dead and
-			vizmap[(e.x\8)|(e.y\8<<8)] and
+			viz[e.x\8|(e.y\8<<8)] and
 			dist(e.x-u.x,e.y-u.y)<=los
 		then
 			attack(u,e)
@@ -1805,7 +1792,7 @@ function fight(u)
 		if fps%10==id%10 then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
-				g(vizmap,e.x\8,e.y\8)	
+				g(viz,e.x\8,e.y\8)	
 		end
 		if in_range and
 			fps%typ.proj_freq==
@@ -2045,17 +2032,17 @@ function can_gather()
 	return (is_res(mx,my) or
 		avail_farm()) and
 		sel_typ==ant and
-		g(hiviz,mx\8,my\8) and
+		g(exp,mx\8,my\8) and
 		sur_acc(mx\8,my\8)
 end
 
 function can_attack()
-	local viz=g(vizmap,mx\8,my\8)
+	local v=g(viz,mx\8,my\8)
 	for u in all(selection) do
 		if hoverunit and
 		 hoverunit.p!=1 and
 			u.typ.atk and
-			(viz or hoverunit.discovered==1)
+			(v or hoverunit.discovered==1)
 		then
 			return true
 		end
@@ -2141,7 +2128,7 @@ function register_bldg(b)
 		s(bldgs,xx,yy,
 			not b.dead and b or nil)
 		if b.dead then
-			s(hiviz,xx,yy,1)
+			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
 		elseif	typ.drop then
 			s(dmap_st.d,xx,yy,{xx,yy})
@@ -2733,9 +2720,9 @@ function make_dmaps(r)
 end
 
 function async_task()
-	--local x=stat(1)
 	local q=queue[1]
 	if q then
+		--time("dmap")
 		if #q==1 then
 	 	queue[1]=make_dmap(q)
 		else
@@ -2745,7 +2732,7 @@ function async_task()
 					deli(queue,1).dmap
 			end
 		end
-		--printh(stat(1)-x,"log")
+		--time("dmap")
 	end
 end
 
@@ -2851,10 +2838,10 @@ function init()
 	cx,cy,mx,my,fps,bldg_bmap,uid=
 		{},unspl"5,6,0,0,0,0,0,0,0"
 	
-	queue,hiviz,vcache,dmaps,
+	queue,exp,vcache,dmaps,
 	units,restiles,selection,
-		proj,bldgs,spiders,vizmap,
-		new_vizmap,
+		proj,bldgs,spiders,viz,
+		new_viz,
 		dmap_st,res=
 		{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
@@ -2878,7 +2865,7 @@ unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
 unit(spider,unspl"48,56,1")--0,16
-
+--web.breq=0
 --x-w/2,y-h\2
 unit(castle,8*8+15/2,16*8+8,2)
 --unit(beetle,unspl"65,81,2")
@@ -2913,8 +2900,8 @@ menuitem(2,"save to clpbrd",function()
 			(const and ","..const or "")..
 			"\n"
 	end
-	--hiviz
-	for k in pairs(hiviz) do
+	--exp
+	for k in pairs(exp) do
 		str=str..k..","
 	end
 	str=str.."\n"
@@ -2942,7 +2929,7 @@ menuitem(3,"load from clpbrd",function()
 			mset(i%mapw8+32,i/mapw8,75)
 		end
 	end
-	local r,hvz=
+	local r,e=
 		split(deli(lines)),
 		split(deli(lines))
 	for i,k in pairs(resorder) do
@@ -2951,73 +2938,73 @@ menuitem(3,"load from clpbrd",function()
 	for l in all(lines) do
 		unit(unspl(l))
 	end
-	for k in all(hvz) do
+	for k in all(e) do
 		if k!="" then
-			hiviz[k]=1
+			exp[k]=1
 		end
 	end
-	unit(archer,unspl"65,81,2")
-unit(warant,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-unit(archer,unspl"65,181,2")
-
-unit(warant,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
-unit(archer,unspl"185,181,1")
+--	unit(archer,unspl"65,81,2")
+--unit(warant,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--unit(archer,unspl"65,181,2")
+--
+--unit(warant,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
+--unit(archer,unspl"185,181,1")
 
 --	make_dmaps"d"
 end)
