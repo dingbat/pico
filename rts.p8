@@ -16,7 +16,7 @@ todo:
 --acct={}
 --times={}
 --function flush_time(str,f)
---	if acct[str] and not f or fps%f==0 then
+--	if acct[str] and (not f or fps%f==0) then
 --		printh(str..": "..acct[str],"log")
 --	end
 --	acct[str]=0
@@ -40,7 +40,7 @@ todo:
 --end
 
 function _draw()
---	time("_draw",15)
+--	time("_draw",60)
  cls()
  draw_map(0) --mainmap
  
@@ -86,8 +86,6 @@ function _draw()
 	pal=_pal
 	pal()
 	
-	draw_map(64) --draw fog borders
-
 	--draw borders around fog
 	fillp(▒)
 	for x=cx\8,cx\8+16 do
@@ -113,7 +111,6 @@ function _draw()
 	end
 	fillp()
 	camera(cx,cy)
---	time("dots",15)
 	
 	--rally flag
 	if sel1 and sel1.rx then
@@ -161,17 +158,34 @@ function _update()
 	fps=(fps+1)%60
  
  handle_input()
-	old_vizmap=vizmap or {}
- vizmap,buttons,pos,
+ buttons,pos,
  	hoverunit,sel_typ=
- 	{},{},{}
+ 	{},{}
+ 	
+ --turn over the vizmap that's
+ --been built up for the last
+ --x frames
+ --todo: base on # of units
+ --~50 p1 units needs %10
+ --~80 might need %20,%30?
+ if fps%5==0 then
+ 	vizmap,new_vizmap=new_vizmap,{}
+		for k in pairs(hiviz) do
+ 		local x,y=(k<<8)>>8,
+				(k>>24)<<16
+			--if can see, clear fog (0)
+			--else, no viz but explored,
+	 	--copy map tile to fogmap
+	  mset(x+32,y,vizmap[k] and
+	   0 or mget(x,y))
+		end
+ end
  
  update_projectiles()
  
  if selbox then
  	bldg_sel,my_sel,enemy_sel=nil
  end
- 
  foreach(units,tick_unit)
 
  --fighting has to happen after
@@ -182,9 +196,10 @@ function _update()
 	  --aggress is expensive, so
 	 	--distribute which units
 	 	--run it across frames (each
-	 	--unit gets checked once per
+	 	--unit gets checked 3x per
 	 	--second)
-		 if fps%30==i%30 and
+	 	--todo: base on # of units
+		 if fps%10==i%10 and
 		  u.st.t=="rest" and
 		  u.typ.atk 
 		 then
@@ -196,7 +211,7 @@ function _update()
 	 	--so units stop as soon as
 	 	--they need to
 	 	if u.st.t=="attack" then
-	 		fight(u,i%30)
+	 		fight(u)
 	 	end
 	 end
  end
@@ -1403,20 +1418,13 @@ end
 
 function tick_unit(u)
 	local typ=u.typ[u.p]
-	if u.dead then
-		u.dead+=1
-		--clear unit's viz after 1s
-		if (u.dead==30) update_viz(u)
-		if (u.dead==60) del(units,u)
-		if (typ.bldg) mset(u.x/8,u.y/8,74)
-		return
-	end
-	if u.hp<=0 then
+	if u.hp<=0 and not u.dead then
 		u.dead,u.st,u.sel=
 			0,{t="dead"}
 		del(selection,u)
 		if typ.bldg then
 			register_bldg(u)
+			mset(u.x/8,u.y/8,91)
 		end
 		if u.p==1 then
 			if u.typ==mound then
@@ -1425,7 +1433,14 @@ function tick_unit(u)
 				res.p+=1
 			end
 		end
-		return		
+	end
+	if u.dead then
+		u.dead+=1
+		--continue to provide viz
+		--while dead
+		update_viz(u)
+		if (u.dead==60) del(units,u)
+		return
 	end
 	
 	if units_heal[u.p] and
@@ -1447,9 +1462,9 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
-	
+
 	update_viz(u)
-	
+
 	if typ.unit and not u.st.wayp then
 		while g(pos,u.x\4,u.y\4) do
 			u.x+=rnd(2)-1
@@ -1460,8 +1475,10 @@ function tick_unit(u)
 end
 
 function update_viz(u)
-	local xx,yy=u.x\8,u.y\8
-	if u.p==1 then
+ --todo: base on # of units
+	if u.p==1 and
+			u.uid%5==fps%5 then
+		local xx,yy=u.x\8,u.y\8
 		for t in all(
 		 viztiles(
 		 	u.x,u.y,
@@ -1470,23 +1487,12 @@ function update_viz(u)
 		) do
 			local x,y=xx+t[1],yy+t[2]
 			local i=x|(y<<8)
-			if not u.dead and t[3] then
-				local b=bldgs[i]
-				if (b) b.discovered=1
-				--"f" bc it's used for concat
-				--when drawing minimap
-				--in theory can be any truthy
-				hiviz[i],vizmap[i]=1,"f"
-				--clear fog
-				mset(x+32,y,0)
-			elseif
-				not vizmap[i] and hiviz[i]
-		 then
-		 	--cant see currently
-		 	--but has been explored, so
-		 	--set same tile in fogmap
-		  mset(x+32,y,mget(x,y))
-		 end
+			local b=bldgs[i]
+			if (b) b.discovered=1
+			--"f" bc it's used for concat
+			--when drawing minimap
+			--in theory can be any truthy
+			hiviz[i],new_vizmap[i]=1,"f"
 		end
 	end
 end
@@ -1506,13 +1512,12 @@ function viztiles(x,y,los)
 		s(vlos,xo,yo,viz)
 		for dx=-l,l do
 		 for dy=-l,l do
-				add(viz,{
-					dx,dy,
-					dist(
-						xo*2-dx*8-4,
-						yo*2-dy*8-4
-					)<los
-				})
+			 if dist(
+					xo*2-dx*8-4,
+					yo*2-dy*8-4
+				)<los then
+					add(viz,{dx,dy})
+				end
 			end
 		end
 	end
@@ -1790,19 +1795,21 @@ function aggress(u)
 	end
 end
 
-function fight(u,i)
-	local typ,e,in_range,d=
+function fight(u)
+	local typ,e,in_range,id,d=
 		u.typ[u.p],u.st.target,
-		u.st.active
+		u.st.active,u.uid
 	local dx,dy=
 		e.x-u.x,e.y-u.y
 	if typ.range then
-		if fps%10==i%10 then
+		if fps%10==id%10 then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
 				g(vizmap,e.x\8,e.y\8)	
 		end
-		if in_range and fps%typ.proj_freq==0 then
+		if in_range and
+			fps%typ.proj_freq==
+			(typ==cat and 0 or id%typ.proj_freq) then
  		add(proj,{
  			from_unit=u,
  			x=u.x-u.dir*typ.proj_xo,
@@ -1813,14 +1820,14 @@ function fight(u,i)
  else
  	in_range=intersect(u_rect(u),
  	 u_rect(e),0)
-		if in_range and fps%30==i then
+		if in_range and fps%30==id%30 then
 		 deal_dmg(u,e)
 		end
  end
  u.st.active=in_range
  if in_range then
-		u.dir,u.st.wayp=sgn(dx)
-	elseif fps%30==i then
+ 	u.dir,u.st.wayp=sgn(dx)
+	elseif fps%10==id%10 then
 		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
 			--pursue enemy
@@ -1957,7 +1964,7 @@ function unspl(...)
 end
 
  --x=(k<<8)>>8
---y=(k>>20)<<12
+--y=(k>>24)<<16
 function g(a,x,y,def)
 	return a[x|(y<<8)] or def
 end
@@ -2217,9 +2224,11 @@ function unit(typ,x,y,p,hp,
 		hp=hp or typ.hp,
 		const=const,
 		discovered=discovered or 0,
+		uid=uid,
 		--currently just used by farm
 		sproff=0,
 	})
+	uid+=1
 	if u.typ.farm then
 		u.res,u.cycles=
 			{typ="r",qty=0},0
@@ -2265,7 +2274,6 @@ function get_wayp(u,x,y,enter)
 	 {u.x\8,u.y\8},
  	{destx,desty})
  	
-	if (#path==1) return
 	--del last element (the start)
 	deli(path)
  for n in all(path) do
@@ -2276,7 +2284,7 @@ function get_wayp(u,x,y,enter)
  if exists and (enter or d_acc) then
  	add(wayp,{x,y})
  end
- return wayp
+ return #wayp>0 and wayp
 end
 
 --a*
@@ -2546,7 +2554,7 @@ function single_unit_section()
 	local typ,r,q=
 		sel1.typ,sel1.res,sel1.q
 	
-	if #selection<3 then
+	if #selection<3 or sel_typ!=ant then
 		draw_sel_ports()
 	else
 		--menuy+4
@@ -2840,14 +2848,15 @@ function init()
 	units_heal,farm_cycles,
 	carry_capacity,
 	--global state
-	cx,cy,mx,my,fps,bldg_bmap=
-		{},unspl"5,6,0,0,0,0,0,0"
+	cx,cy,mx,my,fps,bldg_bmap,uid=
+		{},unspl"5,6,0,0,0,0,0,0,0"
 	
 	queue,hiviz,vcache,dmaps,
 	units,restiles,selection,
-		proj,bldgs,spiders,dmap_st,
-		res=
-		{},{},{},{},
+		proj,bldgs,spiders,vizmap,
+		new_vizmap,
+		dmap_st,res=
+		{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
 r=5
@@ -2927,9 +2936,11 @@ menuitem(3,"load from clpbrd",function()
 
 	local lines=split(stat(4),"\n")	
 	for i,t in pairs(split(deli(lines))) do
-		mset(i%mapw8,i/mapw8,t)
-		--clear out fogmap
-		mset(i%mapw8+32,i/mapw8,75)
+		if t!="" then
+			mset(i%mapw8,i/mapw8,t)
+			--add fog to fogmap
+			mset(i%mapw8+32,i/mapw8,75)
+		end
 	end
 	local r,hvz=
 		split(deli(lines)),
@@ -2943,42 +2954,70 @@ menuitem(3,"load from clpbrd",function()
 	for k in all(hvz) do
 		if k!="" then
 			hiviz[k]=1
-			local x,y=(k<<8)>>8,
-				(k>>20)<<12
-	  mset(x+32,y,mget(x,y))
 		end
 	end
---	unit(archer,unspl"65,81,2")
---unit(warant,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
---unit(archer,unspl"65,181,2")
+	unit(archer,unspl"65,81,2")
+unit(warant,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+unit(archer,unspl"65,181,2")
+
+unit(warant,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
+unit(archer,unspl"185,181,1")
 
 --	make_dmaps"d"
 end)
@@ -3025,14 +3064,14 @@ d00001100d0000000dd000000000000000310011003100110d0000000000000000d0000000000000
 57755000005044505777777557504440057744405494494577077000040000000400000004000000ffffffffeeeeeeeeffffffffffffffffffffffffffffffff
 05575000000005000557775005000445005504455494494500600700141000001410000014100000fff6ffffeeeeeeeeffffffffffffffffffffffff7fffffff
 00050000000000000005550000000050000000500555555006000070111000001110000011100000ffffffffeeeeeeeeffffffffffffffffffffffffffffffff
-fff88fffffffff8fffffffffffffbbbfffffffffffffffffffffffffffffffffffffffff1111d111111d111100000000ffffffffffffffffffffffffffffffff
-f887888ff8fff888f33fff33fffbb3bfff444fffffff44fffffffff6776fff766fffffff1dd1111111111dd100000000ffffffffffffffffffffffffffffffff
-87887878888ff888f3bff3bbffbb3bbfff444ffff4f4444ffffff7666cc666cc667fffff1111111cc111111100000000fffffffffffffff7ffffffffffffffaf
-88788788888f8fdfffbbfbffffb3bbbff4494fffff44454fffff67cccccccccccc76ffff1111cccccccc111100000000fffff7ffffffffffffffffffffffffff
-fff77ffffdf888dffffbbbffffbbbbffff544ffff444544ffff76ccccc6cc6ccccc67fff111cccccccccc11100000000fffffffffffffffffffffaffffffffff
-ff7777fffdd888dfffffbffffffbbfffff9444ff499544fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d100000000ffffffffffffffffffffffffffffffff
-fff77fffffdfdfdfffffbffffffbffffff5444ff49944fffff66cccc7cccc11ccccc66ff111ccc6666ccc11100000000ffffffffffffffffffffffffffffffff
-fff77fffffffdfffffffbffffffbffffff445ffff444fffff6c7ccc1111111111ccc7c6f11ccc667766ccc1100000000fffffffffffffaffffffffffffffffff
+fff88fffffffff8fffffffffffffbbbfffffffffffffffffffffffffffffffffffffffff1111d111111d1111ffffffffffffffffffffffffffffffffffffffff
+f887888ff8fff888f33fff33fffbb3bfff444fffffff44fffffffff6776fff766fffffff1dd1111111111dd1ffff6fffffffffffffffffffffffffffffffffff
+87887878888ff888f3bff3bbffbb3bbfff444ffff4f4444ffffff7666cc666cc667fffff1111111cc1111111fffff5fffffffffffffffff7ffffffffffffffaf
+88788788888f8fdfffbbfbffffb3bbbff4494fffff44454fffff67cccccccccccc76ffff1111cccccccc1111f6f5fffffffff7ffffffffffffffffffffffffff
+fff77ffffdf888dffffbbbffffbbbbffff544ffff444544ffff76ccccc6cc6ccccc67fff111cccccccccc111fffff5fffffffffffffffffffffffaffffffffff
+ff7777fffdd888dfffffbffffffbbfffff9444ff499544fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d1ff5fff6fffffffffffffffffffffffffffffffff
+fff77fffffdfdfdfffffbffffffbffffff5444ff49944fffff66cccc7cccc11ccccc66ff111ccc6666ccc111fff6ffffffffffffffffffffffffffffffffffff
+fff77fffffffdfffffffbffffffbffffff445ffff444fffff6c7ccc1111111111ccc7c6f11ccc667766ccc11fffffffffffffffffffffaffffffffffffffffff
 fff88ffffffffffffffffffffffffbfffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc11ffffffffffffffffffffffffffffffffffffffff
 f887888ff8fff88fffffffffffffb3fffff4fffffffff4fff6ccc6111dd11111116ccc6f111ccc6666ccc111fffffffffffffffffffffffffffffffff7ffffff
 ff8878f8f88ff888f3bfff3fffff3bbffff44ffffff4f44ff7cccc111166111111cccc7f1d1cccccccccc1d1ff2fffffffffffffffffffffffffffffffffffff
