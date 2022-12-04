@@ -141,7 +141,6 @@ function modify_totalu(diff)
 		totalu>=70 and 30 or
 		totalu>=55 and 15 or
 		totalu>=45 and 10 or 5
-	--printh("upc="..upcycle,"log")
 end
 
 function _update()
@@ -161,8 +160,7 @@ function _update()
  if upc==0 then
  	viz,new_viz=new_viz,{}
 		for k in pairs(exp) do
- 		local x,y=(k<<8)>>8,
-				(k>>24)<<16
+ 		local x,y=k<<8>>8,k>>24<<16
 			--if can see, clear fog (0)
 			--else, no viz but explored,
 	 	--copy map tile to fogmap
@@ -1206,7 +1204,7 @@ function handle_click()
 		if dx>=0 and dy>=0 and
 			dx<mmw and dy<mmh+1	then
 			local x,y=
-				dx*mmwratio,dy*mmhratio
+				mmwratio*dx,mmhratio*dy
 			if rclick and sel1 then
 				--right click, move
 				for u in all(selection) do
@@ -1555,8 +1553,8 @@ function draw_minimap()
 	if fps%20==0 then
 		for tx=0,mmw do
 		 for ty=0,mmh do
-		 	local x,y=tx/mmwratio\8,
-		 		ty/mmhratio\8
+		 	local x,y=tx*mmwratio\8,
+		 		ty*mmhratio\8
 		 	sset(
 		 		72+tx,72+ty,
 					g(exp,x,y) and rescol[
@@ -1576,23 +1574,20 @@ function draw_minimap()
 		if u.discovered==1 or
 			g(viz,u.x\8,u.y\8) then
 			pset(
-				u.x*mmwratio,
-				u.y*mmhratio,
+				u.x/mmwratio,
+				u.y/mmhratio,
 				u.sel and 9 or u.p
 			)
 		end
 	end
 	
 	--current view area outline
-	local vx,vy=
-		ceil(mmwratio*cx),
-	 ceil(mmhratio*cy)
-	rect(
-		vx-1,vy-1,
-		vx+mmwratio*128+1,
-		vy+mmhratio*128+1,
-		10
+	camera(
+		-mmx-ceil(cx/mmwratio),
+	 -mmy-ceil(cy/mmhratio)
 	)
+	--10.5=128/mmwratio+1
+	rect(unspl"-1,-1,10.5,10.5,10")
 	camera()
 end
 
@@ -2844,13 +2839,16 @@ end
 poke(0x5f2d,3)
 
 function init()
-	mapw,maph,mmx,mmy,mmw=
-		unspl"256,256,105,107,19"
-	mmh,mapw8,maph8=
-		maph\(mapw/mmw),
-		mapw/8,maph/8
-	mmhratio,mmwratio=mmh/maph,
-		mmw/mapw
+ --constants
+	mapw,maph,mmx,mmy,mmw,
+		mmh, --maph\(mapw/mmw)
+		mapw8, --mapw/8
+		maph8, --maph/8
+		mmhratio, --maph/mmh
+		mmwratio --mapw/mmw
+		=
+		unspl"256,256,105,107,19,19,32,32,13.47,13.47"
+		
 	
 	--tech can change this
 	units_heal,farm_cycles,
@@ -2879,7 +2877,6 @@ end
 
 init()
 
-local qx,qy=6*8,5*8
 --qx=6*8, qy=5*8, +9, +4
 unit(queen,unspl"57,44,1")
 
@@ -2890,8 +2887,8 @@ unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
 unit(spider,unspl"48,56,1")--0,16
 --web.breq=0
---x-w/2,y-h\2
-unit(castle,8*8+15/2,16*8+8,2)
+--8*8+15/2,16*8+16\2
+unit(castle,unspl"71,136,2")
 --unit(beetle,unspl"65,81,2")
 
 -->8
