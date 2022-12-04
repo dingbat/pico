@@ -2022,7 +2022,8 @@ function all_surr(x,y,n,chk_acc)
 	 	then
 			 add(st,{
 			  xx,yy,
-			 	diag=dx!=0 and dy!=0
+			 	diag=dx!=0 and dy!=0,
+			 	k=xx+(yy<<8)
 			 })
 			end
 		end
@@ -2726,7 +2727,7 @@ function dmap_find(u,key)
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
 		for t in all_surr(x,y,1) do
-			local w=g(dmap,t[1],t[2],9)
+			local w=dmap[t.k] or 9
 			if (t.diag) w+=0.4
 			if w<lowest then
 				lowest,x,y=w,unpack(t)
@@ -2760,32 +2761,25 @@ function async_task()
 end
 
 function dmapcc(q)
-	local nxt,off=q.nxt or {},
-		q.offset or 1
-	for i=off,#q.open do
-		local x,y=unpack(q.open[i])
-		if i-off>20 then
-			q.offset,q.nxt=i,nxt
+	for i=1,#q.open do
+		if i>20 then
 			--stop for now, continue
 			--next frame
 			return
 		end
-		s(q.dmap,x,y,q.c)
+		local p=deli(q.open)
+		q.dmap[p.k]=q.c
 		if q.c<8 then
-			for t in all_surr(x,y,1,true) do
-				local xx,yy=unpack(t)
-				if not g(q.closed,xx,yy) then
-					s(q.closed,xx,yy,add(nxt,t))
+			for t in all_surr(p[1],p[2],1,true) do
+				if not q.closed[t.k] then
+					q.closed[t.k]=add(q.nxt,t)
 				end
 			end
 		end
 	end
 
-	q.open,
-	q.c,
-	q.nxt,q.offset=
-		nxt,
-		q.c+1
+	q.c+=1
+	q.open,q.nxt=q.nxt,{}
 end
 
 function make_dmap(key)
@@ -2813,6 +2807,7 @@ function make_dmap(key)
 			--don't need to set closed[i]
 			--here bc these tiles are
 			--inaccessible anyway
+			t.k=i
 			add(open,t)
 		end
 	end
@@ -2823,6 +2818,7 @@ function make_dmap(key)
 		open=open,
 		c=0,
 		closed={},
+		nxt={},
 	}
 end
 
@@ -2893,7 +2889,7 @@ unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
 unit(spider,unspl"48,56,1")--0,16
-web.breq=0
+--web.breq=0
 --x-w/2,y-h\2
 unit(castle,8*8+15/2,16*8+8,2)
 --unit(beetle,unspl"65,81,2")
@@ -2972,10 +2968,12 @@ menuitem(3,"load from clpbrd",function()
 		end
 	end
 	for i=1,50	do
-		unit(archer,unspl"65,181,2")
+		unit(ant,unspl"40,40,1")
+
+--		unit(archer,unspl"65,181,2")
 		unit(warant,unspl"185,181,1")
 	end
---	make_dmaps"d"
+	make_dmaps"d"
 end)
 
 menuitem(4," (do ctrl-v 1st)")
