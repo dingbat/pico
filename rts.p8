@@ -194,7 +194,19 @@ function _update()
 		end
  end
  
- update_projectiles()
+ --update projectiles
+ for p in all(proj) do
+ 	p.x,p.y=norm(p.to,p,0.8)
+  if adj(p.to,p,0.5) then
+   if intersect(
+   	u_rect(del(proj,p).to_unit),
+  		{p.x,p.y},0
+  	) then
+ 	 	deal_dmg(p.from_unit,
+ 	 		p.to_unit)
+			end
+  end
+ end
  
  if selbox then
  	bldg_sel,my_sel,enemy_sel=nil
@@ -203,7 +215,6 @@ function _update()
 
  --fighting has to happen after
  --tick because viz is involved
- --_ENV
  for i,u in inext,units do
  	if not (u.const or u.dead) then
 	  --aggress is expensive, so
@@ -1458,23 +1469,22 @@ end
 function update_viz(u)
 	if u.p==1 and
 			u.uid%upcycle==upc then
-		local xx,yy=u.x\8,u.y\8
+		local k0=u.x\8|u.y\8<<8
 		for t in all(
 		 viztiles(
 		 	u.x,u.y,
 		 	u.typ[u.p].los
 		 )
 		) do
-			--miraculously operator
-			--precedence here works out
-			local i=xx+t[1]|yy+t[2]<<8
-			local b=bldgs[i]
-			if (b) b.discovered=1
+			local k=k0+t
+			if bldgs[k] then
+				bldgs[k].discovered=1
+			end
 			--"v" bc it's used for
 			--indexing into rescol when
 			--drawing minimap, saves
 			--some tokens there
-			exp[i],new_viz[i]=1,"v"
+			exp[k],new_viz[k]=1,"v"
 		end
 	end
 end
@@ -1498,28 +1508,12 @@ function viztiles(x,y,los)
 					xo*2-dx*8-4,
 					yo*2-dy*8-4
 				)<los then
-					add(v,{dx,dy})
+					add(v,dx+dy*256)
 				end
 			end
 		end
 	end
 	return v
-end
-
-function update_projectiles()
- for p in all(proj) do
- 	p.x,p.y=norm(p.to,p,0.8)
-  if adj(p.to,p,0.5) then
-   if intersect(
-   	u_rect(p.to_unit),
-  		{p.x,p.y},0
-  	) then
- 	 	deal_dmg(p.from_unit,
- 	 		p.to_unit)
-			end
-  	del(proj,p)
-  end
- end
 end
 -->8
 --map
@@ -2491,7 +2485,7 @@ function draw_sel_ports()
 		local x=i*13-10
 		if i>6 then
 			--menuy+6
-			print("+"..#selection-6,x,110,1)
+			print("\f1+"..#selection-6,x,110)
 			break
 		end
 		draw_port(
