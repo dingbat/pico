@@ -49,7 +49,7 @@ function _draw()
  for u in all(units) do
 		if 
 		 not g(viz,u.x\8,u.y\8)
-		 and (u.discovered==1 or u.const)
+		 and (u.discovered or u.const)
 		then
  		add(af,u)
  	elseif u.typ.bldg then
@@ -114,7 +114,7 @@ function _draw()
 	--draw borders around fog
 	for x=cx\8,cx\8+16 do
 	 for y=cy\8,cy\8+16 do
-	 	local i=x|y*256
+	 	local i=x|y<<8
 	  if not viz[i] then
 				camera(x*-8+cx,y*-8+cy)
 			 color(exp[i] and 5 or 0)
@@ -1465,8 +1465,9 @@ function update_viz(u)
 		 	u.typ[u.p].los
 		 )
 		) do
-			local x,y=xx+t[1],yy+t[2]
-			local i=x|y*256
+			--miraculously operator
+			--precedence here works out
+			local i=xx+t[1]|yy+t[2]<<8
 			local b=bldgs[i]
 			if (b) b.discovered=1
 			--"v" bc it's used for
@@ -1554,7 +1555,7 @@ function draw_minimap()
 	
 	--units
 	for u in all(units) do
-		if u.discovered==1 or
+		if u.discovered or
 			g(viz,u.x\8,u.y\8) then
 			pset(
 				u.x/mmwratio,
@@ -1769,7 +1770,7 @@ function aggress(u)
 		typ.range)
 	for e in all(units) do
 		if e.p!=u.p and not e.dead and
-			viz[e.x\8|e.y\8*256] and
+			viz[e.x\8|e.y\8<<8] and
 			dist(e.x-u.x,e.y-u.y)<=los
 		then
 			attack(u,e)
@@ -1953,11 +1954,11 @@ end
  --x=(k<<8)>>8
 --y=(k>>24)<<16
 function g(a,x,y,def)
-	return a[x|y*256] or def
+	return a[x|y<<8] or def
 end
 
 function s(a,x,y,v)
- a[x|y*256]=v
+ a[x|y<<8]=v
 end
 
 function modify_totalu(diff)
@@ -2011,7 +2012,7 @@ function all_surr(x,y,n,chk_acc)
 			 add(st,{
 			  xx,yy,
 			 	diag=dx!=0 and dy!=0,
-			 	k=xx|yy*256
+			 	k=xx|yy<<8
 			 })
 			end
 		end
@@ -2052,7 +2053,7 @@ function can_attack()
 		if hoverunit and
 		 hoverunit.p!=1 and
 			u.typ.atk and
-			(v or hoverunit.discovered==1)
+			(v or hoverunit.discovered)
 		then
 			return true
 		end
@@ -2219,7 +2220,7 @@ function unit(typ,x,y,p,hp,
 		p=p,
 		hp=hp or typ.hp,
 		const=const,
-		discovered=discovered or 0,
+		discovered=discovered==1,
 		uid=uid,
 		--currently just used by farm
 		sproff=0,
@@ -2902,7 +2903,7 @@ menuitem(2,"save to clpbrd",function()
 			y..","..
 			p..","..
 			hp..","..
-			discovered..
+			max(discovered)..
 			(const and ","..const or "")..
 			"\n"
 	end
