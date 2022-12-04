@@ -6,7 +6,6 @@ __lua__
 --[[
 todo:
 - ai
-- ~100 unit pop limit
 - dmg mult balancing
 - costs balancing
 - menu/wincond
@@ -137,20 +136,11 @@ function _draw()
 end
 
 function modify_totalu(diff)
--- 75-99: 60 --.37
--- 70-75: 30 --.36
--- 55-70: 15 --.35
--- 45-55: 10 --.37
--- 35-45:  5 --.33
--- 25-35:  3 --.34
---  0-25:  2 --.36
 	totalu+=diff
 	upcycle=totalu>=75 and 60 or
 		totalu>=70 and 30 or
 		totalu>=55 and 15 or
-		totalu>=45 and 10 or
-		totalu>=35 and 5 or
-		totalu>=25 and 3 or 2
+		totalu>=45 and 10 or 5
 	--printh("upc="..upcycle,"log")
 end
 
@@ -1431,7 +1421,8 @@ function tick_unit(u)
 		end
 		if u.p==1 then
 			if u.typ==mound then
-				res.pl-=5
+				res.ppl-=5
+				res.pl=min(res.ppl,99)
 			elseif typ.unit then
 				res.p-=1
 			end
@@ -1855,7 +1846,8 @@ function buildrepair(u)
  			b.const=nil
  			register_bldg(b)
  			if b.typ==mound and b.p==1 then
- 				res.pl+=5
+ 				res.ppl+=5
+ 				res.pl=min(res.ppl,99)
  			elseif b.typ.farm then
  				harvest(u,b)
  			end
@@ -2384,7 +2376,7 @@ end
 
 resorder,f2res,resqty,key2resf,
 	dmap_queue,rescol=
-	split"r,g,b,p",parse[[
+	split"r,g,b,p,pl,ppl",parse[[
 f7=r
 f11=g
 f19=b
@@ -2407,6 +2399,7 @@ r=8
 g=11
 b=4
 p=1
+pl=1
 
 f0=15
 f1=15
@@ -2423,23 +2416,29 @@ h19=4
 h33=13
 ]]
 
-function print_res(rsc,x,y,s,hide_0,oop)
+function print_res(rsc,x,y,s,hide_0,unit)
 	for i,r in pairs(resorder) do
-		local v=oop and i==4 and "" or flr(rsc[r])
-		local no_pop=v==0 and i==4
-		local xoff=no_pop and 6 or 3
-		if v!=0 or not hide_0 then
-			if v!="" or oop then
-				if v=="" or res[r]<v or no_pop then
-					rectfill(x-xoff/3,y-1,
-						x+xoff+#tostr(v)*4-s\2,y+5,
-						10)
-				end
-				spr(129+i,x,y)
-				x+=4+i\4
+		local v=flr(rsc[r])
+		local oop=i==4 and
+		 res.p>=res.pl and unit
+		if i<=5 and (v!=0 or
+		 not hide_0 or
+		 oop) then
+			if oop then
+				local str=hide_0 and "0" or
+					res.p.."x/"..res.pl
+				rectfill(x-s,y-1,
+					x+#str*4+s\2,
+					y+5,
+					10)
 			end
-			if v!="" then
-				x=print(v,x,y,rescol[r])+s
+			spr(128+i,x,y)
+			x+=4+max(i==4 and 1)	
+			if v!=0 or not hide_0 then
+				x=print(v,x,y,rescol[r])
+				if i<4 then
+					x+=2
+				end
 				if not hide_0 and i==3 then
 					line(x-1,y-1,x-1,y+5,5)
 					x+=2
@@ -2699,26 +2698,25 @@ function draw_menu()
 	
 	--resources
 	local len=print_res(res,
-		unspl"0,150,2")
-	rectfill(len-1,unspl"121,0,128,7")
-	print_res(res,unspl"1,122,2")
-	line(len-2,unspl"120,0,120,5")
-	pset(len-1,121)
-	line(len,122,len,128)
+		0,150,2,nil,true)
+	rectfill(len+1,unspl"121,0,128,7")
+	print_res(res,1,122,2,nil,true)
+	line(len,unspl"120,0,120,5")
+	pset(len+1,121)
+	line(len+2,122,len+2,128)
 	
 	if hovbtn and hovbtn.costs and
 		breq_satisfied(hovbtn.costs) then
-		local oop=res.p<1 and
-			hovbtn.costs.typ.unit
+		local unit=hovbtn.costs.typ.unit
 		local len=print_res(
-		 hovbtn.costs,0,150,1,true,oop)
+		 hovbtn.costs,0,150,1,true,unit)
 		local x,y=
 			hovbtn.r[1]-(len-10)/2,
 			hovbtn.r[2]-8
 		rectfill(x,y,x+len,y+8,7)
-		rect(x,y,x+len+1,y+8,1)
 		print_res(hovbtn.costs
-		 ,x+2,y+2,1,true,oop)
+		 ,x+2,y+2,1,true,unit)
+		rect(x,y,x+len+1,y+8,1)
 	end
 end
 -->8
@@ -2877,11 +2875,12 @@ function init()
 		{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
-r=5
-g=5
-b=5
-p=11
-pl=12
+r=55
+g=55
+b=55
+p=4
+pl=10
+ppl=10
 ]]
 end
 
@@ -3048,11 +3047,11 @@ ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454ffffff67cccccccccccc76fffff565555f
 fff7ffffffd88fdfffffbffffffbfffffff45ffff4944ffffffff766cc666cc6667ffffff566555ff53555f6ffafffffffffffffffffffffffffffffffffffff
 fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffff667fff6776fffffffff5555f6ff555fffffffffffffffffffffffffffffffffffffffffff
 fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff6fffff5fffffffffffffffffffffffffffffffffffffffff
-0000000000000000080000000bb00000040000001010000000000000000000000000000000000000000000000000000000000800000005000000050000000000
-007777000000000088800000bbb0000044000000101000000d000000000000000000000000000000000000000000000000000880050050500050500000000000
-074444700000000088800000bb00000004000000c1c00000600006600d0000000dd000000000000000000000000000008080888805555050dd50522226600000
-7444444700000000060000000b00000004400000c1c00000510001606000066060000660000000000000000000000000000008800e5e550d7ddddd2267600000
-4444444400000000060000000b00000004000000111000000016610051166160511661600d000660000000000000000000300800055554d7d05d5d4676000000
+00000000080000000bb0000004000000101000000010000000000000000000000000000000000000000000000000000000000800000005000000050000000000
+0077770088800000bbb000004400000010100000010000000d000000000000000000000000000000000000000000000000000880050050500050500000000000
+0744447088800000bb00000004000000c1c0000001000000600006600d0000000dd000000000000000000000000000008080888805555050dd50522226600000
+74444447060000000b00000004400000c1c0000001000000510001606000066060000660000000000000000000000000000008800e5e550d7ddddd2267600000
+44444444060000000b0000000400000011100000100000000016610051166160511661600d000660000000000000000000300800055554d7d05d5d4676000000
 444444440000000000000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000000000000000430000b00000504d00dddd2462000000
 4444444400000000000000000000000000000000000000000000000000000000000000000000000000000000000000004300b000b50504040005054045000000
 44444444000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000
