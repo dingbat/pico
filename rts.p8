@@ -731,8 +731,6 @@ const=6
 def_typ=building
 bitmap=16
 ]]
-farm_renew_cost_b=3
-
 
 castle=parse[[
 idx=13
@@ -2194,7 +2192,6 @@ function can_renew_farm()
 	return hoverunit and
 		res.b>=farm_renew_cost_b and
 		sel_typ==ant and
-		hoverunit.typ.farm and
 		hoverunit.exp
 end
 
@@ -2789,8 +2786,7 @@ mapw,maph,mmx,mmy,mmw,
 	mapw8, --mapw/8
 	maph8, --maph/8
 	mmhratio, --maph/mmh
-	mmwratio --mapw/mmw
-	=
+	mmwratio= --mapw/mmw
 	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
 		
 resorder,f2res,resqty,key2resf,
@@ -2840,10 +2836,12 @@ function init()
 	--tech can change this
 	units_heal,farm_cycles,
 	carry_capacity,
+	farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,
 	uid,totalu=
-		{},unspl"5,6,0,0,0,0,59,0,0,0"
+		{},
+		unspl"5,6,3,0,0,0,0,59,0,0,0"
 	
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
