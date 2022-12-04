@@ -6,8 +6,10 @@ __lua__
 --[[
 todo:
 - ai
-- dmg mult balancing
-- costs balancing
+- balancing
+	- dmg mult table
+	- unit stats (spd,los,hp)
+ - costs
 - menu/wincond
 - addtl map?
 ]]
@@ -43,32 +45,27 @@ function _draw()
  --cls() not needed!
  draw_map(0) --mainmap
  
- local bf1,bf2,af={},{},{}
+ local bf,af={},{}
  for u in all(units) do
-	 -- doesn't seem to affect 
-	 -- perf much
---	if intersect(u_rect(u),{cx,cy,cx+128,cy+128},1) then
-			if 
-			 not g(viz,u.x\8,u.y\8)
-			 and (u.discovered==1 or u.const)
-			then
-	 		add(af,u)
-	 	elseif u.typ.bldg then
-		 	add(bf1,u)
-		 else
-		 	add(bf2,u)
-		 end
+		if 
+		 not g(viz,u.x\8,u.y\8)
+		 and (u.discovered==1 or u.const)
+		then
+ 		add(af,u)
+ 	elseif u.typ.bldg then
+	 	draw_unit(u)
+	 else
+	 	add(bf,u)
+	 end
  end
  
-	foreach(bf1,draw_unit)
-
 	--highlight selected farm
 	if sel1 and sel1.typ.farm and
 		not sel1.const then
 	 rectaround(sel1,9)
 	end
 
-	foreach(bf2,draw_unit)
+	foreach(bf,draw_unit)
 	foreach(proj,draw_projectile)
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(32) --draw fogmap
@@ -86,7 +83,24 @@ function _draw()
 			sel1.rx-2,sel1.ry-5)
 	end
 
-	if (hilite) draw_hilite()
+	if hilite then
+		local dt=t()-hilite.t
+		if dt>0.5 then
+			hilite=nil
+		elseif hilite.x then
+			circ(hilite.x,hilite.y,
+			 min(0.5/dt,4),8)
+		elseif dt<=0.1 or dt>=0.25 then
+			if hilite.tx then
+				local x,y=hilite.tx*8,
+					hilite.ty*8
+				rect(x-1,y-1,x+8,y+8,8)
+			elseif hilite.unit then
+				rectaround(hilite.unit,8)
+			end
+		end
+	end
+	
 	if webx then
 		line(webx,weby,wmx,wmy,
 		 acc(wmx\8,wmy\8) and 7 or 8)
@@ -104,10 +118,10 @@ function _draw()
 	  if not viz[i] then
 				camera(x*-8+cx,y*-8+cy)
 			 color(exp[i] and 5 or 0)
-			 if (viz[i-1]) line(-1,0,-1,7)
-			 if (viz[i-256]) line(0,-1,7,-1)
-			 if (viz[i+256]) line(0,8,7,8)
-				if (viz[i+1]) line(8,0,8,7)
+			 if (viz[i-1]) line(unspl"-1,0,-1,7")
+			 if (viz[i-256]) line(unspl"0,-1,7,-1")
+			 if (viz[i+256]) line(unspl"0,8,7,8")
+				if (viz[i+1]) line(unspl"8,0,8,7")
 			end
 		end
 	end
@@ -116,11 +130,30 @@ function _draw()
 	camera()
 	
 	draw_menu()
-	if (to_build) draw_to_build()
+	if to_build then
+		local typ,x,y=to_build.typ,
+			to_build.x-cx,to_build.y-cy
+		
+		pal(buildable() or
+		 split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
+		)
+		--menuy
+		if amy>=104 then
+			x,y=amx-3,amy-3
+		else
+			fillp(▒)
+			rect(x-1,y-1,x+typ.fw,
+			 y+typ.fh,3)
+	 	fillp()
+	 end
+		sspr(typ.rest_x,typ.rest_y,
+		 typ.fw,typ.h,x,y)
+		pal()
+	end
 	
 	--minimap hilite
-	if hilite and hilite.px then
-		circ(hilite.px,hilite.py,2,8)
+	if hilite and hilite.circ then
+		circ(unpack(hilite.circ))
 	end
 	
 	--cursor
@@ -133,14 +166,6 @@ function _draw()
 --	if sel1 then
 --		print(sel1.discovered,0,0,7)
 --	end
-end
-
-function modify_totalu(diff)
-	totalu+=diff
-	upcycle=totalu>=75 and 60 or
-		totalu>=70 and 30 or
-		totalu>=55 and 15 or
-		totalu>=45 and 10 or 5
 end
 
 function _update()
@@ -159,8 +184,8 @@ function _update()
  --<upcycle> frames
  if upc==0 then
  	viz,new_viz=new_viz,{}
-		for k in pairs(exp) do
- 		local x,y=k<<8>>8,k>>24<<16
+		for k in next,exp do
+ 		local x,y=k<<8>>8,k\256
 			--if can see, clear fog (0)
 			--else, no viz but explored,
 	 	--copy map tile to fogmap
@@ -179,7 +204,7 @@ function _update()
  --fighting has to happen after
  --tick because viz is involved
  --_ENV
- for i,u in pairs(units) do
+ for i,u in inext,units do
  	if not (u.const or u.dead) then
 	  --aggress is expensive, so
 	 	--distribute which units
@@ -217,48 +242,6 @@ function _update()
 	end
 
 --	time("_update",60)
-end
-
-function draw_hilite()
-	local dt=t()-hilite.t
-	if dt>0.5 then
-		hilite=nil
-	elseif hilite.x then
-		circ(hilite.x,hilite.y,
-		 min(0.5/dt,4),8)
-	elseif dt<=0.1 or dt>=0.25 then
-		if hilite.tx then
-			local x,y=hilite.tx*8,
-				hilite.ty*8
-			rect(x-1,y-1,x+8,y+8,8)
-		elseif hilite.unit then
-			rectaround(hilite.unit,8)
-		end
-	end
-end
-
-function draw_to_build()
-	local typ,x,y=to_build.typ,
-		to_build.x-cx,to_build.y-cy
-	
-	pal(buildable() or
-	 split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
-	)
-	--menuy
-	if amy>=104 then
-		x,y=amx-3,amy-3
-	else
-		fillp(▒)
-		rect(
- 		x-1,y-1,
- 		x+typ.fw,
- 		y+typ.fh,3
- 	)
- 	fillp()
- end
-	sspr(typ.rest_x,typ.rest_y,
-	 typ.fw,typ.h,x,y)
-	pal()
 end
 
 -->8
@@ -1135,7 +1118,7 @@ function gather(u,tx,ty,wp)
 		t="gather",
 		tx=tx,
 		ty=ty,
-		res=f2res["f"..fget(mget(tx,ty))],
+		res=f2res[fget(mget(tx,ty))],
 		wayp=wp or
 			get_wayp(u,t.x,t.y),
 		target=t,
@@ -1210,7 +1193,8 @@ function handle_click()
 				for u in all(selection) do
 					move(u,x,y)
 				end
-				hilite={t=t(),px=amx,py=amy}
+				hilite={t=t(),
+					circ={amx,amy,2,8}}
 			elseif lclick then
 				--move camera
 				cx,cy=
@@ -1487,10 +1471,11 @@ function update_viz(u)
 			local i=x|y*256
 			local b=bldgs[i]
 			if (b) b.discovered=1
-			--"f" bc it's used for concat
-			--when drawing minimap
-			--in theory can be any truthy
-			exp[i],new_viz[i]=1,"f"
+			--"v" bc it's used for
+			--indexing into rescol when
+			--drawing minimap, saves
+			--some tokens there
+			exp[i],new_viz[i]=1,"v"
 		end
 	end
 end
@@ -1558,7 +1543,7 @@ function draw_minimap()
 		 	sset(
 		 		72+tx,72+ty,
 					g(exp,x,y) and rescol[
-						g(viz,x,y,"h")..
+						g(viz,x,y,"e")..
 						fget(mget(x,y))
 					] or 14
 		 	)
@@ -1629,7 +1614,9 @@ function draw_unit(u)
 	--cant use stt bc it'll be move
 	if st.t=="web" and st.first_pt then
 		color"7"
+		--reset last line memory
 		line()
+		--set last line memory
 		line(unpack(st.p1))
 		line(unpack(st.second_pt or
 			{u.x,u.y}))
@@ -1711,7 +1698,7 @@ function update_unit(u)
  step(u)
  --check spider webs
  local r=u_rect(u,1)
- for i,sp in pairs(spiders) do
+ for i,sp in inext,spiders do
  	local ss=sp.st
  	if not ss.ready then
  		deli(spiders,i)
@@ -1973,6 +1960,14 @@ end
 
 function s(a,x,y,v)
  a[x|y*256]=v
+end
+
+function modify_totalu(diff)
+	totalu+=diff
+	upcycle=totalu>=90 and 60 or
+		totalu>=80 and 30 or
+		totalu>=55 and 15 or
+		totalu>=45 and 10 or 5
 end
 
 function intersect(r1,r2,e)
@@ -2248,14 +2243,14 @@ end
 -->8
 --get_wayp
 
-function nearest_acc(x,y,sx,sy)
+function nearest_acc(x,y,u)
 	for n=0,16 do
 		local best_d,best_t=32767
 		for t in all_surr(x,y,n) do
 			if acc(unpack(t)) then
 				local d=dist(
-					t[1]*8+4-sx,
-					t[2]*8+4-sy
+					t[1]*8+4-u.x,
+					t[2]*8+4-u.y
 				)
 				if d<best_d then
 					best_t,best_d=t,d
@@ -2263,27 +2258,23 @@ function nearest_acc(x,y,sx,sy)
 			end
 		end
 		if best_t then
-			return n==0,unpack(best_t)
+			return best_t,n==0
 		end
 	end
 end
 
 function get_wayp(u,x,y,move)
 	if (u.typ.bldg) return
- local wayp,d_acc,destx,desty=
+ local wayp,dest,dest_acc=
  	{},
- 	nearest_acc(
- 		x\8,y\8,
- 		u.x,u.y)
-	--if spare tokens, this will
-	--allow units from getting
+ 	nearest_acc(x\8,y\8,u)
+	--running nearest_acc on start
+	--allows units from getting
 	--unstuck from an inaccessible
 	--tile (e.g. from clumping)
---	local acc,xx,yy=nearest_acc(
---	 u.x\8,u.y\8,u.x,u.y)
 	local path,exists=find_path(
-	 {u.x\8,u.y\8},
- 	{destx,desty})
+	 nearest_acc(u.x\8,u.y\8,u),
+	 dest)
  	
 	--del last element (the start)
 	deli(path)
@@ -2293,15 +2284,12 @@ function get_wayp(u,x,y,move)
  		 n[2]*8+4},1)
  end
  if exists and
-  (not move or d_acc) then
+  (not move or dest_acc) then
  	add(wayp,{x,y})
  end
  return #wayp>0 and wayp
 end
 
-function pt2key(pt)
-	return pt[1]|pt[2]*256
-end
 
 --a*
 --https://t.co/nasud3d1ix
@@ -2315,7 +2303,7 @@ function find_path(start,goal)
   cost_to_goal = 32767
  }, {}
 
- best_table[pt2key(start)] = shortest
+ best_table[start.k] = shortest
  local frontier, frontier_len,
  	closest = {shortest}, 1,
  	shortest
@@ -2330,11 +2318,11 @@ function find_path(start,goal)
   frontier_len -= 1
   local p = shortest.last
   
-  if pt2key(p) == pt2key(goal) then
+  if p.k == goal.k then
    p = {goal}
 
    while shortest.prev do
-    shortest = best_table[pt2key(shortest.prev)]
+    shortest = best_table[shortest.prev.k]
     add(p, shortest.last)
    end
 
@@ -2344,7 +2332,7 @@ function find_path(start,goal)
   	p[1],p[2],1,true
   ) do
    local old_best, new_cost_from_start =
-    best_table[pt2key(n)],
+    best_table[n.k],
     shortest.cost_from_start + 1
    
    if not old_best then
@@ -2356,7 +2344,7 @@ function find_path(start,goal)
     }
 
     frontier_len += 1
-    frontier[frontier_len], best_table[pt2key(n)] = old_best, old_best
+    frontier[frontier_len], best_table[n.k] = old_best, old_best
    end
    if not old_best.dead and old_best.cost_from_start > new_cost_from_start then
     old_best.cost_from_start, old_best.prev = new_cost_from_start, p
@@ -2369,7 +2357,7 @@ function find_path(start,goal)
  end
  local p = {closest.last}
  while closest.prev do
-  closest = best_table[pt2key(closest.prev)]
+  closest = best_table[closest.prev.k]
   add(p, closest.last)
  end
  return p
@@ -2377,50 +2365,9 @@ end
 -->8
 --menu/cursor
 
-resorder,f2res,resqty,key2resf,
-	dmap_queue,rescol=
-	split"r,g,b,p,pl,ppl",parse[[
-f7=r
-f11=g
-f19=b
-]],parse[[
-r=40
-g=35
-b=50
-]],parse[[
-r=2
-g=3
-b=4
-d=d
-]],parse[[
-r=r,g,b,d
-g=g,r,b,d
-b=b,g,r,d
-d=d,r,g,b
-]],parse[[
-r=8
-g=11
-b=4
-p=1
-
-f0=15
-f1=15
-f7=8
-f11=11
-f19=4
-f33=12
-
-h0=5
-h1=5
-h7=8
-h11=3
-h19=4
-h33=13
-]]
-
 function print_res(r,x,y,zero)
 	local oop=res.p>=res.pl
-	for i,k in pairs(split"r,g,b,p") do
+	for i,k in inext,split"r,g,b,p" do
 		local v=i!=4 and flr(r[k]) or
 			zero and "\-b \-i"..res.p..
 					"/\-m \-6"..res.pl or
@@ -2542,7 +2489,7 @@ function cursor_spr()
 end
 
 function draw_sel_ports()
-	for i,u in pairs(selection) do
+	for i,u in inext,selection do
 		local x=i*13-10
 		if i>6 then
 			--menuy+6
@@ -2595,7 +2542,7 @@ function single_unit_section()
 		sspr(unspl"113,80,9,9,49,108")
 	end
 	if typ.prod and not sel1.const then
-		for i,b in pairs(typ.prod) do
+		for i,b in inext,typ.prod do
 			i-=1
 			draw_port(
 				b.typ,
@@ -2661,7 +2608,7 @@ function draw_menu()
   	secs,modstart=split"35,67,26",0
   end
 	end
- for i,sec in pairs(secs) do
+ for i,sec in inext,secs do
  	if (i%2==modstart)	pal(4,15)
  	camera(-x)
  	--104="y"=menuy
@@ -2797,7 +2744,7 @@ function make_dmap(key)
 		end
 	end
 
-	for i,t in pairs(starts) do
+	for i,t in next,starts do
 		if	sur_acc(unpack(t)) then
 			--don't need to set closed[i]
 			--here bc these tiles are
@@ -2836,20 +2783,60 @@ end
 -->8
 --init
 
+--constants
+mapw,maph,mmx,mmy,mmw,
+	mmh, --maph\(mapw/mmw)
+	mapw8, --mapw/8
+	maph8, --maph/8
+	mmhratio, --maph/mmh
+	mmwratio --mapw/mmw
+	=
+	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
+		
+resorder,f2res,resqty,key2resf,
+	dmap_queue,rescol=
+	split"r,g,b,p,pl,ppl",parse[[
+7=r
+11=g
+19=b
+]],parse[[
+r=40
+g=35
+b=50
+]],parse[[
+r=2
+g=3
+b=4
+d=d
+]],parse[[
+r=r,g,b,d
+g=g,r,b,d
+b=b,g,r,d
+d=d,r,g,b
+]],parse[[
+r=8
+g=11
+b=4
+p=1
+
+v0=15
+v1=15
+v7=8
+v11=11
+v19=4
+v33=12
+
+e0=5
+e1=5
+e7=8
+e11=3
+e19=4
+e33=13
+]]
+
 poke(0x5f2d,3)
 
 function init()
- --constants
-	mapw,maph,mmx,mmy,mmw,
-		mmh, --maph\(mapw/mmw)
-		mapw8, --mapw/8
-		maph8, --maph/8
-		mmhratio, --maph/mmh
-		mmwratio --mapw/mmw
-		=
-		unspl"256,256,105,107,19,19,32,32,13.47,13.47"
-		
-	
 	--tech can change this
 	units_heal,farm_cycles,
 	carry_capacity,
@@ -2922,7 +2909,7 @@ menuitem(2,"save to clpbrd",function()
 			"\n"
 	end
 	--exp
-	for k in pairs(exp) do
+	for k in next,exp do
 		str=str..k..","
 	end
 	str=str.."\n"
@@ -2943,7 +2930,7 @@ menuitem(3,"load from clpbrd",function()
 	init()
 
 	local lines=split(stat(4),"\n")	
-	for i,t in pairs(split(deli(lines))) do
+	for i,t in inext,split(deli(lines)) do
 		if t!="" then
 			mset(i%mapw8,i/mapw8,t)
 			--add fog to fogmap
@@ -2953,7 +2940,7 @@ menuitem(3,"load from clpbrd",function()
 	local r,e=
 		split(deli(lines)),
 		split(deli(lines))
-	for i,k in pairs(resorder) do
+	for i,k in inext,resorder do
 		res[k]=r[i]
 	end
 	for l in all(lines) do
@@ -2965,9 +2952,8 @@ menuitem(3,"load from clpbrd",function()
 		end
 	end
 	for i=1,50	do
-		unit(ant,unspl"40,40,1")
-
---		unit(archer,unspl"65,181,2")
+--		unit(ant,unspl"40,40,1")
+		unit(archer,unspl"65,181,2")
 		unit(warant,unspl"185,181,1")
 	end
 	make_dmaps"d"
