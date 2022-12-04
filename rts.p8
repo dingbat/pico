@@ -100,7 +100,7 @@ function _draw()
 	--draw borders around fog
 	for x=cx\8,cx\8+16 do
 	 for y=cy\8,cy\8+16 do
-	 	local i=x|(y<<8)
+	 	local i=x|y*256
 	  if not viz[i] then
 				camera(x*-8+cx,y*-8+cy)
 			 color(exp[i] and 5 or 0)
@@ -1486,7 +1486,7 @@ function update_viz(u)
 		 )
 		) do
 			local x,y=xx+t[1],yy+t[2]
-			local i=x|(y<<8)
+			local i=x|y*256
 			local b=bldgs[i]
 			if (b) b.discovered=1
 			--"f" bc it's used for concat
@@ -1789,7 +1789,7 @@ function aggress(u)
 		typ.range)
 	for e in all(units) do
 		if e.p!=u.p and not e.dead and
-			viz[e.x\8|(e.y\8<<8)] and
+			viz[e.x\8|e.y\8*256] and
 			dist(e.x-u.x,e.y-u.y)<=los
 		then
 			attack(u,e)
@@ -1973,11 +1973,11 @@ end
  --x=(k<<8)>>8
 --y=(k>>24)<<16
 function g(a,x,y,def)
-	return a[x|(y<<8)] or def
+	return a[x|y*256] or def
 end
 
 function s(a,x,y,v)
- a[x|(y<<8)]=v
+ a[x|y*256]=v
 end
 
 function intersect(r1,r2,e)
@@ -2023,7 +2023,7 @@ function all_surr(x,y,n,chk_acc)
 			 add(st,{
 			  xx,yy,
 			 	diag=dx!=0 and dy!=0,
-			 	k=xx+(yy<<8)
+			 	k=xx|yy*256
 			 })
 			end
 		end
@@ -2305,7 +2305,7 @@ function get_wayp(u,x,y,move)
 end
 
 function pt2key(pt)
-	return pt[1]|(pt[2]<<8)
+	return pt[1]|pt[2]*256
 end
 
 --a*
