@@ -1206,8 +1206,7 @@ function handle_click()
 		if dx>=0 and dy>=0 and
 			dx<mmw and dy<mmh+1	then
 			local x,y=
-				dx/mmw*mapw,
-				dy/mmh*maph
+				dx*mmwratio,dy*mmhratio
 			if rclick and sel1 then
 				--right click, move
 				for u in all(selection) do
@@ -1549,18 +1548,15 @@ function draw_map(offset)
  camera(cx,cy)
 end
 
--- 0.11 cpu
 function draw_minimap()
 	camera(-mmx,-mmy)
 	
 	--map tiles
-	--only updated once per second
-
-	if fps%30==0 then
+	if fps%20==0 then
 		for tx=0,mmw do
 		 for ty=0,mmh do
-		 	local x,y=mapw/mmw*tx\8,
-		 		maph/mmh*ty\8
+		 	local x,y=tx/mmwratio\8,
+		 		ty/mmhratio\8
 		 	sset(
 		 		72+tx,72+ty,
 					g(exp,x,y) and rescol[
@@ -1580,8 +1576,8 @@ function draw_minimap()
 		if u.discovered==1 or
 			g(viz,u.x\8,u.y\8) then
 			pset(
-				u.x/mapw*mmw,
-				u.y/maph*mmh,
+				u.x*mmwratio,
+				u.y*mmhratio,
 				u.sel and 9 or u.p
 			)
 		end
@@ -1589,12 +1585,12 @@ function draw_minimap()
 	
 	--current view area outline
 	local vx,vy=
-		ceil(cx/mapw*mmw),
-	 ceil(cy/maph*mmh)
+		ceil(mmwratio*cx),
+	 ceil(mmhratio*cy)
 	rect(
 		vx-1,vy-1,
-		vx+128/mapw*mmw+1,
-		vy+128/maph*mmh+1,
+		vx+mmwratio*128+1,
+		vy+mmhratio*128+1,
 		10
 	)
 	camera()
@@ -2857,6 +2853,8 @@ function init()
 	mmh,mapw8,maph8=
 		maph\(mapw/mmw),
 		mapw/8,maph/8
+	mmhratio,mmwratio=mmh/maph,
+		mmw/mapw
 	
 	--tech can change this
 	units_heal,farm_cycles,
