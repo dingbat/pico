@@ -12,31 +12,31 @@ todo:
 - addtl map?
 ]]
 
-acct={}
-times={}
-function flush_time(str,f)
-	if acct[str] and (not f or fps%f==0) then
-		printh(str..": "..acct[str],"log")
-	end
-	acct[str]=0
-end
-function time(str,run_at_fps)
-	local s=stat(1)
-	if times[str] then
-	 local prev,f=unpack(times[str])
-	 if f==true or not f or fps%f==0 then
-			if f==true then
-				acct[str]=acct[str] or 0
-				acct[str]+=s-prev
-			else
-				printh(str..": "..(s-prev),"log")
-			end
-		end
-		times[str]=nil
-	else
-		times[str]={s,run_at_fps}
-	end
-end
+--acct={}
+--times={}
+--function flush_time(str,f)
+--	if acct[str] and (not f or fps%f==0) then
+--		printh(str..": "..acct[str],"log")
+--	end
+--	acct[str]=0
+--end
+--function time(str,run_at_fps)
+--	local s=stat(1)
+--	if times[str] then
+--	 local prev,f=unpack(times[str])
+--	 if f==true or not f or fps%f==0 then
+--			if f==true then
+--				acct[str]=acct[str] or 0
+--				acct[str]+=s-prev
+--			else
+--				printh(str..": "..(s-prev),"log")
+--			end
+--		end
+--		times[str]=nil
+--	else
+--		times[str]={s,run_at_fps}
+--	end
+--end
 
 function _draw()
 --	time("_draw",60)
@@ -2424,8 +2424,9 @@ function print_res(rsc,x,y,s,hide_0,unit)
 		if i<=5 and (v!=0 or
 		 not hide_0 or
 		 oop) then
-			if oop then
-				local str=hide_0 and "0" or
+			if oop or v>res[r] then
+				local str=hide_0 and
+					(oop and "0" or tostr(v).." ") or
 					res.p.."x/"..res.pl
 				rectfill(x-s,y-1,
 					x+#str*4+s\2,
@@ -2876,7 +2877,7 @@ function init()
 		{},{},{},{},{},{},{d={}},
 	 parse[[
 r=55
-g=55
+g=18
 b=55
 p=4
 pl=10
