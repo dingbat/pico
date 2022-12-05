@@ -2410,13 +2410,14 @@ end
 function draw_port(
 	typ,x,y,costs,onclick,prog,u
 )
+	camera(-x,-y)
 	local cant_pay=costs and not can_pay(costs)
-	rect(x,y,x+10,y+9,
+	rect(0,0,10,9,
 		u and u.p or
 		cant_pay and 6 or
 		costs and 3 or 1
 	)
-	rectfill(x+1,y+1,x+9,y+8,
+	rectfill(1,1,9,8,
 		cant_pay and 7 or costs and
  	costs.tech and 10 or 6
 	)
@@ -2429,7 +2430,7 @@ function draw_port(
 		pal(6,7)
 	end
 	sspr(typ.portx,typ.porty,
-	 typ.portw,8,x+1,y+1)
+	 typ.portw,unspl"8,1,1")
 	pal()
 	
 	if onclick then
@@ -2441,12 +2442,13 @@ function draw_port(
 	end
 
 	if u or prog then
-		bar(x,y+11,10,
+		bar(0,11,10,
 			prog or u.hp/typ.hp,
 			prog and 12,
 			prog and 5
 		)
 	end
+	camera()
 end
 
 function cursor_spr()
@@ -2493,8 +2495,7 @@ function draw_sel_ports()
 			--menuy+3
 			u.typ,x,107,nil,
 			function()
-				u.sel=false
-				del(selection,u)
+				del(selection,u).sel=false
 			end,
 			nil,u)
 	end
@@ -2507,14 +2508,13 @@ function single_unit_section()
 	if #selection<3 or sel_typ!=ant then
 		draw_sel_ports()
 	else
-		--menuy+4
-		draw_port(typ,3,108,nil,
+		--menuy+3
+		draw_port(typ,3,107,nil,
 			function()
-				sel1.sel=false
-				deli(selection,1)
+				deli(selection).sel=false
 			end)
-		--menuy+7
-		print("X"..#selection,unspl"16,112,7")
+		--menuy+6
+		print("X"..#selection,unspl"16,111,7")
 	end
 		
 	if #selection==1 and r then
