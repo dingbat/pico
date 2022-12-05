@@ -1291,14 +1291,13 @@ function handle_click()
 	 elseif can_gather() then
 	 
 	 	hilite={t=t(),tx=tx,ty=ty}
-	  for u in all(selection) do
-			 if avail_farm() then
-			 	harvest(u,hoverunit)
-			 	break
-			 else
-			 	gather(u,tx,ty)
-  		end
-  	end
+	 	if avail_farm() then
+	 		harvest(sel1,hoverunit)
+	 	else
+		  for u in all(selection) do
+				 gather(u,tx,ty)
+	  	end
+	 	end
   	
   elseif can_build() then
   
