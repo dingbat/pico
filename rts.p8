@@ -2641,13 +2641,14 @@ function draw_menu()
 		breq_satisfied(hovbtn.costs) then
 		local len=print_res(
 		 hovbtn.costs,0,150)
-		local x,y=
-			hovbtn.r[1]-(len-9)/2,
-			hovbtn.r[2]-8
-		rectfill(x,y,x+len+1,y+8,7)
-		print_res(hovbtn.costs
-		 ,x+2,y+2)
-		rect(x,y,x+len+2,y+8,1)
+		camera(
+			(len-8)/2-hovbtn.r[1],
+			8-hovbtn.r[2]
+		)
+		rectfill(len+1,unspl"0,0,8,7")
+		print_res(hovbtn.costs,2,2)
+		rect(len+2,unspl"0,0,8,1")
+		camera()
 	end
 end
 -->8
