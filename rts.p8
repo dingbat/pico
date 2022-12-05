@@ -13,13 +13,11 @@ todo:
 - addtl map?
 ]]
 
-cx,cy,cvx,cvy=0,30,1,1
 function _draw()
+ --cls() not needed!
 	if menu then
---		cx,cy=sin(t()/2)*4,
---			8+cos(t()/2)*4
  	pal(split"1,5,3,13,13,13,6,2,6,6,13,13,13,0,5")
-		draw_map(2)
+		draw_map(0)
 		pal()
 		camera()
 		print(
@@ -27,7 +25,7 @@ function _draw()
 		,22,55)
 		return
 	end
- --cls() not needed!
+
  draw_map(0) --mainmap
  
  local bf,af={},{}
@@ -80,6 +78,31 @@ function _draw()
 	pal=_pal
 	pal()
 	
+	fillp(▒)
+	
+	--draw borders around fog
+	for x=cx\8,cx\8+16 do
+	 for y=cy\8,cy\8+16 do
+	 	local i=x|y<<8
+	  if not viz[i] then
+				camera(x*-8+cx,y*-8+cy)
+			 color(exp[i] and 5 or 0)
+			 if (viz[i-1]) line(unspl"-1,0,-1,7")
+			 if (viz[i-256]) line(unspl"0,-1,7,-1")
+			 if (viz[i+256]) line(unspl"0,8,7,8")
+				if (viz[i+1]) line(unspl"8,0,8,7")
+			end
+		end
+	end
+	
+	camera(cx,cy)
+
+	if selbox then
+		rect(unpack(selbox))
+	end
+	
+	fillp()
+	
 	--rally flag
 	if sel1 and sel1.rx then
 		spr(71+fps\5%3,
@@ -108,29 +131,6 @@ function _draw()
 		line(webx,weby,wmx,wmy,
 		 acc(wmx\8,wmy\8) and 7 or 8)
 	end
-	
-	fillp(▒)
-	if selbox then
-		rect(unpack(selbox))
-	end
-	
-	--draw borders around fog
-	for x=cx\8,cx\8+16 do
-	 for y=cy\8,cy\8+16 do
-	 	local i=x|y<<8
-	  if not viz[i] then
-				camera(x*-8+cx,y*-8+cy)
-			 color(exp[i] and 5 or 0)
-			 if (viz[i-1]) line(unspl"-1,0,-1,7")
-			 if (viz[i-256]) line(unspl"0,-1,7,-1")
-			 if (viz[i+256]) line(unspl"0,8,7,8")
-				if (viz[i+1]) line(unspl"8,0,8,7")
-			end
-		end
-	end
-	fillp()
-	
-	camera()
 	
 	draw_menu()
 	if to_build then
@@ -170,8 +170,8 @@ function _update()
 	if menu then
 		cx+=cvx
 		cy+=cvy
-		if (cx>=100 or cx<0) cvx*=-1
-		if (cy>=100 or cy<0) cvy*=-1
+		if (cx%128==0) cvx*=-1
+		if (cy%128==0) cvy*=-1
  	if (btnp(❎)) new_game()
  	return
 	end
@@ -1421,10 +1421,6 @@ function tick_unit(u)
 		del(selection,u)
 		if typ.bldg then
 			register_bldg(u)
-			mset(u.x/8,u.y/8,91)
-			if typ.w>8 then
-				mset(u.x/8+1,u.y/8,91)
-			end
 		end
 		if u.p==1 then
 			if u.typ==mound then
@@ -1772,18 +1768,19 @@ end
 
 function aggress(u)
 	local typ=u.typ[u.p]
-	local los=max(
+	local los,targ_d,targ=max(
 		typ.unit and typ.los,
-		typ.range)
+		typ.range),9999
 	for e in all(units) do
+		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
 			viz[e.x\8|e.y\8<<8] and
-			dist(e.x-u.x,e.y-u.y)<=los
+			d<targ_d and d<los
 		then
-			attack(u,e)
-			break
+			targ,targ_d=e,d
 		end
 	end
+	if (targ) attack(u,targ)
 end
 
 function fight(u)
@@ -2137,10 +2134,10 @@ end
 
 function register_bldg(b)
 	local typ=b.typ
-	--subt 2 to make sure we ref
-	--the top-left tile
+	--mod by 2 to make sure we ref
+	--the bottom-left tile
 	local w,h,x,y=typ.w,typ.h,
-		(b.x-2)\8,(b.y-2)\8
+		(b.x-2)\8,(b.y+2)\8
 
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
@@ -2148,6 +2145,9 @@ function register_bldg(b)
 		if b.dead then
 			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
+			if typ.fire and y==yy then
+				mset(xx,yy,91)
+			end
 		elseif	typ.drop then
 			s(dmap_st.d,xx,yy,{xx,yy})
 		end
@@ -2155,9 +2155,9 @@ function register_bldg(b)
 	reg(x,y)
 	if w>8 then
 		reg(x+1,y)
-		if (h>8) reg(x+1,y+1)
+		if (h>8) reg(x+1,y-1)
 	end
-	if (h>8) reg(x,y+1)
+	if (h>8) reg(x,y-1)
 	
 	if not b.const and typ!=farm then 
 		make_dmaps"d"
@@ -2783,6 +2783,10 @@ mapw,maph,mmx,mmy,mmw,
 	mmwratio= --mapw/mmw
 	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
 		
+--menu
+menu,cx,cy,cvx,cvy=
+	unspl"1,0,30,1,1"
+	
 resources,f2res,resqty,
  key2resf,rescol=
 	split"r,g,b,p,pl,ppl",parse[[
@@ -2853,8 +2857,6 @@ ppl=10
 ]]
 end
 
-menu=1
-
 function new_game()
 	menu=init()
 	--qx=6*8, qy=5*8, +9, +4
@@ -2865,12 +2867,12 @@ function new_game()
 	unit(ant,unspl"40,40,1")-- -8,0
 	unit(ant,unspl"68,43,1")-- 20,3
 	unit(ant,unspl"50,32,1")-- 2,-8
-	for i=0,50 do
+--	for i=0,50 do
 	unit(warant,unspl"48,56,1")--0,16
-	end
+--	end
 	--web.breq=0
 	--8*8+15/2,16*8+16\2
-	unit(queen,unspl"71,136,2")
+	unit(mound,unspl"71,136,2")
 	
 	--unit(beetle,unspl"65,81,2")
 end
@@ -2983,7 +2985,7 @@ bb000b00bb000bb04400040044000440000000000000000000000000000000000d11311331350000
 0d000000000000000000000000000000dd0000000d00000000d0000000000000000000000000000000d000000000000000000000000000000000000000000000
 d00001100d0000000dd000000000000000310011003100110d0000000000000000d00000000000000d0000000000000000d000000000000000d0000000000000
 31000110d0000110d00001100000000005d1001105d1001133000000000000000d0000000000000033100000000000000d000000000000000000000000000000
-0011110031111110311111100d000110505d1110000d111033100000000000013310000000000000331131000000000033100013113000000d10000000011310
+0d11110031111110311111100d000110505d1110000d111033100000000000013310000000000000331131000000000033100013113000000d10000000011310
 001d1d000d1d1d0001d1d1d0d3d1d1100000d1d00050d1d001113113113113113311311311311310001131131131131033113113113113103311311311311311
 00000000000000000000000000000000000000000000000000513113113113500011311311311311050500131131131100113105050113113311311311350505
 00000000000000000000000000000000000000000000000005005050505050000050505050505050000000505050505000505000000050500050505050500000
@@ -3023,7 +3025,7 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 0077770088800000bbb000004400000010100000000000000d000000000000000000000000000000dd6000000600000000000088050050500050500000000000
 0744447088800000bb00000004000000c1c0000000000000600006600d0000000dd000000000000000510061051000168080888885555050dd50522226600000
 74444447060000000b00000004400000c1c00000000000005100016060000660600006600000000005d100665d100066000000880e5e550d7ddddd2267600000
-44444444060000000b0000000400000011100000000000000016610051166160511661600d000660505d661000d1661000300080055554d7d05d5d4676000000
+44444444060000000b0000000400000011100000000000000d16610051166160511661600d000660505d661000d1661000300080055554d7d05d5d4676000000
 444444440000000000000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000d1d005001d104300b000b000504d00dddd2462000000
 444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000430000b0050504040005054045000000
 44444444000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000
