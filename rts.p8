@@ -1260,7 +1260,7 @@ function handle_click()
  end
  
 	--left drag makes selbox
- if btn(5) and not to_build then
+ if btn(5) then
  	if not selbox then
  		selx,sely=mx,my
  	end
