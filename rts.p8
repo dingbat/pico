@@ -10,44 +10,27 @@ todo:
 	- dmg mult table
 	- unit stats (spd,los,hp)
  - costs
-- menu/wincond
 - addtl map?
 ]]
 
---acct={}
---times={}
---function flush_time(str,f)
---	if acct[str] and (not f or fps%f==0) then
---		printh(str..": "..acct[str],"log")
---	end
---	acct[str]=0
---end
---function time(str,run_at_fps)
---	local s=stat(1)
---	if times[str] then
---	 local prev,f=unpack(times[str])
---	 if f==true or not f or fps%f==0 then
---			if f==true then
---				acct[str]=acct[str] or 0
---				acct[str]+=s-prev
---			else
---				printh(str..": "..(s-prev),"log")
---			end
---		end
---		times[str]=nil
---	else
---		times[str]={s,run_at_fps}
---	end
---end
-
 function _draw()
---	time("_draw",60)
+	if menu then
+		cx,cy=0,0
+ 	pal(split"1,5,3,13,13,13,6,2,6,6,13,13,13,0,5")
+		draw_map(2)
+		pal()
+		print(
+			"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start"
+		,22,50)
+		return
+	end
  --cls() not needed!
  draw_map(0) --mainmap
  
  local bf,af={},{}
  for u in all(units) do
 		if 
+			not loser and
 		 not g(viz,u.x\8,u.y\8)
 		 and (u.discovered or u.const)
 		then
@@ -67,6 +50,23 @@ function _draw()
 
 	foreach(bf,draw_unit)
 	foreach(proj,draw_projectile)
+	
+	if loser then
+		camera()
+		rectfill(unspl"0,97,128,121,9")
+		print(loser==1 and
+			"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose" or
+			"\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"
+			,53,102)
+		pal(2,0)
+	 sspr(64+
+	 	({48,t()\0.2%3*16})[loser],
+	 	unspl"0,16,8,12,99,32,16")
+	 pal()
+	 ?"\f1\-0\-a\|ipress ❎ for menu"
+	 return
+	end
+	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(32) --draw fogmap
 	
@@ -161,24 +161,29 @@ function _draw()
 	--cursor can change pal, so
 	--reset
 	pal()
-	
---	time("_draw")
---	if sel1 then
---		print(sel1.discovered,0,0,7)
---	end
 end
 
 function _update()
---	time("_update",60)
+	if menu then
+ 	if (btnp(❎)) new_game()
+ 	return
+	end
 
 	async_task()
 	fps=(fps+1)%60
 	upc=fps%upcycle
  
  handle_input()
- 
+	 
  buttons,pos,hoverunit={},{}
- 	
+ 
+ if loser then
+ 	--disable mouse
+ 	poke(0x5f2d,0)
+ 	menu=btnp(❎)
+		return
+	end
+	
  --turn over the viz that's
  --been built up for the last
  --<upcycle> frames
@@ -251,8 +256,6 @@ function _update()
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
-
---	time("_update",60)
 end
 
 -->8
@@ -1356,7 +1359,7 @@ function handle_input()
  	mid(0,
  		cy+band(b,0x8)/4-band(b,0x4)/2,
 	 	--menuh=21
- 		maph-107
+ 		maph-(loser and 128 or 107)
  	),
  	mid(0,stat(32),126),
 	 mid(-1,stat(33),126)
@@ -1433,6 +1436,7 @@ function tick_unit(u)
 		if u.dead==60 then
 			modify_totalu(
 				del(units,u).p-2)
+			loser=u.typ==queen and u.p
 		end
 		return
 	end
@@ -2687,7 +2691,6 @@ end
 function async_task()
 	local q=queue[1]
 	if q then
-		--time("dmap")
 		if #q==1 then
 	 	queue[1]=make_dmap(q)
 		else
@@ -2697,7 +2700,6 @@ function async_task()
 					deli(queue,1).dmap
 			end
 		end
-		--time("dmap")
 	end
 end
 
@@ -2762,23 +2764,6 @@ function make_dmap(key)
 		nxt={},
 	}
 end
-
---function draw_dmap(res_typ)
---	local dmap=dmaps[res_typ]
--- if (not dmap) return
--- for x=0,16 do
---		for y=0,16 do
---			local n=g(dmap,x+flr(cx/8),y+flr(cy/8))
---			print(n==0 and "+" or n or "",
---				x*8+2,y*8+2,14)
---	 end
---	end
---end
---draw=_draw
---_draw=function()
---	draw()
---	draw_dmap("r")
---end
 -->8
 --init
 
@@ -2827,9 +2812,13 @@ e19=4
 e33=13
 ]]
 
-poke(0x5f2d,3)
-
 function init()
+	--enable mouse
+	poke(0x5f2d,3)
+	
+	--reset map+fogmap
+	reload()
+	
 	--tech can change this
 	units_heal,farm_cycles,
 	carry_capacity,
@@ -2844,7 +2833,7 @@ function init()
 	units,restiles,selection,
 		proj,bldgs,spiders,viz,
 		new_viz,
-		dmap_st,res=
+		dmap_st,res,loser,menu=
 		{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
@@ -2857,22 +2846,27 @@ ppl=10
 ]]
 end
 
-init()
+menu=1
 
---qx=6*8, qy=5*8, +9, +4
-unit(queen,unspl"57,44,1")
-
-make_dmaps"d"
-
-unit(ant,unspl"40,40,1")-- -8,0
-unit(ant,unspl"68,43,1")-- 20,3
-unit(ant,unspl"50,32,1")-- 2,-8
-unit(den,unspl"48,56,1")--0,16
---web.breq=0
---8*8+15/2,16*8+16\2
-unit(castle,unspl"71,136,2")
---unit(beetle,unspl"65,81,2")
-
+function new_game()
+	menu=init()
+	--qx=6*8, qy=5*8, +9, +4
+	unit(queen,unspl"57,44,1")
+	
+	make_dmaps"d"
+	
+	unit(ant,unspl"40,40,1")-- -8,0
+	unit(ant,unspl"68,43,1")-- 20,3
+	unit(ant,unspl"50,32,1")-- 2,-8
+	for i=0,50 do
+	unit(archer,unspl"48,56,1")--0,16
+	end
+	--web.breq=0
+	--8*8+15/2,16*8+16\2
+	unit(queen,unspl"71,136,2")
+	
+	--unit(beetle,unspl"65,81,2")
+end
 -->8
 --clipboard saving
 
@@ -2928,8 +2922,6 @@ menuitem(2,"◆ load from clip",function()
 	for i,t in inext,split(deli(lines)) do
 		if t!="" then
 			mset(i%mapw8,i/mapw8,t)
-			--add fog to fogmap
-			mset(i%mapw8+32,i/mapw8,75)
 		end
 	end
 	local r,e=
@@ -2958,11 +2950,11 @@ menuitem(3,"   (paste first)")
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
-00700700005111000d000000dd00000000000000000051100d011100dd0000001111000000101000011100000010100001110000044440000000000000000000
-000770000051111000511100005111000000000000005111d0511110005111001111011104444000111101110444400011110111042420000000000000010100
-000770000001111000511110005111100d51110000000d11005d1110005111101101441144242000110144114424200011014411404400000110001110144410
-00700700000d1d10000d1d100001d1d0d051d1d00000000d000000d0000d1d100005440050440000110544005044000011054405050050001111144114154510
-00000000000000000000000000000000000000000000000000000000000000000050500505005000005050050500500000505000000000001150544505044000
+00700700005111000d000000dd00000000000000000051100d011100dd0000001111000000101000011100000010100001110000044440000000000000010100
+000770000051111000511100005111000000000000005111d0511110005111001111011104444000111101110444400011110111042420000110001110144410
+000770000001111000511110005111100d51110000000d11005d1110005111101101441144242000110144114424200011014411404400001111144114124210
+00700700000d1d10000d1d100001d1d0d051d1d00000000d000000d0000d1d100005440050440000110544005044000011054405050050001150544505044000
+00000000000000000000000000000000000000000000000000000000000000000050500505005000005050050500500000505000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000800000008000080000000000000000000000000000000000000000010050000000000000000000000000000000000000000000000000000
 000000000000000088000800880008800000000050000000000080000000000000000000115000000000000000000000000000000000000000d0000000000000
