@@ -2412,7 +2412,7 @@ function draw_port(
 )
 	local cant_pay=costs and not can_pay(costs)
 	rect(x,y,x+10,y+9,
-		u and u.p!=1 and 2 or
+		u and u.p or
 		cant_pay and 6 or
 		costs and 3 or 1
 	)
@@ -2867,7 +2867,7 @@ make_dmaps"d"
 unit(ant,unspl"40,40,1")-- -8,0
 unit(ant,unspl"68,43,1")-- 20,3
 unit(ant,unspl"50,32,1")-- 2,-8
-unit(warant,unspl"48,56,1")--0,16
+unit(den,unspl"48,56,1")--0,16
 --web.breq=0
 --8*8+15/2,16*8+16\2
 unit(castle,unspl"71,136,2")
