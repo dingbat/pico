@@ -13,15 +13,18 @@ todo:
 - addtl map?
 ]]
 
+cx,cy,cvx,cvy=0,30,1,1
 function _draw()
 	if menu then
-		cx,cy=0,0
+--		cx,cy=sin(t()/2)*4,
+--			8+cos(t()/2)*4
  	pal(split"1,5,3,13,13,13,6,2,6,6,13,13,13,0,5")
 		draw_map(2)
 		pal()
+		camera()
 		print(
 			"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start"
-		,22,50)
+		,22,55)
 		return
 	end
  --cls() not needed!
@@ -165,6 +168,10 @@ end
 
 function _update()
 	if menu then
+		cx+=cvx
+		cy+=cvy
+		if (cx>=100 or cx<0) cvx*=-1
+		if (cy>=100 or cy<0) cvy*=-1
  	if (btnp(❎)) new_game()
  	return
 	end
@@ -2859,7 +2866,7 @@ function new_game()
 	unit(ant,unspl"68,43,1")-- 20,3
 	unit(ant,unspl"50,32,1")-- 2,-8
 	for i=0,50 do
-	unit(archer,unspl"48,56,1")--0,16
+	unit(warant,unspl"48,56,1")--0,16
 	end
 	--web.breq=0
 	--8*8+15/2,16*8+16\2
