@@ -2593,25 +2593,24 @@ function single_unit_section()
 end
 
 function draw_menu()
-	local x,secs,modstart=
- 	0,split"102,26",1
+	local x,secs=0,split"102,26"
  if sel_typ then
 		if sel_typ.has_q then
   	secs=split"17,24,61,26"
  	elseif sel_typ.prod then
-  	secs,modstart=split"35,67,26",0
+  	secs=split"35,67,26"
   end
 	end
  for i,sec in inext,secs do
- 	if (i%2==modstart)	pal(4,15)
- 	camera(-x)
+ 	if (i%2!=#secs%2)	pal(4,15)
+ 	camera(x)
  	--104="y"=menuy
  	spr(unspl"128,0,104")
  	spr(128,sec-8,104)
  	line(sec-4,unspl"105,3,105,7")
  	rectfill(sec-4,unspl"106,3,108,4")
  	rectfill(sec,unspl"108,0,128")
- 	x+=sec
+ 	x-=sec
  	pal()
  end
  camera()
