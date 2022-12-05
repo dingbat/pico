@@ -245,12 +245,12 @@ function _update()
 			enemy_sel or {}
 	end
 	sel1,sel_typ=selection[1]
-	for s in all(selection) do
+	foreachsel(function(s)
 		--must explicitly check for
 		--nil bc it can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
-	end
+	end)
 
 --	time("_update",60)
 end
@@ -1199,9 +1199,7 @@ function handle_click()
 				mmwratio*dx,mmhratio*dy
 			if rclick and sel1 then
 				--right click, move
-				for u in all(selection) do
-					move(u,x,y)
-				end
+				foreachsel(move,x,y)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
 			elseif lclick then
@@ -1251,9 +1249,7 @@ function handle_click()
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
 				1,nil,nil,0)
-			for u in all(selection) do
-			 build(u,new)
-			end
+			foreachsel(build,new)
 			to_build=nil
 		end
 		return
@@ -1294,37 +1290,27 @@ function handle_click()
 	 	if avail_farm() then
 	 		harvest(sel1,hoverunit)
 	 	else
-		  for u in all(selection) do
-				 gather(u,tx,ty)
-	  	end
+	  	foreachsel(gather,tx,ty)
 	 	end
   	
   elseif can_build() then
   
-  	for u in all(selection) do
-  		build(u,hoverunit)
-  	end
-  	hilite_hoverunit()
+  	foreachsel(build,hoverunit)
+			hilite_hoverunit()
   	
 	 elseif can_attack() then
 	 
-	 	for u in all(selection) do
-  		attack(u,hoverunit)
-  	end
+  	foreachsel(attack,hoverunit)
   	hilite_hoverunit()
   	
   elseif can_drop() then
   
-	 	for u in all(selection) do
-				drop(u,nil,hoverunit)
-  	end
+  	foreachsel(drop,nil,hoverunit)
   	hilite_hoverunit()
   	
   elseif sel1.typ.unit then
   
-	 	for u in all(selection) do
-				move(u,mx,my)
-  	end
+  	foreachsel(move,mx,my)
   	hilite={t=t(),x=mx,y=my}
   	
   elseif sel1.typ.prod then
@@ -1335,6 +1321,12 @@ function handle_click()
   	sel1.rx,sel1.ry=mx,my
   end
  end
+end
+
+function foreachsel(func,...)
+	for u in all(selection) do
+		func(u,...)
+	end
 end
 
 function hilite_hoverunit()
