@@ -237,7 +237,8 @@ function _update()
 			bldg_sel or
 			enemy_sel or {}
 	end
-	sel1,sel_typ=selection[1]
+	sel1,numsel,sel_typ=
+		selection[1],#selection
 	foreachsel(function(s)
 		--explicitly check for
 		--nil bc can be false
@@ -2194,7 +2195,7 @@ function draw_sel_ports()
 		local x=i*13-10
 		if i>6 then
 			--menuy+6
-			print("\f1+"..#selection-6,x,110)
+			print("\f1+"..numsel-6,x,110)
 			break
 		end
 		draw_port(
@@ -2211,7 +2212,7 @@ function single_unit_section()
 	local typ,r,q=
 		sel1.typ,sel1.res,sel1.q
 	
-	if #selection<3 or sel_typ!=ant then
+	if numsel<3 or sel_typ!=ant then
 		draw_sel_ports()
 	else
 		--menuy+3
@@ -2220,10 +2221,10 @@ function single_unit_section()
 				deli(selection).sel=false
 			end)
 		--menuy+6
-		print("X"..#selection,unspl"16,111,7")
+		print("X"..numsel,unspl"16,111,7")
 	end
 		
-	if #selection==1 and r then
+	if numsel==1 and r then
 		for i=0,sel_typ.carry-1 do
 			--menuy+4
 			camera(i%3*-3-20,i\3*-3-108)
@@ -2321,7 +2322,7 @@ function draw_menu()
  camera()
 
  if sel_typ and
- 	(#selection==1 or
+ 	(numsel==1 or
  		sel_typ!=spider) and
  	sel1.p==1
  then
