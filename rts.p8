@@ -2321,23 +2321,24 @@ function draw_menu()
 		unspl"0,150,2")
 	rectfill(len-1,unspl"121,0,128,7")
 	print_res(res,unspl"1,122,2")
-	line(len-2,unspl"120,0,120,5")
-	pset(len-1,121)
-	line(len,122,len,128)
+	camera(-len)
+	line(unspl"-2,120,-128,120,5")
+	pset(-1,121)
+	line(unspl"0,122,0,128")
 	
 	if hovbtn and hovbtn.costs and
 		breq_satisfied(hovbtn.costs) then
 		local len=print_res(
 		 hovbtn.costs,0,150)
 		camera(
-			(len-8)/2-hovbtn.r[1],
+			len/2-4-hovbtn.r[1],
 			8-hovbtn.r[2]
 		)
 		rectfill(len+1,unspl"0,0,8,7")
 		print_res(hovbtn.costs,2,2)
 		rect(len+2,unspl"0,0,8,1")
-		camera()
 	end
+	camera()
 end
 -->8
 --dmaps
