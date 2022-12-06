@@ -6,26 +6,29 @@ __lua__
 function _draw()
  --cls() not needed!
 	if menu then
- 	pal(split"1,5,3,13,13,13,6,2,6,6,13,13,13,0,5")
+ 	pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
 		draw_map(0)
 		camera()
-		sspr(unspl"32,88,39,8,49,70")
-	 --28 tok (replace with pal())
-	 pal(split"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15")
+		sspr(unspl"32,88,39,8,49,75")
+	 --42 tok (replace with pal())
 	 local x=64+t()\0.5%2*16
-	 sspr(x,unspl"0,16,8,25,25,32,16")
+	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
+	 sspr(x,unspl"0,16,8,25,31,32,16")
+	 sspr(x,unspl"0,16,8,72,31,32,16,1")
+	 pal(split"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15")
+	 sspr(x,unspl"0,16,8,25,30,32,16")
 	 pal(1,2)
-	 sspr(x,unspl"0,16,8,72,25,32,16,1")
+	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 	 --
 	 --pal()
 		print(
 			"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start"
-		,22,45)
+		,22,50)
 		print(ai_diff==0 and
 			"\f0easy\-0\|f\fbeasy" or
 			ai_diff==1 and
 			"\f0\-jmed\-4\|f\famed" or
-			"\f0hard\-0\|f\fehard",57,72)
+			"\f0hard\-0\|f\fehard",57,77)
 		return
 	end
 
@@ -73,23 +76,21 @@ function _draw()
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(32) --draw fogmap
 	
-	--don't want draw_unit
-	--resetting fog pal
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
 	pal=_pal
 	pal()
 	
-	fillp(▒)
+	fillp"23130.5"--▒
 	
 	for x=cx\8,cx\8+16 do
-	 for y=cy\8,cy\8+16 do
-	 	local i=x|y<<8
-			camera(x*-8+cx,y*-8+cy)
-		 color(exp[i] and 5 or 0)
-		 borders(exp,i)
-		 borders(viz,i)
-		end
+	for y=cy\8,cy\8+16 do
+ 	local i=x|y<<8
+		camera(x*-8+cx,y*-8+cy)
+	 color(exp[i] and 5 or 0)
+	 borders(exp,i)
+	 borders(viz,i)
+	end
 	end
 	
 	camera(cx,cy)
@@ -141,7 +142,7 @@ function _draw()
 		if amy>=104 then
 			x,y=amx-3,amy-3
 		else
-			fillp(▒)
+			fillp"23130.5"--▒
 			rect(x-1,y-1,x+typ.fw,
 			 y+typ.fh,3)
 	 	fillp()
@@ -166,7 +167,7 @@ function _update()
 		cy+=cvy
 		if (cx%128==0) cvx*=-1
 		if (cy%128==0) cvy*=-1
- 	if btnp(❎) then
+ 	if btnp"5" then
  		new_game()
  	else
 			ai_diff-=btnp()
@@ -175,7 +176,7 @@ function _update()
  	return
 	end
 
-	async_task()
+	async_dmap()
 	fps=(fps+1)%60
 	upc=fps%upcycle
 
@@ -184,8 +185,8 @@ function _update()
  buttons,pos,hoverunit={},{}
  if loser then
  	--disable mouse
- 	poke(0x5f2d)
- 	if btnp(❎) then
+ 	poke"24365"
+ 	if btnp"5" then
  		init_menu()
  	end
 		return
@@ -1176,14 +1177,13 @@ end
 function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.hp<=0 and not u.dead then
-		u.dead,u.st,u.sel=
-			0,parse"t=dead"
-		del(selection,u)
+		del(selection,u).dead,
+			u.st,u.sel=0,parse"t=dead"
 		if typ.bldg then
 			register_bldg(u)
 		end
 		if u.p==1 then
-			if u.typ==mound then
+			if typ.drop then
 				res.ppl-=5
 				res.pl=min(res.ppl,99)
 			elseif typ.unit then
@@ -1251,18 +1251,15 @@ function update_viz(u)
 end
 
 function viztiles(x,y,los)
-	local xo,yo,vlos=
-		x%8\2,y%8\2,
-		vcache[los]
-	if not vlos then
-		vlos={}
-		vcache[los]=vlos
-	end
-	local v,l=g(vlos,xo,yo),
+	local xo,yo,l=x%8\2,y%8\2,
 		ceil(los/8)
+	if not vcache[los] then
+		vcache[los]={}
+	end
+	local v=g(vcache[los],xo,yo)
 	if not v then
 		v={}
-		s(vlos,xo,yo,v)
+		s(vcache[los],xo,yo,v)
 		for dx=-l,l do
 		for dy=-l,l do
 		 if dist(xo*2-dx*8-4,
@@ -1380,7 +1377,7 @@ function draw_unit(u)
 	end
 	
 	if u.const then
-		fillp(▒)
+		fillp"23130.5"--▒
 		rectaround(u,
 			u==sel1 and 9 or 12)
 		fillp()
@@ -1569,20 +1566,18 @@ function buildrepair(u)
 	if fps%30==0 then
 		if b.const then
  		b.const+=1
- 		if b.const==b.typ.const then
+ 		if b.const>=b.typ.const then
  			b.const=nil
  			register_bldg(b)
- 			if b.typ==mound and b.p==1 then
+ 			if b.typ.drop and b.p==1 then
  				res.ppl+=5
  				res.pl=min(res.ppl,99)
  			elseif b.typ.farm then
  				harvest(u,b)
  			end
  		end
- 	elseif (
- 		b.hp<b.typ.hp and
- 		res.b>=1
- 	) then
+ 	elseif b.hp<b.typ.hp and
+ 		res.b>=1 then
  		b.hp+=1
  		res.b-=0.5
  	else
@@ -1612,8 +1607,7 @@ function produce(u)
 				u.typ.prod[b.idx]=b.tech()
 			else
 				local new=unit(
-					b.typ,u.x,u.y,1
-				)
+					b.typ,u.x,u.y,1)
 				if new.typ==ant and
 					u.rx and
 					is_res(u.rx,u.ry)
@@ -1637,11 +1631,11 @@ end
 function check_target_col(u)
 	local st=u.st
 	local t=st.target
-	if (
+	if
 		t and
 		intersect(u_rect(t),u_rect(u),
 			st.t=="gather" and -3 or 0)
-	) then
+	then
 		u.dir,st.active,st.fps=
 			sgn(t.x-u.x),true,fps
 		if st.t=="harvest" then
@@ -2387,7 +2381,7 @@ b=b,g,r,d
 d=d,r,g,b]][r])
 end
 
-function async_task()
+function async_dmap()
 	local q=queue[1]
 	if q then
 		if #q==1 then
@@ -2424,23 +2418,21 @@ function dmapcc(q)
 end
 
 function make_dmap(key)
-	local open,starts={},
-		dmap_st[key]
-	if not starts then
-		starts={}
-		dmap_st[key]=starts
+	local open={}
+	if not dmap_st[key] then
+		dmap_st[key]={}
 		for x=0,mapw8 do
 		for y=0,maph8 do
 			if
 				fget(mget(x,y),key2resf[key])
 		 then
-		 	s(starts,x,y,{x,y})
+		 	s(dmap_st[key],x,y,{x,y})
 		 end
 		end
 		end
 	end
 
-	for i,t in next,starts do
+	for i,t in next,dmap_st[key] do
 		if	sur_acc(unpack(t)) then
 			t.k=i
 			add(open,t)
