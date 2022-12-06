@@ -1,4 +1,28 @@
 
+--[[
+todo:
+- ai
+- balancing
+	- dmg mult table
+	- unit stats (spd,los,hp)
+ - costs
+- addtl map?
+]]
+
+--[[
+the following will not be saved:
+- unit states
+- resource count in partially
+  mined resource tiles
+- units in production, along w/
+  the used resources+pop count
+- techs (research, upgrades)
+- if a prereq building was built
+  but there are none left when
+  saving, the prereq won't save
+- top-left tree will regrow :-)
+]]
+
 acct={}
 times={}
 function flush_time(str,f)

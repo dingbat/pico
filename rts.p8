@@ -3,16 +3,6 @@ version 38
 __lua__
 --main loop
 
---[[
-todo:
-- ai
-- balancing
-	- dmg mult table
-	- unit stats (spd,los,hp)
- - costs
-- addtl map?
-]]
-
 function _draw()
  --cls() not needed!
 	if menu then
@@ -50,7 +40,6 @@ function _draw()
 	 end
  end
 
-	--highlight selected farm
 	if sel1 and sel1.typ.farm and
 		not sel1.const then
 	 rectaround(sel1,9)
@@ -156,7 +145,6 @@ function _draw()
 		pal()
 	end
 	
-	--minimap hilite
 	if hilite and hilite.circ then
 		circ(unpack(hilite.circ))
 	end
@@ -197,22 +185,16 @@ function _update()
 		return
 	end
 	
- --turn over the viz that's
- --been built up for the last
- --<upcycle> frames
+ --turn over viz
  if upc==0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k<<8>>8,k\256
-			--if can see, clear fog (0)
-			--else, no viz but explored,
-	 	--copy map tile to fogmap
-	  mset(x+32,y,viz[k] and
+			mset(x+32,y,viz[k] and
 	   0 or mget(x,y))
 		end
  end
 
- --update projectiles
  for p in all(proj) do
  	p.x,p.y=norm(p.to,p,0.8)
   if intersect(
@@ -229,26 +211,16 @@ function _update()
  end
  foreach(units,tick_unit)
 
- --fighting has to happen after
- --tick because viz is involved
+ --fighting happens after
+ --tick bc needs viz
  for i,u in inext,units do
  	if not (u.const or u.dead) then
-	  --aggress is expensive, so
-	 	--distribute which units
-	 	--run it across frames (each
-	 	--unit gets checked 3x per
-	 	--second)
 		 if upc==i%upcycle and
 		  u.st.t=="rest" and
 		  u.typ.atk
 		 then
 				aggress(u)
 	 	end
-	 	--same principle for fight,
-	 	--but it needs to manage
-	 	--timing a bit more closely
-	 	--so units stop as soon as
-	 	--they need to
 	 	if u.st.t=="attack" then
 	 		fight(u)
 	 	end
@@ -262,8 +234,8 @@ function _update()
 	end
 	sel1,sel_typ=selection[1]
 	foreachsel(function(s)
-		--must explicitly check for
-		--nil bc it can be false
+		--explicitly check for
+		--nil bc can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
@@ -288,179 +260,137 @@ function parse(unit,typ,tech)
 	return add(typs,obj)
 end
 
---bitmaps:
---tower:1
---mound:2
---den:4
---barracks:8
---farm:16
---castle:32
-
 ant=parse[[
 idx=1
 w=4
 fw=4
 h=4
-
 xoff_r=16
 yoff_g=4
 xoff_b=16
 yoff_b=4
-
 rest_x=0
 rest_y=8
 rest_fr=2
 rest_fps=30
-
 drop_x=0
 drop_y=8
 drop_fr=2
 drop_fps=30
-
 move_x=8
 move_y=8
 move_fr=2
 move_fps=15
-
 gather_x=8
 gather_y=8
 gather_fr=2
 gather_fps=15
-
 build_x=40
 build_y=8
 build_fr=2
 build_fps=15
-
 harvest_x=32
 harvest_y=8
 harvest_fr=2
 harvest_fps=15
-
 dead_x=40
 dead_y=12
-
 portx=0
 porty=72
 portw=8
 dir=1
 unit=1
 carry=6
-
 spd=1
 los=20
 hp=10
-def=ant
-]]
+def=ant]]
 beetle=parse[[
 idx=2
 w=8
 fw=8
 h=6
-
 rest_x=8
 rest_y=0
 rest_fr=2
 rest_fps=30
-
 move_x=16
 move_y=0
 move_fr=2
 move_fps=10
-
 attack_x=40
 attack_y=0
 attack_fr=3
 attack_fps=10
-
 dead_x=32
 dead_y=0
-
 portx=26
 porty=72
 portw=9
 unit=1
 dir=1
-
 spd=0.9
 los=20
 hp=20
-
 def=seige
 atk_typ=seige
-atk=1
-]]
+atk=1]]
 spider=parse[[
 idx=3
 w=8
 fw=8
 h=5
-
 rest_x=0
 rest_y=16
 rest_fr=2
 rest_fps=30
-
 attack_x=64
 attack_y=16
 attack_fr=3
 attack_fps=10
-
 move_x=8
 move_y=16
 move_fr=6
 move_fps=2
-
 web_x=88
 web_y=16
-
 dead_x=56
 dead_y=16
-
 portx=16
 porty=72
 portw=9
 unit=1
 dir=1
-
 spd=2
 los=30
 hp=15
-
 def=spider
 atk_typ=spider
-atk=2
-]]
+atk=2]]
 archer=parse[[
 idx=4
 w=7
 fw=8
 h=6
-
 rest_x=0
 rest_y=25
 rest_fr=2
 rest_fps=30
-
 move_x=8
 move_y=24
 move_fr=2
 move_fps=10
-
 attack_x=32
 attack_y=24
 attack_fr=2
 attack_fps=10
-
 dead_x=24
 dead_y=25
-
 portx=44
 porty=72
 portw=9
 unit=1
 dir=1
-
 spd=1.5
 los=30
 hp=15
@@ -469,79 +399,63 @@ proj_yo=0
 proj_freq=30
 proj_s=28
 range=25
-
 atk_typ=acid
 def=ant
-atk=1
-]]
+atk=1]]
 warant=parse[[
 idx=5
 w=8
 fw=8
 h=6
-
 rest_x=48
 rest_y=64
 rest_fr=2
 rest_fps=30
-
 move_x=56
 move_y=64
 move_fr=2
 move_fps=10
-
 attack_x=80
 attack_y=64
 attack_fr=2
 attack_fps=10
-
 dead_x=72
 dead_y=64
-
 portx=35
 porty=72
 portw=9
 unit=1
 dir=1
-
 spd=1.5
 los=30
 hp=15
-
 atk_typ=ant
 def=ant
-atk=1
-]]
+atk=1]]
 cat=parse[[
 idx=6
 w=16
 fw=16
 h=8
-
 rest_x=48
 rest_y=24
 rest_fr=2
 rest_fps=30
-
 move_x=64
 move_y=24
 move_fr=4
 move_fps=8
-
 attack_x=64
 attack_y=8
 attack_fr=4
 attack_fps=15
-
 dead_x=112
 dead_y=16
-
 portx=53
 porty=72
 portw=9
 unit=1
 dir=1
-
 spd=0.75
 los=30
 hp=15
@@ -550,37 +464,30 @@ proj_xo=1
 proj_yo=-4
 proj_s=32
 range=50
-
 atk_typ=seige
 def=seige
-atk=2
-]]
+atk=2]]
 queen=parse[[
 idx=7
 w=15
 h=8
 fw=16
-
 rest_x=64
 rest_y=-1
 rest_fr=2
 rest_fps=30
-
 attack_x=80
 attack_y=-1
 attack_fr=2
 attack_fps=15
-
 dead_x=112
 dead_y=0
-
 dir=-1
 portx=8
 porty=72
 portw=8
 has_q=1
 drop=1
-
 bldg=1
 los=20
 range=20
@@ -589,39 +496,29 @@ proj_xo=-4
 proj_yo=2
 proj_freq=30
 proj_s=28
-
 atk_typ=acid
 def=queen
 atk=1
-bitmap=0
-]]
-
---#########----
-
+bitmap=0]]
 tower=parse[[
 idx=8
 w=8
 fw=8
 h=14
 fh=16
-
 rest_x=40
 rest_y=96
-
 attack_x=40
 attack_y=96
-
 fire=1
 dead_x=48
 dead_y=99
 dead_fr=7
 dead_fps=9
-
 portx=0
 porty=80
 portw=8
 bldg=1
-
 los=30
 hp=40
 dir=-1
@@ -631,32 +528,26 @@ proj_yo=-2
 proj_xo=-1
 proj_freq=30
 proj_s=24
-
 atk_typ=tower
 def=building
 atk=1
-bitmap=1
-]]
+bitmap=1]]
 mound=parse[[
 idx=9
 w=8
 fw=8
 h=8
 fh=8
-
 rest_x=16
 rest_y=96
-
 portx=35
 porty=80
 portw=8
-
 fire=1
 dead_x=48
 dead_y=104
 dead_fr=7
 dead_fps=9
-
 bldg=1
 los=5
 hp=30
@@ -665,29 +556,23 @@ const=12
 has_q=1
 drop=1
 def=building
-bitmap=2
-]]
-
+bitmap=2]]
 den=parse[[
 idx=10
 w=8
 fw=8
 h=8
 fh=8
-
 rest_x=16
 rest_y=104
-
 fire=1
 dead_x=48
 dead_y=104
 dead_fr=7
 dead_fps=9
-
 portx=26
 porty=80
 portw=9
-
 bldg=1
 los=10
 hp=20
@@ -695,28 +580,23 @@ dir=-1
 const=20
 has_q=1
 def=building
-bitmap=4
-]]
+bitmap=4]]
 barracks=parse[[
 idx=11
 w=8
 fw=8
 h=8
 fh=8
-
 rest_x=16
 rest_y=112
-
 fire=1
 dead_x=48
 dead_y=104
 dead_fr=7
 dead_fps=9
-
 portx=0
 porty=88
 portw=8
-
 bldg=1
 los=10
 hp=20
@@ -724,28 +604,23 @@ dir=-1
 const=20
 has_q=1
 def=building
-bitmap=8
-]]
+bitmap=8]]
 farm=parse[[
 idx=12
 w=8
 fw=8
 h=8
 fh=8
-
 rest_x=16
 rest_y=120
-
 fire=1
 dead_x=48
 dead_y=104
 dead_fr=7
 dead_fps=9
-
 portx=17
 porty=80
 portw=9
-
 farm=1
 carry=9
 bldg=1
@@ -754,34 +629,27 @@ hp=10
 dir=-1
 const=6
 def=building
-bitmap=16
-]]
-
+bitmap=16]]
 castle=parse[[
 idx=13
 w=15
 fw=16
 h=16
 fh=16
-
 rest_x=112
 rest_y=113
-
 attack_x=112
 attack_y=113
-
 fire=1
 dead_x=48
 dead_y=97
 dead_fr=4
 dead_fps=15
-
 portx=8
 porty=88
 portw=9
 bldg=1
 has_q=1
-
 los=40
 hp=70
 dir=-1
@@ -791,221 +659,170 @@ proj_yo=0
 proj_xo=0
 proj_s=24
 proj_freq=20
-
 atk_typ=tower
 def=building
 atk=1
-bitmap=32
-]]
+bitmap=32]]
 
 ant.prod={
 	parse([[
 r=0
 g=0
-b=2
-]],mound),
-
+b=2]],mound),
 	parse([[
 r=1
 g=3
 b=0
-breq=2
-]],farm),
-
+breq=2]],farm),
 	parse([[
 r=0
 g=5
-b=5
-]],barracks),
-
+b=5]],barracks),
 	parse([[
 r=0
 g=3
 b=8
-breq=8
-]],den),
-
+breq=8]],den),
 	parse([[
 r=0
 g=3
-b=8
-]],tower),
-
+b=8]],tower),
 --breq=1|4|8=13 (twr,den,bar)
 	parse([[
 r=0
 g=3
 b=3
-breq=13
-]],castle),
+breq=13]],castle),
 }
-
 queen.prod={
 	parse([[
 t=6
 r=2
 g=3
 b=0
-p=
-]],ant),
+p=]],ant),
 nil,nil,nil,
-	parse([[
+parse([[
 t=10
 r=0
 g=12
 b=0
-idx=5
-]],parse[[
+idx=5]],parse[[
 portx=96
 porty=88
-portw=8
-]],function()
-			ant[1].carry=9
-		end
-	),
+portw=8]],function()
+		ant[1].carry=9
+	end),
 }
-
 web=parse([[
 t=4
 r=0
 g=2
 b=0
-breq=1000
-]],parse[[
+breq=100]],parse[[
 portx=8
 porty=80
-portw=9
-]])
-
+portw=9]])
 spider.prod={web}
-
 den.prod={
 	parse([[
 t=8
 r=0
 g=4
 b=3
-p=
-]],beetle),
-
+p=]],beetle),
 	parse([[
 t=8
 r=3
 g=4
 b=0
-p=
-]],spider),
-
+p=]],spider),
 parse([[
 t=5
 r=0
 g=2
 b=0
-idx=3
-]],parse[[
+idx=3]],parse[[
 portx=114
 porty=72
-portw=9
-]],function()
-			web.breq=nil
-		end
-	),
+portw=9]],function()
+		web.breq=nil
+	end),
 nil,
- parse([[
+parse([[
 t=5
 r=0
 g=2
 b=0
-idx=5
-]],parse[[
+idx=5]],parse[[
 portx=114
 porty=64
-portw=9
-]],function()
-			beetle[1].atk+=1
-		end
-	),
-	parse([[
+portw=9]],function()
+		beetle[1].atk+=1
+	end),
+parse([[
 t=5
 r=0
 g=2
 b=0
-idx=6
-]],parse[[
+idx=6]],parse[[
 portx=105
 porty=64
-portw=9
-]],function()
-			spider[1].atk+=1
-		end
-	),
+portw=9]],function()
+		spider[1].atk+=1
+	end),
 }
-
 mound.prod={
 	parse([[
 t=12
 r=5
 g=5
 b=1
-idx=1
-]],parse[[
+idx=1]],parse[[
 portx=104
 porty=88
-portw=9
-]],function()
-			farm_cycles=10
-		end
-	),
+portw=9]],function()
+		farm_cycles=10
+	end),
 }
-
 barracks.prod={
 	parse([[
 t=10
 r=1
 g=2
 b=1
-p=
-]],warant),
+p=]],warant),
 	parse([[
 t=10
 r=1
 g=2
 b=1
-p=
-]],archer),
-
+p=]],archer),
 	parse([[
 t=5
 r=0
 g=2
 b=0
-idx=3
-]],parse[[
+idx=3]],parse[[
 portx=96
 porty=64
 portw=9
 ]],function()
-			archer[1].range+=5
-			archer[1].los+=5
-		end
-	),
-	nil,
-	
-		parse([[
+		archer[1].range+=5
+		archer[1].los+=5
+	end),
+nil,
+parse([[
 t=5
 r=0
 g=2
 b=0
-idx=5
-]],parse[[
+idx=5]],parse[[
 portx=105
 porty=72
-portw=9
-]],function()
-			warant[1].atk+=1
-		end
-	),
-	
+portw=9]],function()
+		warant[1].atk+=1
+	end),
 	parse([[
 t=5
 r=0
@@ -1017,53 +834,43 @@ portx=96
 porty=72
 portw=9
 ]],function()
-			archer[1].atk+=1
-		end
-	),
+		archer[1].atk+=1
+end),
 }
-
 castle.prod={
 	parse([[
 t=10
 r=1
 g=2
 b=1
-p=
-]],cat),
+p=]],cat),
 nil,nil,nil,
  parse([[
 t=5
 r=0
 g=2
 b=0
-idx=5
-]],parse[[
+idx=5]],parse[[
 portx=96
 porty=80
-portw=8
-]],function()
-			units_heal[1]=true
-		end
-	),
-	parse([[
+portw=8]],function()
+	units_heal[1]=true
+end),
+parse([[
 t=5
 r=0
 g=2
 b=0
-idx=6
-]],parse[[
+idx=6]],parse[[
 portx=104
 porty=80
-portw=9
-]],function()
-			for x in all{tower,castle,
-				den,barracks} do
-				x[1].los+=5
-			end
+portw=9]],function()
+		for x in all{tower,castle,
+			den,barracks} do
+			x[1].los+=5
 		end
-	),
+	end),
 }
-
 dmg_mult=parse[[
 ant_vs_ant=1
 ant_vs_queen=0.9
@@ -1093,20 +900,17 @@ acid_vs_ant=1
 acid_vs_queen=1
 acid_vs_spider=1.5
 acid_vs_seige=1
-acid_vs_building=0.6
-]]
+acid_vs_building=0.6]]
 
 function rest(u)
 	u.st=parse"t=rest"
 end
-
 function move(u,x,y)
 	u.st={
 		t="move",
 		wayp=get_wayp(u,x,y,true),
 	}
 end
-
 function build(u,b)
 	u.st,u.res={
 		t="build",
@@ -1114,17 +918,13 @@ function build(u,b)
 		wayp=get_wayp(u,b.x,b.y),
 	}
 end
-
 function target_tile(tx,ty)
 	return {
 		x=tx*8+3,y=ty*8+3,
-		typ=parse[[
-w=8
-h=8
-]],
+		typ=parse[[w=8
+h=8]],
 	}
 end
-
 function gather(u,tx,ty,wp)
 	local t=target_tile(tx,ty)
 	u.st={
@@ -1137,7 +937,6 @@ function gather(u,tx,ty,wp)
 		target=t,
 	}
 end
-
 function drop(u,nxt_res,dropu)
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
@@ -1155,7 +954,6 @@ function drop(u,nxt_res,dropu)
 			target_tile(x,y),
 	}
 end
-
 function attack(u,e)
 	if u.typ.atk then
 		u.st={
@@ -1168,7 +966,6 @@ function attack(u,e)
 		end
 	end
 end
-
 function harvest(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="harvest",
@@ -1186,28 +983,23 @@ function handle_click()
 	local lclick,rclick=btnp(5),
 		btnp(4)
 
-	--check left click on button
 	if lclick and hovbtn then
 		hovbtn.handle()
 		return
 	end
 	
-	--click in menubar
 	--menuy
 	if amy>104 and not selbox then
 		local dx,dy=amx-mmx,amy-mmy
-		--minimap
 		if min(dx,dy)>=0 and
 			dx<mmw and dy<mmh+1	then
 			local x,y=
 				mmwratio*dx,mmhratio*dy
 			if rclick and sel1 then
-				--right click, move
 				foreachsel(move,x,y)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
 			elseif lclick then
-				--move camera
 				cx,cy=
 					mid(0,x-64,mapw-128),
 					--menuh=21
@@ -1218,14 +1010,12 @@ function handle_click()
 	 return
 	end
 	
-	--right click cancels place
  if rclick and (to_build or
  	webbing) then
  	to_build,webbing,webx=nil
  	return
  end
 
- --left click places web
  if webbing then
  	if lclick and
  	 can_finish_web() then
@@ -1259,7 +1049,6 @@ function handle_click()
 		return
  end
 
-	--left drag makes selbox
  if btn(5) then
  	if not selbox then
  		selx,sely=mx,my
@@ -1269,13 +1058,12 @@ function handle_click()
 			min(sely,my),
 			max(selx,mx),
 			max(sely,my),
-			7 --color when unpacking
+			7 --color
  	}
  else
  	selbox=nil
  end
 	
- --right click
  if rclick and sel1 and sel1.p==1 then
 	 local tx,ty=mx\8,my\8
 	 if can_renew_farm() then
@@ -1326,7 +1114,7 @@ end
 
 function handle_input()
 	local b=btn()
-	--make p1=p2, allowing esdf
+	--allow esdf
 	if (b>32) b>>=8
 	cx,cy,amx,amy=
  	mid(0,
@@ -1341,11 +1129,9 @@ function handle_input()
  	mid(0,stat(32),126),
 	 mid(-1,stat(33),126)
 
- --mouse-based calculations
- --buttons are actually added
- --in _draw(), frame behind
  mx,my,wmx,wmy,hovbtn=
  	amx+cx,amy+cy,mx+3,my+3
+ --buttons added in _draw()
  for b in all(buttons) do
  	if intersect(b.r,{amx,amy},1) then
 			hovbtn=b
@@ -1360,9 +1146,7 @@ function handle_input()
 	end
 
  handle_click()
- --should happen after click
- --because click could be on a
- --to_build
+ 
  if to_build then
 	 to_build.x,to_build.y=
 	 	mx\8*8,my\8*8
@@ -1403,12 +1187,10 @@ function tick_unit(u)
 	end
 	if u.dead then
 		u.dead+=1
-		--continue to provide viz
-		--while dead
 		update_viz(u)
 		if u.dead==60 then
 			modify_totalu(
-				del(units,u).p-2)
+			 del(units,u).p-2)
 			loser=u.typ==queen and u.p
 		end
 		return
@@ -1447,22 +1229,16 @@ end
 
 function update_viz(u)
 	if u.p==1 and
-			u.uid%upcycle==upc then
+		u.uid%upcycle==upc then
 		local k0=u.x\8|u.y\8<<8
-		for t in all(
-		 viztiles(
-		 	u.x,u.y,
-		 	u.typ[u.p].los
-		 )
+		for t in all(viztiles(
+		 u.x,u.y,u.typ[u.p].los)
 		) do
 			local k=k0+t
 			if bldgs[k] then
 				bldgs[k].discovered=1
 			end
-			--"v" bc it's used for
-			--indexing into rescol when
-			--drawing minimap, saves
-			--some tokens there
+			--"v" to index into rescol
 			exp[k],new_viz[k]=1,"v"
 		end
 	end
@@ -1482,14 +1258,12 @@ function viztiles(x,y,los)
 		v={}
 		s(vlos,xo,yo,v)
 		for dx=-l,l do
-		 for dy=-l,l do
-			 if dist(
-					xo*2-dx*8-4,
-					yo*2-dy*8-4
-				)<los then
-					add(v,dx+dy*256)
-				end
+		for dy=-l,l do
+		 if dist(xo*2-dx*8-4,
+		  yo*2-dy*8-4)<los then
+				add(v,dx+dy*256)
 			end
+		end
 		end
 	end
 	return v
@@ -1518,17 +1292,15 @@ function draw_minimap()
 	--map tiles
 	if fps%20==0 then
 		for tx=0,mmw do
-		 for ty=0,mmh do
-		 	local x,y=tx*mmwratio\8,
-		 		ty*mmhratio\8
-		 	sset(
-		 		72+tx,72+ty,
-					g(exp,x,y) and rescol[
-						g(viz,x,y,"e")..
-						fget(mget(x,y))
-					] or 14
-		 	)
-			end
+		for ty=0,mmh do
+	 	local x,y=tx*mmwratio\8,
+	 		ty*mmhratio\8
+	 	sset(72+tx,72+ty,
+				g(exp,x,y) and rescol[
+					g(viz,x,y,"e")..
+					fget(mget(x,y))
+				] or 14)
+		end
 		end
 	end
 	pal(14,0)
@@ -1607,15 +1379,8 @@ function draw_unit(u)
 			u==sel1 and 9 or 12)
 		fillp()
 		local p=u.const/typ.const
-		bar(
-			xx,
-			yy,
-			fw-1,
-			p,
-			14,5
-		)
-		--construction sprite
-		--(switches after 0.5)
+		bar(xx,yy,fw-1,p,14,5)
+		--const spr switches after 0.5
 		sx-=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif ufps then
@@ -1630,8 +1395,7 @@ function draw_unit(u)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
- --bldgs (fire=true) shouldn't
- --rotate
+ --bldgs shouldn't rotate
 	sspr(sx,sy,w,h,xx,yy,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
@@ -1663,7 +1427,6 @@ function update_unit(u)
  	check_target_col(u)
  end
  step(u)
- --check spider webs
  local r=u_rect(u,1)
  for i,sp in inext,spiders do
  	local ss=sp.st
@@ -1676,8 +1439,7 @@ function update_unit(u)
  			intersect(r,ss.p2,1) or
  			intersect(r,u_rect(sp),-2)
  		then
- 			u.st=parse[[
-t=dead
+ 			u.st=parse[[t=dead
 webbed=5]]
 	 		attack(sp,u)
 	 		return
@@ -1788,7 +1550,7 @@ function fight(u)
 	elseif upc==id%upcycle then
 		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
-			--pursue enemy
+			--pursue
 	 	attack(u,e)
 	 elseif not u.st.wayp then
 	 	rest(u)
@@ -1900,11 +1662,9 @@ function step(u)
 	local st=u.st
 	local wayp,spd=st.wayp,u.typ.spd
 	if wayp then
-	 --spider making web is slow
  	if (st.first_pt) spd/=2
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		spd/3.5)
- 	--7515
  	local x,y=unpack(wayp[1])
  	if dist(x-u.x,y-u.y)<2 then
  		if #wayp==1 then
@@ -1940,7 +1700,7 @@ function modify_totalu(diff)
 		totalu>=45 and 10 or 5
 end
 
---r2 can be a point {x,y}
+--r2 can be {x,y}
 function intersect(r1,r2,e)
 	local a,b,c,d=unpack(r2)
 	return r1[1]-e<(c or a) and
@@ -1958,7 +1718,7 @@ function u_rect(u,e)
  }
 end
 
--- musurca/freds - https://www.lexaloffle.com/bbs/?tid=36059
+-- musurca/freds - /bbs/?tid=36059
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,
@@ -2052,7 +1812,7 @@ function mine_res(x,y,r)
 	if n==full\3 or n==full*4\5 then
 		mset(x,y,mget(x,y)+16)
 	elseif n==0 then
-		mset(x,y,74) --exhaust tile
+		mset(x,y,74) --exhaust
 		s(dmap_st[r],x,y)
 		s(dmaps[r],x,y)
 		make_dmaps(r)
@@ -2069,7 +1829,7 @@ function norm(it,nt,f)
 		sgn(xv) --xdir
 end
 
---strict=f to ignore farms+const
+--strict incl farms+const
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0) and
@@ -2094,8 +1854,7 @@ end
 
 function register_bldg(b)
 	local typ=b.typ
-	--mod by 2 to make sure we ref
-	--the bottom-left tile
+	--make sure we get ⬇️⬅️ tile
 	local w,h,x,y=typ.w,typ.h,
 		(b.x-2)\8,(b.y+2)\8
 
@@ -2189,13 +1948,11 @@ function unit(typ,x,y,p,hp,
 		const=const,
 		discovered=discovered==1,
 		uid=uid,
-		--currently just used by farm
-		sproff=0,
+		sproff=0, --for farm
 	})
 	uid+=1
 	if u.typ.farm then
-		u.res,u.cycles=parse[[
-typ=r
+		u.res,u.cycles=parse[[typ=r
 qty=0]],0
 	end		
 	if u.typ.bldg then
@@ -2234,16 +1991,11 @@ function get_wayp(u,x,y,move)
  local wayp,dest,dest_acc=
  	{},
  	nearest_acc(x\8,y\8,u)
-	--running nearest_acc on start
-	--allows units from getting
-	--unstuck from an inaccessible
-	--tile (e.g. from clumping)
+	--unstick from an inacc tile
 	local path,exists=find_path(
 	 nearest_acc(u.x\8,u.y\8,u),
 	 dest)
- 	
-	--del last element (the start)
-	deli(path)
+	deli(path) --del start
  for n in all(path) do
 		add(wayp,
  		{n[1]*8+4,
@@ -2256,10 +2008,7 @@ function get_wayp(u,x,y,move)
  return #wayp>0 and wayp
 end
 
-
---a*
---https://t.co/nasud3d1ix
-
+--a* by https://t.co/nasud3d1ix
 function find_path(start,goal)
  local shortest,best_table={
   last=start,
@@ -2289,13 +2038,10 @@ function find_path(start,goal)
    end
    return p,true
   end
-  for n in all_surr(
-  	p[1],p[2],1,true
-  ) do
+  for n in all_surr(p[1],p[2],1,true) do
    local old_best,new_cost_from_start=
     best_table[n.k],
     shortest.cost_from_start+1
-
    if not old_best then
     old_best={
      last=n,
@@ -2350,9 +2096,8 @@ function print_res(r,x,y,zero)
 end
 
 function breq_satisfied(costs)
-	return not costs.breq or
- 	bldg_bmap&costs.breq==
- 	costs.breq
+	local b=max(costs.breq)
+	return bldg_bmap&b==b
 end
 
 function can_pay(costs)
@@ -2391,7 +2136,6 @@ function draw_port(
 		pal(split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	end
 	if not costs then
-		--gray bg, turn gray to white
 		pal(6,7)
 	end
 	sspr(typ.portx,typ.porty,
@@ -2417,7 +2161,6 @@ function draw_port(
 end
 
 function cursor_spr()
- --pointer (buttons)
  if webbing then
  	--menuy
  	if amy<104 and not can_finish_web() then
@@ -2426,25 +2169,19 @@ function cursor_spr()
  	return 70
  end
  if hovbtn then
- 	--pointer spr missing 1px
 		pset(amx-1,amy+4,5)
   return 66
 	end
 	if sel1 and sel1.p==1 then
-	 --build cursor
 		if to_build or
 			can_build() or
 			can_renew_farm() then
 			return 68
 		end
-		--pick
 		if (can_gather())	return 67
-		--sword
 		if (can_attack()) return 65
-		--basket
 		if (can_drop()) return 69
 	end
-	--default
 	return 64
 end
 
@@ -2500,7 +2237,6 @@ function single_unit_section()
 		sspr(unspl"113,80,9,9,49,108")
 	end
 	if typ.prod and not sel1.const then
-		--next will skip over nils
 		for i,b in next,typ.prod do
 			i-=1
 			draw_port(
@@ -2569,7 +2305,7 @@ function draw_menu()
  for i,sec in inext,secs do
  	if (i%2!=#secs%2)	pal(4,15)
  	camera(x)
- 	--104="y"=menuy
+ 	--104=menuy
  	spr(unspl"128,0,104")
  	spr(128,sec-8,104)
  	line(sec-4,unspl"105,3,105,7")
@@ -2590,10 +2326,8 @@ function draw_menu()
 		draw_sel_ports()
 	end
 	
-	--minimap
 	draw_minimap()
 	
-	--resources
 	local len=print_res(res,
 		unspl"0,150,2")
 	rectfill(len-1,unspl"121,0,128,7")
@@ -2641,12 +2375,10 @@ function dmap_find(u,key)
 end
 	
 function make_dmaps(r)
-	queue=split(parse[[
-r=r,g,b,d
+	queue=split(parse[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
-d=d,r,g,b
-]][r])
+d=d,r,g,b]][r])
 end
 
 function async_task()
@@ -2667,8 +2399,7 @@ end
 function dmapcc(q)
 	for i=1,#q.open do
 		if i>20 then
-			--stop for now, continue
-			--next frame
+			--continue next tick
 			return
 		end
 		local p=deli(q.open)
@@ -2689,28 +2420,22 @@ end
 function make_dmap(key)
 	local open,starts={},
 		dmap_st[key]
-	
-	--ensure starts exists (we
-	--won't enter the if for "d")
 	if not starts then
 		starts={}
 		dmap_st[key]=starts
 		for x=0,mapw8 do
-			for y=0,maph8 do
-				if
-					fget(mget(x,y),key2resf[key])
-			 then
-			 	s(starts,x,y,{x,y})
-			 end
-			end
+		for y=0,maph8 do
+			if
+				fget(mget(x,y),key2resf[key])
+		 then
+		 	s(starts,x,y,{x,y})
+		 end
+		end
 		end
 	end
 
 	for i,t in next,starts do
 		if	sur_acc(unpack(t)) then
-			--don't need to set closed[i]
-			--here bc these tiles are
-			--inaccessible anyway
 			t.k=i
 			add(open,t)
 		end
@@ -2757,27 +2482,24 @@ r=8
 g=11
 b=4
 p=1
-
 v0=15
 v1=15
 v7=8
 v11=11
 v19=4
 v33=12
-
 e0=5
 e1=5
 e7=8
 e11=3
 e19=4
-e33=13
-]]
+e33=13]]
 
 function init()
-	--enable mouse
+	--mouse
 	poke(0x5f2d,3)
 	
-	--reset map+fogmap
+	--reset maps
 	reload()
 	
 	--tech can change this
@@ -2803,8 +2525,7 @@ g=55
 b=55
 p=4
 pl=10
-ppl=10
-]]
+ppl=10]]
 end
 
 function init_menu()
@@ -2814,45 +2535,24 @@ end
 
 function new_game()
 	menu=init()
-	--qx=6*8, qy=5*8, +9, +4
+	--6,5
 	unit(queen,unspl"57,44,1")
 	
 	make_dmaps"d"
 	
-	unit(ant,unspl"40,40,1")-- -8,0
-	unit(ant,unspl"68,43,1")-- 20,3
-	unit(ant,unspl"50,32,1")-- 2,-8
---	for i=0,50 do
-	unit(warant,unspl"48,56,1")--0,16
---	end
-	--web.breq=0
-	--8*8+15/2,16*8+16\2
-	unit(mound,unspl"71,136,2")
-	
-	--unit(beetle,unspl"65,81,2")
+	unit(ant,unspl"40,40,1")
+	unit(ant,unspl"68,43,1")
+	unit(ant,unspl"50,32,1")
+	unit(warant,unspl"48,56,1")
 end
 
 init_menu()
 -->8
---clipboard saving
+--saving
 
---[[
-the following will not be saved:
-- unit states
-- resource count in partially
-  mined resource tiles
-- units in production, along w/
-  the used resources+pop count
-- techs (research, upgrades)
-- if a prereq building was built
-  but there are none left when
-  saving, the prereq won't save
-- top-left tree will regrow :-)
-]]
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
 	local str=ai_diff.."/"
-	--units
 	for _ENV in all(units) do
 		str=str..
 		 typ.idx..","..
@@ -2864,17 +2564,14 @@ menuitem(1,"⌂ save to clip",function()
 			(const and ","..const or "")..
 			"/"
 	end
-	--exp
 	for k in next,exp do
 		str=str..k..","
 	end
 	str=str.."/"
-	--res
 	for r in all(resources) do
 		str=str..res[r]..","
 	end
 	str=str.."/"
-	--map
 	for i=1,mapw8*maph8-1 do
 		str=str..
 		 mget(i%mapw8,i/mapw8)..","
