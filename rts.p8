@@ -177,18 +177,16 @@ function _update()
 	end
 
 	async_dmap()
-	fps=(fps+1)%60
+	fps+=1
+	fps%=60
 	upc=fps%upcycle
 
  handle_input()
 	
  buttons,pos,hoverunit={},{}
  if loser then
- 	--disable mouse
- 	poke"24365"
- 	if btnp"5" then
- 		init_menu()
- 	end
+ 	poke"24365" --no mouse
+ 	if (btnp"5")	init_menu()
 		return
 	end
 	
@@ -196,7 +194,7 @@ function _update()
  if upc==0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
- 		local x,y=k<<8>>8,k\256
+ 		local x,y=k&0x00ff,k\256
 			mset(x+32,y,viz[k] and
 	   0 or mget(x,y))
 		end
@@ -258,10 +256,10 @@ function parse(unit,typ,tech)
 		[1]={},[2]={}
 	}
 	for l in all(split(unit,"\n")) do
-		local v1,v2=unpack(split(l,"="))
-		if v2 then
-			obj[v1],obj[1][v1],
-				obj[2][v1]=v2,v2,v2
+		local k,v=unpack(split(l,"="))
+		if v then
+			obj[k],obj[1][k],
+				obj[2][k]=v,v,v
 		end
 	end
 	return add(typs,obj)
@@ -1682,7 +1680,7 @@ function unspl(...)
 	return unpack(split(...))
 end
 
---x=k<<8>>8
+--x=k<<8>>8 (or k&0x00ff)
 --y=k>>24<<16 (or k\256)
 function g(a,x,y,def)
 	return a[x|y<<8] or def
@@ -2008,7 +2006,7 @@ function get_wayp(u,x,y,move)
  return #wayp>0 and wayp
 end
 
---a* by https://t.co/nasud3d1ix
+--a* based on https://t.co/nasud3d1ix
 function find_path(start,goal)
  local shortest,best_table={
   last=start,
@@ -2016,6 +2014,13 @@ function find_path(start,goal)
   cost_to_goal=32767
  },{}
  best_table[start.k]=shortest
+ function path(p,s)
+	 while s.prev do
+   s=best_table[s.prev.k]
+   add(p,s.last)
+  end
+  return p
+ end
  local frontier,frontier_len,
  	closest={shortest},1,
  	shortest
@@ -2028,15 +2033,10 @@ function find_path(start,goal)
   shortest=frontier[index_of_min]
   frontier[index_of_min],shortest.dead=frontier[frontier_len],true
   frontier_len-=1
+  
   local p=shortest.last
-
   if p.k==goal.k then
-   p={goal}
-   while shortest.prev do
-    shortest=best_table[shortest.prev.k]
-    add(p,shortest.last)
-   end
-   return p,true
+   return path({goal},shortest),true
   end
   for n in all_surr(p[1],p[2],1,true) do
    local old_best,new_cost_from_start=
@@ -2060,12 +2060,7 @@ function find_path(start,goal)
 			end
   end
  end
- local p={closest.last}
- while closest.prev do
-  closest=best_table[closest.prev.k]
-  add(p,closest.last)
- end
- return p
+ return path({closest.last},closest)
 end
 -->8
 --menu/cursor
@@ -2131,24 +2126,18 @@ function draw_port(
 		cant_pay and 7 or costs and
  	costs.tech and 10 or 6
 	)
+	pal(cant_pay and split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
-	if cant_pay then
-		pal(split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
-	end
-	if not costs then
-		pal(6,7)
-	end
+	pal(not costs and 6,7)
 	sspr(typ.portx,typ.porty,
 	 typ.portw,unspl"8,1,1")
 	pal()
 	
-	if onclick then
-		add(buttons,{
-			r={x,y,x+10,y+8},
-			handle=onclick,
-			costs=costs,
-		})
-	end
+	add(buttons,{
+		r={x,y,x+10,y+8},
+		handle=onclick,
+		costs=costs,
+	})
 
 	if u or prog then
 		bar(0,11,10,
@@ -2163,9 +2152,9 @@ end
 function cursor_spr()
  if webbing then
  	--menuy
- 	if amy<104 and not can_finish_web() then
-			pal(split"8,8,8,8,8,8,8")
- 	end
+		pal(amy<104 and
+			not can_finish_web() and
+			split"8,8,8,8,8,8,8")
  	return 70
  end
  if hovbtn then
@@ -2303,7 +2292,7 @@ function draw_menu()
   end
 	end
  for i,sec in inext,secs do
- 	if (i%2!=#secs%2)	pal(4,15)
+ 	pal(i%2!=#secs%2 and 4,15)
  	camera(x)
  	--104=menuy
  	spr(unspl"128,0,104")
