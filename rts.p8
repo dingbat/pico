@@ -673,7 +673,8 @@ ant.prod={
 	parse([[
 r=0
 g=0
-b=2]],mound),
+b=2
+breq=0]],mound),
 	parse([[
 r=1
 g=3
@@ -682,7 +683,8 @@ breq=2]],farm),
 	parse([[
 r=0
 g=5
-b=5]],barracks),
+b=5
+breq=0]],barracks),
 	parse([[
 r=0
 g=3
@@ -691,7 +693,8 @@ breq=8]],den),
 	parse([[
 r=0
 g=3
-b=8]],tower),
+b=8
+breq=0]],tower),
 --breq=1|4|8=13 (twr,den,bar)
 	parse([[
 r=0
@@ -705,14 +708,16 @@ t=6
 r=2
 g=3
 b=0
-p=]],ant),
+p=
+breq=0]],ant),
 nil,nil,nil,
 parse([[
 t=10
 r=0
 g=12
 b=0
-idx=5]],parse[[
+idx=5
+breq=0]],parse[[
 portx=96
 porty=88
 portw=8]],function()
@@ -735,19 +740,22 @@ t=8
 r=0
 g=4
 b=3
-p=]],beetle),
+p=
+breq=0]],beetle),
 	parse([[
 t=8
 r=3
 g=4
 b=0
-p=]],spider),
+p=
+breq=0]],spider),
 parse([[
 t=5
 r=0
 g=2
 b=0
-idx=3]],parse[[
+idx=3
+breq=0]],parse[[
 portx=114
 porty=72
 portw=9]],function()
@@ -759,7 +767,8 @@ t=5
 r=0
 g=2
 b=0
-idx=5]],parse[[
+idx=5
+breq=0]],parse[[
 portx=114
 porty=64
 portw=9]],function()
@@ -770,7 +779,8 @@ t=5
 r=0
 g=2
 b=0
-idx=6]],parse[[
+idx=6
+breq=0]],parse[[
 portx=105
 porty=64
 portw=9]],function()
@@ -783,7 +793,8 @@ t=12
 r=5
 g=5
 b=1
-idx=1]],parse[[
+idx=1
+breq=0]],parse[[
 portx=104
 porty=88
 portw=9]],function()
@@ -796,19 +807,22 @@ t=10
 r=1
 g=2
 b=1
-p=]],warant),
+p=
+breq=0]],warant),
 	parse([[
 t=10
 r=1
 g=2
 b=1
-p=]],archer),
+p=
+breq=0]],archer),
 	parse([[
 t=5
 r=0
 g=2
 b=0
-idx=3]],parse[[
+idx=3
+breq=0]],parse[[
 portx=96
 porty=64
 portw=9
@@ -822,7 +836,8 @@ t=5
 r=0
 g=2
 b=0
-idx=5]],parse[[
+idx=5
+breq=0]],parse[[
 portx=105
 porty=72
 portw=9]],function()
@@ -834,6 +849,7 @@ r=0
 g=2
 b=0
 idx=6
+breq=0
 ]],parse[[
 portx=96
 porty=72
@@ -848,14 +864,16 @@ t=10
 r=1
 g=2
 b=1
-p=]],cat),
+p=
+breq=0]],cat),
 nil,nil,nil,
  parse([[
 t=5
 r=0
 g=2
 b=0
-idx=5]],parse[[
+idx=5
+breq=0]],parse[[
 portx=96
 porty=80
 portw=8]],function()
@@ -866,7 +884,8 @@ t=5
 r=0
 g=2
 b=0
-idx=6]],parse[[
+idx=6
+breq=0]],parse[[
 portx=104
 porty=80
 portw=9]],function()
@@ -1967,7 +1986,7 @@ end
 function nearest_acc(x,y,u)
 	for n=0,16 do
 		local best_d,best_t=32767
-		for t in all_surr(x,y,n) do
+		for t in all_surr(x\8,y\8,n) do
 			if acc(unpack(t)) then
 				local d=dist(
 					t[1]*8+4-u.x,
@@ -1985,25 +2004,26 @@ function nearest_acc(x,y,u)
 end
 
 function get_wayp(u,x,y,move)
-	if (u.typ.bldg) return
- local wayp,dest,dest_acc=
- 	{},
- 	nearest_acc(x\8,y\8,u)
-	--unstick from an inacc tile
-	local path,exists=find_path(
-	 nearest_acc(u.x\8,u.y\8,u),
-	 dest)
-	deli(path) --del start
- for n in all(path) do
-		add(wayp,
- 		{n[1]*8+4,
- 		 n[2]*8+4},1)
- end
- if exists and
-  (not move or dest_acc) then
- 	add(wayp,{x,y})
- end
- return #wayp>0 and wayp
+	if u.typ.unit then
+		local wayp,dest,dest_acc=
+			{},
+			nearest_acc(x,y,u)
+		--unstick from an inacc tile
+		local path,exists=find_path(
+		 nearest_acc(u.x,u.y,u),
+		 dest)
+		deli(path) --del start
+		for n in all(path) do
+			add(wayp,
+				{n[1]*8+4,
+				 n[2]*8+4},1)
+		end
+		if exists and
+		 (not move or dest_acc) then
+			add(wayp,{x,y})
+		end
+		return #wayp>0 and wayp
+	end
 end
 
 --a* based on https://t.co/nasud3d1ix
@@ -2090,17 +2110,12 @@ function print_res(r,x,y,zero)
 	return x-1
 end
 
-function breq_satisfied(costs)
-	local b=max(costs.breq)
-	return bldg_bmap&b==b
-end
-
 function can_pay(costs)
  return res.r>=costs.r and
  	res.g>=costs.g and
  	res.b>=costs.b and
  	(not costs.p or res.p<res.pl) and
- 	breq_satisfied(costs)
+ 	bldg_bmap|costs.breq==bldg_bmap
 end
 
 function pay(costs,dir)
@@ -2327,7 +2342,8 @@ function draw_menu()
 	line(unspl"0,122,0,128")
 	
 	if hovbtn and hovbtn.costs and
-		breq_satisfied(hovbtn.costs) then
+		bldg_bmap|hovbtn.costs.breq==
+			bldg_bmap then
 		local len=print_res(
 		 hovbtn.costs,0,150)
 		camera(
