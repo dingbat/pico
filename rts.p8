@@ -172,10 +172,12 @@ function _update()
 		cy+=cvy
 		if (cx%128==0) cvx*=-1
 		if (cy%128==0) cvy*=-1
-		if (btnp(➡️)) ai_diff+=1
-		if (btnp(⬅️)) ai_diff-=1
-		ai_diff%=3
- 	if (btnp(❎)) new_game()
+ 	if btnp(❎) then
+ 		new_game()
+ 	else
+			ai_diff-=btnp()
+			ai_diff%=3
+		end
  	return
 	end
 
@@ -186,11 +188,12 @@ function _update()
  handle_input()
 	 
  buttons,pos,hoverunit={},{}
- 
  if loser then
  	--disable mouse
- 	poke(0x5f2d,0)
- 	menu=btnp(❎)
+ 	poke(0x5f2d)
+ 	if btnp(❎) then
+ 		init_menu()
+ 	end
 		return
 	end
 	
@@ -1094,7 +1097,7 @@ acid_vs_building=0.6
 ]]
 
 function rest(u)
-	u.st={t="rest"}
+	u.st=parse"t=rest"
 end
 
 function move(u,x,y)
@@ -1115,7 +1118,10 @@ end
 function target_tile(tx,ty)
 	return {
 		x=tx*8+3,y=ty*8+3,
-		typ={w=8,h=8},
+		typ=parse[[
+w=8
+h=8
+]],
 	}
 end
 
@@ -1381,7 +1387,7 @@ function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.hp<=0 and not u.dead then
 		u.dead,u.st,u.sel=
-			0,{t="dead"}
+			0,parse"t=dead"
 		del(selection,u)
 		if typ.bldg then
 			register_bldg(u)
@@ -1563,11 +1569,9 @@ end
 
 function draw_unit(u)
 	local typ,st,
-		res_typ,
-		col=
+		res_typ=
 			u.typ,u.st,
-			u.res and u.res.typ or "",
-			u.p
+			u.res and u.res.typ or ""
 
 	local fw,w,h,
 	 stt,
@@ -1617,18 +1621,17 @@ function draw_unit(u)
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
-	pal(2,col)
-	if u.sel and (
+	pal(2,u.p)
+	pal(1,u.sel and (
 	 (u.p==1 and (typ.unit or
 	 	not my_sel)) or
 	 not (my_sel or bldg_sel)
-	) then
-		col=9
-	end
-	pal(1,col)
+	) and 9 or u.p)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
+ --bldgs (fire=true) shouldn't
+ --rotate
 	sspr(sx,sy,w,h,xx,yy,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
@@ -1673,7 +1676,9 @@ function update_unit(u)
  			intersect(r,ss.p2,1) or
  			intersect(r,u_rect(sp),-2)
  		then
- 			u.st={t="dead",webbed=5}
+ 			u.st=parse[[
+t=dead
+webbed=5]]
 	 		attack(sp,u)
 	 		return
 		 end
@@ -2177,7 +2182,7 @@ function unit(typ,x,y,p,hp,
 		typ=typs[typ] or typ,
 		x=x,
 		y=y,
-		st={t="rest"},
+		st=parse"t=rest",
 		dir=1,
 		p=p,
 		hp=hp or typ.hp,
@@ -2189,8 +2194,9 @@ function unit(typ,x,y,p,hp,
 	})
 	uid+=1
 	if u.typ.farm then
-		u.res,u.cycles=
-			{typ="r",qty=0},0
+		u.res,u.cycles=parse[[
+typ=r
+qty=0]],0
 	end		
 	if u.typ.bldg then
 		register_bldg(u)
@@ -2255,70 +2261,63 @@ end
 --https://t.co/nasud3d1ix
 
 function find_path(start,goal)
- 
- local shortest, 
- best_table = {
-  last = start,
-  cost_from_start = 0,
-  cost_to_goal = 32767
- }, {}
-
- best_table[start.k] = shortest
- local frontier, frontier_len,
- 	closest = {shortest}, 1,
+ local shortest,best_table={
+  last=start,
+  cost_from_start=0,
+  cost_to_goal=32767
+ },{}
+ best_table[start.k]=shortest
+ local frontier,frontier_len,
+ 	closest={shortest},1,
  	shortest
- while frontier_len > 0 do
-  local cost, index_of_min = 32767
-  for i = 1, frontier_len do
-   local temp = frontier[i].cost_from_start + frontier[i].cost_to_goal
-   if (temp <= cost) index_of_min,cost = i,temp
+ while frontier_len>0 do
+  local cost,index_of_min=32767
+  for i=1,frontier_len do
+   local temp=frontier[i].cost_from_start+frontier[i].cost_to_goal
+   if (temp<=cost) index_of_min,cost=i,temp
   end
-  shortest = frontier[index_of_min]
-  frontier[index_of_min], shortest.dead = frontier[frontier_len], true
-  frontier_len -= 1
-  local p = shortest.last
+  shortest=frontier[index_of_min]
+  frontier[index_of_min],shortest.dead=frontier[frontier_len],true
+  frontier_len-=1
+  local p=shortest.last
   
-  if p.k == goal.k then
-   p = {goal}
-
+  if p.k==goal.k then
+   p={goal}
    while shortest.prev do
-    shortest = best_table[shortest.prev.k]
-    add(p, shortest.last)
+    shortest=best_table[shortest.prev.k]
+    add(p,shortest.last)
    end
-
    return p,true
-  end -- if
+  end
   for n in all_surr(
   	p[1],p[2],1,true
   ) do
-   local old_best, new_cost_from_start =
+   local old_best,new_cost_from_start=
     best_table[n.k],
-    shortest.cost_from_start + 1
+    shortest.cost_from_start+1
    
    if not old_best then
-    old_best = {
-     last = n,
-     cost_from_start = 32767,
-     cost_to_goal = 
+    old_best={
+     last=n,
+     cost_from_start=32767,
+     cost_to_goal=
      	dist(n[1]-goal[1],n[2]-goal[2])
     }
-
-    frontier_len += 1
-    frontier[frontier_len], best_table[n.k] = old_best, old_best
+    frontier_len+=1
+    frontier[frontier_len],best_table[n.k]=old_best,old_best
    end
-   if not old_best.dead and old_best.cost_from_start > new_cost_from_start then
-    old_best.cost_from_start, old_best.prev = new_cost_from_start, p
-   end -- if
-			if old_best.cost_to_goal < closest.cost_to_goal then
-				closest = old_best
+   if not old_best.dead and old_best.cost_from_start>new_cost_from_start then
+    old_best.cost_from_start,old_best.prev=new_cost_from_start,p
+   end
+			if old_best.cost_to_goal<closest.cost_to_goal then
+				closest=old_best
 			end
-			
   end
  end
- local p = {closest.last}
+ local p={closest.last}
  while closest.prev do
-  closest = best_table[closest.prev.k]
-  add(p, closest.last)
+  closest=best_table[closest.prev.k]
+  add(p,closest.last)
  end
  return p
 end
@@ -2530,7 +2529,7 @@ function single_unit_section()
 					else
 						sel1.q={
 							b=b,qty=1,t=b.t,
-							fps15=max(fps%15-1)
+							fps15=(fps-1)%15
 						}
 					end
 				end
@@ -2737,13 +2736,9 @@ mapw,maph,mmx,mmy,mmw,
 	mmhratio, --maph/mmh
 	mmwratio= --mapw/mmw
 	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
-		
---menu
-menu,cx,cy,cvx,cvy,ai_diff=
-	unspl"1,0,30,1,1,0"
 	
-resources,f2res,resqty,
- key2resf,rescol=
+ai_diff,resources,f2res,resqty,
+ key2resf,rescol=0,
 	split"r,g,b,p,pl,ppl",parse[[
 7=r
 11=g
@@ -2812,6 +2807,11 @@ ppl=10
 ]]
 end
 
+function init_menu()
+	menu,cx,cy,cvx,cvy=
+		unspl"1,0,30,1,1"
+end
+
 function new_game()
 	menu=init()
 	--qx=6*8, qy=5*8, +9, +4
@@ -2831,6 +2831,8 @@ function new_game()
 	
 	--unit(beetle,unspl"65,81,2")
 end
+
+init_menu()
 -->8
 --clipboard saving
 
@@ -2848,7 +2850,8 @@ the following will not be saved:
 - top-left tree will regrow :-)
 ]]
 menuitem(1,"⌂ save to clip",function()
-	local str=""
+	if (menu) return
+	local str=ai_diff.."/"
 	--units
 	for _ENV in all(units) do
 		str=str..
@@ -2859,18 +2862,18 @@ menuitem(1,"⌂ save to clip",function()
 			hp..","..
 			max(discovered)..
 			(const and ","..const or "")..
-			"\n"
+			"/"
 	end
 	--exp
 	for k in next,exp do
 		str=str..k..","
 	end
-	str=str.."\n"
+	str=str.."/"
 	--res
 	for r in all(resources) do
 		str=str..res[r]..","
 	end
-	str=str.."\n"
+	str=str.."/"
 	--map
 	for i=1,mapw8*maph8-1 do
 		str=str..
@@ -2881,8 +2884,8 @@ end)
 
 menuitem(2,"◆ load from clip",function()
 	init()
-
-	local lines=split(stat(4),"\n")	
+	local lines=split(stat(4),"/")	
+	ai_diff=deli(lines,1)
 	for i,t in inext,split(deli(lines)) do
 		if t!="" then
 			mset(i%mapw8,i/mapw8,t)
@@ -2901,11 +2904,6 @@ menuitem(2,"◆ load from clip",function()
 		if k!="" then
 			exp[k]=1
 		end
-	end
-	for i=1,50	do
---		unit(ant,unspl"40,40,1")
-		unit(archer,unspl"65,181,2")
-		unit(warant,unspl"185,181,1")
 	end
 	make_dmaps"d"
 end)
