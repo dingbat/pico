@@ -55,15 +55,15 @@ function _draw()
 	if loser then
 		camera()
 		rectfill(unspl"0,97,128,121,9")
-		print(loser==1 and
-			"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose" or
-			"\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"
-			,53,102)
 		pal(2,0)
 	 sspr(64+
 	 	({48,t()\0.2%3*16})[loser],
 	 	unspl"0,16,8,12,99,32,16")
 	 pal()
+	 print(loser==1 and
+			"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose" or
+			"\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"
+			,53,102)
 	 ?"\f1\-0\-a\|ipress ❎ for menu"
 	 return
 	end
@@ -80,18 +80,13 @@ function _draw()
 	
 	fillp(▒)
 	
-	--draw borders around fog
 	for x=cx\8,cx\8+16 do
 	 for y=cy\8,cy\8+16 do
 	 	local i=x|y<<8
-	  if not viz[i] then
-				camera(x*-8+cx,y*-8+cy)
-			 color(exp[i] and 5 or 0)
-			 if (viz[i-1]) line(unspl"-1,0,-1,7")
-			 if (viz[i-256]) line(unspl"0,-1,7,-1")
-			 if (viz[i+256]) line(unspl"0,8,7,8")
-				if (viz[i+1]) line(unspl"8,0,8,7")
-			end
+			camera(x*-8+cx,y*-8+cy)
+		 color(exp[i] and 5 or 0)
+		 borders(exp,i)
+		 borders(viz,i)
 		end
 	end
 	
@@ -159,10 +154,8 @@ function _draw()
 		circ(unpack(hilite.circ))
 	end
 	
-	--cursor
 	spr(cursor_spr(),amx,amy)
-	--cursor can change pal, so
-	--reset
+	--cursor_spr() can change pal
 	pal()
 end
 
@@ -1531,6 +1524,15 @@ function draw_map(offset)
  camera(cx%8,cy%8)
  map(cx/8+offset,cy/8,unspl"0,0,17,17")
  camera(cx,cy)
+end
+
+function borders(arr,i)
+ if not arr[i] then
+	 if (arr[i-1]) line(unspl"-1,0,-1,7")
+	 if (arr[i-256]) line(unspl"0,-1,7,-1")
+	 if (arr[i+256]) line(unspl"0,8,7,8")
+		if (arr[i+1]) line(unspl"8,0,8,7")
+	end
 end
 
 function draw_minimap()
