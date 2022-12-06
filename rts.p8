@@ -34,10 +34,10 @@ function _draw()
 	end
 
  draw_map(0) --mainmap
- 
+
  local bf,af={},{}
  for u in all(units) do
-		if 
+		if
 			not loser and
 		 not g(viz,u.x\8,u.y\8)
 		 and (u.discovered or u.const)
@@ -49,7 +49,7 @@ function _draw()
 	 	add(bf,u)
 	 end
  end
- 
+
 	--highlight selected farm
 	if sel1 and sel1.typ.farm and
 		not sel1.const then
@@ -184,9 +184,9 @@ function _update()
 	async_task()
 	fps=(fps+1)%60
 	upc=fps%upcycle
- 
+
  handle_input()
-	 
+	
  buttons,pos,hoverunit={},{}
  if loser then
  	--disable mouse
@@ -211,7 +211,7 @@ function _update()
 	   0 or mget(x,y))
 		end
  end
- 
+
  --update projectiles
  for p in all(proj) do
  	p.x,p.y=norm(p.to,p,0.8)
@@ -223,7 +223,7 @@ function _update()
 	 		p.to_unit)
 		end
  end
- 
+
  if selbox then
  	bldg_sel,my_sel,enemy_sel=nil
  end
@@ -240,7 +240,7 @@ function _update()
 	 	--second)
 		 if upc==i%upcycle and
 		  u.st.t=="rest" and
-		  u.typ.atk 
+		  u.typ.atk
 		 then
 				aggress(u)
 	 	end
@@ -1224,7 +1224,7 @@ function handle_click()
  	to_build,webbing,webx=nil
  	return
  end
- 
+
  --left click places web
  if webbing then
  	if lclick and
@@ -1258,7 +1258,7 @@ function handle_click()
 		end
 		return
  end
- 
+
 	--left drag makes selbox
  if btn(5) then
  	if not selbox then
@@ -1340,7 +1340,7 @@ function handle_input()
  	),
  	mid(0,stat(32),126),
 	 mid(-1,stat(33),126)
- 
+
  --mouse-based calculations
  --buttons are actually added
  --in _draw(), frame behind
@@ -1358,7 +1358,7 @@ function handle_input()
 		wmx,wmy=norm({wmx,wmy},
 			{x=webx,y=weby},webd)
 	end
- 
+
  handle_click()
  --should happen after click
  --because click could be on a
@@ -1863,7 +1863,7 @@ function produce(u)
 				u.q=nil
 			end
 		end
-	end 
+	end
 end
 
 function check_target_col(u)
@@ -2119,7 +2119,7 @@ function register_bldg(b)
 	end
 	if (h>8) reg(x,y-1)
 	
-	if not b.const and typ!=farm then 
+	if not b.const and typ!=farm then
 		make_dmaps"d"
 		if b.p==1 then
 			bldg_bmap|=typ.bitmap
@@ -2135,7 +2135,7 @@ end
 function collect(u,res)
 	if u.res and u.res.typ==res then
 		u.res.qty+=1
-	else 
+	else
 		u.res={typ=res,qty=1}
 	end
 	if u.res.qty>=u.typ.carry then
@@ -2280,7 +2280,7 @@ function find_path(start,goal)
   frontier[index_of_min],shortest.dead=frontier[frontier_len],true
   frontier_len-=1
   local p=shortest.last
-  
+
   if p.k==goal.k then
    p={goal}
    while shortest.prev do
@@ -2295,7 +2295,7 @@ function find_path(start,goal)
    local old_best,new_cost_from_start=
     best_table[n.k],
     shortest.cost_from_start+1
-   
+
    if not old_best then
     old_best={
      last=n,
@@ -2432,7 +2432,7 @@ function cursor_spr()
 	end
 	if sel1 and sel1.p==1 then
 	 --build cursor
-		if to_build or 
+		if to_build or
 			can_build() or
 			can_renew_farm() then
 			return 68
@@ -2535,7 +2535,7 @@ function single_unit_section()
 				end
 			)
 		end
-		if q then 
+		if q then
 			draw_port(
 			 q.b.typ,
 			 q.b.tech and 24 or
@@ -2579,7 +2579,7 @@ function draw_menu()
  	pal()
  end
  camera()
- 
+
  if sel_typ and
  	(#selection==1 or
  		sel_typ!=spider) and
@@ -2689,7 +2689,7 @@ end
 function make_dmap(key)
 	local open,starts={},
 		dmap_st[key]
-	 
+	
 	--ensure starts exists (we
 	--won't enter the if for "d")
 	if not starts then
