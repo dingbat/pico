@@ -42,3 +42,15 @@ _draw=function()
 	draw()
 	draw_dmap("r")
 end
+
+
+	if u.sel and u.typ.range then
+		circ(u.x,u.y,u.typ.los,13)
+		circ(u.x,u.y,u.typ.range,8)
+	end
+	pset(u.x,u.y,13)
+	if u.st.wayp then
+		for wp in all(u.st.wayp) do
+			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
+		end
+	end

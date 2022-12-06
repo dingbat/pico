@@ -212,15 +212,13 @@ function _update()
  --update projectiles
  for p in all(proj) do
  	p.x,p.y=norm(p.to,p,0.8)
-  if adj(p.to,p,0.5) then
-   if intersect(
-   	u_rect(del(proj,p).to_unit),
-  		{p.x,p.y},0
-  	) then
- 	 	deal_dmg(p.from_unit,
- 	 		p.to_unit)
-			end
-  end
+  if intersect(
+  	u_rect(del(proj,p).to_unit),
+ 		{p.x,p.y},0
+ 	) then
+	 	deal_dmg(p.from_unit,
+	 		p.to_unit)
+		end
  end
  
  if selbox then
@@ -349,7 +347,7 @@ carry=6
 spd=1
 los=20
 hp=10
-def_typ=worker
+def=ant
 ]]
 beetle=parse[[
 idx=2
@@ -385,8 +383,8 @@ spd=0.9
 los=20
 hp=20
 
-def_typ=beetle
-atk_typ=beetle
+def=seige
+atk_typ=seige
 atk=1
 ]]
 spider=parse[[
@@ -426,7 +424,7 @@ spd=2
 los=30
 hp=15
 
-def_typ=spider
+def=spider
 atk_typ=spider
 atk=2
 ]]
@@ -469,8 +467,8 @@ proj_freq=30
 proj_s=28
 range=25
 
-atk_typ=archer
-def_typ=archer
+atk_typ=acid
+def=ant
 atk=1
 ]]
 warant=parse[[
@@ -507,8 +505,8 @@ spd=1.5
 los=30
 hp=15
 
-atk_typ=warant
-def_typ=warant
+atk_typ=ant
+def=ant
 atk=1
 ]]
 cat=parse[[
@@ -550,8 +548,8 @@ proj_yo=-4
 proj_s=32
 range=50
 
-atk_typ=cat
-def_typ=cat
+atk_typ=seige
+def=seige
 atk=2
 ]]
 queen=parse[[
@@ -589,8 +587,8 @@ proj_yo=2
 proj_freq=30
 proj_s=28
 
-atk_typ=archer
-def_typ=queen
+atk_typ=acid
+def=queen
 atk=1
 bitmap=0
 ]]
@@ -632,7 +630,7 @@ proj_freq=30
 proj_s=24
 
 atk_typ=tower
-def_typ=building
+def=building
 atk=1
 bitmap=1
 ]]
@@ -663,7 +661,7 @@ dir=-1
 const=12
 has_q=1
 drop=1
-def_typ=building
+def=building
 bitmap=2
 ]]
 
@@ -693,7 +691,7 @@ hp=20
 dir=-1
 const=20
 has_q=1
-def_typ=building
+def=building
 bitmap=4
 ]]
 barracks=parse[[
@@ -722,7 +720,7 @@ hp=20
 dir=-1
 const=20
 has_q=1
-def_typ=building
+def=building
 bitmap=8
 ]]
 farm=parse[[
@@ -752,7 +750,7 @@ los=0
 hp=10
 dir=-1
 const=6
-def_typ=building
+def=building
 bitmap=16
 ]]
 
@@ -792,7 +790,7 @@ proj_s=24
 proj_freq=20
 
 atk_typ=tower
-def_typ=building
+def=building
 atk=1
 bitmap=32
 ]]
@@ -1064,59 +1062,35 @@ portw=9
 }
 
 dmg_mult=parse[[
-warant_vs_worker=1
-warant_vs_archer=1
-warant_vs_warant=1
-warant_vs_queen=1
-warant_vs_spider=1
-warant_vs_beetle=1.5
-warant_vs_building=1
-warant_vs_cat=1.5
+ant_vs_ant=1
+ant_vs_queen=0.9
+ant_vs_spider=1
+ant_vs_seige=1.5
+ant_vs_building=1
 
-spider_vs_worker=1
-spider_vs_archer=1
-spider_vs_warant=1
-spider_vs_queen=1
+spider_vs_ant=1.5
+spider_vs_queen=0.9
 spider_vs_spider=1
-spider_vs_beetle=1.5
+spider_vs_seige=1
 spider_vs_building=1
-spider_vs_cat=1
 
-beetle_vs_worker=1
-beetle_vs_archer=1
-beetle_vs_warant=1
-beetle_vs_queen=1
-beetle_vs_spider=1
-beetle_vs_beetle=1
-beetle_vs_building=2
-beetle_vs_cat=1
+seige_vs_ant=1
+seige_vs_queen=1
+seige_vs_spider=1
+seige_vs_seige=1
+seige_vs_building=2
 
-tower_vs_worker=1
-tower_vs_archer=1
-tower_vs_warant=1
-tower_vs_queen=1
+tower_vs_ant=1
+tower_vs_queen=0.75
 tower_vs_spider=1
-tower_vs_beetle=1
-tower_vs_building=1
-tower_vs_cat=1
+tower_vs_seige=1
+tower_vs_building=0.5
 
-cat_vs_worker=1
-cat_vs_archer=1
-cat_vs_warant=1
-cat_vs_queen=1
-cat_vs_spider=1
-cat_vs_beetle=1
-cat_vs_building=2.5
-cat_vs_cat=1
-
-archer_vs_worker=1
-archer_vs_archer=1
-archer_vs_warant=1
-archer_vs_queen=1
-archer_vs_spider=1
-archer_vs_beetle=1
-archer_vs_building=1
-archer_vs_cat=1
+acid_vs_ant=1
+acid_vs_queen=1
+acid_vs_spider=1.5
+acid_vs_seige=1
+acid_vs_building=0.6
 ]]
 
 function rest(u)
@@ -1298,45 +1272,32 @@ function handle_click()
  --right click
  if rclick and sel1 and sel1.p==1 then
 	 local tx,ty=mx\8,my\8
-	 
 	 if can_renew_farm() then
-	 
 	 	hilite_hoverunit()
 	 	hoverunit.sproff,
 	 		hoverunit.cycles,
 	 		hoverunit.exp=0,0
 	 	res.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
-	 	
 	 elseif can_gather() then
-	 
 	 	hilite={t=t(),tx=tx,ty=ty}
 	 	if avail_farm() then
 	 		harvest(sel1,hoverunit)
 	 	else
 	  	foreachsel(gather,tx,ty)
 	 	end
-  	
   elseif can_build() then
-  
   	foreachsel(build,hoverunit)
 			hilite_hoverunit()
-  	
 	 elseif can_attack() then
-	 
   	foreachsel(attack,hoverunit)
   	hilite_hoverunit()
-  	
   elseif can_drop() then
-  
   	foreachsel(drop,nil,hoverunit)
   	hilite_hoverunit()
-  	
   elseif sel1.typ.unit then
-  
   	foreachsel(move,mx,my)
   	hilite={t=t(),x=mx,y=my}
-  	
   elseif sel1.typ.prod then
   	--set rally
   	if is_res(mx,my) then
@@ -1677,17 +1638,6 @@ function draw_unit(u)
 		end
 		bar(xx,yy-1,w,hpp)
 	end
-
---	if u.sel and u.typ.range then
---		circ(u.x,u.y,u.typ.los,13)
---		circ(u.x,u.y,u.typ.range,8)
---	end
---	pset(u.x,u.y,13)
---	if u.st.wayp then
---		for wp in all(u.st.wayp) do
---			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
---		end
---	end
 end
 
 function update_unit(u)
@@ -1949,8 +1899,9 @@ function step(u)
  	if (st.first_pt) spd/=2
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		spd/3.5)
- 	
- 	if adj(wayp[1],u,2) then
+ 	--7515
+ 	local x,y=unpack(wayp[1])
+ 	if dist(x-u.x,y-u.y)<2 then
  		if #wayp==1 then
  			st.wayp=nil
 			else
@@ -2092,9 +2043,6 @@ end
 
 function mine_res(x,y,r)
 	local full=resqty[r]
-	--could add +10 to full if
-	--mget(x,y) has flag x
-	--(give alt res more capacity)
 	local n=g(restiles,x,y,full)-1
 	if n==full\3 or n==full*4\5 then
 		mset(x,y,mget(x,y)+16)
@@ -2105,11 +2053,6 @@ function mine_res(x,y,r)
 		make_dmaps(r)
 	end
 	s(restiles,x,y,n)
-end
-
-function adj(it,nt,n)
-	return abs(it[1]-nt.x)<=n and
-		abs(it[2]-nt.y)<=n
 end
 
 function norm(it,nt,f)
@@ -2181,7 +2124,7 @@ function register_bldg(b)
 end
 
 function deal_dmg(from,to)
-	to.hp-=from.typ[from.p].atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def_typ]
+	to.hp-=from.typ[from.p].atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def]
 end
 
 function collect(u,res)
