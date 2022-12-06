@@ -10,11 +10,17 @@ function _draw()
 		draw_map(0)
 		camera()
 		sspr(unspl"32,88,39,8,49,70")
-		pal()
+	 --28 tok (replace with pal())
+	 pal(split"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15")
+	 local x=64+t()\0.5%2*16
+	 sspr(x,unspl"0,16,8,25,25,32,16")
+	 pal(1,2)
+	 sspr(x,unspl"0,16,8,72,25,32,16,1")
+	 --
+	 --pal()
 		print(
 			"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start"
 		,22,45)
-		
 		print(ai_diff==0 and
 			"\f0easy\-0\|f\fbeasy" or
 			ai_diff==1 and
