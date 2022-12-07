@@ -49,7 +49,7 @@ function _draw()
 	 end
  end
 
-	if sel1 and sel1.typ.farm and
+	if sel_typ==farm and
 		not sel1.const then
 	 rectaround(sel1,9)
 	end
@@ -121,6 +121,11 @@ function _draw()
 		end
 	end
 	
+	if webx then
+		line(webx,weby,wmx,wmy,
+		 can_finish_web() and 7 or 8)
+	end
+	
 	draw_menu()
 	if to_build then
 		local typ,x,y=to_build.typ,
@@ -148,9 +153,6 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
-	if webx then
-		line(webx,weby,wmx,wmy,7)
-	end
 	--cursor_spr can change pal
 	pal()
 end
