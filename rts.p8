@@ -157,7 +157,7 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
-	--cursor_spr() can change pal
+	--cursor_spr can change pal
 	pal()
 end
 
@@ -166,7 +166,7 @@ function _update()
 		cx+=cvx
 		cy+=cvy
 		if (cx%128==0) cvx*=-1
-		if (cy%128==0) cvy*=-1
+		if (cy%120==0) cvy*=-1
  	if btnp"5" then
  		new_game()
  	else
@@ -203,10 +203,11 @@ function _update()
  for p in all(proj) do
  	p.x,p.y=norm(p.to,p,0.8)
   if intersect(
-  	u_rect(del(proj,p).to_unit),
+  	u_rect(p.to_unit),
  		{p.x,p.y},0
  	) then
-	 	deal_dmg(p.from_unit,
+	 	deal_dmg(
+	 	 del(proj,p).from_unit,
 	 		p.to_unit)
 		end
  end
