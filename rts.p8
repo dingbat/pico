@@ -59,17 +59,23 @@ function _draw()
 	
 	if loser then
 		camera()
-		rectfill(unspl"0,97,128,121,9")
+		rectfill(unspl"0,96,128,115,9")
 		pal(2,0)
 	 sspr(64+
 	 	({48,t()\0.2%3*16})[loser],
-	 	unspl"0,16,8,12,99,32,16")
+	 	unspl"0,16,8,14,98,34,16")
 	 pal()
+		print(ai_diff==0 and
+			"\#9\|d\-0        \-0\-4\-e\|h\f2easy ai" or
+			ai_diff==1 and
+			"\#9\|d\-0          \-0\-0\-a\|h\f2medium ai" or
+			"\#9\|d\-0        \-0\-4\-e\|h\f2hard ai"
+			,22,93)
 	 print(loser==1 and
 			"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose" or
 			"\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"
 			,53,102)
-	 ?"\f1\-0\-a\|ipress ❎ for menu"
+	 ?"\f4\#9\|k\-0\-4                   \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
 	 return
 	end
 	
@@ -175,7 +181,7 @@ function _update()
 		end
  	return
 	end
-
+	
 	async_dmap()
 	fps+=1
 	fps%=60
@@ -1048,7 +1054,7 @@ function handle_click()
 	 		sel1.st,webbing,webx={
 	 		 t="web",
 	 		 wayp=get_wayp(
-	 		 	sel1,webx,weby),
+	 		  sel1,webx,weby),
 	 		 p1={webx,weby},
 	 		 p2={wmx,wmy},
 	 		}
@@ -1061,14 +1067,12 @@ function handle_click()
 
  if btn"5" and to_build then
   if buildable() then
-	  pay(to_build,-1)
-			local new=unit(
+			foreachsel(build,unit(
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1,nil,nil,0)
-			foreachsel(build,new)
-			to_build=nil
+				1,nil,nil,0))
+			to_build=pay(to_build,-1)
 		end
 		return
  end
@@ -1102,6 +1106,7 @@ function handle_click()
 	 		hoverunit.exp=0,0
 	 	res.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
+	 	
 	 elseif can_gather() then
 	 	hilite=htile
 	 	if avail_farm() then
@@ -1109,18 +1114,23 @@ function handle_click()
 	 	else
 	  	foreachsel(gather,tx,ty)
 	 	end
+	 	
   elseif can_build() then
   	foreachsel(build,hoverunit)
 			hilite_hoverunit()
+			
 	 elseif can_attack() then
   	foreachsel(attack,hoverunit)
   	hilite_hoverunit()
+  	
   elseif can_drop() then
   	foreachsel(drop,nil,hoverunit)
   	hilite_hoverunit()
+  	
   elseif sel1.typ.unit then
   	foreachsel(move,mx,my)
   	hilite={t=t(),cx=mx,cy=my}
+  	
   elseif sel1.typ.prod then
   	--set rally
   	if fget(mget(tx,ty),1) then
