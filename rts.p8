@@ -2435,8 +2435,7 @@ function make_dmap(key)
 
 	for i,t in next,dmap_st[key] do
 		if	sur_acc(unpack(t)) then
-			t.k=i
-			add(open,t)
+			add(open,t).k=i
 		end
 	end
 	
