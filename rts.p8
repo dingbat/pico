@@ -1412,8 +1412,8 @@ function draw_unit(u)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
- --bldgs shouldn't rotate
 	sspr(sx,sy,w,h,xx,yy,w,h,
+  --bldgs shldnt rotate
 		not typ.fire and u.dir==typ.dir)
 	pal()
 	if not u.dead and hpp<=0.5 then			
@@ -2111,9 +2111,9 @@ function can_pay(costs)
 end
 
 function pay(costs,dir)
- res.r+=costs.r*dir
-	res.g+=costs.g*dir
-	res.b+=costs.b*dir
+	for r in all(split"r,g,b") do
+  res[r]+=costs[r]*dir
+	end
 	if costs.p then
 		res.p-=dir
 	end
@@ -2540,6 +2540,8 @@ function new_game()
 	unit(ant,unspl"68,43,1")
 	unit(ant,unspl"50,32,1")
 	unit(warant,unspl"48,56,1")
+
+-- unit(mound,unspl"71,136,2")
 end
 
 init_menu()
