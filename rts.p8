@@ -760,7 +760,7 @@ breq=0]],parse[[
 portx=114
 porty=72
 portw=9]],function()
-		web.breq=nil
+		web.breq=0
 	end),
 nil,
 parse([[
@@ -930,12 +930,14 @@ acid_vs_building=0.6]]
 function rest(u)
 	u.st=parse"t=rest"
 end
+
 function move(u,x,y)
 	u.st={
 		t="move",
 		wayp=get_wayp(u,x,y,true),
 	}
 end
+
 function build(u,b)
 	u.st,u.res={
 		t="build",
@@ -943,6 +945,7 @@ function build(u,b)
 		wayp=get_wayp(u,b.x,b.y),
 	}
 end
+
 function target_tile(tx,ty)
 	return {
 		x=tx*8+3,y=ty*8+3,
@@ -950,6 +953,7 @@ function target_tile(tx,ty)
 h=8]],
 	}
 end
+
 function gather(u,tx,ty,wp)
 	local t=target_tile(tx,ty)
 	u.st={
@@ -962,6 +966,7 @@ function gather(u,tx,ty,wp)
 		target=t,
 	}
 end
+
 function drop(u,nxt_res,dropu)
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
@@ -979,6 +984,7 @@ function drop(u,nxt_res,dropu)
 			target_tile(x,y),
 	}
 end
+
 function attack(u,e)
 	if u.typ.atk then
 		u.st={
@@ -991,6 +997,7 @@ function attack(u,e)
 		end
 	end
 end
+
 function harvest(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="harvest",
@@ -1206,6 +1213,7 @@ function tick_unit(u)
 				res.pl=min(res.ppl,99)
 			elseif typ.unit then
 				res.p-=1
+				modify_totalu(u.p-2)
 			end
 		end
 	end
@@ -1213,9 +1221,7 @@ function tick_unit(u)
 		u.dead+=1
 		update_viz(u)
 		if u.dead==60 then
-			modify_totalu(
-			 del(units,u).p-2)
-			loser=u.typ==queen and u.p
+			loser=del(units,u).typ==queen and u.p
 		end
 		return
 	end
@@ -1310,7 +1316,6 @@ end
 function draw_minimap()
 	camera(-mmx,-mmy)
 	
-	--map tiles
 	if fps%20==0 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -1328,7 +1333,6 @@ function draw_minimap()
 	spr(unspl"153,0,0,3,3")
 	pal()
 	
-	--units
 	for u in all(units) do
 		if u.discovered or
 			g(viz,u.x\8,u.y\8) then
@@ -1340,7 +1344,7 @@ function draw_minimap()
 		end
 	end
 	
-	--current view area outline
+	--current view
 	camera(
 		-mmx-ceil(cx/mmwratio),
 	 -mmy-ceil(cy/mmhratio)
@@ -1441,9 +1445,6 @@ function update_unit(u)
  	if (t=="harvest") farmer(u)
  	if (t=="build") buildrepair(u)
   if (t=="gather") mine(u)
-  if t=="drop" and st.nxt then
-  	mine_nxt_res(u,st.nxt)
-		end
  else
  	check_target_col(u)
  end
@@ -1606,13 +1607,22 @@ end
 
 function mine(u)
 	local x,y,r=u.st.tx,u.st.ty,u.st.res
-	if g(restiles,x,y)==0 then
-		if not mine_nxt_res(u,r) then
-		 drop(u,r)
-		end
+	local full=resqty[r]
+	local n=g(restiles,x,y,full)
+	if n==0 then
+		mine_nxt_res(u,r)
 	elseif fps==u.st.fps then
 		collect(u,r)
-		mine_res(x,y,r)
+		
+		if n==full\3 or n==full\1.25 then
+			mset(x,y,mget(x,y)+16)
+		elseif n==1 then
+			mset(x,y,74) --exhaust
+			s(dmap_st[r],x,y)
+			s(dmaps[r],x,y)
+			make_dmaps(r)
+		end
+		s(restiles,x,y,n-1)
 	end
 end
 
@@ -1662,17 +1672,27 @@ function check_target_col(u)
 			st.wayp=nil
 		end
 		if st.t=="drop" then
-			local ures=u.res
-			if ures then
-				res[ures.typ]+=ures.qty/3
+			if u.res then
+				res[u.res.typ]+=u.res.qty/3
 				u.res=nil
 			end
 			if st.farm then
 				harvest(u,st.farm)
-			elseif not st.nxt then
+			elseif st.nxt then
+   	mine_nxt_res(u,st.nxt)
+			else
 				rest(u)
 			end
 		end
+	end
+end
+
+function mine_nxt_res(u,res)
+	local wp,x,y=dmap_find(u,res)
+	if wp then
+		gather(u,x,y,wp)
+	else
+		drop(u,r)
 	end
 end
 
@@ -1727,12 +1747,12 @@ function intersect(r1,r2,e)
 		r1[4]+e>b
 end
 
-function u_rect(u,e)
-	local w2,h2,e=u.typ.w/2,
-		u.typ.h/2,e or 0
+function u_rect(_ENV,e)
+	local w2,h2,e=typ.w/2,
+		typ.h/2,e or 0
  return {
- 	u.x-w2-e,u.y-h2-e,
- 	u.x+w2,u.y+h2
+ 	x-w2-e,y-h2-e,
+ 	x+w2,y+h2
  }
 end
 
@@ -1768,14 +1788,6 @@ function all_surr(x,y,n,chk_acc)
 		end
 	end
 	return all(st)
-end
-
-function mine_nxt_res(u,res)
-	local wp,x,y=dmap_find(u,res)
-	if wp then
-		gather(u,x,y,wp)
-		return true
-	end
 end
 
 function is_res(x,y)
@@ -1824,20 +1836,6 @@ function rectaround(u,c)
 	rect(unpack(u_rect(u,1)))
 end
 
-function mine_res(x,y,r)
-	local full=resqty[r]
-	local n=g(restiles,x,y,full)-1
-	if n==full\3 or n==full*4\5 then
-		mset(x,y,mget(x,y)+16)
-	elseif n==0 then
-		mset(x,y,74) --exhaust
-		s(dmap_st[r],x,y)
-		s(dmaps[r],x,y)
-		make_dmaps(r)
-	end
-	s(restiles,x,y,n)
-end
-
 function norm(it,nt,f)
 	local xv,yv=
 		it[1]-nt.x,it[2]-nt.y
@@ -1872,7 +1870,7 @@ end
 
 function register_bldg(b)
 	local typ=b.typ
-	--make sure we get ⬇️⬅️ tile
+	--get ⬇️⬅️ tile
 	local w,h,x,y=typ.w,typ.h,
 		(b.x-2)\8,(b.y+2)\8
 
@@ -1955,19 +1953,16 @@ end
 
 function unit(typ,x,y,p,hp,
 	discovered,const)
- local u=add(units,{
-		typ=typs[typ] or typ,
-		x=x,
-		y=y,
-		st=parse"t=rest",
-		dir=1,
-		p=p,
-		hp=hp or typ.hp,
-		const=const,
-		discovered=discovered==1,
-		uid=uid,
-		sproff=0, --for farm
-	})
+ local u=add(units,parse[[dir=1
+sproff=0]])
+
+ u.typ,u.x,u.y,u.p,u.hp,u.const,
+  u.discovered,u.uid=
+ 	typs[typ] or typ,
+		x,y,p,hp or typ.hp,const,
+		discovered==1,uid
+
+	rest(u)
 	uid+=1
 	if u.typ.farm then
 		u.res,u.cycles=parse[[typ=r
@@ -2123,7 +2118,7 @@ function pay(costs,dir)
  res.r+=costs.r*dir
 	res.g+=costs.g*dir
 	res.b+=costs.b*dir
-	if costs.typ.unit then
+	if costs.p then
 		res.p-=dir
 	end
 end
