@@ -197,14 +197,16 @@ function _update()
  end
 
  for p in all(proj) do
- 	p.x,p.y=norm(p.to,p,0.8)
-  if intersect(
-  	u_rect(p.to_unit),
- 		{p.x,p.y},0
- 	) then
-	 	deal_dmg(
-	 	 del(proj,p).from_unit,
-	 		p.to_unit)
+ 	p.x,p.y,_,sum=norm(p.to,p,.8)
+  if sum<0.5 then
+	  if intersect(
+	  	u_rect(del(proj,p).to_unit),
+	 		{p.x,p.y},0
+	 	) then
+		 	deal_dmg(
+		 	 p.from_unit,
+		 		p.to_unit)
+			end
 		end
  end
 
@@ -1836,10 +1838,11 @@ end
 function norm(it,nt,f)
 	local xv,yv=
 		it[1]-nt.x,it[2]-nt.y
-	local norm=f/(abs(xv)+abs(yv))
-	return nt.x+xv*norm,
-		nt.y+yv*norm,
-		sgn(xv) --xdir
+	local sum=abs(xv)+abs(yv)
+	return nt.x+xv*f/sum,
+		nt.y+yv*f/sum,
+		sgn(xv), --xdir
+		sum
 end
 
 --strict incl farms+const
@@ -2537,7 +2540,7 @@ function new_game()
 	unit(unspl"1,68,43,1")
 	unit(unspl"1,50,32,1")
 	unit(unspl"5,48,56,1")
-
+	
  unit(unspl"7,209,188,2")
 	unit(unspl"1,192,184,2")
 	unit(unspl"1,220,187,2")
@@ -2603,6 +2606,7 @@ menuitem(2,"◆ load from clip",function()
 			exp[k]=1
 		end
 	end
+--	unit(castle,unspl"88,136,2")
 	make_dmaps"d"
 end)
 
