@@ -90,6 +90,8 @@ function _draw()
 	 color(exp[i] and 5 or 0)
 	 borders(exp,i)
 	 borders(viz,i)
+	 --gridlines
+--	 rect(0,0,8,8,1)
 	end
 	end
 	
@@ -1196,7 +1198,8 @@ end
 function tick_unit(u)
 	local typ=u.typ[u.p]
 	if u.hp<=0 and not u.dead then
-		del(selection,u).dead,
+		del(selection,u)
+		u.dead,
 			u.st,u.sel=0,parse"t=dead"
 		if typ.bldg then
 			register_bldg(u)
@@ -2419,7 +2422,6 @@ function dmapcc(q)
 end
 
 function make_dmap(key)
-	local open={}
 	if not dmap_st[key] then
 		dmap_st[key]={}
 		for x=0,mapw8 do
@@ -2432,7 +2434,8 @@ function make_dmap(key)
 		end
 		end
 	end
-
+	
+	local open={}
 	for i,t in next,dmap_st[key] do
 		if	sur_acc(unpack(t)) then
 			add(open,t).k=i
@@ -2605,7 +2608,13 @@ menuitem(2,"◆ load from clip",function()
 			exp[k]=1
 		end
 	end
---	unit(castle,unspl"88,136,2")
+	
+	unit(castle,unspl"97,136,2")
+	unit(barracks,unspl"117,140,2")
+	unit(warant,unspl"113,156,2")
+	unit(archer,unspl"113,156,2")
+	unit(archer,unspl"113,156,2")
+
 	make_dmaps"d"
 end)
 
