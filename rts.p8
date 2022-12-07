@@ -1126,10 +1126,12 @@ function handle_click()
   	hilite={t=t(),x=mx,y=my}
   elseif sel1.typ.prod then
   	--set rally
-  	if is_res(mx,my) then
+  	if fget(mget(tx,ty),1) then
  	  hilite={t=t(),tx=tx,ty=ty}
 			end
-  	sel1.rx,sel1.ry=mx,my
+  	sel1.rx,sel1.ry,
+  		sel1.rtx,sel1.rty=
+  		mx,my,tx,ty
   end
  end
 end
@@ -1637,10 +1639,10 @@ function produce(u)
 				local new=unit(
 					b.typ,u.x,u.y,1)
 				if new.typ==ant and
-					u.rx and
-					is_res(u.rx,u.ry)
+					u.rtx and
+					fget(mget(u.rtx,u.rty),1)
 				then
-					gather(new,u.rx\8,u.ry\8)
+					gather(new,u.rtx,u.rty)
 				else
 					move(new,u.rx or u.x+5,
 						u.ry or u.y+5)
@@ -1790,10 +1792,6 @@ function all_surr(x,y,n,chk_acc)
 	return all(st)
 end
 
-function is_res(x,y)
-	return fget(mget(x\8,y\8),1)
-end
-
 function avail_farm()
 	return hoverunit and
 		hoverunit.typ.farm and
@@ -1802,11 +1800,12 @@ function avail_farm()
 end
 
 function can_gather()
-	return (is_res(mx,my) or
+	local x,y=mx\8,my\8
+	return (fget(mget(x,y),1) or
 		avail_farm()) and
 		sel_typ==ant and
-		g(exp,mx\8,my\8) and
-		sur_acc(mx\8,my\8)
+		g(exp,x,y) and
+		sur_acc(x,y)
 end
 
 function can_attack()
