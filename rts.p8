@@ -2080,23 +2080,22 @@ end
 function print_res(r,x,y,zero)
 	local oop=res.p>=res.pl
 	for i,k in inext,split"r,g,b,p" do
-		local v=i!=4 and flr(r[k]) or
-			zero and "\-b \-i"..res.p..
-					"/\-m \-6"..res.pl or
+		local newx,v=0,i!=4 and
+			flr(r[k]) or zero and
+			"\-b \-i"..res.p..
+				"/\-m \-6"..res.pl or
 			oop and r[k] or 0
+		if zero and i==3 then
+			newx,v=-2,v.."\-g\^t\|f\f5|"
+		end
 		if v!=0 or zero then
 			v=(
 				(i==4 and oop or
 				res[k]<flr(v)) and "\#a "
 				or " ")..v
-			local newx=print(v,x,y,
-			 rescol[k])
+			newx+=print(v,x,y,rescol[k])
 			spr(128+i,x,y)
 			x=newx+(zero or 1)
-		end
-		if zero and i==3 then
-			line(x-1,y-1,x-1,y+5,5)
-			x+=2
 		end
 	end
 	return x-1
