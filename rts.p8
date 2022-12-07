@@ -199,8 +199,8 @@ function _update()
  end
 
  for p in all(proj) do
- 	p.x,p.y,_,sum=norm(p.to,p,.8)
-  if sum<0.5 then
+ 	p.x,p.y,_,d=norm(p.to,p,.8)
+  if d<0.5 then
 	  if intersect(
 	  	u_rect(del(proj,p).to_unit),
 	 		{p.x,p.y},0
@@ -1169,6 +1169,7 @@ function handle_input()
 		webd=mid(10,
 		 dist(webx-wmx,weby-wmy),
 		 25)
+
 		wmx,wmy=norm({wmx,wmy},
 			{x=webx,y=weby},webd)
 	end
@@ -1841,11 +1842,11 @@ end
 function norm(it,nt,f)
 	local xv,yv=
 		it[1]-nt.x,it[2]-nt.y
-	local sum=abs(xv)+abs(yv)
-	return nt.x+xv*f/sum,
-		nt.y+yv*f/sum,
-		sgn(xv), --xdir
-		sum
+	local d=dist(xv,yv)+0.0001
+	return nt.x+xv*f/d,
+		nt.y+yv*f/d,
+		sgn(xv),--xdir
+		d
 end
 
 --strict incl farms+const
@@ -2609,9 +2610,12 @@ menuitem(2,"◆ load from clip",function()
 		end
 	end
 	
+	web.breq=0
 	unit(castle,unspl"97,136,2")
 	unit(barracks,unspl"117,140,2")
 	unit(warant,unspl"113,156,2")
+	unit(warant,unspl"113,156,2")
+	unit(archer,unspl"113,156,2")
 	unit(archer,unspl"113,156,2")
 	unit(archer,unspl"113,156,2")
 
