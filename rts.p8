@@ -111,15 +111,11 @@ function _draw()
 		local dt=t()-hilite.t
 		if dt>0.5 then
 			hilite=nil
-		elseif hilite.x then
-			circ(hilite.x,hilite.y,
+		elseif hilite.cx then
+			circ(hilite.cx,hilite.cy,
 			 min(0.5/dt,4),8)
 		elseif dt<=0.1 or dt>=0.25 then
-			if hilite.tx then
-				local x,y=hilite.tx*8,
-					hilite.ty*8
-				rect(x-1,y-1,x+8,y+8,8)
-			elseif hilite.unit then
+			if hilite.unit then
 				rectaround(hilite.unit,8)
 			end
 		end
@@ -947,16 +943,8 @@ function build(u,b)
 	}
 end
 
-function target_tile(tx,ty)
-	return {
-		x=tx*8+3,y=ty*8+3,
-		typ=parse[[w=8
-h=8]],
-	}
-end
-
 function gather(u,tx,ty,wp)
-	local t=target_tile(tx,ty)
+	local t=tile_as_unit(tx,ty)
 	u.st={
 		t="gather",
 		tx=tx,
@@ -982,7 +970,7 @@ function drop(u,nxt_res,dropu)
 		wayp=wayp,
 		nxt=nxt_res,
 		target=dropu or
-			target_tile(x,y),
+			tile_as_unit(x,y),
 	}
 end
 
@@ -1099,6 +1087,10 @@ function handle_click()
 	
  if rclick and sel1 and sel1.p==1 then
 	 local tx,ty=mx\8,my\8
+	 local htile={
+	 	t=t(),
+	 	unit=tile_as_unit(tx,ty)
+	 }
 	 if can_renew_farm() then
 	 	hilite_hoverunit()
 	 	hoverunit.sproff,
@@ -1107,7 +1099,7 @@ function handle_click()
 	 	res.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
 	 elseif can_gather() then
-	 	hilite={t=t(),tx=tx,ty=ty}
+	 	hilite=htile
 	 	if avail_farm() then
 	 		harvest(sel1,hoverunit)
 	 	else
@@ -1124,11 +1116,11 @@ function handle_click()
   	hilite_hoverunit()
   elseif sel1.typ.unit then
   	foreachsel(move,mx,my)
-  	hilite={t=t(),x=mx,y=my}
+  	hilite={t=t(),cx=mx,cy=my}
   elseif sel1.typ.prod then
   	--set rally
   	if fget(mget(tx,ty),1) then
- 	  hilite={t=t(),tx=tx,ty=ty}
+ 	  hilite=htile
 			end
   	sel1.rx,sel1.ry,
   		sel1.rtx,sel1.rty=
@@ -1149,8 +1141,7 @@ end
 
 function handle_input()
 	local b=btn()
-	--allow esdf
-	if (b>32) b>>=8
+	if (b>32) b>>=8 --allow esdf
 	cx,cy,amx,amy=
  	mid(0,
  		cx+band(b,0x2)-band(b,0x1)*2,
@@ -1748,6 +1739,14 @@ function intersect(r1,r2,e)
 		r1[3]+e>a and
 		r1[2]-e<(d or b) and
 		r1[4]+e>b
+end
+
+function tile_as_unit(tx,ty)
+	return {
+		x=tx*8+4,y=ty*8+4,
+		typ=parse[[w=8
+h=8]],
+	}
 end
 
 function u_rect(_ENV,e)
