@@ -1001,10 +1001,7 @@ end
 --update
 
 function handle_click()
-	local lclick,rclick=btnp(5),
-		btnp(4)
-
-	if lclick and hovbtn then
+	if btnp"5" and hovbtn then
 		hovbtn.handle()
 		return
 	end
@@ -1016,29 +1013,29 @@ function handle_click()
 			dx<mmw and dy<mmh+1	then
 			local x,y=
 				mmwratio*dx,mmhratio*dy
-			if rclick and sel1 then
+			if btnp"4" and sel1 then
 				foreachsel(move,x,y)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
-			elseif lclick then
+			elseif btnp"5" then
 				cx,cy=
 					mid(0,x-64,mapw-128),
 					--menuh=21
 				 mid(0,y-64,maph-107)
 			end
 		end
-		if (lclick) to_build=nil
+		if (btnp"5") to_build=nil
 	 return
 	end
 	
- if rclick and (to_build or
+ if btnp"4" and (to_build or
  	webbing) then
  	to_build,webbing,webx=nil
  	return
  end
 
  if webbing then
- 	if lclick and
+ 	if btnp"5" and
  	 can_finish_web() then
 	 	if webx then
 				pay(web,-1)
@@ -1056,7 +1053,7 @@ function handle_click()
  	return
  end
 
- if lclick and to_build then
+ if btn"5" and to_build then
   if buildable() then
 	  pay(to_build,-1)
 			local new=unit(
@@ -1070,7 +1067,7 @@ function handle_click()
 		return
  end
 
- if btn(5) then
+ if btn"5" then
  	if not selbox then
  		selx,sely=mx,my
  	end
@@ -1085,7 +1082,8 @@ function handle_click()
  	selbox=nil
  end
 	
- if rclick and sel1 and sel1.p==1 then
+ if btnp"4" and sel1 and
+ 	sel1.p==1 then
 	 local tx,ty=mx\8,my\8
 	 local htile={
 	 	t=t(),
