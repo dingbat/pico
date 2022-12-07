@@ -1939,9 +1939,8 @@ function can_renew_farm()
 end
 
 function bar(x,y,w,prog,fg,bg)
-	line(x,y,x+w,y,bg or 8)
-	line(x,y,x+flr(w*prog),y,
-		fg or 11)
+	line(x+w,y,x,y,bg or 8)
+	line(x+flr(w*prog),y,fg or 11)
 end
 
 function sur_acc(x,y)
@@ -1971,7 +1970,7 @@ qty=0]],0
 	if u.typ.bldg then
 		register_bldg(u)
 	else
-		modify_totalu(2-u.p)
+		modify_totalu(2-p)
 	end
 	return u
 end
