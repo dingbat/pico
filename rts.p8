@@ -2475,9 +2475,8 @@ mapw,maph,mmx,mmy,mmw,
 	mmwratio= --mapw/mmw
 	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
 	
-ai_diff,resources,f2res,resqty,
- key2resf,rescol=0,
-	split"r,g,b,p,pl,ppl",parse[[
+ai_diff,f2res,resqty,
+ key2resf,rescol=0,parse[[
 7=r
 11=g
 19=b
@@ -2586,7 +2585,7 @@ menuitem(1,"⌂ save to clip",function()
 		str=str..k..","
 	end
 	str=str.."/"
-	for r in all(resources) do
+	for r in all(split"r,g,b,p,pl,ppl") do
 		str=str..res[r]..","
 	end
 	str=str.."/"
@@ -2609,7 +2608,7 @@ menuitem(2,"◆ load from clip",function()
 	local r,e=
 		split(deli(lines)),
 		split(deli(lines))
-	for i,k in inext,resources do
+	for i,k in inext,split"r,g,b,p,pl,ppl" do
 		res[k]=r[i]
 	end
 	for l in all(lines) do
