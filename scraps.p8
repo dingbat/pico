@@ -51,6 +51,7 @@ end
 
 
 function draw_dmap(res_typ)
+ if (not dmaps) return
 	local dmap=dmaps[res_typ]
  if (not dmap) return
  for x=0,16 do

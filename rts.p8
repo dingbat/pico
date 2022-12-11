@@ -21,9 +21,7 @@ function _draw()
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 	 --
 	 --pal()
-		print(
-			"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start"
-		,22,50)
+		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start",22,50
 		print(ai_diff==0 and
 			"\f0easy\-0\|f\fbeasy" or
 			ai_diff==1 and
@@ -39,7 +37,7 @@ function _draw()
 		if
 			not loser and
 		 not g(viz,u.x\8,u.y\8)
-		 and (u.discovered or u.const)
+		 and u.discovered
 		then
  		add(af,u)
  	elseif u.typ.bldg then
@@ -80,7 +78,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(32) --draw fogmap
+--	draw_map(32) --draw fogmap
 	
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -186,7 +184,7 @@ function _update()
 	fps+=1
 	fps%=60
 	upc=fps%upcycle
-
+	
  handle_input()
 	
  buttons,pos,hoverunit={},{}
@@ -254,6 +252,8 @@ function _update()
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
+	
+	if (fps%5==0) ai()
 end
 
 -->8
@@ -971,7 +971,7 @@ end
 function drop(u,nxt_res,dropu)
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
-		dropu=not wayp and p1q
+		dropu=not wayp and queens[u.p]
 	end
 	if dropu then
 		wayp=get_wayp(u,dropu.x,
@@ -1071,7 +1071,7 @@ function handle_click()
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1,nil,nil,0))
+				1,nil,1,0))
 			to_build=pay(to_build,-1)
 		end
 		return
@@ -1254,6 +1254,7 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
+	if (fps%5==0) ai_unit(u)
 
 	update_viz(u)
 
@@ -1518,7 +1519,7 @@ function farmer(u)
 		if f.res.qty==0 then
 			drop(u)
 			f.cycles+=1
-			f.exp,f.ready=
+			f.exp,f.ready=f.p==1 and
 			 f.cycles==farm_cycles
 			f.sproff=f.exp and 32 or 0
 		end
@@ -1644,7 +1645,7 @@ function produce(u)
 				u.typ.prod[b.idx]=b.tech()
 			else
 				local new=unit(
-					b.typ,u.x,u.y,1)
+					b.typ,u.x,u.y,u.p)
 				if new.typ==ant and
 					u.rtx and
 					fget(mget(u.rtx,u.rty),1)
@@ -1681,10 +1682,10 @@ function check_target_col(u)
 			st.wayp=nil
 		end
 		if st.t=="drop" then
-			if u.res then
+			if u.res and u.p==1 then
 				res[u.res.typ]+=u.res.qty/3
-				u.res=nil
 			end
+			u.res=nil
 			if st.farm then
 				harvest(u,st.farm)
 			elseif st.nxt then
@@ -1909,11 +1910,11 @@ function register_bldg(b)
 	end
 	if (h>8) reg(x,y-1)
 	
+	if (typ==queen) queens[b.p]=b
 	if not b.const and typ!=farm then
 		make_dmaps"d"
 		if b.p==1 then
 			bldg_bmap|=typ.bitmap
-			if (typ==queen) p1q=b
 		end
 	end
 end
@@ -2204,7 +2205,7 @@ function draw_sel_ports()
 		local x=i*13-10
 		if i>6 then
 			--menuy+6
-			print("\f1+"..numsel-6,x,110)
+			?"\f1+"..numsel-6,x,110
 			break
 		end
 		draw_port(
@@ -2230,7 +2231,7 @@ function single_unit_section()
 				deli(selection).sel=false
 			end)
 		--menuy+6
-		print("X"..numsel,unspl"16,111,7")
+		?"X"..numsel,unspl"16,111,7"
 	end
 		
 	if numsel==1 and r then
@@ -2409,6 +2410,8 @@ function async_dmap()
 					deli(queue,1).dmap
 			end
 		end
+	else
+		dmaps_ready=true
 	end
 end
 
@@ -2463,6 +2466,7 @@ function make_dmap(key)
 		nxt={},
 	}
 end
+
 -->8
 --init
 
@@ -2520,16 +2524,17 @@ function init()
 	farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,
-	uid,totalu=
+	uid,totalu,
+	dmaps_ready=
 		{},
 		unspl"5,6,3,0,0,0,0,59,0,0,0"
 	
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
 		proj,bldgs,spiders,viz,
-		new_viz,
+		new_viz,queens,
 		dmap_st,res,loser,menu=
-		{},{},{},{},{},{},
+		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
 r=5
@@ -2557,7 +2562,7 @@ function new_game()
  unit(unspl"7,209,188,2")
 	unit(unspl"1,192,184,2")
 	unit(unspl"1,220,187,2")
-	unit(unspl"1,202,176,2")
+	unit(unspl"1,202,196,2")
 	unit(unspl"5,200,170,2")
 	
 	make_dmaps"d"
@@ -2633,6 +2638,79 @@ menuitem(2,"◆ load from clip",function()
 end)
 
 menuitem(3,"   (paste first)")
+-->8
+--ai
+
+ai_idle,ai_work,ai_res,
+	mound_spots,farm_spots={},{},
+ split"r,g,b",
+ parse[[
+27=27
+28=20]],parse[[
+27=23
+26=24
+25=24
+24=23
+28=26
+29=21
+]]
+
+function ai_unit(u)
+ if u.p==2 and u.typ==ant then
+ 	add(ai_work,u)
+ 	if u.st.t=="rest" then
+ 		add(ai_idle,u)
+ 	end
+ end
+end
+
+function ai_mine(u)
+	mine_nxt_res(u,
+		add(ai_res,deli(ai_res,1))
+	)
+end
+
+function ai()
+	if dmaps_ready then
+		for x,y in next,mound_spots do
+			if fget(mget(x,y))==0 then
+				local w=deli(ai_idle) or
+					deli(ai_work)
+				mound_spots[x]=
+					build(w,unit(
+					 mound,
+					 x*8+4,
+					 y*8+4,
+					 2,nil,nil,0))
+			end
+		end
+		if farm_spots and
+			g(dmaps.r,24,24)>=4 then
+ 			for x,y in next,farm_spots do
+				if fget(mget(x,y))==0 then
+					local w=deli(ai_idle) or
+						deli(ai_work)
+					mound_spots[x]=
+						build(w,unit(
+						 farm,
+						 x*8+4,
+						 y*8+4,
+						 2,nil,nil,0))
+				end
+			end
+			farm_spots=nil
+			del(ai_res,"r")
+		end
+		foreach(ai_idle,ai_mine)
+		if not queens[2].q and #ai_work<30 then
+			queens[2].q={
+				b={typ=ant},qty=1,t=1,
+				fps15=0,
+			}
+		end
+	end
+	ai_idle,ai_work={},{}
+end
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
