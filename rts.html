@@ -534,6 +534,7 @@ document.addEventListener("touchcancel", function(event) {event.preventDefault()
 	var p8_touch_detected = false;
 	addEventListener("touchstart", function(event)
 	{
+		event.preventDefault();
 		p8_touch_detected = true;
 
 		// hide codo_textarea -- clipboard support on mobile is not feasible
