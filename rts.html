@@ -68,9 +68,9 @@
 	// document.addEventListener('touchend', {});
 
 // document.addEventListener("touchstart",  function(event) {event.preventDefault()})
-document.addEventListener("touchmove",   function(event) {event.preventDefault()})
-document.addEventListener("touchend",    function(event) {event.preventDefault()})
-document.addEventListener("touchcancel", function(event) {event.preventDefault()})
+// document.addEventListener("touchmove",   function(event) {event.preventDefault()})
+// document.addEventListener("touchend",    function(event) {event.preventDefault()})
+// document.addEventListener("touchcancel", function(event) {event.preventDefault()})
 
 
 
@@ -617,9 +617,9 @@ document.addEventListener("touchcancel", function(event) {event.preventDefault()
 
 		// install touch events. These also serve to block scrolling / pinching / zooming on phones when p8_is_running
 			// moved event.preventDefault(); calls into pico8_buttons_event() (want to let top buttons pass through)
-		addEventListener("touchstart", function(event){ pico8_buttons_event(event, 0); }, {passive: false});
-		addEventListener("touchmove",  function(event){ pico8_buttons_event(event, 1); }, {passive: false});
-		addEventListener("touchend",   function(event){ pico8_buttons_event(event, 2); }, {passive: false});
+		addEventListener("touchstart", function(event){ pico8_buttons_event(event, 0); event.preventDefault()}, {passive: false});
+		addEventListener("touchmove",  function(event){ pico8_buttons_event(event, 1); event.preventDefault()}, {passive: false});
+		addEventListener("touchend",   function(event){ pico8_buttons_event(event, 2); event.preventDefault()}, {passive: false});
 
 
 		// load and run script
