@@ -58,7 +58,7 @@ function _draw()
 		pal(2,0)
 	 sspr(64+
 	 	({48,t()\0.2%3*16})[loser],
-	 	unspl"0,16,8,14,98,34,16")
+	 	unspl"0,16,8,14,98,32,16")
 	 pal()
 		print(ai_diff==0 and
 			"\#9\|d\-0        \-0\-4\-e\|h\f2easy ai" or
@@ -230,7 +230,7 @@ function _update()
 		end
  	if not (u.const or u.dead) then
 		 if upc==u.uid%upcycle and
-		  u.st.t=="rest" and
+		  u.st.aggress and
 		  u.typ.atk
 		 then
 				aggress(u)
@@ -964,13 +964,16 @@ acid_vs_seige=0.9
 acid_vs_building=0.6]]
 
 function rest(u)
-	u.st=parse"t=rest"
+	u.st=parse[[
+t=rest
+aggress=1]]
 end
 
-function move(u,x,y)
+function move(u,x,y,aggress)
 	u.st={
 		t="move",
 		wayp=get_wayp(u,x,y,0),
+		aggress=aggress,
 	}
 end
 
@@ -1251,10 +1254,11 @@ function tick_unit(u)
 		end
 	end
 	if u.dead then
+		loser=u.typ==queen and u.p
 		u.dead+=1
 		update_viz(u)
 		if u.dead==60 then
-			loser=del(units,u).typ==queen and u.p
+			del(units,u)
 		end
 		return
 	end
@@ -1948,7 +1952,7 @@ end
 
 function collect(u,res)
 	if u.res and u.res.typ==res then
-		u.res.qty+=1
+		u.res.qty+=u.p
 	else
 		u.res={typ=res,qty=1}
 	end
@@ -2121,6 +2125,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
+	local res1=res[2]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2656,14 +2661,14 @@ menuitem(2,"◆ load from clip",function()
 		end
 	end
 	
-	web.breq=0
-	unit(castle,unspl"97,136,2")
-	unit(barracks,unspl"117,140,2")
-	unit(warant,unspl"113,156,2")
-	unit(warant,unspl"113,156,2")
-	unit(archer,unspl"113,156,2")
-	unit(archer,unspl"113,156,2")
-	unit(archer,unspl"113,156,2")
+--	web.breq=0
+--	unit(castle,unspl"97,136,2")
+--	unit(barracks,unspl"117,140,2")
+--	unit(warant,unspl"113,156,2")
+--	unit(warant,unspl"113,156,2")
+--	unit(archer,unspl"113,156,2")
+--	unit(archer,unspl"113,156,2")
+--	unit(archer,unspl"113,156,2")
 
 	make_dmaps"d"
 end)
@@ -2684,20 +2689,59 @@ function ai_unit1(u)
 				nxt_res%=3
 				nxt_res+=1
 		 end
-	 end
+	 elseif u.typ.atk and
+	 	u.typ.unit and
+	 	u.st.t=="rest" then
+	 	add(army,u)
+	 end 	
  end
 end
 
-function ai_unit2(u)
-	if u.typ.bldg and
-		u.hp<u.typ.hp*0.75 and
-		not u.repair then
-		u.repair=deli(miners)
-		build(u.repair,u)
+function ai_prod(u,idx)
+	local p=u.typ.prod[idx]
+	if not u.q and can_pay(p,2) then
+		pay(p,-1,2)
+		u.q={
+			b=p,qty=1,t=p.t,
+			fps15=0,
+		}
 	end
-	if u.repair and
-		u.repair.st.target!=u then
-		u.repair=nil
+end
+
+function ai_unit2(u)
+	if u.p==2 then
+		if u.typ.bldg and
+			u.hp<u.typ.hp*0.75 and
+			not u.repair then
+			u.repair=deli(miners)
+			if u.repair then
+				build(u.repair,u)
+			end
+		end
+		if u.repair and
+			u.repair.st.target!=u then
+			u.repair=nil
+		end
+		--removable
+		if u.typ.farm and
+		 not u.const and
+		 not u.farmer then
+			local w=deli(miners)
+			if (w) harvest(w,u)
+		end
+		if u.typ==queen then
+			if #miners<30 then
+				ai_prod(u,1)
+			end
+		elseif u.typ==barracks then
+			ai_prod(u,1)
+		end
+	elseif u.st.t=="attack" and
+		u.st.active then
+		local a=deli(army)
+		if a then
+			attack(a,u)
+		end
 	end
 end
 
@@ -2708,12 +2752,19 @@ function ai_init()
 	--4:den
 	--5:tower
 	--6:castle
-	miners,nxt_res,bo=
-		{},1,
+	miners,army,nxt_res,bo=
+		{},{},1,
 		{
-			{5,1,27,27},
-		 {10,3,23,23},
+			{6,1,27,27},
+		 {10,3,23,19},
+		 {11,2,25,24},
+		 {11,2,26,24},
+			{13,1,27,21},
+		 {14,2,25,22},
+		 {14,2,26,22},
 			{15,5,22,16},
+			{17,1,29,25},
+			{40,6,19,18},
 		}
 		
 	unit(tower,unspl"141,178,2")
@@ -2722,7 +2773,7 @@ end
 
 function ai_build(t,pid,x,y)
 	local b=ant.prod[pid]
-	pay(b,-0.5,2)
+	pay(b,-1,2)
 	build(
 		deli(miners),
 		unit(b.typ,
@@ -2734,21 +2785,19 @@ end
 
 function ai_frame()
 	local b=bo[1]
-	if b and b[1]<t() then
+	if b and b[1]<=res[2].p then
 		ai_build(unpack(deli(bo,1)))
 	end
-	local p_ant=queen.prod[1]
-	if not queens[2].q and
-	 #miners<30 and
-	 can_pay(p_ant,2) then
-		pay(p_ant,-0.5,2)
-		queens[2].q={
-			b=p_ant,qty=1,t=5,
-			fps15=0,
-		}
+	if #army>5 then
+		for u in all(army) do
+			local q=queens[1]
+			move(u,q.x,q.y,true)
+		end
 	end
-	miners={}
+	miners,army={},{}
 end
+
+_update60=_update
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
