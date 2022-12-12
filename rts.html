@@ -63,14 +63,14 @@
 	// added 0.2.1: work-around for iOS/Safari running from an iFrame (e.g. from itch.io page):
 	// touch events only register after adding dummy listeners on document.
 
-	// document.addEventListener('touchstart', {});
-	// document.addEventListener('touchmove', {});
-	// document.addEventListener('touchend', {});
+	document.addEventListener('touchstart', {});
+	document.addEventListener('touchmove', {});
+	document.addEventListener('touchend', {});
 
-document.addEventListener("touchstart",  function(event) {event.preventDefault()})
-document.addEventListener("touchmove",   function(event) {event.preventDefault()})
-document.addEventListener("touchend",    function(event) {event.preventDefault()})
-document.addEventListener("touchcancel", function(event) {event.preventDefault()})
+// document.addEventListener("touchstart",  function(event) {event.preventDefault()})
+// document.addEventListener("touchmove",   function(event) {event.preventDefault()})
+// document.addEventListener("touchend",    function(event) {event.preventDefault()})
+// document.addEventListener("touchcancel", function(event) {event.preventDefault()})
 
 
 
