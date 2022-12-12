@@ -5,9 +5,8 @@ __lua__
 
 function _draw()
  --cls() not needed!
+ draw_map(0) --mainmap
 	if menu then
- 	pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
-		draw_map(0)
 		camera()
 		sspr(unspl"40,88,31,8,49,75")
 	 --42 tok (replace with pal())
@@ -29,8 +28,6 @@ function _draw()
 			"\f0hard\-0\|f\fehard",57,77)
 		return
 	end
-
- draw_map(0) --mainmap
 
  local bf,af={},{}
  for u in all(units) do
@@ -78,7 +75,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(32) --draw fogmap
+--	draw_map(32) --fogmap
 	
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -177,6 +174,7 @@ function _update()
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
+		pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
  	return
 	end
 	
@@ -223,11 +221,15 @@ function _update()
  end
  foreach(units,tick_unit)
 
- --fighting happens after
+ --sel & fighting happens after
  --tick bc needs viz
- for i,u in inext,units do
+ for u in all(units) do
+		if (fps%5==0) ai_unit2(u)	
+ 	if selbox and g(viz,u.x\8,u.y\8) then
+ 	 update_sel(u)
+		end
  	if not (u.const or u.dead) then
-		 if upc==i%upcycle and
+		 if upc==u.uid%upcycle and
 		  u.st.t=="rest" and
 		  u.typ.atk
 		 then
@@ -253,13 +255,14 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if (fps%5==0) ai()
+	if fps%5==0 then
+	 ai_frame()
+	end
 end
 
 -->8
 --unit defs/states
 
-typs={}
 function parse(unit,typ,tech)
 	local obj={
 		typ=typ,tech=tech,
@@ -272,9 +275,12 @@ function parse(unit,typ,tech)
 				obj[2][k]=v,v,v
 		end
 	end
-	return add(typs,obj)
+	add(typs,obj)
+	return obj
 end
 
+function init_typs()
+typs={}
 ant=parse[[
 idx=1
 w=4
@@ -320,6 +326,7 @@ spd=1
 los=20
 hp=10
 def=ant]]
+
 beetle=parse[[
 idx=2
 w=8
@@ -344,12 +351,13 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=0.9
+spd=10.9
 los=20
 hp=20
 def=seige
 atk_typ=seige
 atk=1]]
+
 spider=parse[[
 idx=3
 w=8
@@ -382,6 +390,7 @@ hp=15
 def=spider
 atk_typ=spider
 atk=2]]
+
 archer=parse[[
 idx=4
 w=7
@@ -417,6 +426,7 @@ range=25
 atk_typ=acid
 def=ant
 atk=1]]
+
 warant=parse[[
 idx=5
 w=8
@@ -447,6 +457,7 @@ hp=15
 atk_typ=ant
 def=ant
 atk=1]]
+
 cat=parse[[
 idx=6
 w=16
@@ -482,6 +493,7 @@ range=50
 atk_typ=seige
 def=seige
 atk=2]]
+
 queen=parse[[
 idx=7
 w=15
@@ -515,6 +527,7 @@ atk_typ=acid
 def=queen
 atk=1
 bitmap=0]]
+
 tower=parse[[
 idx=8
 w=8
@@ -547,6 +560,7 @@ atk_typ=tower
 def=building
 atk=1
 bitmap=1]]
+
 mound=parse[[
 idx=9
 w=8
@@ -572,6 +586,7 @@ has_q=1
 drop=1
 def=building
 bitmap=2]]
+
 den=parse[[
 idx=10
 w=8
@@ -596,6 +611,7 @@ const=20
 has_q=1
 def=building
 bitmap=4]]
+
 barracks=parse[[
 idx=11
 w=8
@@ -620,6 +636,7 @@ const=20
 has_q=1
 def=building
 bitmap=8]]
+
 farm=parse[[
 idx=12
 w=8
@@ -645,6 +662,7 @@ dir=-1
 const=6
 def=building
 bitmap=16]]
+
 castle=parse[[
 idx=13
 w=15
@@ -712,6 +730,7 @@ g=3
 b=3
 breq=13]],castle),
 }
+
 queen.prod={
 	parse([[
 t=6
@@ -734,6 +753,7 @@ portw=8]],function()
 		ant[1].carry=9
 	end),
 }
+
 web=parse([[
 t=4
 r=0
@@ -743,7 +763,9 @@ breq=100]],parse[[
 portx=8
 porty=80
 portw=9]])
+
 spider.prod={web}
+
 den.prod={
 	parse([[
 t=8
@@ -797,6 +819,7 @@ portw=9]],function()
 		spider[1].atk+=1
 	end),
 }
+
 mound.prod={
 	parse([[
 t=12
@@ -811,6 +834,7 @@ portw=9]],function()
 		farm_cycles=10
 	end),
 }
+
 barracks.prod={
 	parse([[
 t=10
@@ -868,6 +892,7 @@ portw=9
 		archer[1].atk+=1
 end),
 }
+
 castle.prod={
 	parse([[
 t=10
@@ -905,6 +930,8 @@ portw=9]],function()
 		end
 	end),
 }
+end
+
 dmg_mult=parse[[
 ant_vs_ant=1
 ant_vs_queen=0.9
@@ -915,25 +942,25 @@ ant_vs_building=1
 spider_vs_ant=1.5
 spider_vs_queen=0.9
 spider_vs_spider=1
-spider_vs_seige=1
-spider_vs_building=1
+spider_vs_seige=1.1
+spider_vs_building=0.8
 
 seige_vs_ant=1
-seige_vs_queen=1
+seige_vs_queen=0.8
 seige_vs_spider=1
 seige_vs_seige=1
-seige_vs_building=2
+seige_vs_building=1.6
 
 tower_vs_ant=1
 tower_vs_queen=0.75
-tower_vs_spider=1
-tower_vs_seige=1
+tower_vs_spider=1.1
+tower_vs_seige=0.8
 tower_vs_building=0.5
 
 acid_vs_ant=1
 acid_vs_queen=1
 acid_vs_spider=1.5
-acid_vs_seige=1
+acid_vs_seige=0.9
 acid_vs_building=0.6]]
 
 function rest(u)
@@ -993,9 +1020,7 @@ function attack(u,e)
 			target=e,
 			wayp=get_wayp(u,e.x,e.y),
 		}
-		if u.typ.bldg then
-			u.discovered=1
-		end
+		u.discovered=u.typ.bldg and 1
 	end
 end
 
@@ -1104,7 +1129,7 @@ function handle_click()
 	 	hoverunit.sproff,
 	 		hoverunit.cycles,
 	 		hoverunit.exp=0,0
-	 	res.b-=farm_renew_cost_b
+	 	res1.b-=farm_renew_cost_b
 	 	harvest(sel1,hoverunit)
 	 	
 	 elseif can_gather() then
@@ -1216,14 +1241,13 @@ function tick_unit(u)
 		if typ.bldg then
 			register_bldg(u)
 		end
-		if u.p==1 then
-			if typ.drop then
-				res.ppl-=5
-				res.pl=min(res.ppl,99)
-			elseif typ.unit then
-				res.p-=1
-				modify_totalu(u.p-2)
-			end
+		local r=res[u.p]
+		if typ.drop then
+			r.ppl-=5
+			r.pl=min(r.ppl,99)
+		elseif typ.unit then
+			r.p-=1
+			modify_totalu(u.p-2)
 		end
 	end
 	if u.dead then
@@ -1247,14 +1271,13 @@ function tick_unit(u)
 		hoverunit=u
 	end
 	
-	if (selbox) update_sel(u)
 	if (u.const) return
 	if u.st.target and u.st.target.dead then
 		rest(u)
 	end
 	
 	update_unit(u)
-	if (fps%5==0) ai_unit(u)
+	if (fps%5==0) ai_unit1(u)
 
 	update_viz(u)
 
@@ -1421,12 +1444,10 @@ function draw_unit(u)
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
-	pal(2,u.p)
+	pal(2,u.p) --queen eyes
 	pal(1,u.sel and (
-	 u.p==1 and (typ.unit or
-	 	not my_sel) or
-	 u==sel1
-	) and 9 or u.p)
+	 u.p==1 and typ.unit
+	 or u==sel1) and 9 or u.p)
 	if st.webbed then
 		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
 	end
@@ -1591,24 +1612,24 @@ function fight(u)
 end
 
 function buildrepair(u)
-	local b=u.st.target
+	local b,r=u.st.target,res[u.p]
 	if fps%30==0 then
 		if b.const then
  		b.const+=1
  		if b.const>=b.typ.const then
  			b.const=nil
  			register_bldg(b)
- 			if b.typ.drop and b.p==1 then
- 				res.ppl+=5
- 				res.pl=min(res.ppl,99)
+ 			if b.typ.drop then
+ 				r.ppl+=5
+ 				r.pl=min(r.ppl,99)
  			elseif b.typ.farm then
  				harvest(u,b)
  			end
  		end
  	elseif b.hp<b.typ.hp and
- 		res.b>=1 then
+ 		r.b>=1 then
  		b.hp+=1
- 		res.b-=0.5
+ 		r.b-=0.5
  	else
  		rest(u)
  	end
@@ -1684,8 +1705,8 @@ function check_target_col(u)
 			st.wayp=nil
 		end
 		if st.t=="drop" then
-			if u.res and u.p==1 then
-				res[u.res.typ]+=u.res.qty/3
+			if u.res then
+				res[u.p][u.res.typ]+=u.res.qty/3
 			end
 			u.res=nil
 			if st.farm then
@@ -1951,7 +1972,7 @@ end
 
 function can_renew_farm()
 	return hoverunit and
-		res.b>=farm_renew_cost_b and
+		res1.b>=farm_renew_cost_b and
 		sel_typ==ant and
 		hoverunit.exp
 end
@@ -2100,12 +2121,12 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
-	local oop=res.p>=res.pl
+	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
 			flr(r[k]) or zero and
-			"\-b \-i"..res.p..
-				"/\-m \-6"..res.pl or
+			"\-b \-i"..res1.p..
+				"/\-m \-6"..res1.pl or
 			oop and r[k] or 0
 		if zero and i==3 then
 			newx,v=-2,v.."\-g\^t\|f\f5|"
@@ -2113,7 +2134,7 @@ function print_res(r,x,y,zero)
 		if v!=0 or zero then
 			v=(
 				(i==4 and oop or
-				res[k]<flr(v)) and "\#a "
+				res1[k]<flr(v)) and "\#a "
 				or " ")..v
 			newx+=print(v,x,y,rescol[k])
 			spr(128+i,x,y)
@@ -2123,20 +2144,21 @@ function print_res(r,x,y,zero)
 	return x-1
 end
 
-function can_pay(costs)
- return res.r>=costs.r and
- 	res.g>=costs.g and
- 	res.b>=costs.b and
- 	(not costs.p or res.p<res.pl) and
+function can_pay(costs,p)
+	local r=res[p or 1]
+ return r.r>=costs.r and
+ 	r.g>=costs.g and
+ 	r.b>=costs.b and
+ 	(not costs.p or r.p<r.pl) and
  	bldg_bmap|costs.breq==bldg_bmap
 end
 
-function pay(costs,dir)
+function pay(costs,dir,p)
 	for r in all(split"r,g,b") do
-  res[r]+=costs[r]*dir
+  res[p or 1][r]+=costs[r]*dir
 	end
 	if costs.p then
-		res.p-=dir
+		res[p or 1].p-=dir
 	end
 end
 
@@ -2345,10 +2367,10 @@ function draw_menu()
 	
 	draw_minimap()
 	
-	local len=print_res(res,
+	local len=print_res(res[2],
 		unspl"0,150,2")
 	rectfill(len-1,unspl"121,0,128,7")
-	print_res(res,unspl"1,122,2")
+	print_res(res[2],unspl"1,122,2")
 	camera(-len)
 	line(unspl"-2,120,-128,120,5")
 	pset(-1,121)
@@ -2500,12 +2522,14 @@ r=8
 g=11
 b=4
 p=1
+
 v0=15
 v1=15
 v7=8
 v11=11
 v19=4
 v33=12
+
 e0=5
 e1=5
 e7=8
@@ -2519,18 +2543,7 @@ function init()
 	
 	--reset maps
 	reload()
-	
-	--tech can change this
-	units_heal,farm_cycles,
-	carry_capacity,
-	farm_renew_cost_b,
-	--global state
-	cx,cy,mx,my,fps,bldg_bmap,
-	uid,totalu,
-	dmaps_ready=
-		{},
-		unspl"5,6,3,0,0,0,0,59,0,0,0"
-	
+		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
 		proj,bldgs,spiders,viz,
@@ -2545,6 +2558,21 @@ b=5
 p=4
 pl=10
 ppl=10]]
+
+	res1,
+	--tech can change this
+	units_heal,farm_cycles,
+	carry_capacity,
+	farm_renew_cost_b,
+	--global state
+	cx,cy,mx,my,fps,bldg_bmap,
+	uid,totalu,
+	dmaps_ready=
+		res[1],{},
+		unspl"5,6,3,0,0,0,0,59,0,0,0"
+
+	init_typs()
+	ai_init()
 end
 
 function init_menu()
@@ -2559,22 +2587,14 @@ function new_game()
 	unit(unspl"1,40,40,1")
 	unit(unspl"1,68,43,1")
 	unit(unspl"1,50,32,1")
-	unit(unspl"5,48,56,1")
+	unit(unspl"2,48,56,1")
 	
  unit(unspl"7,209,188,2")
 	unit(unspl"1,192,184,2")
 	unit(unspl"1,220,187,2")
 	unit(unspl"1,202,196,2")
 	unit(unspl"5,200,170,2")
-	unit(tower,unspl"141,184,2")
-	bld(barracks,23,23)
-	bld(tower,22,16)
-	tower[2].range+=15
 	make_dmaps"d"
-end
-
-function bld(typ,x,y)
-	unit(typ,x*8+typ.w/2,y*8+typ.h/2,2)
 end
 
 init_menu()
@@ -2600,7 +2620,7 @@ menuitem(1,"⌂ save to clip",function()
 	end
 	str=str.."/"
 	for r in all(split"r,g,b,p,pl,ppl") do
-		str=str..res[r]..","
+		str=str..res1[r]..","..res[2][r]..","
 	end
 	str=str.."/"
 	for i=1,mapw8*maph8-1 do
@@ -2623,7 +2643,9 @@ menuitem(2,"◆ load from clip",function()
 		split(deli(lines)),
 		split(deli(lines))
 	for i,k in inext,split"r,g,b,p,pl,ppl" do
-		res[k]=r[i]
+		i*=2
+		i-=1
+		res1[k],res[2][k]=r[i],r[i+1]
 	end
 	for l in all(lines) do
 		unit(unspl(l))
@@ -2650,33 +2672,82 @@ menuitem(3,"   (paste first)")
 -->8
 --ai
 
-ai_idle,ai_work,ai_res={},{},
- split"r,g,b"
-
-function ai_unit(u)
- if u.p==2 and u.typ==ant then
- 	add(ai_work,u)
- 	if u.st.t=="rest" then
- 		add(ai_idle,u)
- 	end
+function ai_unit1(u)
+ if u.p==2 then
+ 	if u.typ==ant then 
+ 		if u.st.t=="gather" then
+		 	add(miners,u)
+		 elseif u.st.t=="rest" and
+		 	dmaps_ready then
+		 	mine_nxt_res(u,
+		 		split"r,g,b"[nxt_res])
+				nxt_res%=3
+				nxt_res+=1
+		 end
+	 end
  end
 end
 
-function ai()
-	if dmaps_ready then
-	 for u in all(ai_idle) do
-	 	mine_nxt_res(u,
-				add(ai_res,deli(ai_res,1))
-			)
-	 end
-		if not queens[2].q and #ai_work<30 then
-			queens[2].q={
-				b={typ=ant},qty=1,t=1,
-				fps15=0,
-			}
-		end
+function ai_unit2(u)
+	if u.typ.bldg and
+		u.hp<u.typ.hp*0.75 and
+		not u.repair then
+		u.repair=deli(miners)
+		build(u.repair,u)
 	end
-	ai_idle,ai_work={},{}
+	if u.repair and
+		u.repair.st.target!=u then
+		u.repair=nil
+	end
+end
+
+function ai_init()
+	--1:mound
+	--2:farm
+	--3:barracks
+	--4:den
+	--5:tower
+	--6:castle
+	miners,nxt_res,bo=
+		{},1,
+		{
+			{5,1,27,27},
+		 {10,3,23,23},
+			{15,5,22,16},
+		}
+		
+	unit(tower,unspl"141,178,2")
+	tower[2].range+=15
+end
+
+function ai_build(t,pid,x,y)
+	local b=ant.prod[pid]
+	pay(b,-0.5,2)
+	build(
+		deli(miners),
+		unit(b.typ,
+			x*8+b.typ.w/2,
+			y*8+b.typ.h/2,
+			2,nil,nil,0)
+	)
+end
+
+function ai_frame()
+	local b=bo[1]
+	if b and b[1]<t() then
+		ai_build(unpack(deli(bo,1)))
+	end
+	local p_ant=queen.prod[1]
+	if not queens[2].q and
+	 #miners<30 and
+	 can_pay(p_ant,2) then
+		pay(p_ant,-0.5,2)
+		queens[2].q={
+			b=p_ant,qty=1,t=5,
+			fps15=0,
+		}
+	end
+	miners={}
 end
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
@@ -2964,8 +3035,8 @@ __map__
 4c545452524d4e4f4c6d6e6f56575757575757586c4d4e4f4c4d4e4a535352524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5c5d53535c5d5e5f5c6b7a566a67676759775a69587a5e5f5c5d515f4a4a4a524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 7b6d6e6f6c6d6e6f6c7a566a67676767684c7677786d6e6f6c6d6e6f6c6d6e6f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-527d7e7f7c7d7e7f7c566a6767676767685c56587c7d7e7f7c7d7e7f7c507e7f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-52524a4f4c4d4e4f4c6667676767676769576a686c4d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+527d7e7f7c7d7e7f7c566a6767676767695757587c7d7e7f7c7d7e7f7c507e7f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+52524a4f4c4d4e4f4c66676767676767676767686c4d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5353525f5c5d5e5f52765a676767676767676768515d5e5f5c5d5e5f5c5d4a544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5252516f6c6d6e4a50537677775a675977777778536d6e6f51516e6f6c4a54544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 5252517f7c7d7e7f4a52535353767778535052534a7d7e7f7c7d7e7f4a5554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
