@@ -9,6 +9,7 @@ function _draw()
 	if menu then
 		camera()
 		sspr(unspl"40,88,31,8,49,75")
+	 --mascots
 	 --42 tok (replace with pal())
 	 local x=64+t()\0.5%2*16
 	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
@@ -19,13 +20,9 @@ function _draw()
 	 pal(1,2)
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 	 --
-	 --pal()
+--  pal()
 		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start",22,50
-		print(ai_diff==0 and
-			"\f0easy\-0\|f\fbeasy" or
-			ai_diff==1 and
-			"\f0\-jmed\-4\|f\famed" or
-			"\f0hard\-0\|f\fehard",57,77)
+		?split"\f0easy\-0\|f\fbeasy,\f0\-jmed\-4\|f\famed,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
 
@@ -51,7 +48,7 @@ function _draw()
 
 	foreach(bf,draw_unit)
 	foreach(proj,draw_projectile)
-	
+
 	if loser then
 		camera()
 		rectfill(unspl"0,96,128,115,9")
@@ -59,17 +56,9 @@ function _draw()
 	 sspr(64+
 	 	({48,t()\0.2%3*16})[loser],
 	 	unspl"0,16,8,14,98,32,16")
-	 pal()
-		print(ai_diff==0 and
-			"\#9\|d\-0        \-0\-4\-e\|h\f2easy ai" or
-			ai_diff==1 and
-			"\#9\|d\-0          \-0\-0\-a\|h\f2medium ai" or
-			"\#9\|d\-0        \-0\-4\-e\|h\f2hard ai"
-			,22,93)
-	 print(loser==1 and
-			"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose" or
-			"\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"
-			,53,102)
+	 pal()		
+		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f2easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f2medium ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f2hard ai"[ai_diff+1],22,93
+	 ?split"\^w\^t\fa\|gyou lose\-0\-0\-0\-0\|f\f1you lose,\^w\^t\fa\|gyou win!\-0\-0\-0\-0\|f\f1you win!"[loser],53,102
 	 ?"\f4\#9\|k\-0\-4                   \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
 	 return
 	end
@@ -1043,7 +1032,9 @@ end
 --update
 
 function handle_click()
-	if btnp"5" and hovbtn then
+	local l,r=5,4
+	
+	if btnp(l) and hovbtn then
 		hovbtn.handle()
 		return
 	end
@@ -1055,29 +1046,33 @@ function handle_click()
 			dx<mmw and dy<mmh+1	then
 			local x,y=
 				mmwratio*dx,mmhratio*dy
-			if btnp"4" and sel1 then
+			if btnp(r) and sel1 then
 				foreachsel(move,x,y)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
-			elseif btnp"5" then
+			elseif btnp(l) then
 				cx,cy=
 					mid(0,x-64,mapw-128),
 					--menuh=21
 				 mid(0,y-64,maph-107)
 			end
 		end
-		if (btnp"5") to_build=nil
+		if (btnp(l)) to_build=nil
 	 return
 	end
 	
- if btnp"4" and (to_build or
+	if (btn"5" or btn"4") and action then
+		l,r,action=4,5
+	end
+	
+ if btnp(r) and (to_build or
  	webbing) then
  	to_build,webbing,webx=nil
  	return
  end
 
  if webbing then
- 	if btnp"5" and
+ 	if btnp(l) and
  	 can_finish_web() then
 	 	if webx then
 				pay(web,-1)
@@ -1095,7 +1090,7 @@ function handle_click()
  	return
  end
 
- if btn"5" and to_build then
+ if btn(l) and to_build then
   if buildable() then
   	local b=unit(
 				to_build.typ,
@@ -1109,7 +1104,7 @@ function handle_click()
 		return
  end
 
- if btn"5" then
+ if btn(l) then
  	if not selbox then
  		selx,sely=mx,my
  	end
@@ -1124,7 +1119,7 @@ function handle_click()
  	selbox=nil
  end
 	
- if btnp"4" and sel1 and
+ if btnp(r) and sel1 and
  	sel1.p==1 then
 	 local tx,ty=mx\8,my\8
 	 local htile={
@@ -1160,7 +1155,7 @@ function handle_click()
   	hilite_hoverunit()
   	
   elseif sel1.typ.unit then
-  	foreachsel(move,mx,my)
+  	foreachsel(move,mx,my,l==4)
   	hilite={t=t(),cx=mx,cy=my}
   	
   elseif sel1.typ.prod then
@@ -1487,7 +1482,7 @@ function update_unit(u)
  	if (t=="build") buildrepair(u)
   if (t=="gather") mine(u)
  else
- 	check_target_col(u)
+ 	check_target(u)
  end
  step(u)
  local r=u_rect(u,1)
@@ -1697,13 +1692,13 @@ function produce(u)
 	end
 end
 
-function check_target_col(u)
+function check_target(u)
 	local st=u.st
-	local t=st.target
+	local t,nxt=st.target,st.nxt
 	if
 		t and
 		intersect(u_rect(t),u_rect(u),
-			st.t=="gather" and -3 or 0)
+			st.res and -3 or 0)
 	then
 		u.dir,st.active,st.fps=
 			sgn(t.x-u.x),true,fps
@@ -1719,12 +1714,13 @@ function check_target_col(u)
 			u.res=nil
 			if st.farm then
 				harvest(u,st.farm)
-			elseif st.nxt then
-   	mine_nxt_res(u,st.nxt)
 			else
 				rest(u)
+				u.st.res=nxt
 			end
 		end
+	elseif st.res and not st.wayp then
+ 	mine_nxt_res(u,st.res)
 	end
 end
 
@@ -1733,7 +1729,7 @@ function mine_nxt_res(u,res)
 	if wp then
 		gather(u,x,y,wp)
 	else
-		drop(u,r)
+		drop(u,res)
 	end
 end
 
@@ -2145,7 +2141,7 @@ function print_res(r,x,y,zero)
 				(i==4 and oop or
 				res1[k]<flr(v)) and "\#a "
 				or " ")..v
-			newx+=print(v,x,y,rescol[k])
+			newx+=? v,x,y,rescol[k]
 			spr(128+i,x,y)
 			x=newx+(zero or 1)
 		end
@@ -2181,10 +2177,11 @@ function draw_port(
 		cant_pay and 6 or
 		costs and 3 or typ.porto or 1
 	)
+	local f=typ.portf and action or typ.portf
 	rectfill(1,1,9,8,
 		cant_pay and 7 or costs and
  	costs.tech and 10 or
- 	typ.portf or 6
+ 	f or 6
 	)
 	pal(cant_pay and split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
@@ -2234,12 +2231,14 @@ function cursor_spr()
 	return 64
 end
 
-function draw_sel_ports()
+function draw_sel_ports(x)
 	for i,u in inext,selection do
-		local x=i*13-10
-		if i>6 then
+		x+=13
+		if i>5 then
 			--menuy+6
-			?"\f1+"..numsel-6,x,110
+			if (numsel>15) x-=4
+			x=?"\f1+"..numsel-6,x-15,121
+			spr(132,x+1,121)
 			break
 		end
 		draw_port(
@@ -2255,17 +2254,9 @@ end
 function single_unit_section()
 	local r,q=sel1.res,sel1.q
 	
-	if sel_typ==ant and numsel>1 then
-		--menuy+3
-		draw_port(sel_typ,3,107,nil,
-			function()
-				deli(selection).sel=false
-			end)
-		--menuy+6
-		?"X"..numsel,unspl"16,111,7"
-	else
-		draw_sel_ports()
-	end
+	if numsel==1 then
+		draw_sel_ports(-10)
+ end
 	
 	if sel1.const then
 	 draw_port(
@@ -2275,7 +2266,9 @@ porty=80
 portw=9
 porto=8
 portf=9
-	 	]],20,107,nil,function()
+	 	]],20,
+	 	--menuy+3
+	 	107,nil,function()
 	 		pay(sel1.cost,1)
 	 		sel1.hp=0
 	 	end,sel1.const/sel_typ.const
@@ -2295,7 +2288,7 @@ portf=9
 	end
 	if sel1.cycles then
 		--menuy+6
-		print(sel1.cycles.."/"..farm_cycles,unspl"36,110,4")
+		? sel1.cycles.."/"..farm_cycles,unspl"36,110,4"
 		--menuy+4
 		sspr(unspl"112,96,9,9,49,108")
 	end
@@ -2338,9 +2331,9 @@ portf=9
 			draw_port(
 			 q.b.typ,
 			 q.b.tech and 24 or
-			  print("X"..q.qty,
-			   --menuy+6
-			   unspl"32,110,7") and 20,
+			  --menuy+6
+			  ?"X"..q.qty,unspl"32,110,7"
+			  and 20,
 			 --menuy+3
 			 107,nil,
 				function()
@@ -2356,14 +2349,28 @@ portf=9
 	end
 end
 
+axn_mine,axn_atkmov=parse[[
+portx=24
+porty=32
+portw=8
+porto=10
+portf=9
+]],parse[[
+portx=113
+porty=80
+portw=9
+porto=10
+portf=9
+]]
+
 function draw_menu()
 	local x,secs=0,split"102,26"
- if sel_typ and not sel1.const then
-		if sel_typ.has_q then
-  	secs=split"17,24,61,26"
- 	elseif sel_typ.prod then
-  	secs=split"35,67,26"
-  end
+	if sel1 and sel1.p==1 then
+		if sel1.typ.has_q then
+			secs=split"17,24,61,26"
+		else
+	 	secs=split"17,17,68,26"
+		end
 	end
  for i,sec in inext,secs do
  	pal(i%2!=#secs%2 and 4,15)
@@ -2379,14 +2386,27 @@ function draw_menu()
  end
  camera()
 
- if sel_typ and
- 	(numsel==1 or
- 	 sel_typ!=spider) and
- 	sel1.p==1
- then
+ if numsel==1 or sel_typ==ant then
 		single_unit_section()
 	else
-		draw_sel_ports()
+		draw_sel_ports(24)
+	end
+	if numsel>1 then
+		if (numsel<10) camera(-2)
+		?"X"..numsel,unspl"5,111,1"
+		spr(132,1,111)
+	end
+	
+	--action
+	if sel1 and sel1.typ.unit then
+		draw_port(
+	 	sel_typ==ant and axn_mine or
+	 	axn_atkmov,20,
+	 	--menuy+3
+	 	108,nil,function()
+	 		action=13
+	 	end
+	 )
 	end
 	
 	draw_minimap()
@@ -2577,9 +2597,9 @@ function init()
 		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
-r=5
-g=5
-b=5
+r=20
+g=20
+b=20
 p=4
 pl=10
 ppl=10]]
@@ -2591,10 +2611,10 @@ ppl=10]]
 	farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,
-	uid,totalu,
+	uid,totalu,numsel,
 	dmaps_ready=
 		res[1],{},
-		unspl"5,6,3,0,0,0,0,59,0,0,0"
+		unspl"5,6,3,0,0,0,0,59,0,0,0,0"
 
 	init_typs()
 	ai_init()
@@ -2619,6 +2639,7 @@ function new_game()
 	unit(unspl"1,220,187,2")
 	unit(unspl"1,202,196,2")
 	unit(unspl"5,200,170,2")
+	
 	make_dmaps"d"
 end
 
@@ -2791,8 +2812,9 @@ function ai_init()
 			split"22,1,24,19",
 		}
 		
-	unit(tower,unspl"140,178,2")
+	unit(unspl"8,140,178,2")
 	tower[2].range+=15
+	ant[2].carry=9
 end
 
 function ai_build(t,pid,x,y)
@@ -2815,10 +2837,11 @@ function ai_frame()
 	if b and b[1]<=res[2].p then
 		ai_build(unpack(deli(bo,1)))
 	end
-	if #army>5 then
-		for u in all(army) do
-			local q=queens[1]
-			move(u,q.x,q.y,true)
+	if #army>10 then
+		for i=1,5 do
+			move(army[i],
+				queens[1].x,queens[1].y,
+				true)
 		end
 	end
 	miners,army={},{}
@@ -2906,14 +2929,14 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 404044404504400050500050502266d5d507d04e4e4040444b0001331333300000000000ee4e4e4e4e44ee4e4eee0000444004d00044404d0006650770000000
 050504055050050050050500502222dddd0444044400050b050b01331110000000000000ee4e4e4e4e4e4e4e4eee00005b054040050004040050506006000000
 000000000000000005000005005050505000505000500000b00000505000000000000000ee4eee4e4e4ee44e4eee000000b00000000000000000000000000000
-0000b0004447444440000000000000000000000000000000000000000000000000000000ee4eee4e4e4eee4e4eee000000000000880055088000000000000000
-000b35004447446440008700007000070700000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000990990088577880000000000000000
-00b333504464774640878878000744447000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000009889889008878850000000000000000
-0b4444454647647440788888007441144000000400000000000000000000000000000000ee44444e4444e4444eee000009888889057888500000000000000000
-00411d404447467643437753344411114400004110000000000000000000000000000000ee4e4e4e4ee4e4ee4eee000009888889577888400000000000000000
-00411d404774774444537733454715511470045114000000000000000000000000000000ee4e4e4e4444e4444eee000000988890058848840000000000000000
-004444404446447445327724537415514700455445400000000000000000000000000000ee4eee4e4ee4e4eeeeee000000098900088504885000000000000000
-000444004444444743422225340741144070545454500000000000000000000000000000ee4eee4e4ee4e4eeeeee000000009000880000588000000000000000
+0000b0004447444440000000000000000000000000000000000000000000000000000000ee4eee4e4e4eee4e4eee000000000000880055088000000555000000
+000b35004447446440008700007000070700000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000990990088577880000005775000000
+00b333504464774640878878000744447000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000009889889008878850000557765000000
+0b4444454647647440788888007441144000000400000000000000000000000000000000ee44444e4444e4444eee000009888889057888500088845650000000
+00411d404447467643437753344411114400004110000000000000000000000000000000ee4e4e4e4ee4e4ee4eee000009888889577888400800484500000000
+00411d404774774444537733454715511470045114000000000000000000000000000000ee4e4e4e4444e4444eee000000988890058848840808480500000000
+004444404446447445327724537415514700455445400000000000000000000000000000ee4eee4e4ee4e4eeeeee000000098900088504885800580000000000
+000444004444444743422225340741144070545454500000000000000000000000000000ee4eee4e4ee4e4eeeeee000000009000880000588088800000000000
 000000000000000000000000000000000000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000000000004000440000000800000000
 005000500005050500000000000000000000000000700000000000000000000000007000eeeeeeeeeeeeeeeeeeee000000055500004400444000008880000000
 057505750004040400000000000000000000000007700000000000000000000000007700eeeeeeeeeeeeeeeeeeee000000500050444440004001188888000000
