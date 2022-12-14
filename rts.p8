@@ -1025,7 +1025,7 @@ function drop(u,nxt_res,dropu)
 end
 
 function attack(u,e)
-	if u.typ.atk then
+	if u.typ.atk and e then
 		u.st={
 			t="attack",
 			target=e,
@@ -1572,19 +1572,23 @@ end
 
 function aggress(u)
 	local typ=u.typ[u.p]
-	local los,targ_d,targ=max(
+	local los,targ_d,targ,pref=max(
 		typ.unit and typ.los,
 		typ.range),9999
 	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
 			viz[e.x\8|e.y\8<<8] and
-			d<targ_d and d<los
+			d<los
 		then
-			targ,targ_d=e,d
+			if (d<targ_d)targ,targ_d=e,d
+			if typ.atk_typ=="seige"
+				and e.typ.fire then
+				pref=e
+			end
 		end
 	end
-	if (targ) attack(u,targ)
+	attack(u,pref or targ)
 end
 
 function fight(u)
@@ -2697,6 +2701,7 @@ bo=
 30,2,88,24
 31,2,92,24
 33,1,86,19
+35,5,86,23
 37,1,86,24
 43,1,95,22
 47,1,93,13,
@@ -2704,11 +2709,10 @@ bo=
 
 function ai_init()
 	ai_frame()
-	bo_idx,nxt_res,res_alloc,
-		unit_prod,defsqd,offsqd,
-		offst,defst=
-		0,1,split"r,b,g",true,{},{},
-		"idle","idle"
+	bo_idx,nxt_res,res_alloc,uprod,
+		defsqd,offsqd,atksqd,defst=
+		0,1,split"r,b,g",true,
+		{},{},{}
 
 	tower[2].range+=15
 	ant[2].carry=9
@@ -2748,7 +2752,7 @@ end
 
 function ai_prod(u)
 	local p=u.typ.prod[u.lastp]
-	if unit_prod and
+	if uprod and
 		not u.q and can_pay(p,2) then
 		pay(p,-1,2)
 		u.q={
@@ -2765,15 +2769,13 @@ function ai_unit2(u)
 		if u.typ.bldg and
 			(u.hp<u.typ.hp*0.75 or 
 			 u.const) and
-			not u.repair then
-			u.repair=deli(miners)
-			if u.repair then
-				build(u.repair,u)
-			end
+			not u.w then
+			u.w=deli(miners)
+			if (u.w) build(u.w,u)
 		end
-		if u.repair and
-			u.repair.st.t!="build" then
-			u.repair=nil
+		if u.w and
+			u.w.st.t!="build" then
+			u.w=nil
 		end
 		if u.typ.farm and
 		 not u.const and
@@ -2791,11 +2793,13 @@ function ai_unit2(u)
 	elseif u.st.t=="attack" and
 		u.st.active and
 		u.x>136 and u.y>120 and
-		defst=="idle"
+		not defst
 	then
-		defst="def"
+		inv,defst=true,"attack"
 		for a in all(defsqd) do
-			attack(a,u)
+			if a.st.t=="rest" then
+				move(a,u.x,u.y,true)
+			end
 		end
 	end
 end
@@ -2803,8 +2807,8 @@ end
 function ai_build(t,pid,x,y)
 	local b=ant.prod[pid]
 	if res[2].p>=t and bo_idx<t then
-		unit_prod=can_pay(b,2)
-		if unit_prod then
+		uprod=can_pay(b,2)
+		if uprod then
 			bo_idx=t
 			pay(b,-1,2)
 			unit(b.typ,
@@ -2818,17 +2822,20 @@ end
 function ai_frame()
 	if antcount then
 		foreach_spl(bo,ai_build)
-		if #offsqd>=10 and
-			offst=="idle" then
-			offst="atk"
-			for u in all(offsqd) do
+		if #offsqd>=10 and not defst
+		then
+			atksqd,offsqd=offsqd,{}
+		end
+		for u in all(atksqd) do
+			if u.st.t=="rest" then
 				move(u,
-					queens[1].x,queens[1].y,
-					true)
+				queens[1].x,queens[1].y,
+				true)
 			end
 		end
+		if (not inv) defst=nil
 	end
-	miners,antcount={},0
+	miners,antcount,inv={},0
 end
 
 _update60=_update
@@ -3189,8 +3196,8 @@ __map__
 4c545452524d4e4f4c6d6e6f56575757575757586c4d4e4f4c4d4e53535352524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c545452524d4e4f4c6d6e6f56575757575757586c4d4e4fd24d4e53535352520000000000000000000000000000000000000000000000000000000000000000
 5c5d53535c5d5e5f5c6b7a566a67676759775a69587a5e5f5c5d515f525253524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5c5d53535c5d5e5f5c6b7a566a67676759775a69587a5ee25c5d51c2525253520000000000000000000000000000000000000000000000000000000000000000
 7b6d6e6f6c6d6e6f6c7a566a67676767684c6667686d6e6f6c6d6e6f6c6d6e6f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7b6d6e6f6c6d6e6f6c7a566a67676767684c666768d06e6ff2f2f2f26c6d6e6f0000000000000000000000000000000000000000000000000000000000000000
-527d7e7f7c7d7e7f7c566a676767676769576a59787d7e7f7c7d7e7f7c507e7f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b527d7e7f7c7d7e7f7c566a676767676769576a59787d7e7ff20a0bf27c507e7f0000000000000000000000000000000000000000000000000000000000000000
-5252534f4c4d4e4f4c66676767676767676767686c4d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252534f4c4d4e4f4c66676767676767676767686c4d4e4ff2f2f2f2f2f2f2540000000000000000000000000000000000000000000000000000000000000000
+527d7e7f7c7d7e7f7c566a676767676769576a59787d7e7f7c7d7e7f7c507e7f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b527d7e7f7c7d7e7f7c566a676767676769576a59787dc57ff20a0bf27c507e7f0000000000000000000000000000000000000000000000000000000000000000
+5252534f4c4d4e4f4c66676767676767676767686c4d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252534f4c4d4e4f4c66676767676767676767686c4dd54ff2f2f2f2f2f2f2540000000000000000000000000000000000000000000000000000000000000000
 5353525f5c5d5e5f52765a676767676767676768535d5e5f5c5d5e5f5c5d55544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5353525f5c5d5e5f52765a676767676767676768535d5e5f5c5d5e5ff2c255540000000000000000000000000000000000000000000000000000000000000000
 5252516f6c6d6e5250537677775a67597777777853536e6f51516e6f6c5554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252516f6c6d6e5250537677775a67597777777853536e6f51516e6ff25554540000000000000000000000000000000000000000000000000000000000000000
 5252517f7c7d7e7f505253535376777853505253527d7e7f7c7d7e7f545554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252517f7c7d7e7f505253535376777853505253527d7e7f7c7d7ec2545554540000000000000000000000000000000000000000000000000000000000000000
