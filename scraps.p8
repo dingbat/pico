@@ -79,3 +79,15 @@ end
 			pset(wp[1],wp[2],acc(wp[1]/8,wp[2]/8) and 12 or 8)
 		end
 	end
+
+
+
+
+	 	foreach_spl(
+[[-1,-1,0,-1,7
+-256,0,-1,7,-1
+256,0,8,7,8
+1,8,0,8,7]],function(di,...)
+ 		if (arr[i+di]) line(...)
+ 	end
+ 	)
