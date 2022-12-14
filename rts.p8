@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(32) --fogmap
+	draw_map(32) --fogmap
 	
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -150,9 +150,6 @@ function _draw()
 end
 
 function _update()
-	if fps==0 then
-		printh(stat(0),"log")
-	end
 	if menu then
 		cx+=cvx
 		cy+=cvy
@@ -264,7 +261,7 @@ function parse(unit,typ,tech)
 				obj[2][k]=v,v,v
 		end
 	end
-	add(typs,obj)
+	if (obj.idx) add(typs,obj)
 	return obj
 end
 
@@ -975,8 +972,7 @@ acid_vs_seige=0.9
 acid_vs_building=0.6]]
 
 function rest(u)
-	u.st=parse[[
-t=rest
+	u.st=parse[[t=rest
 aggress=1]]
 end
 
@@ -1306,7 +1302,9 @@ function tick_unit(u)
 	end
 	
 	if intersect(u_rect(u),
-	 {mx,my},1) then
+	 {mx,my},1) and (
+	 not hoverunit or hoverunit.p==1
+	) then
 		hoverunit=u
 	end
 	
@@ -1748,7 +1746,7 @@ function check_target(u)
 		end
 		if st.t=="drop" then
 			if u.res then
-				res[u.p][u.res.typ]+=u.res.qty*u.p/3
+				res[u.p][u.res.typ]+=u.res.qty/gather_f[u.p]
 			end
 			u.res=nil
 			if st.farm then
@@ -1815,10 +1813,10 @@ end
 
 function modify_totalu(diff)
 	totalu+=diff
-	upcycle=totalu>=90 and 60 or
-		totalu>=80 and 30 or
-		totalu>=55 and 15 or
-		totalu>=45 and 10 or 5
+	upcycle=totalu>=80 and 60 or
+		totalu>=60 and 30 or
+		totalu>=45 and 15 or
+		totalu>=35 and 10 or 5
 end
 
 --r2 can be {x,y}
@@ -1866,8 +1864,8 @@ function all_surr(x,y,n,chk_acc)
 	 		min(xx,yy)>=0 and
 	 		xx<mapw8 and yy<maph8
 	 		and (not chk_acc or
-	 			acc(xx,yy) and
-	 			(acc(xx,y) or acc(x,yy))
+	 			acc(xx,yy)
+	 			--and (acc(xx,y) or acc(x,yy))
 	 		)
 	 	then
 			 add(st,{
@@ -2041,13 +2039,15 @@ function unit(typ,x,y,p,hp,
 	discovered,const)
  local typ,u=typs[typ] or typ,
  	add(units,
- 		parse"dir=1\nsproff=0")
+ 		parse[[dir=1
+sproff=0
+lastp=1]])
  		
  u.typ,u.x,u.y,u.p,u.hp,u.const,
-  u.discovered,u.uid,u.lastp=
+  u.discovered,u.uid=
  	typ,
 		x,y,p,hp or typ.hp,const,
-		discovered==1,uid,1
+		discovered==1,uid
 
 	rest(u)
 	uid+=1
@@ -2300,11 +2300,13 @@ function draw_sel_ports(x)
 end
 
 function single_unit_section()
-	local r,q=sel1.res,sel1.q
+	local q=sel1.q
 	
 	if numsel==1 then
 		draw_sel_ports(-10)
  end
+ 
+ if (sel1.p!=1) return
 	
 	if sel1.const then
 	 draw_port(
@@ -2324,21 +2326,11 @@ portf=9
 	 return
 	end
 	
-	if numsel==1 and r then
-		for i=0,sel1.typ[sel1.p].carry-1 do
-			--menuy+4
-			camera(i%3*-3-20,i\3*-3-108)
-			rect(unspl"0,0,3,3,7")
-			rect(1,1,2,2,r.qty>i and
-				rescol[r.typ] or 5)
-		end
-		camera()
-	end
 	if sel1.cycles then
 		--menuy+6
-		? sel1.cycles.."/"..farm_cycles,unspl"36,110,4"
+		? sel1.cycles.."/"..farm_cycles,unspl"38,111,4"
 		--menuy+4
-		sspr(unspl"112,96,9,9,49,108")
+		sspr(unspl"112,96,9,9,51,109")
 	end
 	if sel_typ.prod then
 		for i,b in next,sel_typ.prod do
@@ -2397,20 +2389,6 @@ portf=9
 	end
 end
 
-axn_mine,axn_atkmov=parse[[
-portx=24
-porty=32
-portw=8
-porto=2
-portf=13
-]],parse[[
-portx=113
-porty=80
-portw=9
-porto=2
-portf=13
-]]
-
 function draw_menu()
 	local x,secs=0,split"102,26"
 	if sel1 and sel1.p==1 then
@@ -2443,12 +2421,12 @@ function draw_menu()
 		if (numsel<10) camera(-2)
 		?"X"..numsel,unspl"5,111,1"
 		spr(132,1,111)
---		add(buttons,{
---			r=split"0,110,10,118",
---			handle=function()
---			 deli(selection).sel=false
---			end
---		})
+		add(buttons,{
+			r=split"0,110,10,118",
+			handle=function()
+			 deli(selection).sel=false
+			end
+		})
 	end
 	
 	--action
@@ -2510,7 +2488,6 @@ function dmap_find(u,key)
 end
 	
 function make_dmaps(r)
-	printh("making dmaps","log")
 	queue=split(parse[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
@@ -2527,7 +2504,6 @@ function async_dmap()
 			if q.c==9 then
 				dmaps[q.key]=
 					deli(queue,1).dmap
-				printh("done w "..q.key,"log")
 			end
 		end
 	else
@@ -2599,7 +2575,9 @@ mapw,maph,mmx,mmy,mmw,
 	unspl"256,256,105,107,19,19,32,32,13.47,13.47"
 	
 ai_diff,reskeys,f2res,resqty,
- key2resf,rescol=0,
+ key2resf,rescol,
+ axn_mine,axn_atkmov
+ =0,
 split"r,g,b,p,pl,ppl,reqs",parse[[
 7=r
 11=g
@@ -2631,7 +2609,19 @@ e1=5
 e7=8
 e11=3
 e19=4
-e33=13]]
+e33=13]],parse[[
+portx=24
+porty=32
+portw=8
+porto=2
+portf=13
+]],parse[[
+portx=113
+porty=80
+portw=9
+porto=2
+portf=13
+]]
 
 function init()
 	poke(0x5f2d,3) --mouse
@@ -2655,17 +2645,27 @@ reqs=0]]
 
 	res1,
 	--tech can change
-	units_heal,farm_cycles,
-	farm_renew_cost_b,
+	units_heal,gather_f,
+	farm_cycles,farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,
 	uid,totalu,numsel,
 	dmaps_ready=
 		res[1],{false,true},
+		{3,2-ai_diff/2},
 		unspl"5,3,0,0,0,0,59,0,0,0"
 
 	init_typs()
-	ai_init()
+	
+	--ai init
+	ai_frame()
+	bo_idx,nxt_res,res_alloc,uprod,
+		defsqd,offsqd,atksqd,defst=
+		0,1,split"r,b,g",true,
+		{},{},{}
+
+	tower[2].range+=15
+	ant[2].carry=9
 end
 
 function init_menu()
@@ -2727,22 +2727,18 @@ bo=
 30,2,88,24
 31,2,92,24
 33,1,86,19
+34,3,88,16
 35,5,86,23
 37,1,90,28
 43,1,95,22
-47,1,93,13,
-53,1,82,29]]
-
-function ai_init()
-	ai_frame()
-	bo_idx,nxt_res,res_alloc,uprod,
-		defsqd,offsqd,atksqd,defst=
-		0,1,split"r,b,g",true,
-		{},{},{}
-
-	tower[2].range+=15
-	ant[2].carry=9
-end
+47,1,93,13
+53,1,85,27
+54,2,93,24
+55,5,80,30
+56,2,94,24
+57,1,84,29
+59,2,92,25
+62,2,92,26]]
 
 function ai_unit1(u)
  if u.p==2 then
@@ -2810,7 +2806,7 @@ function ai_unit2(u)
 			if (w) harvest(w,u)
 		end
 		if u.typ==queen then
-			if antcount<6 then
+			if antcount<30 then
 				ai_prod(u)
 			end
 		elseif u.typ.units then
@@ -2818,7 +2814,7 @@ function ai_unit2(u)
 		end
 	elseif u.st.t=="attack" and
 		u.st.active and
-		u.x>136 and u.y>120 and
+		u.x>128 and u.y>120 and
 		not defst
 	then
 		inv,defst=true,"attack"
@@ -2842,7 +2838,7 @@ function ai_build(t,pid,x,y)
 end
 
 function ai_frame()
-	if antcount then
+	if dmaps_ready then
 		foreach_spl(bo,ai_build)
 		if #offsqd>=10 and not defst
 		then
@@ -2856,7 +2852,7 @@ function ai_frame()
 	miners,antcount,inv={},0
 end
 
-_update60=_update
+--_update60=_update
 -->8
 --saving
 
@@ -3198,7 +3194,7 @@ __map__
 525253535c5d5e5f5c796667597777785c5d5e5f5c5d6667676759785c5d50504b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b525253535c5d5e5f5c796667597777785c5d5e5f5c5d6667676759785cc250500000000000000000000000000000000000000000000000000000000000000000
 526d6e6f6c6d6e6f6c6d7677787a6e6f6c6d6e6f6c6d66676759786f6c5353504b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b526d6e6f6c6d6e6f6c6d7677787a6e6f6c6d6e6f6c6d66676759786f6c5353500000000000000000000000000000000000000000000000000000000000000000
 7c7d536b527d7e7f7c7d7e7f7c7d797f7c7d7e7f7c7a767777787e7f535353534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7c7d536b527d7e7f7c7d7e7f7c7d797f7c7d7e7f7c7a767777784c7f535353530000000000000000000000000000000000000000000000000000000000000000
-4c52565758544e4f4c4d4e4f4c4d4e4f4c4d4e4f794d4e4f4c4d4e4f535252534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c52565758544e4f4c4d4e4f4c4d4e4f4c4d4e4f794dc54f4c4d4ec2535252530000000000000000000000000000000000000000000000000000000000000000
+4c52565758544e4f4c4d4e4f4c4d4e4f4c4d4e4f794d4e4f4c4d4e4f535252534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c52565758544e4f4c4d4e4f4c4d4e4f4c4d4e4f794dc54fe24d4ec2535252530000000000000000000000000000000000000000000000000000000000000000
 5051666768535e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5d5e53535353534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5051666768535e5f5c5d5e5f5c5d5e5f5c5d5e5f5c5dd55f5c5d5e53535353530000000000000000000000000000000000000000000000000000000000000000
 5150666768536e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e6f6c6d6e52525053534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5150666768536e6f6c6d6e6f6c6d6e6f6c6d6eeeef6d6e6fe26d6e52525053530000000000000000000000000000000000000000000000000000000000000000
 7c52767778517e7f7c7d7e7f7c7d7e7f7c6b7e7f7c7d7e7f7c7d5253525350534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7c52767778517e7f7c7d7e7f7c7d7e7f7c6b7efeff7dc27f7c7d5253525350530000000000000000000000000000000000000000000000000000000000000000
@@ -3209,10 +3205,10 @@ __map__
 5252534f4c4d4e4f4c66676767676767676767686c4d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252534f4c4d4e4f4c66676767676767676767686c4dd54ff2f2f2f2f2f2f2540000000000000000000000000000000000000000000000000000000000000000
 5353525f5c5d5e5f52765a676767676767676768535d5e5f5c5d5e5f5c5d55544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5353525f5c5d5e5f52765a676767676767676768535d5e5f5c5d5e5ff2c255540000000000000000000000000000000000000000000000000000000000000000
 5252516f6c6d6e5250537677775a67597777777853536e6f51516e6f6c5554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252516f6c6d6e5250537677775a67597777777853536e6f51516e6ff25554540000000000000000000000000000000000000000000000000000000000000000
-5252517f7c7d7e7f505253535376777853505253527d7e7f7c7d7e7f545554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252517f7c7d7e7f505253535376777853505253527d7e7f7c7d7ec2545554540000000000000000000000000000000000000000000000000000000000000000
+5252517f7c7d7e7f505253535376777853505253527d7e7f7c7d7e7f545554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5252517f7c7d7e7f50525353537677785350525352c27e7f7c7d7ec2545554540000000000000000000000000000000000000000000000000000000000000000
 525355554c4d4e4f4c4d53525353525353525353534d4e4f4c4d4e54555455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b525355554c4d4e4f4c4d53525353525353525353534d4ec24c4d4e54555455540000000000000000000000000000000000000000000000000000000000000000
-5354545455545e5f5c5d5e5f53525353525d5e5f5c5d5e5455545455545454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5354545455545e5f5c5d5e5f53525353525dc25f5c5d5e5455545455545454540000000000000000000000000000000000000000000000000000000000000000
-54555455555454556c6d6e6f6c6d6e6f6c6d6e6f6c6d545454545554545455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b54555455555454556c6d6e6f6c6d6e6f6c6d6e6f6c6d545454545554545455540000000000000000000000000000000000000000000000000000000000000000
-5454545454545454547d7e7f7c7d7e7f7c7d7e7f7c55555455545454555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5454545454545454547d7e7f7c7d7e7f7c7d7e7f7c55555455545454555454540000000000000000000000000000000000000000000000000000000000000000
+5354545455545e5f5c5d5e5f53525353525d5e5f5c5d5e5455545455545454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5354545455545e5f5c5d5e5f53525353525d4c5fc25d5e5455545455545454540000000000000000000000000000000000000000000000000000000000000000
+54555455555454556c6d6e6f6c6d6e6f6c6d6e6f6c6d545454545554545455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b54555455555454556c6d6e6f6c6d6e6fc56d6e6f6c6d545454545554545455540000000000000000000000000000000000000000000000000000000000000000
+5454545454545454547d7e7f7c7d7e7f7c7d7e7f7c55555455545454555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5454545454545454547d7e7f7c7d7e7fd57d7e7f7c55555455545454555454540000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 0101000027000000001f000200002200024000270002900029000290002800027000250002200020000200001f0001e0001e0001f00020000220002400024000210001d0001b0001900017000170000000000000

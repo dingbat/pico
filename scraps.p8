@@ -89,6 +89,14 @@ end
  	end
  	)
 
+last=0
+update()
+local mem=stat"0"
+	if fps==0 then
+		printh(mem.." ("..mem-last..")","log")
+		last=mem
+	end
+
 
 if fps==0 then
 			printh("offsqd: \0","log")
