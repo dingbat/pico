@@ -1660,15 +1660,16 @@ end
 
 function mine(u)
 	local x,y,r=u.st.tx,u.st.ty,u.st.res
-	local full=resqty[r]
+	local full,t=resqty[r],mget(x,y)
 	local n=g(restiles,x,y,full)
 	if n==0 then
 		mine_nxt_res(u,r)
 	elseif fps==u.st.fps then
 		collect(u,r)
-		
-		if n==full\3 or n==full\1.25 then
-			mset(x,y,mget(x,y)+16)
+		if t<112 and
+			(n==full\3 or n==full\1.25)
+		then
+			mset(x,y,t+16)
 		elseif n==1 then
 			mset(x,y,74) --exhaust
 			s(dmap_st[r],x,y)
