@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(32) --fogmap
+--	draw_map(32) --fogmap
 	
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -726,7 +726,7 @@ queen.prod={
 	parse([[
 t=6
 r=2
-g=3
+g=0
 b=0
 p=
 breq=0]],ant),
@@ -742,6 +742,24 @@ portx=96
 porty=88
 portw=8]],function()
 		ant[1].carry=9
+	end),
+parse([[
+t=10
+r=15
+g=15
+b=0
+idx=6
+breq=32]],parse[[
+portx=44
+porty=80
+portw=9]],function()
+		add(mound.prod,parse([[
+t=8
+r=4
+g=0
+b=0
+p=
+breq=0]],ant),1)
 	end),
 }
 
@@ -1038,7 +1056,11 @@ function handle_click()
 		hovbtn.handle()
 		return
 	end
-	
+
+	if (btnp"5" or btnp"4") and action then
+		r,action=5
+	end	
+
 	--menuy
 	if amy>104 and not selbox then
 		local dx,dy=amx-mmx,amy-mmy
@@ -1059,10 +1081,6 @@ function handle_click()
 		end
 		if (btnp(l)) to_build=nil
 	 return
-	end
-	
-	if (btn"5" or btn"4") and action then
-		l,r,action=4,5
 	end
 	
  if btnp(r) and (to_build or
@@ -1709,7 +1727,7 @@ function check_target(u)
 		end
 		if st.t=="drop" then
 			if u.res then
-				res[u.p][u.res.typ]+=u.res.qty/3
+				res[u.p][u.res.typ]+=u.res.qty*u.p/3
 			end
 			u.res=nil
 			if st.farm then
@@ -2125,7 +2143,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
---	local res1=res[2]
+	local res1=res[2]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2171,17 +2189,21 @@ function draw_port(
 	typ,x,y,costs,onclick,prog,u
 )
 	camera(-x,-y)
-	local cant_pay=costs and not can_pay(costs)
+	local cant_pay,axnsel=
+		costs and not can_pay(costs),
+	 typ.portf and action
 	rect(0,0,10,9,
 		u and u.p or
 		cant_pay and 6 or
-		costs and 3 or typ.porto or 1
+		costs and 3 or
+		axnsel and 10 or
+		typ.porto or 1
 	)
-	local f=typ.portf and action or typ.portf
 	rectfill(1,1,9,8,
 		cant_pay and 7 or costs and
  	costs.tech and 10 or
- 	f or 6
+ 	axnsel and 9 or
+ 	typ.portf or 6
 	)
 	pal(cant_pay and split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
@@ -2237,7 +2259,7 @@ function draw_sel_ports(x)
 		if i>5 then
 			--menuy+6
 			if (numsel>15) x-=4
-			x=?"\f1+"..numsel-6,x-15,121
+			x=?"\f1+"..numsel-5,x-15,121
 			spr(132,x+1,121)
 			break
 		end
@@ -2353,14 +2375,14 @@ axn_mine,axn_atkmov=parse[[
 portx=24
 porty=32
 portw=8
-porto=10
-portf=9
+porto=2
+portf=13
 ]],parse[[
 portx=113
 porty=80
 portw=9
-porto=10
-portf=9
+porto=2
+portf=13
 ]]
 
 function draw_menu()
@@ -2404,14 +2426,14 @@ function draw_menu()
 	 	axn_atkmov,20,
 	 	--menuy+3
 	 	108,nil,function()
-	 		action=13
+	 		action=not action
 	 	end
 	 )
 	end
 	
 	draw_minimap()
 	
---	local res1=res[2]
+	local res1=res[2]
 	local len=print_res(res1,
 		unspl"0,150,2")
 	rectfill(len-1,unspl"121,0,128,7")
@@ -2597,9 +2619,9 @@ function init()
 		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
-r=20
-g=20
-b=20
+r=5
+g=5
+b=5
 p=4
 pl=10
 ppl=10]]
@@ -2607,14 +2629,13 @@ ppl=10]]
 	res1,
 	--tech can change this
 	units_heal,farm_cycles,
-	carry_capacity,
 	farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,bldg_bmap,
 	uid,totalu,numsel,
 	dmaps_ready=
-		res[1],{},
-		unspl"5,6,3,0,0,0,0,59,0,0,0,0"
+		res[1],{nil,10},
+		unspl"5,3,0,0,0,0,59,0,0,0,0"
 
 	init_typs()
 	ai_init()
@@ -2644,6 +2665,169 @@ function new_game()
 end
 
 init_menu()
+-->8
+--ai
+
+function ai_init()
+	--1:mound
+	--2:farm
+	--3:barracks
+	--4:den
+	--5:tower
+	--6:castle
+	miners,army,ai_ants,nxt_res,
+	bo_idx,locs,res_alloc,bo=
+		{},{},3,1,1,{},
+		split"r,b,g,b",
+		{
+			split"6,1,27,27",
+		 split"10,3,23,19",
+		 split"11,2,25,24",
+		 split"11,2,26,24",
+			split"13,1,27,21",
+		 split"14,2,25,22",
+		 split"14,2,26,22",
+			split"15,5,22,16",
+			split"17,1,29,25",
+			split"20,6,19,18",
+		 split"21,3,23,18",
+			split"22,1,24,28",
+			split"22,1,26,18",
+			split"22,1,22,21",
+			split"22,1,24,19",
+		}
+		
+	unit(unspl"8,140,178,2")
+	tower[2].range+=15
+	ant[2].carry=9
+end
+
+function ai_unit1(u)
+ if u.p==2 then
+ 	if u.typ==ant then
+ 		if (u.dead==0) ai_ants-=1
+ 		if u.st.res=="r" and
+ 			bo_idx>3 then
+			 rest(u)
+			 res_alloc=split"b,g"
+			end
+ 		if u.st.t=="gather" then			
+		 	add(miners,u)
+		 elseif u.st.t=="rest" and
+		 	dmaps_ready then
+				nxt_res%=#res_alloc
+				nxt_res+=1
+		 	mine_nxt_res(u,
+		 		res_alloc[nxt_res])
+		 end
+	 elseif u.typ.atk and
+	 	u.typ.unit and
+	 	u.st.t=="rest" then
+	 	add(army,u)
+	 end 	
+ end
+end
+
+function ai_prod(u,idx)
+	local p=u.typ.prod[idx]
+	if not u.q and can_pay(p,2) then
+		pay(p,-1,2)
+		u.q={
+			b=p,qty=1,t=p.t,
+			fps15=0,
+		}
+		return 1
+	end
+	return 0
+end
+
+function ai_unit2(u)
+	if u.p==2 then
+		if u.typ.bldg and
+			u.hp<u.typ.hp*0.75 and
+			not u.repair then
+			u.repair=deli(miners)
+			if u.repair then
+				build(u.repair,u)
+			end
+		end
+		if u.repair and
+			u.repair.st.target!=u then
+			u.repair=nil
+		end
+		--refarm in saved game
+		if u.typ.farm and
+		 not u.const and
+		 not u.farmer then
+			local w=deli(miners)
+			if (w) harvest(w,u)
+		end
+		if u.typ==queen then
+			if ai_ants<30 then
+				ai_ants+=ai_prod(u,1)
+			end
+		elseif u.typ==barracks then
+			if u.dead==0 then
+				ai_build(nil,3,
+					unpack(avail_loc(25,23)))
+			else
+				ai_prod(u,1)
+			end
+		end
+	elseif u.st.t=="attack" and
+		u.st.active then
+		local a=deli(army)
+		if a then
+			attack(a,u)
+		end
+	end
+end
+
+function avail_loc(x,y)
+	local c=1
+	for n=2,10 do
+		for t in all_surr(x,y,n) do
+			if c<locs[x|y<<8] and
+				acc(t.x,t.y,true) then
+			 locs[x|y<<8]=c+3
+			 return t
+			end
+		end
+	end
+end
+
+function ai_build(t,pid,x,y)
+	local w,b=deli(miners),
+		ant.prod[pid]
+	if w then
+		pay(b,-1,2)
+		build(
+			w,
+			unit(b.typ,
+				x*8+b.typ.w/2,
+				y*8+b.typ.h/2,
+				2,nil,nil,0)
+		)
+	end
+end
+
+function ai_frame()
+	local b=bo[bo_idx]
+	if b and b[1]<=ai_ants then
+		bo_idx+=1
+		ai_build(unpack(b))
+	end
+	if #army>10 then
+		for i=1,5 do
+			move(army[i],
+				queens[1].x,queens[1].y,
+				true)
+		end
+	end
+	miners,army={},{}
+end
+
+_update60=_update
 -->8
 --saving
 
@@ -2715,139 +2899,6 @@ menuitem(2,"◆ load from clip",function()
 end)
 
 menuitem(3,"   (paste first)")
--->8
---ai
-
-function ai_unit1(u)
- if u.p==2 then
- 	if u.typ==ant then 
- 		if u.st.t=="gather" then
-		 	add(miners,u)
-		 elseif u.st.t=="rest" and
-		 	dmaps_ready then
-		 	mine_nxt_res(u,
-		 		split"r,g,b"[nxt_res])
-				nxt_res%=3
-				nxt_res+=1
-		 end
-	 elseif u.typ.atk and
-	 	u.typ.unit and
-	 	u.st.t=="rest" then
-	 	add(army,u)
-	 end 	
- end
-end
-
-function ai_prod(u,idx)
-	local p=u.typ.prod[idx]
-	if not u.q and can_pay(p,2) then
-		pay(p,-1,2)
-		u.q={
-			b=p,qty=1,t=p.t,
-			fps15=0,
-		}
-	end
-end
-
-function ai_unit2(u)
-	if u.p==2 then
-		if u.typ.bldg and
-			u.hp<u.typ.hp*0.75 and
-			not u.repair then
-			u.repair=deli(miners)
-			if u.repair then
-				build(u.repair,u)
-			end
-		end
-		if u.repair and
-			u.repair.st.target!=u then
-			u.repair=nil
-		end
-		--refarm in saved game
-		if u.typ.farm and
-		 not u.const and
-		 not u.farmer then
-			local w=deli(miners)
-			if (w) harvest(w,u)
-		end
-		if u.typ==queen then
-			if #miners<30 then
-				ai_prod(u,1)
-			end
-		elseif u.typ==barracks then
-			ai_prod(u,1)
-		end
-	elseif u.st.t=="attack" and
-		u.st.active then
-		local a=deli(army)
-		if a then
-			attack(a,u)
-		end
-	end
-end
-
-function ai_init()
-	--1:mound
-	--2:farm
-	--3:barracks
-	--4:den
-	--5:tower
-	--6:castle
-	miners,army,nxt_res,bo=
-		{},{},1,
-		{
-			split"6,1,27,27",
-		 split"10,3,23,19",
-		 split"11,2,25,24",
-		 split"11,2,26,24",
-			split"13,1,27,21",
-		 split"14,2,25,22",
-		 split"14,2,26,22",
-			split"15,5,22,16",
-			split"17,1,29,25",
-			split"20,6,19,18",
-			split"22,1,24,28",
-			split"22,1,26,18",
-			split"22,1,22,21",
-			split"22,1,24,19",
-		}
-		
-	unit(unspl"8,140,178,2")
-	tower[2].range+=15
-	ant[2].carry=9
-end
-
-function ai_build(t,pid,x,y)
-	local w,b=deli(miners),
-		ant.prod[pid]
-	if w then
-		pay(b,-1,2)
-		build(
-			w,
-			unit(b.typ,
-				x*8+b.typ.w/2,
-				y*8+b.typ.h/2,
-				2,nil,nil,0)
-		)
-	end
-end
-
-function ai_frame()
-	local b=bo[1]
-	if b and b[1]<=res[2].p then
-		ai_build(unpack(deli(bo,1)))
-	end
-	if #army>10 then
-		for i=1,5 do
-			move(army[i],
-				queens[1].x,queens[1].y,
-				true)
-		end
-	end
-	miners,army={},{}
-end
-
---_update60=_update
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
@@ -2929,14 +2980,14 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 404044404504400050500050502266d5d507d04e4e4040444b0001331333300000000000ee4e4e4e4e44ee4e4eee0000444004d00044404d0006650770000000
 050504055050050050050500502222dddd0444044400050b050b01331110000000000000ee4e4e4e4e4e4e4e4eee00005b054040050004040050506006000000
 000000000000000005000005005050505000505000500000b00000505000000000000000ee4eee4e4e4ee44e4eee000000b00000000000000000000000000000
-0000b0004447444440000000000000000000000000000000000000000000000000000000ee4eee4e4e4eee4e4eee000000000000880055088000000555000000
-000b35004447446440008700007000070700000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000990990088577880000005775000000
-00b333504464774640878878000744447000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000009889889008878850000557765000000
-0b4444454647647440788888007441144000000400000000000000000000000000000000ee44444e4444e4444eee000009888889057888500088845650000000
-00411d404447467643437753344411114400004110000000000000000000000000000000ee4e4e4e4ee4e4ee4eee000009888889577888400800484500000000
-00411d404774774444537733454715511470045114000000000000000000000000000000ee4e4e4e4444e4444eee000000988890058848840808480500000000
-004444404446447445327724537415514700455445400000000000000000000000000000ee4eee4e4ee4e4eeeeee000000098900088504885800580000000000
-000444004444444743422225340741144070545454500000000000000000000000000000ee4eee4e4ee4e4eeeeee000000009000880000588088800000000000
+0000b0004447444440000000000000000000000000000000022000000000000000000000ee4eee4e4e4eee4e4eee000000000000880055088000000555000000
+000b350044474464400087000070000707000000000000002dd200000000000000000000eeeeeeeeeeeeeeeeeeee000000990990088577880000005775000000
+00b333504464774640878878000744447000000000000002d4dd20000000000000000000eeeeeeeeeeeeeeeeeeee000009889889008878850000557765000000
+0b4444454647647440788888007441144000000400000002ddd420000000000000000000ee44444e4444e4444eee000009888889057888500088845650000000
+00411d404447467643437753344411114400004110000002d4dd20000000000000000000ee4e4e4e4ee4e4ee4eee000009888889577888400800484500000000
+00411d4047747744445377334547155114700451140000402dd200000000000000000000ee4e4e4e4444e4444eee000000988890058848840808480500000000
+004444404446447445327724537415514700455445400414022000000000000000000000ee4eee4e4ee4e4eeeeee000000098900088504885800580000000000
+000444004444444743422225340741144070545454504545400000000000000000000000ee4eee4e4ee4e4eeeeee000000009000880000588088800000000000
 000000000000000000000000000000000000000000000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000000000004000440000000800000000
 005000500005050500000000000000000000000000700000000000000000000000007000eeeeeeeeeeeeeeeeeeee000000055500004400444000008880000000
 057505750004040400000000000000000000000007700000000000000000000000007700eeeeeeeeeeeeeeeeeeee000000500050444440004001188888000000
