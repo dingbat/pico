@@ -17,9 +17,6 @@ the following will not be saved:
 - units in production, along w/
   the used resources+pop count
 - techs (research, upgrades)
-- if a prereq building was built
-  but there are none left when
-  saving, the prereq won't save
 - top-left tree will regrow :-)
 ]]
 
@@ -91,3 +88,16 @@ end
  		if (arr[i+di]) line(...)
  	end
  	)
+
+
+if fps==0 then
+			printh("offsqd: \0","log")
+			for u in all(offsqd) do
+				printh(u.typ.atk_typ..", \0","log")
+			end
+			printh("\ndefsqd: \0","log")
+			for u in all(defsqd) do
+				printh(u.typ.atk_typ..", \0","log")
+			end
+			printh("","log")
+		end
