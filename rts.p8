@@ -2634,7 +2634,7 @@ ppl=10]]
 	cx,cy,mx,my,fps,bldg_bmap,
 	uid,totalu,numsel,
 	dmaps_ready=
-		res[1],{nil,10},
+		res[1],{false,true},
 		unspl"5,3,0,0,0,0,59,0,0,0,0"
 
 	init_typs()
@@ -2650,10 +2650,10 @@ function new_game()
 	menu=init()
 	--6,5
 	unit(unspl"7,57,44,1")
-	unit(unspl"1,40,40,1")
-	unit(unspl"1,68,43,1")
-	unit(unspl"1,50,32,1")
-	unit(unspl"5,48,56,1")
+--	unit(unspl"1,40,40,1")
+--	unit(unspl"1,68,43,1")
+--	unit(unspl"1,50,32,1")
+--	unit(unspl"5,48,56,1")
 
  unit(unspl"7,209,188,2")
 	unit(unspl"1,192,184,2")
@@ -2682,11 +2682,12 @@ function ai_init()
 		{
 			split"6,1,27,27",
 		 split"10,3,23,19",
-		 split"11,2,25,24",
-		 split"11,2,26,24",
+		 split"10,2,25,23",
+		 split"10,2,25,23",
+		 split"10,2,25,23",
 			split"13,1,27,21",
-		 split"14,2,25,22",
-		 split"14,2,26,22",
+		 split"14,2,25,23",
+		 split"14,2,25,23",
 			split"15,5,22,16",
 			split"17,1,29,25",
 			split"20,6,19,18",
@@ -2707,8 +2708,8 @@ function ai_unit1(u)
  	if u.typ==ant then
  		if (u.dead==0) ai_ants-=1
  		if u.st.res=="r" and
- 			bo_idx>3 then
-			 rest(u)
+ 			g(dmaps.r,24,24)>5 then
+			 drop(u)
 			 res_alloc=split"b,g"
 			end
  		if u.st.t=="gather" then			
@@ -2784,21 +2785,23 @@ function ai_unit2(u)
 end
 
 function avail_loc(x,y)
-	local c=1
-	for n=2,10 do
+	local c=0
+	for n=0,10 do
 		for t in all_surr(x,y,n) do
-			if c<locs[x|y<<8] and
-				acc(t.x,t.y,true) then
-			 locs[x|y<<8]=c+3
+			c+=1
+			if c>(locs[x|y<<8] or 0) and
+				acc(t[1],t[2],true) then
+			 locs[x|y<<8]=c+1
 			 return t
 			end
 		end
 	end
 end
 
-function ai_build(t,pid,x,y)
-	local w,b=deli(miners),
-		ant.prod[pid]
+function ai_build(t,pid,lx,ly)
+	local w,b,x,y=deli(miners),
+		ant.prod[pid],
+		unpack(avail_loc(lx,ly))
 	if w then
 		pay(b,-1,2)
 		build(
@@ -2813,7 +2816,7 @@ end
 
 function ai_frame()
 	local b=bo[bo_idx]
-	if b and b[1]<=ai_ants then
+	if b and b[1]<=res[2].p then
 		bo_idx+=1
 		ai_build(unpack(b))
 	end
