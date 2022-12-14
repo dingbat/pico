@@ -21,7 +21,7 @@ function _draw()
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 	 --
 --  pal()
-		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start",22,50
+		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-q\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-jmed\-4\|f\famed,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
