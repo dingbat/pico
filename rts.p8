@@ -2365,17 +2365,20 @@ portf=13
 	
 	draw_minimap()
 	
+	function sel_only(unit)
+		foreachsel(function(u)
+			u.sel=nil
+		end)
+		selection,unit.sel={unit},1
+	end
+	
 	sspr(idle and 112 or 120,
 	 unspl"105,8,6,116,121")
 	add(buttons,idle and {
 		r=split"116,121,125,128",
 		handle=function()
-			foreachsel(function(u)
-				u.sel=nil
-			end)
-			selection,cx,cy,idle.sel=
-				{idle},idle.x-64,idle.y-64,
-				true
+			sel_only(idle)
+			cx,cy=idle.x-64,idle.y-64
 			mouse_cam()
 		end
 	})
@@ -2385,11 +2388,7 @@ portf=13
  add(buttons,idle_mil and {
 		r=split"106,121,113,128",
 		handle=function()
-			foreachsel(function(u)
-				u.sel=nil
-			end)
-			selection,idle_mil.sel=
-				{idle_mil},true
+			sel_only(idle_mil)
 		end
 	})
 	
