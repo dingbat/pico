@@ -266,6 +266,10 @@ function init_typs()
 typs={}
 ant=parse[[
 idx=1
+spd=1
+los=20
+hp=10
+
 w=4
 fw=4
 h=4
@@ -305,13 +309,15 @@ portw=8
 dir=1
 unit=1
 carry=6
-spd=1
-los=20
-hp=10
 def=ant]]
 
 beetle=parse[[
 idx=2
+spd=0.9
+los=20
+hp=10
+atk=1
+
 w=8
 fw=8
 h=6
@@ -334,15 +340,16 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=0.9
-los=20
-hp=20
 def=seige
-atk_typ=seige
-atk=1]]
+atk_typ=seige]]
 
 spider=parse[[
 idx=3
+spd=2
+los=30
+hp=15
+atk=1.6
+
 w=8
 fw=8
 h=5
@@ -365,15 +372,18 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=2
-los=30
-hp=15
 def=spider
-atk_typ=spider
-atk=2]]
+atk_typ=spider]]
 
 archer=parse[[
 idx=4
+spd=1.5
+los=30
+hp=25
+range=25
+atk=1
+proj_freq=30
+
 w=7
 fw=8
 h=6
@@ -396,20 +406,19 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=1.5
-los=30
-hp=15
 proj_xo=-2
 proj_yo=0
-proj_freq=30
 proj_s=28
-range=25
 atk_typ=acid
-def=ant
-atk=1]]
+def=ant]]
 
 warant=parse[[
 idx=5
+spd=1.5
+los=25
+hp=25
+atk=1
+
 w=8
 fw=8
 h=6
@@ -432,15 +441,18 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=1.5
-los=30
-hp=15
 atk_typ=ant
-def=ant
-atk=1]]
+def=ant]]
 
 cat=parse[[
 idx=6
+spd=0.75
+los=30
+hp=15
+range=50
+atk=2
+proj_freq=60
+
 w=16
 fw=16
 h=8
@@ -463,20 +475,20 @@ porty=72
 portw=9
 unit=1
 dir=1
-spd=0.75
-los=30
-hp=15
-proj_freq=60
 proj_xo=1
 proj_yo=-4
 proj_s=32
-range=50
 atk_typ=seige
-def=seige
-atk=2]]
+def=seige]]
 
 queen=parse[[
 idx=7
+los=20
+hp=60
+atk=1.5
+range=20
+proj_freq=30
+
 w=15
 h=8
 fw=16
@@ -497,21 +509,23 @@ portw=8
 has_q=1
 drop=1
 bldg=1
-los=20
-range=20
-hp=50
 proj_xo=-4
 proj_yo=2
-proj_freq=30
 proj_s=28
 atk_typ=acid
 def=queen
-atk=1
 bitmap=0
 units=1]]
 
 tower=parse[[
 idx=8
+los=30
+hp=50
+range=30
+const=25
+atk=1
+proj_freq=30
+
 w=8
 fw=8
 h=14
@@ -529,22 +543,20 @@ portx=0
 porty=80
 portw=8
 bldg=1
-los=30
-hp=40
 dir=-1
-range=30
-const=20
 proj_yo=-2
 proj_xo=-1
-proj_freq=30
 proj_s=24
 atk_typ=tower
 def=building
-atk=1
 bitmap=1]]
 
 mound=parse[[
 idx=9
+los=5
+hp=25
+const=12
+
 w=8
 fw=8
 h=8
@@ -560,10 +572,7 @@ dead_y=104
 dead_fr=7
 dead_fps=9
 bldg=1
-los=5
-hp=30
 dir=-1
-const=12
 has_q=1
 drop=1
 def=building
@@ -571,6 +580,10 @@ bitmap=2]]
 
 den=parse[[
 idx=10
+los=10
+hp=35
+const=30
+
 w=8
 fw=8
 h=8
@@ -586,10 +599,7 @@ portx=26
 porty=80
 portw=9
 bldg=1
-los=10
-hp=20
 dir=-1
-const=20
 has_q=1
 def=building
 bitmap=4
@@ -598,6 +608,10 @@ mil=1]]
 
 barracks=parse[[
 idx=11
+los=10
+hp=30
+const=20
+
 w=8
 fw=8
 h=8
@@ -613,10 +627,7 @@ portx=-1
 porty=88
 portw=8
 bldg=1
-los=10
-hp=20
 dir=-1
-const=20
 has_q=1
 def=building
 bitmap=8
@@ -625,6 +636,10 @@ mil=1]]
 
 farm=parse[[
 idx=12
+los=0
+hp=10
+const=6
+
 w=8
 fw=8
 h=8
@@ -642,15 +657,19 @@ portw=9
 farm=1
 carry=9
 bldg=1
-los=0
-hp=10
 dir=-1
-const=6
 def=building
 bitmap=16]]
 
 castle=parse[[
 idx=13
+los=45
+hp=80
+range=40
+const=40
+atk=1.2
+proj_freq=20
+
 w=15
 fw=16
 h=16
@@ -669,18 +688,12 @@ porty=88
 portw=9
 bldg=1
 has_q=1
-los=40
-hp=70
 dir=-1
-range=30
-const=20
 proj_yo=0
 proj_xo=0
 proj_s=24
-proj_freq=20
 atk_typ=tower
 def=building
-atk=1
 bitmap=32
 units=1]]
 
@@ -691,7 +704,7 @@ g=0
 b=10
 breq=0]],mound),
 	parse([[
-r=2
+r=0
 g=8
 b=0
 breq=2]],farm),
@@ -930,7 +943,7 @@ spider_vs_building=0.8
 seige_vs_ant=1
 seige_vs_queen=0.8
 seige_vs_spider=1
-seige_vs_seige=1
+seige_vs_seige=0.9
 seige_vs_building=1.6
 
 tower_vs_ant=1
@@ -2571,9 +2584,9 @@ function init()
 		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
-r=55
-g=55
-b=55
+r=5
+g=5
+b=5
 p=4
 pl=10
 ppl=10
@@ -2625,7 +2638,7 @@ function new_game()
 1,330,196,2
 5,328,170,2
 8,268,178,2
-2,55,150,3]],unit)
+2,65,150,3]],unit)
 	
 	make_dmaps"d"
 end
@@ -2747,7 +2760,7 @@ function ai_unit2(u)
 		end
 	elseif u.st.t=="attack" and
 		u.st.active and
-		u.x>128 and u.y>120 and
+		u.x>192 and u.y>120 and
 		not defst
 	then
 		inv,defst=true,"attack"
