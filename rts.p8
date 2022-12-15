@@ -87,7 +87,7 @@ function _draw()
 	
 	camera(cx,cy)
 
-	if selbox then
+	if selx then
 		rect(unpack(selbox))
 	end
 	
@@ -169,8 +169,11 @@ function _update()
   {},{}
  if loser then
  	poke"24365" --no mouse
- 	if (btnp"5")	init_menu()
-		return
+ 	if rdy and btnp"5" then
+ 		init_menu()
+ 	end
+		rdy=not btnp"5"
+ 	return
 	end
 	
  --turn over viz
@@ -197,14 +200,14 @@ function _update()
 		end
  end
 
- if selbox then
+ if selx then
  	bldg_sel,my_sel,enemy_sel=nil
  end
  
  foreach(units,tick_unit)
  for u in all(units) do
 		if (fps%5==0) ai_unit2(u)	
- 	if selbox and
+ 	if selx and
  		(g(viz,u.x\8,u.y\8) or
  			u.discovered) then
  	 update_sel(u)
@@ -222,7 +225,7 @@ function _update()
 	 end
  end
 
- if selbox then
+ if selx then
 		selection=my_sel or
 			bldg_sel or
 			enemy_sel or {}
@@ -1041,10 +1044,23 @@ function handle_click()
 
 	if (btnp"5" or btnp"4") and action then
 		r,action=5
-	end	
+	end
+	
+	if btnp(l) and hoverunit and
+  selt and t()-selt<0.2 then
+		selection,selx={}
+		for u in all(units) do
+			if intersect(u_rect(u),
+				{cx,cy,cx+128,cy+128},0) and
+				u.p==1 and u.typ==hoverunit.typ then
+				add(selection,u).sel=true
+			end
+		end
+		return
+	end
 
 	--menuy
-	if amy>104 and not selbox then
+	if amy>104 and not selx then
 		local dx,dy=amx-mmx,amy-mmy
 		if min(dx,dy)>=0 and
 			dx<mmw and dy<mmh+1	then
@@ -1079,15 +1095,15 @@ function handle_click()
 				1,nil,1,0)
 			b.cost=to_build
 			foreachsel(build,b)
-			to_build=pay(to_build,-1)
+			to_build,selx=pay(to_build,-1)
 		end
 		return
  end
 
- if btn(l) then
- 	if not selbox then
- 		selx,sely,selt=mx,my,t()
- 	end
+ if btnp(l) and not selx then
+ 	selx,sely,selt=mx,my,t()
+ end
+ if btn(l) and selx then
 		selbox={
 			min(selx,mx),
 			min(sely,my),
@@ -1096,7 +1112,7 @@ function handle_click()
 			7 --color
  	}
  else
- 	selbox=nil
+ 	selx=nil
  end
 	
  if btnp(r) and sel1 and
@@ -1232,7 +1248,7 @@ function tick_unit(u)
 	end
 	if u.dead then
 		if u.typ==queen then
-			loser,selbox=u.p,{0,0}
+			loser=u.p
 		end
 		u.dead+=1
 		if (typ.unit) update_viz(u)
@@ -1423,7 +1439,7 @@ function draw_unit(u)
 		sx+=f\ufps%fr*fw
 	end
 	pal(2,u.p) --queen eyes
-	pal(1,u.sel and (
+	pal(1,not loser and u.sel and (
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p)
 	sspr(sx,sy,w,h,xx,yy,w,h,
@@ -2279,7 +2295,8 @@ end
 function draw_menu()
 	local x,secs=0,split"102,26"
 	if sel1 and sel1.p==1 then
-		if sel1.typ.has_q then
+		--4 tok (and...)
+		if sel1.typ.has_q and not sel1.const then
 			secs=split"17,24,61,26"
 		else
 	 	secs=split"17,17,68,26"
@@ -2309,7 +2326,7 @@ function draw_menu()
 		?"X"..numsel,unspl"5,111,1"
 		spr(unspl"132,1,111")
 		add(buttons,{
-			r=split"0,110,10,118",
+			r=split"0,110,14,119",
 			handle=function()
 			 deli(selection).sel=false
 			end
@@ -2530,7 +2547,7 @@ function init()
 	units,restiles,selection,
 		proj,bldgs,spiders,viz,
 		new_viz,queens,
-		dmap_st,res,loser,menu=
+		dmap_st,res,loser,menu,selx=
 		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
 	 parse[[
