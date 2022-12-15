@@ -113,11 +113,6 @@ function _draw()
 		end
 	end
 	
-	if webx then
-		line(webx,weby,wmx,wmy,
-		 can_finish_web() and 7 or 8)
-	end
-	
 	draw_menu()
 	if to_build then
 		local typ,x,y=to_build.typ,
@@ -145,8 +140,6 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
-	--cursor_spr can change pal
-	pal()
 end
 
 function _update()
@@ -362,8 +355,6 @@ move_x=8
 move_y=16
 move_fr=6
 move_fps=2
-web_x=88
-web_y=16
 dead_x=56
 dead_y=16
 portx=16
@@ -763,18 +754,6 @@ breq=0]],ant),1)
 	end),
 }
 
-web=parse([[
-t=4
-r=0
-g=2
-b=0
-breq=100]],parse[[
-portx=8
-porty=80
-portw=9]])
-
-spider.prod={web}
-
 den.prod={
 	parse([[
 t=13
@@ -790,18 +769,7 @@ g=4
 b=0
 p=
 breq=0]],spider),
-parse([[
-t=5
-r=8
-g=5
-b=0
-idx=3
-breq=0]],parse[[
-portx=114
-porty=72
-portw=9]],function()
-		web.breq=0
-	end),
+nil,
 nil,
 parse([[
 t=5
@@ -1097,28 +1065,8 @@ function handle_click()
 	 return
 	end
 	
- if btnp(r) and (to_build or
- 	webbing) then
- 	to_build,webbing,webx=nil
- 	return
- end
-
- if webbing then
- 	if btnp(l) and
- 	 can_finish_web() then
-	 	if webx then
-				pay(web,-1)
-	 		sel1.st,webbing,webx={
-	 		 t="web",
-	 		 wayp=get_wayp(
-	 		  sel1,webx,weby),
-	 		 p1={webx,weby},
-	 		 p2={wmx,wmy},
-	 		}
-	 	else
-	 		webx,weby=wmx,wmy
-	 	end
- 	end
+ if btnp(r) and to_build then
+ 	to_build=nil
  	return
  end
 
@@ -1228,8 +1176,8 @@ function mouse_cam()
  	mid(0,stat(32),126),
 	 mid(-1,stat(33),126)
 
- mx,my,wmx,wmy,hovbtn=
- 	amx+cx,amy+cy,mx+3,my+3
+ mx,my,hovbtn=
+ 	amx+cx,amy+cy
 end
 
 function handle_input()
@@ -1240,13 +1188,6 @@ function handle_input()
  	if intersect(b.r,{amx,amy},1) then
 			hovbtn=b
  	end
-	end
-	if webx then
-		webd=mid(10,
-		 dist(webx-wmx,weby-wmy),
-		 22)
-		wmx,wmy=norm({wmx,wmy},
-			{x=webx,y=weby},webd)
 	end
 
  handle_click()
@@ -1468,15 +1409,6 @@ function draw_unit(u)
 	 typ[stt.."_fps"],
 	 typ[stt.."_fr"],
 		u.dead or fps
-
-	--cant use stt bc it'll be move
-	if st.t=="web" and st.first_pt then
-		color"7"
-		line()
-		line(unpack(st.p1))
-		line(unpack(st.second_pt or
-			{u.x,u.y}))
-	end
 	
 	if u.const and not u.dead then
 		fillp"23130.5"--▒
@@ -1494,9 +1426,6 @@ function draw_unit(u)
 	pal(1,u.sel and (
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p)
-	if st.webbed then
-		pal(split"7,7,6,6,6,7,7,7,7,7,7,7,6,7,7,6")
-	end
 	sspr(sx,sy,w,h,xx,yy,w,h,
   --bldgs shldnt rotate
 		not typ.fire and u.dir==typ.dir)
@@ -1511,10 +1440,6 @@ end
 
 function update_unit(u)
 	local st=u.st
-	if st.webbed then
-		if (fps==0) st.webbed-=1
-		if (st.webbed==0) rest(u)
-	end
 	local t=st.t
  if (u.q) produce(u)
  if (u.typ.farm) update_farm(u)
@@ -1526,40 +1451,8 @@ function update_unit(u)
  	check_target(u)
  end
  step(u)
- local r=u_rect(u,1)
- for i,sp in inext,spiders do
- 	local ss=sp.st
- 	if not ss.ready then
- 		deli(spiders,i)
- 	elseif fps%10==i%10 and
- 		sp.p!=u.p then
- 		if
- 			intersect(r,ss.p1,2) or
- 			intersect(r,ss.p2,2) or
- 			intersect(r,u_rect(sp),0)
- 		then
- 			u.st=parse[[t=dead
-webbed=5]]
-	 		attack(sp,u)
-	 		return
-		 end
-		end
-	end
- if not st.wayp then
- 	if t=="move" then
- 		rest(u)
- 	elseif t=="web" and not st.ready then
-			if st.second_pt then
-				st.ready=add(spiders,u)
-			elseif st.first_pt then
-				st.wayp,st.second_pt=
-					{{norm(st.p1,u,webd/2)}},
-					st.p2
-			else
-				st.wayp,st.first_pt=
-					{st.p2},true
-			end
-		end
+ if not st.wayp and t=="move" then
+		rest(u)
  end
 end
 
@@ -2021,10 +1914,6 @@ function can_drop()
 	end
 end
 
-function can_finish_web()
- return acc(wmx\8,wmy\8)
-end
-
 function can_renew_farm()
 	return hoverunit and
 		res1.b>=farm_renew_cost_b and
@@ -2264,13 +2153,6 @@ function draw_port(
 end
 
 function cursor_spr()
- if webbing then
- 	--menuy
-		pal(amy<104 and
-			not can_finish_web() and
-			split"8,8,8,8,8,8,8")
- 	return 70
- end
  if hovbtn then
 		pset(amx-1,amy+4,5)
   return 66
@@ -2358,10 +2240,6 @@ portf=9
 					end
 					if b.typ.bldg then
 						to_build=b
-						return
-					end
-					if b==web then
-						webbing,webx=true
 						return
 					end
 					pay(b,-1)
