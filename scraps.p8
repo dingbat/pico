@@ -17,6 +17,20 @@ unspl"512,256,105,107,19,9,64,32,28.444,26.947"
 	rect(unspl"-1,-1,5,5,10")
 
 
+selx,sely,selt=mx,my,t()
+
+if btnp(l) and hoverunit and
+  selt and t()-selt<0.5 then
+		selection,selbox={}
+		for u in all(units) do
+			if intersect(u_rect(u),
+				{cx,cy,cx+128,cy+128},0) and
+				u.p==1 and u.typ==hoverunit.typ then
+				add(selection,u).sel=true
+			end
+		end
+		return
+	end
 
 
 --[[
@@ -32,8 +46,7 @@ todo:
 --[[
 the following will not be saved:
 - unit states
-- resource count in partially
-  mined resource tiles
+- resource count in resource tiles
 - units in production, along w/
   the used resources+pop count
 - techs (research, upgrades)

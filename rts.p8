@@ -172,7 +172,8 @@ function _update()
 	
  handle_input()
 	
- buttons,pos,hoverunit={},{}
+ buttons,pos,hoverunit,idle=
+  {},{}
  if loser then
  	poke"24365" --no mouse
  	if (btnp"5")	init_menu()
@@ -537,7 +538,7 @@ bldg=1
 los=30
 hp=40
 dir=-1
-range=25
+range=30
 const=20
 proj_yo=-2
 proj_xo=-1
@@ -1136,7 +1137,7 @@ function handle_click()
 
  if btn(l) then
  	if not selbox then
- 		selx,sely=mx,my
+ 		selx,sely,selt=mx,my,t()
  	end
 		selbox={
 			min(selx,mx),
@@ -1210,7 +1211,7 @@ function hilite_hoverunit()
 	hilite={t=t(),unit=hoverunit}
 end
 
-function handle_input()
+function mouse_cam()
 	local b=btn()
 	if (b>32) b>>=8 --allow esdf
 	cx,cy,amx,amy=
@@ -1228,6 +1229,11 @@ function handle_input()
 
  mx,my,wmx,wmy,hovbtn=
  	amx+cx,amy+cy,mx+3,my+3
+end
+
+function handle_input()
+	mouse_cam()
+	
  --buttons added in _draw()
  for b in all(buttons) do
  	if intersect(b.r,{amx,amy},1) then
@@ -1311,6 +1317,11 @@ function tick_unit(u)
 	if (u.const) return
 	if u.st.target and u.st.target.dead then
 		rest(u)
+	end
+	
+	if u.typ==ant and u.p==1
+		and u.st.t=="rest" then
+		idle=u
 	end
 	
 	update_unit(u)
@@ -1460,9 +1471,7 @@ function draw_unit(u)
 	--cant use stt bc it'll be move
 	if st.t=="web" and st.first_pt then
 		color"7"
-		--reset last line memory
 		line()
-		--set last line memory
 		line(unpack(st.p1))
 		line(unpack(st.second_pt or
 			{u.x,u.y}))
@@ -1475,7 +1484,6 @@ function draw_unit(u)
 		fillp()
 		local p=u.const/typ.const
 		bar(xx,yy,fw-1,p,14,5)
-		--const spr switches after 0.5
 		sx-=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif ufps then
@@ -1801,8 +1809,8 @@ function foreach_spl(str,func)
 	end
 end
 
---x=k<<8>>8 (or k&0x00ff)
---y=k>>24<<16 (or k\256)
+--x=k<<8>>8 (k&0x00ff)
+--y=k>>24<<16 (k\256)
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
@@ -2091,11 +2099,11 @@ function get_wayp(u,x,y,tol)
 		local wayp,dest,dest_d=
 			{},
 			nearest_acc(x,y,u)
-		--unstick from an inacc tile
+		--unstick
 		local path,exists=find_path(
 		 nearest_acc(u.x,u.y,u),
 		 dest)
-		deli(path) --del start
+		deli(path) --start
 		for n in all(path) do
 			add(wayp,
 				{n[1]*8+4,
@@ -2109,7 +2117,7 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---a* based on https://t.co/nasud3d1ix
+--a* based on t.co/NaSUd3d1ix
 function find_path(start,goal)
  local shortest,best_table={
   last=start,
@@ -2399,7 +2407,7 @@ function draw_menu()
 		end
 	end
  for i,sec in inext,secs do
- 	pal(i%2!=#secs%2 and 4,15)
+ 	pal(i%2!=0 and 4,15)
  	camera(x)
  	--104=menuy
  	spr(unspl"128,0,104")
@@ -2420,7 +2428,7 @@ function draw_menu()
 	if numsel>1 then
 		if (numsel<10) camera(-2)
 		?"X"..numsel,unspl"5,111,1"
-		spr(132,1,111)
+		spr(unspl"132,1,111")
 		add(buttons,{
 			r=split"0,110,10,118",
 			handle=function()
@@ -2429,11 +2437,21 @@ function draw_menu()
 		})
 	end
 	
-	--action
 	if sel1 and sel1.typ.unit then
 		draw_port(
-	 	sel_typ==ant and axn_mine or
-	 	axn_atkmov,20,
+	 	sel_typ==ant and parse[[
+portx=24
+porty=32
+portw=8
+porto=2
+portf=13
+]] or parse[[
+portx=113
+porty=80
+portw=9
+porto=2
+portf=13
+]],20,
 	 	--menuy+3
 	 	108,nil,function()
 	 		action=not action
@@ -2442,6 +2460,21 @@ function draw_menu()
 	end
 	
 	draw_minimap()
+	
+	sspr(idle and 113 or 121,
+	 unspl"105,6,6,115,121")
+	add(buttons,idle and {
+		r=split"115,121,120,128",
+		handle=function()
+			foreachsel(function(u)
+				u.sel=nil
+			end)
+			selection,cx,cy,idle.sel=
+				{idle},idle.x-64,idle.y-64,
+				true
+			mouse_cam()
+		end
+	})
 	
 --	local res1=res[2]
 	camera(-print_res(res1,
@@ -2575,8 +2608,7 @@ mapw,maph,mmx,mmy,mmw,
 	unspl"384,256,105,107,19,12,48,32,21.333,20.21"
 	
 ai_diff,reskeys,f2res,resqty,
- key2resf,rescol,
- axn_mine,axn_atkmov
+ key2resf,rescol
  =0,
 split"r,g,b,p,pl,ppl,reqs",parse[[
 7=r
@@ -2609,19 +2641,7 @@ e1=5
 e7=8
 e11=3
 e19=4
-e33=13]],parse[[
-portx=24
-porty=32
-portw=8
-porto=2
-portf=13
-]],parse[[
-portx=113
-porty=80
-portw=9
-porto=2
-portf=13
-]]
+e33=13]]
 
 function init()
 	poke(0x5f2d,3) --mouse
@@ -2660,12 +2680,13 @@ reqs=0]]
 	--ai init
 	ai_frame()
 	bo_idx,nxt_res,res_alloc,uprod,
-		defsqd,offsqd,atksqd,defst=
+		defsqd,offsqd,atksqd,
+		ant[2].carry,
+		tower[2].range,
+		defst=
 		0,1,split"r,b,g",true,
-		{},{},{}
-
-	tower[2].range+=15
-	ant[2].carry=9
+		{},{},{},
+		40,9
 end
 
 function init_menu()
@@ -2696,12 +2717,7 @@ init_menu()
 -->8
 --ai
 
---1:mound
---2:farm
---3:barracks
---4:den
---5:tower
---6:castle
+--1m 2f 3b 4d 5t 6c
 bo=
 [[6,1,91,27
 8,3,87,21
@@ -2851,8 +2867,6 @@ function ai_frame()
 	end
 	miners,antcount,inv={},0
 end
-
---_update60=_update
 -->8
 --saving
 
@@ -3021,12 +3035,12 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 45544540045114005454545004444400000000000444440000000000000000000000000000000000000000000000000000000000000000004440444400000000
 00000000000000000000000004111400000000000411d40000000000000000000000000000000000000000000000000000000000000000000440044000000000
 00000000000000006000060604444400005050000444440000000060000600600005060000056050000006050000060000000000000000000000004000000000
-00000000000000000744447000414000004140000041400000060600000565060056050000000565000060600000000600000000000000000000000000000000
-00744070000000007441144000444000004140000044400000056560005050500000565000606000000000000000000000000000000000000000000000000000
-0741140000000000441111440041400000414000004140000050555000a005000060600000000000000000000000000000000000000000000000000000000000
-04151140000470004715511400414500004045000041455000a0aa000aaa0aa000a00a0000a00500000005000000000000000000000000000000000000000000
-0411114000414400741551460000000000000000000000000a9aa9a50a99a9950a95a9a5059a59a505a65a650075050000750500007505000000000000000000
-0741140000444400074114400000000000000000000000005989989559899895598998955a89a895569a69a50576576005765760057657600000000000000000
+00000000000000000744447000414000004140000041400000060600000565060056050000000565000060600000000600000000000000000099990000555500
+00744070000000007441144000444000004140000044400000056560005050500000565000606000000000000000000000000000000000000929929005255250
+0741140000000000441111440041400000414000004140000050555000a005000060600000000000000000000000000000000000000000000929929005255250
+04151140000470004715511400414500004045000041455000a0aa000aaa0aa000a00a0000a005000000050000000000000000000000000009d44d9005d44d50
+0411114000414400741551460000000000000000000000000a9aa9a50a99a9950a95a9a5059a59a505a65a650075050000750500007505000944449005444450
+0741140000444400074114400000000000000000000000005989989559899895598998955a89a895569a69a50576576005765760057657600099990000555500
 00000000000000000000000000000000000000000000000028222822288288222282828225228522552852525657657556576575565765750000000000000000
 000000000000000000000000509030b0505500000000000000000000000600600005060000000000000000000000000000000000000000000000000000000000
 00000000000000000500050000000000550500000000000000060500000500060006000000000000000000000000000000000000000000000000000000000000
