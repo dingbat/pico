@@ -974,6 +974,7 @@ acid_vs_building=0.6]]
 
 function rest(u)
 	u.st=parse[[t=rest
+rest=1
 aggress=1]]
 end
 
@@ -981,7 +982,7 @@ function movegrp(us,x,y,aggress,rest)
 	local lowest=999
 	for u in all(us) do
 		if not rest or
-		 u.st.t=="rest" then
+		 u.st.rest then
 			move(u,x,y,aggress)
 		end
 		lowest=min(u.typ.spd,lowest)
@@ -1320,7 +1321,7 @@ function tick_unit(u)
 	end
 	
 	if u.typ==ant and u.p==1
-		and u.st.t=="rest" then
+		and u.st.rest then
 		idle=u
 	end
 	
@@ -2767,7 +2768,7 @@ function ai_unit1(u)
 			end
  		if u.st.t=="gather" then			
 		 	add(miners,u)
-		 elseif u.st.t=="rest" and
+		 elseif u.st.rest and
 		 	dmaps_ready then
 				nxt_res%=#res_alloc
 				nxt_res+=1
