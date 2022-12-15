@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(mapw8) --fogmap
+	draw_map(mapw8) --map
 	
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -146,7 +146,7 @@ function _update()
 	if menu then
 		cx+=cvx
 		cy+=cvy
-		if (cx%128==0) cvx*=-1
+		if (cx%256==0) cvx*=-1
 		if (cy%120==0) cvy*=-1
  	if btnp"5" then
  		new_game()
@@ -162,6 +162,7 @@ function _update()
 	fps+=1
 	fps%=60
 	upc=fps%upcycle
+	ai=upc==0
 	
  handle_input()
 	
@@ -207,7 +208,7 @@ function _update()
  
  foreach(units,tick_unit)
  for u in all(units) do
-		if (fps%5==0) ai_unit2(u)	
+		if (ai) ai_unit2(u)	
  	if selx and
  		(g(viz,u.x\8,u.y\8) or
  			u.discovered) then
@@ -239,7 +240,7 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if fps%5==0 then
+	if ai then
 	 ai_frame()
 	end
 end
@@ -1291,7 +1292,7 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
-	if (fps%5==0) ai_unit1(u)
+	if (ai) ai_unit1(u)
 
 	update_viz(u)
 
@@ -1727,6 +1728,13 @@ function foreach_spl(str,func)
 	end
 end
 
+function sel_only(unit)
+	foreachsel(function(u)
+		u.sel=nil
+	end)
+	selection,unit.sel={unit},1
+end
+	
 --x=k<<8>>8 (k&0x00ff)
 --y=k>>24<<16 (k\256)
 function g(a,x,y,def)
@@ -2364,13 +2372,6 @@ portf=13
 	end
 	
 	draw_minimap()
-	
-	function sel_only(unit)
-		foreachsel(function(u)
-			u.sel=nil
-		end)
-		selection,unit.sel={unit},1
-	end
 	
 	sspr(idle and 112 or 120,
 	 unspl"105,8,6,116,121")
