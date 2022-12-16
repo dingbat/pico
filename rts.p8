@@ -1732,10 +1732,13 @@ function unspl(...)
 	return unpack(split(...))
 end
 
-function foreach_spl(str,func)
-	for s in all(split(str,"\n")) do
-		func(unspl(s))
-	end
+function splspl(str,spl)
+	local x={}
+	foreach(split(str,spl or "\n"),
+		function(s)
+			add(x,split(s))
+		end)
+	return x
 end
 
 function sel_only(unit)
@@ -2109,7 +2112,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
-	local res1=res[2]
+	local res1=res2
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2404,7 +2407,7 @@ portf=13
 		end
 	})
 	
-	local res1=res[2]
+	local res1=res2
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
 	line(unspl"-4,120,-128,120,5")
@@ -2591,7 +2594,7 @@ pl=10
 ppl=10
 reqs=0]]
 
-	res1,
+	res1,res2,
 	--tech can change
 	units_heal,gather_f,
 	farm_cycles,farm_renew_cost_b,
@@ -2599,23 +2602,13 @@ reqs=0]]
 	cx,cy,mx,my,fps,
 	uid,totalu,numsel,
 	dmaps_ready=
-		res[1],{false,true},
+		res[1],res[2],{false,true},
 		{3,2-ai_diff/2},
 		unspl"5,3,0,0,0,0,59,0,0,0"
 
 	init_typs()
 	
-	--ai init
-	ai_frame()
-	bo_idx,nxt_res,res_alloc,uprod,
-		defsqd,offsqd,atksqd,
-		ant[2].carry,
-		tower[2].range,
-		defst=
-		0,1,split"r,b,g,r",true,
-		{},{},{},
-		9,40
-	visualize_ai()
+	ai_init()
 end
 
 function init_menu()
@@ -2626,8 +2619,8 @@ end
 function new_game()
 	menu=init()
 	--q=6,5
-	foreach_spl(
-[[7,57,44,1
+	foreach(
+splspl[[7,57,44,1
 1,40,40,1
 1,68,43,1
 1,50,32,1
@@ -2638,7 +2631,9 @@ function new_game()
 1,330,196,2
 5,328,170,2
 8,268,169,2
-2,65,150,3]],unit)
+2,65,150,3]],
+	function(u) unit(unpack(u)) end
+)
 	
 	make_dmaps"d"
 end
@@ -2647,9 +2642,19 @@ init_menu()
 -->8
 --ai
 
---1m 2f 3b 4d 5t 6c
-bo=
-[[6,1,123,27
+function ai_init()
+	bo_idx,nxt_res,res_alloc,
+		defsqd,offsqd,atksqd,
+		miners,antcount,
+		ant[2].carry,
+		tower[2].range,
+		defst,uhold=
+		1,1,split"r,b,g,r",
+		{},{},{},{},0,
+		9,40
+		
+	--1m 2f 3b 4d 5t 6c
+	bo=splspl[[6,1,123,27
 8,3,119,21
 9,1,123,21
 12,5,118,16
@@ -2659,14 +2664,14 @@ bo=
 16,2,122,24
 17,2,123,24
 18,3,120,18
-19,1,117,25
+19,1,117,27
 20,2,123,23
 21,2,123,22
 22,4,120,20
 23,2,122,22
 24,2,121,22
 25,1,123,16
-26,6,115,18
+26,6,114,17
 27,2,120,22
 28,1,119,28
 29,2,120,23
@@ -2677,35 +2682,46 @@ bo=
 35,5,118,23
 37,1,122,28
 43,1,127,22
-47,1,125,13
-53,1,117,27
+45,5,117,20
+47,1,124,12
+53,1,113,28
 54,2,125,24
 55,5,112,30
 56,2,126,24
 57,1,116,29
 59,2,124,25
+60,5,114,29
 62,2,124,26]]
-
-function visualize_ai()
-	mset(121,23,8)
-	mset(122,23,9)
-	foreach_spl(bo,function(a,t,x,y)
-		local typ=ant.prod[t].typ
-		local sx,sy=typ.rest_x,typ.rest_y
-		local tile=sy\8*16+sx\8
-		mset(x,y,tile)
-		if typ.w>8 then
-			mset(x+1,y,tile+1)
-			if typ.h>8 then
-				mset(x+1,y+1,tile+17)
-			end
-		end
-		if typ.h>8 then
-			mset(x,y+1,tile+16)
-		end
-	end)
-	cstore(0x2000,0x2000,4096)
 end
+
+--function visualize_ai()
+--	for y=0,31 do
+--		memcpy(
+--			0x2060+y*128,
+--			0x2010+y*128,
+--			32)
+--	end
+--	mset(121,23,8)
+--	mset(122,23,9)
+--	foreach_spl(bo,function(a,t,x,y)
+--		local typ=ant.prod[t].typ
+--		local sx,sy=typ.rest_x,typ.rest_y
+--		local tile=sy\8*16+sx\8
+--		mset(x,y,tile)
+--		if typ.w>8 then
+--			mset(x+1,y,tile+1)
+--			if typ.h>8 then
+--				mset(x+1,y+1,tile+17)
+--			end
+--		end
+--		if typ.h>8 then
+--			mset(x,y+1,tile+16)
+--		end
+--	end)
+--	cstore(0x2000,0x2000,4096)
+--end
+
+_update60=_update
 
 function ai_unit1(u)
  if u.p==2 then
@@ -2714,7 +2730,7 @@ function ai_unit1(u)
  		if u.st.res=="r" and
  			not g(dmaps.r,41,24) then
 			 drop(u)
-			 res_alloc=split"b,g"
+			 res_alloc=split"b,g,b,g,g"
 			end
  		if u.st.t=="gather" then			
 		 	add(miners,u)
@@ -2739,9 +2755,16 @@ function ai_unit1(u)
  end
 end
 
+function nohold(p)
+	return not uhold or
+		(p.r==0 or res2.r-p.r>=uhold.r) and
+		(p.g==0 or res2.g-p.g>=uhold.g) and
+		(p.b==0 or res2.b-p.b>=uhold.b)
+end
+
 function ai_prod(u)
 	local p=u.typ.prod[u.lastp]
-	if uprod and
+	if nohold(p) and
 		not u.q and can_pay(p,2) then
 		pay(p,-1,2)
 		u.q={
@@ -2789,34 +2812,35 @@ function ai_unit2(u)
 	end
 end
 
-function ai_build(t,pid,x,y)
-	local b=ant.prod[pid]
-	if res[2].p>=t and bo_idx<t then
-		uprod=can_pay(b,2)
-		if uprod then
-			bo_idx=t
-			pay(b,-1,2)
-			unit(b.typ,
-				(x-80)*8+b.typ.w/2,
-				y*8+b.typ.h/2,
-				2,nil,nil,0)
-		end
-	end
-end
-
 function ai_frame()
-	if dmaps_ready then
-		foreach_spl(bo,ai_build)
-		if #offsqd>=10 and not defst
-		then
-			atksqd,offsqd=offsqd,{}
+	if (not inv) defst=nil
+	miners,antcount,inv,uhold={},0
+	
+	local bld=bo[bo_idx]
+	if bld then
+		local p,pid,x,y=unpack(bld)
+		local b=ant.prod[pid]
+		if res2.p>=p then
+			if can_pay(b,2) then
+				bo_idx+=1
+				pay(b,-1,2)
+				unit(b.typ,
+					(x-80)*8+b.typ.w/2,
+					y*8+b.typ.h/2,
+					2,nil,nil,0)
+			else
+				uhold=b
+			end
 		end
-		movegrp(atksqd,
-			queens[1].x,queens[1].y,
-			true,true)
-		if (not inv) defst=nil
 	end
-	miners,antcount,inv={},0
+	if #offsqd>=100 and
+		not defst then
+		atksqd,offsqd=offsqd,{}
+	end
+	movegrp(atksqd,
+		queens[1].x,
+		queens[1].y,
+		true,true)
 end
 -->8
 --saving
@@ -2840,7 +2864,7 @@ menuitem(1,"⌂ save to clip",function()
 	end
 	str=str.."/"
 	for r in all(reskeys) do
-		str=str..res1[r]..","..res[2][r]..","
+		str=str..res1[r]..","..res2[r]..","
 	end
 	str=str.."/"
 	for i=1,mapw8*maph8-1 do
@@ -2852,23 +2876,22 @@ end)
 
 menuitem(2,"◆ load from clip",function()
 	init()
-	local lines=split(stat(4),"/")	
-	ai_diff,bo_idx=unspl(deli(lines,1))
-	for i,t in inext,split(deli(lines)) do
+	local data=splspl(stat(4),"/")	
+	ai_diff,bo_idx=unpack(deli(lines,1))
+	for i,t in inext,deli(lines) do
 		if t!="" then
 			mset(i%mapw8,i/mapw8,t)
 		end
 	end
-	local r,e=
-		split(deli(lines)),
-		split(deli(lines))
+	local r,e=deli(lines),
+		deli(lines)
 	for i,k in inext,reskeys do
 		i*=2
 		i-=1
-		res1[k],res[2][k]=r[i],r[i+1]
+		res1[k],res2[k]=r[i],r[i+1]
 	end
 	for l in all(lines) do
-		unit(unspl(l))
+		unit(unpack(l))
 	end
 	for k in all(e) do
 		if k!="" then
@@ -3155,25 +3178,25 @@ __map__
 525253525c5d5e5f5c5e5f5d56576a67b367685d7a5e5f5c5d5e52666767676767685f5f5c7b5e5f5c5d5e5f5c5e5e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4bb367685d7a5e5f5c5d5e52666767676767685f5f5c7b5e5f5c5d5e5f5c5e5e54
 5253525253526e6f6c6e6f6d66676767676768796e6e6f6c6d6e53666767676759786c6d6e6f6c5657584e7f6c4d55544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b676768796e6e6f6c6d6e53666767676759786c6d6e6f6c5657584e7f6c4d5554
 5252505252527e7f7c7e7f7d666785676759787d7e7e7f7c7d7e53765a676759786f7c7d7e56576a67685e4f7c5454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6759787d7e7e7f7c7d7e53765a676759786f7c7d7e56576a67685e4f7c545454
-52535352524d4e4f4c4e4f7b6667676767687b4d4e4e4f4c4d4e4f7b665977784d7f4c4d566a676767686e5f4c5455554b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b67687b4d4e4e4f4c4d4e4f7b665977784d7f4c4d566a676767686e5f4c545555
-525253535c5d5e5f5c5e5f796667597777785c5d5e5e5f5c5d5e5f5c7678525c5d4f5c6b6667676759787e6f555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b77785c5d5e5e5f5c5d5e5f5c7678525c5d4f5c6b6667676759787e6f55c25454
+52535352524d4e4f4c4e4f7b6667676767687b4d4e4e4f4c4d4e4f7b665977784d7f4c4d566a676767686e5f4c5455554b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b67687b4d4e4e4f4c4d4e4f7b665977784d7f4c4d566a676767686e5fc2545555
+525253535c5d5e5f5c5e5f796667597777785c5d5e5e5f5c5d5e5f5c7678525c5d4f5c6b6667676759787e6f555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b77785c5d5e5e5f5c5d5e5f5c7678525c5d4f5c6b6667676759787e6f55545454
 526d6e6f6c6d6e6f6c6e6f6d7677787a526f6c6d6e796f6c6d6e6f6c6d6e6f6c6d5f6c6d66676759786f4e7f555353544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b526f6c6d6e796f6c6d6e6f6c6d6e6f6c6d5f6c6d66676759786f4e7f55535354
 7c7d536b527d7e7f7c7e7f7d7e7f7c7d797f7c7d7e7e7f7c7d7e7f7c7d7e7f7c7d6f7c7a76777778537f5e4f535353534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b797f7c7d7e7e7f7c7d7e7f7c7d7e7f7c7d6f7c7a76777778537f5e4f53535353
-4c52565757584e4f4c4d4e4f4c4d4e4f4c4d4e4c4d4e4f4c4d4e4f794d4e4f4c4d7f7f7f7c7d7e527c7d7e5f535252534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c4d4e4c4d4e4f4c4d4e4f794d4e4f4c4d7f7f7f7c7dc552e27d7ec253525253
-5051666767687b5f5c5d5e5f5c5d5e5f5c5d5e5c5d5e5f5c5d5e5f5c5d5e5f5c5d4f4c4d4e4f4c4d4e4f5e53535353534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5c5d5e5c5d5e5f5c5d5e5f5c5d5e5f5c5d4f4c4d4e4fd54d4e4f5e5353535353
-5150666759784c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f6f7c7d7e7f7c7d7e527c6b7e7f7f7c7d6e6f6c6d6e52525053534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4e4f4c4d4e4f6f7c7d7e7f7c7d7e527c6b7e7feeef7d6e6fe26d6e5252505353
-7c52767778515c5d5e5f56575757585d5e5f5c5d5e5f7f4f4c6d6e5256575757575757587a4d7e7f7c7d5253525350534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5e5f5c5d5e5f7f4f4c6d6e5256575757575757feff4dc27f7c7d525352535053
+4c52565757584e4f4c4d4e4f4c4d4e4f4c4d4e4c4d4e4f4c4d4e4f794d4e4f4c4d7f7f7f7c7d7e4c7c7d7e5f535252534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c4d4e4c4d4e4f4c4d4e4f794d4e4f4c4d7f7f7f7c7dc54ce27d7ec253525253
+5051666767687b5f5c5d5e5f5c5d5e5f5c5d5e5c5d5e5f5c5d5e5f5c5d5e5f5c5d4f4c4d4e4f4c4d4e4f5e53535353534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5c5d5e5c5d5e5f5c5d5e5f5c5d5e5f5c5d4feeef4e4fd54d4e4f5e5353535353
+5150666759784c4d4e4f4c4d4e4f4c4d4e4f4c4d4e4f6f7c7d7e7f7c7d7e527c6b7e7f7f7c7d6e6f6c6d6e52525053534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4e4f4c4d4e4f6f7c7d7e7f7c7d7e527c6b7efeff7c7d6e6fe26d6e5252505353
+7c52767778515c5d5e5f56575757585d5e5f5c5d5e5f7f4f4c6d6e5256575757575757587a4d7e7f7c7d5253525350534b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5e5f5c5d5e5f7f4f4c6d6e5256575757575757587a4dc27f7c7d525352535053
 4c545452524d6c6d6e566a6767676958796f6c6d796f4e5f5c6b7a566a67676759775a69586d4e4f4c4d4e53535352524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b796f6c6d796f4e5f5c6b7a566a67676759775a69586d4e4fd24d4e5353535252
 5c5d55535c5d7c7d53666767676767687a7f7c7d7e7f5e6f6c7a566a67676767684c6667686d5e5f5c5d515f525253524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7a7f7c7d7e7f5e6f6c7a566a67676767684c6667686d5ee25c5d51c252525352
 7b6d6e6f6c6d4c4d52765a676767676852534c4d4e4f6e7f7c566a676767b36769576a59787d6e6f6c6d6e6f6c6d6e6f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b52534c4d4e4f6e7f7c566a676767b36769576a5978d26e6ff2f2f2f26c6d6ec2
 527d7e7f7c7d5c5d50536667676767695853535d5e5f7e4f4c66676767b46767b26767686c4d7e7f7c7d7e7f7c507e7f4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5853535d5e5f7e4f4c66676767b46767b26767686c4dc57ff20809f27c507e7f
 5252534f4c4d6c6d6e526667676767676958526d6e6f4e5f52765a676767676767676768535d4e4f4c4d4e4f4c4d4e544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6958526d6e6f4e5f52765a676767676767676768535dd54ff2f2f2f2f2f2f254
-5353525f5c5d7c7d7e53765a676767676768537d7e7f5e5250537677775a67597777777853535e5f5c5d5e5f5c5d55544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6768537d7e7f5e5250537677775a67597777777853c25e5f5c5d5e5ff2c25554
+5353525f5c5d7c7d7e53765a676767676768537d7e7f5e5250537677775a67597777777853535e5f5c5d5e5f5c5d55544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6768537d7e7f5e5250537677775a67597777777853535e5f5c5d5e5ff2c25554
 5252516f6c6d4c4d4e505366676767676768534d4e4f6e7f505253535376777853505253527d6e6f51516e6f6c5554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6768534d4e4f6e7f505253535376777853505253527d6e6f51516e6ff2555454
 525251547c7d5c5d5e5f52765a6767675978525d5e5f7e4e4f4d53525353525353525353534d7e7f7c7d7e7f545554544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b5978525d5e5f7e4e4f4d5352535352535352535353c27e7f7c7d7ec254555454
-5253555554546c6d6e6f6c527677777778526c4c4d4e4f5e5f5d5e5f53525353525d5e5f5c5d4e4f4c4d4e54555455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b78526c4c4d4e4f5e5f5d5e5f53525353525d5e5f5c5d4ec24c4dc25455545554
+5253555554546c6d6e6f6c527677777778526c4c4d4e4f5e5f5d5e5f53525353525d5e5f5c5d4e4f4c4d4e54555455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b78526c4c4d4e4f5e5f5d5e5f5352535352c25e5f5c5d4ec24c4dc25455545554
 535454545554557d7e7f7c7d7e6b7c7d7e7f7c5c5d54545c5d5e5f5c5d5e5f5c5d4f4c4d4e4f5e5455545455545454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7e7f7c5c5d54545c5d5e5f5c5d5e5f5c5d4f4c4dc24f5e545554545554545454
 54555455555454556c6d6e6f6c6d6e6f6c6d6e6c55545554546e6f4c4d4c6e6f4d4c4d4c4d6d545454545554545455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6c6d6e6c55545554546e6f4c4d4c6e6fc54c4d4c4d6d54545454555454545554
 5454545454545454547d7e7f7c7d7e7f7c7d7e545455545454547f5c5d5c7e7f5d5c5d5c5d55555455545454555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7c7d7e545455545454547f5c5d5c7e7fd55c5d5c5d5555545554545455545454
 __sfx__
-0101000027000000001f000200002200024000270002900029000290002800027000250002200020000200001f0001e0001e0001f00020000220002400024000210001d0001b0001900017000170000000000000
+0001000027000000001f000200002200024000270002900029000290002800027000250002200020000200001f0001e0001e0001f00020000220002400024000210001d0001b0001900017000170000000000000
