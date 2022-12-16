@@ -28,17 +28,19 @@ function _draw()
 
  local bf,af={},{}
  for u in all(units) do
-		if
-			not loser and
-		 not g(viz,u.x\8,u.y\8)
-		 and u.discovered
-		then
- 		add(af,u)
- 	elseif u.typ.bldg then
-	 	draw_unit(u)
-	 else
-	 	add(bf,u)
-	 end
+ 	if u.onscr then
+			if
+				not loser and
+			 not g(viz,u.x\8,u.y\8)
+			 and u.discovered
+			then
+	 		add(af,u)
+	 	elseif u.typ.bldg then
+		 	draw_unit(u)
+		 else
+		 	add(bf,u)
+		 end
+		end
  end
 
 	if sel_typ==farm and
@@ -157,17 +159,22 @@ function _update()
  	return
 	end
 	
+	local total=res1.p+res2.p
+	upcycle=total>=110 and 60 or
+		total>=80 and 30 or
+		total>=65 and 15 or
+		total>=45 and 10 or 5
+
 	async_dmap()
 	fps+=1
 	fps%=60
 	upc=fps%upcycle
-	ai=upc==0
 	
  handle_input()
 	
- buttons,pos,hoverunit,
+ ai,buttons,pos,hoverunit,
  	idle,idle_mil=
-  {},{}
+  upc==0,{},{}
  if loser then
  	poke"24365" --no mouse
  	if rdy and btnp"5" then
@@ -177,8 +184,8 @@ function _update()
  	return
 	end
 	
- --turn over viz
- if upc==0 then
+ --turn over viz if upc=0
+ if ai then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
@@ -214,7 +221,7 @@ function _update()
  	 update_sel(u)
 		end
  	if not (u.const or u.dead) then
-		 if upc==u.uid%upcycle and
+		 if upc==u.id%upcycle and
 		  u.st.aggress and
 		  u.typ.atk
 		 then
@@ -1064,8 +1071,7 @@ function handle_click()
   selt and t()-selt<0.2 then
 		selection,selx={}
 		for u in all(units) do
-			if intersect(u_rect(u),
-				{cx,cy,cx+128,cy+128},0) and
+			if u.onscr and
 				u.p==1 and u.typ==hoverunit.typ then
 				add(selection,u).sel=true
 			end
@@ -1243,6 +1249,9 @@ function update_sel(u)
 end
 
 function tick_unit(u)
+	u.onscr=intersect(u_rect(u),
+		{cx,cy,cx+128,cy+128},0)
+
 	local typ=u.typ[u.p]
 	if u.hp<=0 and not u.dead then
 		del(selection,u)
@@ -1257,7 +1266,6 @@ function tick_unit(u)
 			r.pl=min(r.ppl,99)
 		elseif typ.unit then
 			r.p-=1
-			modify_totalu(u.p-2)
 		end
 	end
 	if u.dead then
@@ -1317,7 +1325,7 @@ end
 
 function update_viz(u)
 	if u.p==1 and
-		u.uid%upcycle==upc then
+		u.id%upcycle==upc then
 		local k0=u.x\8|u.y\8<<8
 		for t in all(viztiles(
 		 u.x,u.y,u.typ[u.p].los)
@@ -1546,7 +1554,7 @@ end
 function fight(u)
 	local typ,e,in_range,id,d=
 		u.typ[u.p],u.st.target,
-		u.st.active,u.uid
+		u.st.active,u.id
 	local dx,dy=
 		e.x-u.x,e.y-u.y
 	if typ.range then
@@ -1756,14 +1764,6 @@ end
 
 function s(a,x,y,v)
  a[x|y<<8]=v
-end
-
-function modify_totalu(diff)
-	totalu+=diff
-	upcycle=totalu>=80 and 60 or
-		totalu>=60 and 30 or
-		totalu>=45 and 15 or
-		totalu>=35 and 10 or 5
 end
 
 --r2 can be {x,y}
@@ -1987,21 +1987,18 @@ sproff=0
 lastp=1]])
  		
  u.typ,u.x,u.y,u.p,u.hp,u.const,
-  u.discovered,u.uid=
+  u.discovered,u.id=
  	typ,
 		x,y,p,hp or typ.hp,const,
-		discovered==1,uid
+		discovered==1,flr(rnd"60")
 
 	rest(u)
-	uid+=1
 	if typ.farm then
 		u.res,u.cycles=parse[[typ=r
 qty=0]],0
 	end		
 	if typ.bldg then
 		register_bldg(u)
-	else
-		modify_totalu(2-p)
 	end
 	return u
 end
@@ -2599,12 +2596,11 @@ reqs=0]]
 	units_heal,gather_f,
 	farm_cycles,farm_renew_cost_b,
 	--global state
-	cx,cy,mx,my,fps,
-	uid,totalu,numsel,
+	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
 		{3,2-ai_diff/2},
-		unspl"5,3,0,0,0,0,59,0,0,0"
+		unspl"5,3,0,0,0,0,59,0"
 
 	init_typs()
 	
@@ -2721,7 +2717,7 @@ end
 --	cstore(0x2000,0x2000,4096)
 --end
 
-_update60=_update
+--_update60=_update
 
 function ai_unit1(u)
  if u.p==2 then
@@ -2732,7 +2728,7 @@ function ai_unit1(u)
 			 drop(u)
 			 res_alloc=split"b,g,b,g,g"
 			end
- 		if u.st.t=="gather" then			
+ 		if u.st.res then			
 		 	add(miners,u)
 		 elseif u.st.rest and
 		 	dmaps_ready then
@@ -2876,7 +2872,7 @@ end)
 
 menuitem(2,"◆ load from clip",function()
 	init()
-	local data=splspl(stat(4),"/")	
+	local lines=splspl(stat(4),"/")
 	ai_diff,bo_idx=unpack(deli(lines,1))
 	for i,t in inext,deli(lines) do
 		if t!="" then
