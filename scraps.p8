@@ -142,3 +142,45 @@ if fps==0 then
 			end
 			printh("","log")
 		end
+
+
+ai_init()
+
+		for y=0,31 do
+		memcpy(
+			0x2060+y*128,
+			0x2010+y*128,
+			32)
+	end
+	mset(121,23,8)
+	mset(122,23,9)
+	foreach(bo,function(bi)
+		local _,t,x,y=unpack(bi)
+		local typ=ant.prod[t].typ
+		local sx,sy=typ.rest_x,typ.rest_y
+		local tile=sy\8*16+sx\8
+		function set(x,y,tile)
+			if fget(mget(x,y),0) then
+				assert(false,x..","..y)
+			end
+			mset(x,y,tile)
+		end
+		set(x,y,tile)
+		if typ.w>8 then
+			set(x+1,y,tile+1)
+			if typ.h>8 then
+				set(x+1,y+1,tile+17)
+			end
+		end
+		if typ.h>8 then
+			set(x,y+1,tile+16)
+		end
+	end)
+	cstore(0x2000,0x2000,4096)
+
+
+
+		 		printh(
+	 			"b="..tostr(b).." boi="..
+	 			tostr(u.boi)
+	 		,"log")
