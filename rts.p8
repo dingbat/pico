@@ -11,7 +11,6 @@ function _draw()
 		spr(unspl"184,45,75,1,1,1")
 		spr(unspl"184,76,75,1,1")
 	 --mascots
-	 --42 tok (replace with pal())
 	 local x=64+t()\0.5%2*16
 	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
 	 sspr(x,unspl"0,16,8,25,31,32,16")
@@ -20,9 +19,8 @@ function _draw()
 	 sspr(x,unspl"0,16,8,25,30,32,16")
 	 pal(1,2)
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
-	 --
---  pal()
-		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-3\f0EEOOTY\-0\-8\|f\f6EEOOTY\|h\*k \f0V0.1\-0\|f\f6V0.1",22,50
+	 --pal()
+		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0EEOOTY\-0\-8\|f\f6EEOOTY\|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
@@ -149,7 +147,7 @@ function _update()
 		cx+=cvx
 		cy+=cvy
 		if (cx%256==0) cvx*=-1
-		if (cy%120==0) cvy*=-1
+		if (cy%127==0) cvy*=-1
  	if btnp"5" then
  		new_game()
  	else
@@ -199,8 +197,7 @@ function _update()
  	return
 	end
 	
- --turn over viz if upc=0
- if ai then
+ if ai then --if upc=0
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
@@ -257,7 +254,7 @@ function _update()
 	sel1,numsel,sel_typ=
 		selection[1],#selection
 	foreachsel(function(s)
-		--check for nil, can be false
+		--check nil, can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
@@ -268,19 +265,26 @@ function _update()
 end
 
 -->8
---unit defs/states
+--units/states
 
-function parse(unit,typ,tech)
+function unspl(...)
+	return unpack(split(...))
+end
+
+function parse(unit,typ,tech,t)
 	local p2={}
 	local obj={{},p2,p2,
-		typ=typ,tech=tech,prod={}}
+		typ=typ,
+		tech=tech,
+		techt=t or {},
+		prod={}}
 	for l in all(split(unit,"\n")) do
-		local k,v=unpack(split(l,"="))
+		local k,v=unspl(l,"=")
 		if v then
 			obj[k],obj[1][k],p2[k]=v,v,v
 		end
 	end
-	if (obj.idx) add(typs,obj)
+	add(obj.idx and typs,obj)
 	return obj
 end
 
@@ -290,7 +294,8 @@ ant=parse[[
 idx=1
 spd=0.286
 los=20
-hp=10
+hp=5
+def=ant
 
 w=4
 fw=4
@@ -331,7 +336,6 @@ portw=8
 dir=1
 unit=1
 carry=6
-def=ant
 ant=1]]
 ant1=ant[1]
 
@@ -339,8 +343,10 @@ beetle=parse[[
 idx=2
 spd=0.19
 los=20
-hp=10
+hp=30
 atk=1
+def=seige
+atk_typ=seige
 
 w=8
 fw=8
@@ -363,16 +369,16 @@ portx=26
 porty=72
 portw=9
 unit=1
-dir=1
-def=seige
-atk_typ=seige]]
+dir=1]]
 
 spider=parse[[
 idx=3
 spd=0.482
 los=30
 hp=15
-atk=1.6
+atk=1.667
+def=spider
+atk_typ=spider
 
 w=8
 fw=8
@@ -395,18 +401,18 @@ portx=16
 porty=72
 portw=9
 unit=1
-dir=1
-def=spider
-atk_typ=spider]]
+dir=1]]
 
 archer=parse[[
 idx=4
 spd=0.343
 los=30
-hp=25
+hp=5
 range=25
-atk=1
+atk=0.667
 proj_freq=30
+atk_typ=acid
+def=ant
 
 w=7
 fw=8
@@ -432,16 +438,16 @@ unit=1
 dir=1
 proj_xo=-2
 proj_yo=0
-proj_s=28
-atk_typ=acid
-def=ant]]
+proj_s=28]]
 
 warant=parse[[
 idx=5
 spd=0.321
 los=25
-hp=25
+hp=10
 atk=1
+atk_typ=ant
+def=ant
 
 w=8
 fw=8
@@ -464,9 +470,7 @@ portx=35
 porty=72
 portw=9
 unit=1
-dir=1
-atk_typ=ant
-def=ant]]
+dir=1]]
 
 cat=parse[[
 idx=6
@@ -474,8 +478,10 @@ spd=0.2
 los=50
 hp=15
 range=50
-atk=2
+atk=1.667
 proj_freq=60
+atk_typ=seige
+def=seige
 
 w=16
 fw=16
@@ -502,17 +508,17 @@ dir=1
 proj_xo=1
 proj_yo=-4
 proj_s=32
-atk_typ=seige
-def=seige
 cat=1]]
 
 queen=parse[[
 idx=7
 los=20
-hp=100
+hp=400
 atk=1.5
 range=20
 proj_freq=30
+atk_typ=acid
+def=queen
 
 w=15
 h=8
@@ -537,8 +543,6 @@ bldg=1
 proj_xo=-4
 proj_yo=2
 proj_s=28
-atk_typ=acid
-def=queen
 bitmap=0
 units=1
 queen=1]]
@@ -546,11 +550,13 @@ queen=1]]
 tower=parse[[
 idx=8
 los=30
-hp=60
+hp=250
 range=30
 const=32
-atk=1
+atk=1.2
 proj_freq=30
+atk_typ=tower
+def=building
 
 w=8
 fw=8
@@ -573,15 +579,14 @@ dir=-1
 proj_yo=-2
 proj_xo=-1
 proj_s=24
-atk_typ=tower
-def=building
 bitmap=1]]
 
 mound=parse[[
 idx=9
 los=5
-hp=25
+hp=100
 const=10
+def=building
 
 w=8
 fw=8
@@ -601,14 +606,14 @@ bldg=1
 dir=-1
 has_q=1
 drop=1
-def=building
 bitmap=2]]
 
 den=parse[[
 idx=10
 los=10
-hp=35
+hp=250
 const=25
+def=building
 
 w=8
 fw=8
@@ -627,7 +632,6 @@ portw=9
 bldg=1
 dir=-1
 has_q=1
-def=building
 bitmap=4
 units=2
 mil=1]]
@@ -635,8 +639,9 @@ mil=1]]
 barracks=parse[[
 idx=11
 los=10
-hp=30
+hp=200
 const=20
+def=building
 
 w=8
 fw=8
@@ -655,7 +660,6 @@ portw=8
 bldg=1
 dir=-1
 has_q=1
-def=building
 bitmap=8
 units=2
 mil=1]]
@@ -663,8 +667,9 @@ mil=1]]
 farm=parse[[
 idx=12
 los=0
-hp=10
+hp=50
 const=6
+def=building
 
 w=8
 fw=8
@@ -684,17 +689,18 @@ farm=1
 carry=9
 bldg=1
 dir=-1
-def=building
 bitmap=16]]
 
 castle=parse[[
 idx=13
 los=45
-hp=200
+hp=800
 range=40
 const=80
-atk=1.2
+atk=1.8
 proj_freq=15
+atk_typ=tower
+def=building
 
 w=15
 fw=16
@@ -718,8 +724,6 @@ dir=-1
 proj_yo=0
 proj_xo=0
 proj_s=24
-atk_typ=tower
-def=building
 bitmap=32
 units=1]]
 
@@ -749,7 +753,7 @@ r=0
 g=5
 b=15
 breq=0]],tower),
---breq=1|4|8=13 (twr,den,bar)
+--13=1|4|8 (t,d,b)
 	parse([[
 r=0
 g=20
@@ -775,10 +779,10 @@ idx=5
 breq=0]],parse[[
 portx=96
 porty=88
-portw=8]],function()
-		ant1.carry=9
-		ant1.spd*=1.1
-	end),
+portw=8]],function(_ENV)
+		carry=9
+		spd*=1.15
+	end,ant),
 parse([[
 t=20
 r=15
@@ -825,10 +829,10 @@ idx=5
 breq=0]],parse[[
 portx=114
 porty=64
-portw=9]],function()
-		beetle[1].atk*=1.5
-		beetle[1].hp*=1.15
-	end),
+portw=9]],function(_ENV)
+		atk*=1.5
+		hp*=1.15
+	end,beetle),
 parse([[
 t=30
 r=10
@@ -838,10 +842,10 @@ idx=6
 breq=0]],parse[[
 portx=105
 porty=64
-portw=9]],function()
-		spider[1].atk*=1.2
-		spider[1].hp*=1.2
-	end),
+portw=9]],function(_ENV)
+		atk*=1.2
+		hp*=1.2
+	end,spider),
 }
 
 mound.prod={
@@ -884,10 +888,10 @@ breq=0]],parse[[
 portx=96
 porty=64
 portw=9
-]],function()
-		archer[1].range+=5
-		archer[1].los+=5
-	end),
+]],function(_ENV)
+		range+=5
+		los+=5
+	end,archer),
 nil,
 parse([[
 t=18
@@ -898,11 +902,11 @@ idx=5
 breq=0]],parse[[
 portx=105
 porty=72
-portw=9]],function()
-		warant[1].atk*=1.5
-		warant[1].los+=5
-		warant[1].hp*=1.333
-	end),
+portw=9]],function(_ENV)
+		atk*=1.5
+		los+=5
+		hp*=1.333
+	end,warant),
 	parse([[
 t=10
 r=9
@@ -914,9 +918,9 @@ breq=0
 portx=96
 porty=72
 portw=9
-]],function()
-		archer[1].atk*=1.25
-end),
+]],function(_ENV)
+		atk*=1.25
+end,archer),
 }
 
 castle.prod={
@@ -959,34 +963,34 @@ end
 
 dmg_mult=parse[[
 ant_vs_ant=1
-ant_vs_queen=0.9
-ant_vs_spider=1
+ant_vs_queen=0.7
+ant_vs_spider=0.8
 ant_vs_seige=1.5
-ant_vs_building=1
+ant_vs_building=0.5
+
+acid_vs_ant=1
+acid_vs_queen=0.6
+acid_vs_spider=1.5
+acid_vs_seige=0.7
+acid_vs_building=0.25
 
 spider_vs_ant=1.5
 spider_vs_queen=0.9
 spider_vs_spider=1
-spider_vs_seige=1.1
-spider_vs_building=0.8
+spider_vs_seige=1
+spider_vs_building=0.1
 
-seige_vs_ant=1
-seige_vs_queen=0.8
-seige_vs_spider=1
-seige_vs_seige=0.9
-seige_vs_building=1.6
+seige_vs_ant=0.9
+seige_vs_queen=3
+seige_vs_spider=0.7
+seige_vs_seige=1
+seige_vs_building=15
 
 tower_vs_ant=1
 tower_vs_queen=0.75
-tower_vs_spider=1.1
-tower_vs_seige=0.8
-tower_vs_building=0.5
-
-acid_vs_ant=1
-acid_vs_queen=1
-acid_vs_spider=1.5
-acid_vs_seige=0.9
-acid_vs_building=0.6]]
+tower_vs_spider=1.25
+tower_vs_seige=0.9
+tower_vs_building=0.1]]
 
 function rest(u)
 	u.st=parse[[t=rest
@@ -1057,12 +1061,11 @@ end
 
 function attack(u,e)
 	if u.typ.atk and e then
-		u.st={
+		u.st,u.discovered={
 			t="attack",
 			target=e,
 			wayp=get_wayp(u,e.x,e.y),
-		}
-		u.discovered=u.typ.bldg and 1
+		},u.typ.bldg and 1
 	end
 end
 
@@ -1153,7 +1156,7 @@ function handle_click()
 			min(sely,my),
 			max(selx,mx),
 			max(sely,my),
-			7 --color
+			7 --col
  	}
  else
  	selx=nil
@@ -1221,7 +1224,7 @@ end
 
 function mouse_cam()
 	local b=btn()
-	if (b>32) b>>=8 --allow esdf
+	if (b>32) b>>=8 --esdf
 	cx,cy,amx,amy=
  	mid(0,
  		cx+band(b,0x2)-band(b,0x1)*2,
@@ -1393,12 +1396,18 @@ function draw_map(offset)
  camera(cx,cy)
 end
 
+local borderline={
+	"8,0,8,7",
+	[-1]="-1,0,-1,7",
+	[-256]="0,-1,7,-1",
+	[256]="0,8,7,8"
+}
+
 function borders(arr,i)
  if not arr[i] then
-	 if (arr[i-1]) line(unspl"-1,0,-1,7")
-	 if (arr[i-256]) line(unspl"0,-1,7,-1")
-	 if (arr[i+256]) line(unspl"0,8,7,8")
-		if (arr[i+1]) line(unspl"8,0,8,7")
+ 	for k,v in next,borderline do
+ 		if (arr[i+k]) line(unspl(v))
+ 	end
 	end
 end
 
@@ -1419,12 +1428,11 @@ function draw_minimap()
 		end
 	end
 	
-	--current view
 	camera(
 		-mmx-ceil(cx/mmwratio),
 	 -mmy-ceil(cy/mmhratio)
 	)
-	--10.5=128/mmwratio+1
+	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
 	camera()
 end
@@ -1659,7 +1667,8 @@ function produce(u)
 		u.q.t-=0.5
 		if u.q.t==0 then
 			if b.tech then
-				u.prot.prod[b.idx]=b.tech()
+				u.prot.prod[b.idx]=
+					b.tech(b.techt[1])
 			else
 				local new=unit(
 					b.typ,u.x,u.y,u.p)
@@ -1743,10 +1752,6 @@ end
 -->8
 --utils
 
-function unspl(...)
-	return unpack(split(...))
-end
-
 function splspl(str,spl)
 	local x={}
 	foreach(split(str,spl or "\n"),
@@ -1763,8 +1768,8 @@ function sel_only(unit)
 	selection,unit.sel={unit},1
 end
 	
---x=k<<8>>8 (k&0x00ff)
---y=k>>24<<16 (k\256)
+--x=k&0x00ff
+--y=k\256
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
@@ -1816,11 +1821,8 @@ function all_surr(x,y,n,chk_acc)
 	 	local xx,yy=x+dx,y+dy
 	 	if
 	 		min(xx,yy)>=0 and
-	 		xx<mapw8 and yy<maph8
-	 		and (not chk_acc or
-	 			acc(xx,yy)
-	 			--and (acc(xx,y) or acc(x,yy))
-	 		)
+	 		xx<mapw8 and yy<maph8 and
+	 		(not chk_acc or acc(xx,yy))
 	 	then
 			 add(st,{
 			  xx,yy,
@@ -2329,8 +2331,7 @@ end
 function draw_menu()
 	local x,secs=0,split"102,26"
 	if sel1 and sel1.p==1 then
-		--4 tok (and...)
-		if sel1.typ.has_q and not sel1.const then
+		if sel1.typ.has_q then
 			secs=split"17,24,61,26"
 		else
 	 	secs=split"17,17,68,26"

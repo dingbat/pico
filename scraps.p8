@@ -184,3 +184,10 @@ ai_init()
 	 			"b="..tostr(b).." boi="..
 	 			tostr(u.boi)
 	 		,"log")
+
+
+
+	 if (arr[i-1]) line(unspl"-1,0,-1,7")
+	 if (arr[i-256]) line(unspl"0,-1,7,-1")
+	 if (arr[i+256]) line(unspl"0,8,7,8")
+		if (arr[i+1]) line(unspl"8,0,8,7")
