@@ -1,5 +1,61 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
+__lua__
+a=[[[[]]
+acct={}
+times={}
+maxes={}
+fps=0
+default_fps=1
+function cpu(str,f,silent)
+	f=f or default_fps
+	if not f or fps%f==0 then
+		local s,prev=stat(1),
+	 	times[str]
+		if prev then
+			local diff=s-prev
+			times[str]=nil
+			if silent then
+				return diff
+			else
+				--printh(str..": "..diff,"log")
+				if diff>(maxes[str] or 0) then
+					maxes[str]=diff
+				end
+				if fps==0 then
+					printh(str.." *****max*****: "..maxes[str],"log")
+					maxes[str]=0
+				end
+			end
+		else
+			times[str]=s
+		end
+	end
+end
+function cpu_acc(str,f,flush)
+	f=f or default_fps
+	if not f or fps%f==0 then
+		local s,act=stat(1),
+			acct[str] or 0
+		if flush then
+			printh(str..": "..act,"log")
+			acct[str]=nil
+	 else
+	 	local t=cpu(str,f,true)
+	 	if t then
+	 		acct[str]=act+t
+	 	end
+	 end
+	end
+end
+--]]
+
+function _draw()
+	cls()
+end
+
+function _update()
+end
 __gfx__
 00000000022222000000000006666600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000022ddd2200000000066555660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -6,8 +6,12 @@ __lua__
 a=[[[[]]
 acct={}
 times={}
+maxes={}
+fps=0
+default_fps=5
 function cpu(str,f,silent)
-	if not f or fps==f then
+	f=f or default_fps
+	if not f or fps%f==0 then
 		local s,prev=stat(1),
 	 	times[str]
 		if prev then
@@ -17,6 +21,13 @@ function cpu(str,f,silent)
 				return diff
 			else
 				printh(str..": "..diff,"log")
+--				if diff>(maxes[str] or 0) then
+--					maxes[str]=diff
+--				end
+--				if fps==0 then
+--					printh(str.." *****max*****: "..maxes[str],"log")
+--					maxes[str]=0
+--				end
 			end
 		else
 			times[str]=s
@@ -24,7 +35,8 @@ function cpu(str,f,silent)
 	end
 end
 function cpu_acc(str,f,flush)
-	if not f or fps==f then
+	f=f or default_fps
+	if not f or fps%f==0 then
 		local s,act=stat(1),
 			acct[str] or 0
 		if flush then
@@ -42,6 +54,7 @@ end
 
 function _draw()
  --cls not needed!
+	cpu("_draw")
  draw_map(0) --mainmap
 	if menu then
 		camera()
@@ -59,9 +72,9 @@ function _draw()
 	 --pal()
 		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0EEOOTY\-0\-8\|f\f6EEOOTY\|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
+		cpu("_draw")
 		return
 	end
-	cpu("_draw",0)
 
  local bf,af={},{}
  for u in all(units) do
@@ -178,7 +191,7 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
-	cpu("_draw",0)
+	cpu("_draw")
 end
 
 function _update()
@@ -207,12 +220,12 @@ function _update()
 	fps%=60
 	upc=fps%upcycle
 
-	cpu("_update",0)
+	cpu("_update")
 	
 	async_dmap()
  handle_input()
  
- if fps%20==0 then
+ if fps%30==0 then
 		for tx=0,mmw do
 		for ty=0,mmh do
 	 	local x,y=tx*mmwratio\8,
@@ -226,7 +239,7 @@ function _update()
 		end
 	end
 	
- upc0,buttons,pos,hoverunit,
+ ai,buttons,pos,hoverunit,
  	idle,idle_mil=
   upc==0,{},{}
  if loser then
@@ -238,7 +251,7 @@ function _update()
  	return
 	end
 	
- if upc0 then
+ if upc==0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
@@ -267,7 +280,7 @@ function _update()
  
  foreach(units,tick_unit)
  for u in all(units) do
-		if (upc0) ai_unit2(u)	
+		if (ai) ai_unit2(u)	
  	if selx
  		and (g(viz,u.x\8,u.y\8)
  		 or u.discovered)
@@ -300,10 +313,11 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if upc0 then
+	if ai then
 	 ai_frame()
 	end
-	cpu("_update",0)
+	cpu("_update")
+	cpu_acc("ai",nil,true)
 end
 
 -->8
@@ -1378,7 +1392,7 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
-	if (upc0) ai_unit1(u)
+	if (ai) ai_unit1(u)
 
 	update_viz(u)
 
