@@ -206,7 +206,7 @@ function _update()
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
-			mset(x+mapw8,y,viz[k] and
+ 		mset(x+mapw8,y,viz[k] and
 	   0 or mget(x,y))
 		end
  end
@@ -1362,11 +1362,14 @@ function update_viz(u)
 		 u.x,u.y,u.typ.los)
 		) do
 			local k=k0+t
-			if bldgs[k] then
-				bldgs[k].discovered=1
+			if k<maph8<<8 and k>=0 and
+				k%256<mapw8 then
+				if bldgs[k] then
+					bldgs[k].discovered=1
+				end
+				--"v" to index into rescol
+				exp[k],new_viz[k]=1,"v"
 			end
-			--"v" to index into rescol
-			exp[k],new_viz[k]=1,"v"
 		end
 	end
 end
@@ -2723,7 +2726,7 @@ function ai_init()
 65,6,115,4]]
 end
 
-_update60=_update
+--_update60=_update
 
 function ai_unit1(u)
  if u.p==2 then
