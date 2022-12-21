@@ -158,6 +158,11 @@ function _update()
  	return
 	end
 	
+	--autosave
+	if time()%15<1 and fps==0 then
+		save()
+	end
+	
 	local total=res1.p+res2.p
 	upcycle=total>=110 and 60 or
 		total>=80 and 30 or
@@ -1945,7 +1950,7 @@ function register_bldg(b)
 end
 
 function deal_dmg(from,to)
-	to.hp-=from.typ[from.p].atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def]
+	to.hp-=from.typ.atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def]
 end
 
 function collect(u,res)
@@ -2718,7 +2723,7 @@ function ai_init()
 65,6,115,4]]
 end
 
---_update60=_update
+_update60=_update
 
 function ai_unit1(u)
  if u.p==2 then
@@ -2727,7 +2732,7 @@ function ai_unit1(u)
  		if u.st.res=="r" and
  			not g(dmaps.r,41,24) then
 			 drop(u)
-			 res_alloc=split"b,g,g,g,g"
+			 res_alloc=split"b,g,b,g,b,g"
 			end
 			if u.st.rest and
 				u.st.res=="b" then
@@ -2871,7 +2876,7 @@ end
 -->8
 --saving
 
-menuitem(1,"⌂ save to clip",function()
+function save()
 	if (menu) return
 	local str=ai_diff..","..bo_idx.."/"
 	for _ENV in all(units) do
@@ -2898,7 +2903,8 @@ menuitem(1,"⌂ save to clip",function()
 		 mget(i%mapw8,i/mapw8)..","
 	end
 	printh(str,"@clip")
-end)
+end
+menuitem(1,"⌂ save to clip",save)
 
 menuitem(2,"◆ load from clip",function()
 	init()
@@ -2950,10 +2956,9 @@ function trace(name,fn,...)
 			printh("","log")
 		end
 	end
-	local s,fr
+	local s,fr=stat(1)
 	
 	if run then
-		s,fr=stat(1)
 		local lc=frame.chld[#frame.chld]
 		if lc and lc.name==name then
 			fr=lc
@@ -2972,8 +2977,7 @@ function trace(name,fn,...)
 	local r=fn(...)
 	
 	if run then
-		local diff=stat(1)-s
-		fr.t=fr.t+diff
+		fr.t=fr.t+stat(1)-s
 		frame=frame.parent
 		if frame.name=="_" then
 			print_frame(frame,-1)
