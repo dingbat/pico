@@ -3,66 +3,6 @@ version 38
 __lua__
 --main loop
 
-a=[[[[]]
-acct={}
-times={}
-maxes={}
-fps=0
-default_fps=30
-nest=0
-function cpu(str,f,silent)
-	f=f or default_fps
-	if not f or fps%f==0 then
-		local s,prev=stat(1),
-	 	times[str]
-		if prev then
-			local diff=s-prev
-			times[str]=nil
-			if silent then
-				return diff
-			else
-				for i=1,nest-1 do
-					printh(" \0","log")
-				end
-				nest=nest-1
-				printh(str..": "..diff,"log")
---				if diff>(maxes[str] or 0) then
---					maxes[str]=diff
---				end
---				if fps==0 then
---					printh(str.." *****max*****: "..maxes[str],"log")
---					maxes[str]=0
---				end
-			end
-		else
-			if not silent then
-				nest=nest+1
-			end
-			times[str]=s
-		end
-	end
-end
-function cpu_acc(str,f,flush)
-	f=f or default_fps
-	if not f or fps%f==0 then
-		local s,act=stat(1),
-			acct[str] or 0
-		if flush then
-			for i=1,nest do
-				printh(" \0","log")
-			end
-			printh(str..": "..act,"log")
-			acct[str]=nil
-	 else
-	 	local t=cpu(str,f,true)
-	 	if t then
-	 		acct[str]=act+t
-	 	end
-	 end
-	end
-end
---]]
-
 function _draw()
  --cls not needed!
  draw_map(0) --mainmap
@@ -322,7 +262,6 @@ function _update()
 	if ai then
 	 ai_frame()
 	end
-	cpu_acc("ai",nil,true)
 end
 
 -->8
@@ -2782,7 +2721,6 @@ end
 --_update60=_update
 
 function ai_unit1(u)
-cpu_acc"ai"
  if u.p==2 then
  	if u.typ.ant then
  		antcount+=1
@@ -2851,7 +2789,6 @@ function ai_prod(u)
 end
 
 function ai_unit2(u)
-cpu_acc"ai"
 	if u.p==2 then
 		if u.typ.bldg and
 			(u.hp<u.typ.hp*0.75 or 
@@ -2890,7 +2827,6 @@ cpu_acc"ai"
 		inv|=b
 		movegrp(defsqd[b],u.x,u.y,1)
 	end
-cpu_acc"ai"
 end
 
 function ai_bld(boi)
@@ -2916,7 +2852,6 @@ function ai_bld(boi)
 end
 
 function ai_frame()
-cpu_acc"ai"
 	if inv==0 then
 	 foreach(rebuild,ai_bld)
 	end	
@@ -2932,7 +2867,6 @@ cpu_acc"ai"
 		unspl"48,40,1,1")
 	inv,miners,antcount,uhold=
 		0,{},0
-	cpu_acc"ai"
 end
 -->8
 --saving
@@ -2996,6 +2930,79 @@ end)
 
 menuitem(3,"   (paste first)")
 menuitem(4,"∧ resign",function() loser=1 end)
+-->8
+a=[[[[]]
+freq=0.5
+last_t=0
+targ_t=0
+frame={name="_",chld={}}
+function trace_fn(name)
+	local orig=_ENV[name]
+	_ENV[name]=function(...)
+		return trace(name,orig,...)
+	end
+end
+
+function trace(name,fn,...)
+ if t()~=last_t then
+		run=t()>targ_t
+		if run then
+			printh("","log")
+		end
+	end
+	local s,fr
+	
+	if run then
+		s,fr=stat(1)
+		local lc=frame.chld[#frame.chld]
+		if lc and lc.name==name then
+			fr=lc
+		else
+			fr=add(frame.chld,{
+				name=name,
+				parent=frame,
+				chld={},
+				t=0
+			})
+		end
+		frame=fr
+		targ_t,last_t=t()+freq,t()
+	end
+	
+	local r=fn(...)
+	
+	if run then
+		local diff=stat(1)-s
+		fr.t=fr.t+diff
+		frame=frame.parent
+		if frame.name=="_" then
+			print_frame(frame,-1)
+			frame.chld={}
+		end
+	end
+	
+	return r
+end
+
+function print_frame(f,n)
+	if f.t then
+		for i=1,n do
+			printh("  \0","log")
+		end
+		printh(f.name..": "..f.t,"log")
+	end
+	for c in all(f.chld) do
+		print_frame(c,n+1)
+	end
+end
+
+trace_fn("_draw")
+trace_fn("_update")
+trace_fn("ai_unit1")
+trace_fn("ai_unit2")
+trace_fn("ai_frame")
+--]]
+
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000

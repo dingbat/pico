@@ -1,61 +1,96 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
-a=[[[[]]
-acct={}
-times={}
-maxes={}
-fps=0
-default_fps=1
-function cpu(str,f,silent)
-	f=f or default_fps
-	if not f or fps%f==0 then
-		local s,prev=stat(1),
-	 	times[str]
-		if prev then
-			local diff=s-prev
-			times[str]=nil
-			if silent then
-				return diff
-			else
-				--printh(str..": "..diff,"log")
-				if diff>(maxes[str] or 0) then
-					maxes[str]=diff
-				end
-				if fps==0 then
-					printh(str.." *****max*****: "..maxes[str],"log")
-					maxes[str]=0
-				end
-			end
-		else
-			times[str]=s
-		end
-	end
-end
-function cpu_acc(str,f,flush)
-	f=f or default_fps
-	if not f or fps%f==0 then
-		local s,act=stat(1),
-			acct[str] or 0
-		if flush then
-			printh(str..": "..act,"log")
-			acct[str]=nil
-	 else
-	 	local t=cpu(str,f,true)
-	 	if t then
-	 		acct[str]=act+t
-	 	end
-	 end
-	end
-end
---]]
-
 function _draw()
-	cls()
+	for i=0,100 do
+		cls(12)
+	end
 end
 
 function _update()
+	trace("sqrt!",function()
+		for i=0,50 do
+			sqrt(i)
+		end
+		trace("nested",function()
+			for i=0,50 do
+				sqrt(i)
+			end
+		end)
+	end)
 end
+-->8
+a=[[[[]]
+freq=1
+last_t=0
+targ_t=0
+frame={name="_",chld={}}
+function trace_fn(name)
+	local orig=_ENV[name]
+	_ENV[name]=function(...)
+		return trace(name,orig,...)
+	end
+end
+
+function trace(name,fn,...)
+ if t()~=last_t then
+		run=t()>targ_t
+		if run then
+			printh("","log")
+		end
+	end
+	local s,fr
+	
+	if run then
+		s,fr=stat(1)
+		local lc=frame.chld[#frame.chld]
+		if lc and lc.name==name then
+			fr=lc
+		else
+			fr=add(frame.chld,{
+				name=name,
+				parent=frame,
+				chld={},
+				t=0
+			})
+		end
+		frame=fr
+		targ_t,last_t=t()+freq,t()
+	end
+	
+	local r=fn(...)
+	
+	if run then
+		local diff=stat(1)-s
+		fr.t=fr.t+diff
+		frame=frame.parent
+		if frame.name=="_" then
+			print_frame(frame,-1)
+			frame.chld={}
+		end
+	end
+	
+	return r
+end
+
+function print_frame(f,n)
+	if f.t then
+		for i=1,n do
+			printh(" \0","log")
+		end
+		printh(f.name..": "..f.t,"log")
+	end
+	for c in all(f.chld) do
+		print_frame(c,n+1)
+	end
+end
+
+trace_fn("_draw")
+trace_fn("_update")
+trace_fn("cls")
+trace_fn("sqrt")
+--]]
+
 __gfx__
 00000000022222000000000006666600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000022ddd2200000000066555660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
