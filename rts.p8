@@ -8,7 +8,8 @@ acct={}
 times={}
 maxes={}
 fps=0
-default_fps=5
+default_fps=30
+nest=0
 function cpu(str,f,silent)
 	f=f or default_fps
 	if not f or fps%f==0 then
@@ -20,6 +21,10 @@ function cpu(str,f,silent)
 			if silent then
 				return diff
 			else
+				for i=1,nest-1 do
+					printh(" \0","log")
+				end
+				nest=nest-1
 				printh(str..": "..diff,"log")
 --				if diff>(maxes[str] or 0) then
 --					maxes[str]=diff
@@ -30,6 +35,9 @@ function cpu(str,f,silent)
 --				end
 			end
 		else
+			if not silent then
+				nest=nest+1
+			end
 			times[str]=s
 		end
 	end
@@ -40,6 +48,9 @@ function cpu_acc(str,f,flush)
 		local s,act=stat(1),
 			acct[str] or 0
 		if flush then
+			for i=1,nest do
+				printh(" \0","log")
+			end
 			printh(str..": "..act,"log")
 			acct[str]=nil
 	 else
@@ -54,7 +65,6 @@ end
 
 function _draw()
  --cls not needed!
-	cpu("_draw")
  draw_map(0) --mainmap
 	if menu then
 		camera()
@@ -72,7 +82,6 @@ function _draw()
 	 --pal()
 		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0EEOOTY\-0\-8\|f\f6EEOOTY\|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
-		cpu("_draw")
 		return
 	end
 
@@ -191,7 +200,6 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
-	cpu("_draw")
 end
 
 function _update()
@@ -219,8 +227,6 @@ function _update()
 	fps+=1
 	fps%=60
 	upc=fps%upcycle
-
-	cpu("_update")
 	
 	async_dmap()
  handle_input()
@@ -316,7 +322,6 @@ function _update()
 	if ai then
 	 ai_frame()
 	end
-	cpu("_update")
 	cpu_acc("ai",nil,true)
 end
 
@@ -2777,6 +2782,7 @@ end
 --_update60=_update
 
 function ai_unit1(u)
+cpu_acc"ai"
  if u.p==2 then
  	if u.typ.ant then
  		antcount+=1
@@ -2845,6 +2851,7 @@ function ai_prod(u)
 end
 
 function ai_unit2(u)
+cpu_acc"ai"
 	if u.p==2 then
 		if u.typ.bldg and
 			(u.hp<u.typ.hp*0.75 or 
@@ -2883,6 +2890,7 @@ function ai_unit2(u)
 		inv|=b
 		movegrp(defsqd[b],u.x,u.y,1)
 	end
+cpu_acc"ai"
 end
 
 function ai_bld(boi)
@@ -2908,6 +2916,7 @@ function ai_bld(boi)
 end
 
 function ai_frame()
+cpu_acc"ai"
 	if inv==0 then
 	 foreach(rebuild,ai_bld)
 	end	
@@ -2922,7 +2931,8 @@ function ai_frame()
 	movegrp(atksqd,
 		unspl"48,40,1,1")
 	inv,miners,antcount,uhold=
-		0,{},0	
+		0,{},0
+	cpu_acc"ai"
 end
 -->8
 --saving
