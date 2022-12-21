@@ -2,22 +2,20 @@ pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
 function _draw()
-	for i=0,100 do
-		cls(12)
-	end
 end
 
 function _update()
-	trace("sqrt!",function()
-		for i=0,50 do
-			sqrt(i)
+	trace("bitshift",function()
+		for i=0,20000 do
+			x=i>>24<<16
 		end
-		trace("nested",function()
-			for i=0,50 do
-				sqrt(i)
-			end
-		end)
 	end)
+	trace("div",function()
+		for i=0,20000 do
+			x=i\256
+		end
+	end)
+
 end
 -->8
 a=[[[[]]

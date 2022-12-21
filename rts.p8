@@ -66,13 +66,14 @@ function _draw()
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(mapw8) --fogmap
 
-	_pal,pal=pal,max
+	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
 	pal=_pal
 	pal()
 	
 	fillp"23130.5"--▒
 	
+--	trace("borders", function()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+16 do
  	local i=x|y<<8
@@ -84,6 +85,7 @@ function _draw()
 	 borders(viz,i)
 	end
 	end
+--	end)
 	
 	camera(cx,cy)
 
@@ -159,9 +161,9 @@ function _update()
 	end
 	
 	--autosave
-	if time()%15<1 and fps==0 then
-		save()
-	end
+--	if time()%15<1 and fps==0 then
+--		save()
+--	end
 	
 	local total=res1.p+res2.p
 	upcycle=total>=110 and 60 or
@@ -190,9 +192,9 @@ function _update()
 		end
 	end
 	
- ai,buttons,pos,hoverunit,
+ ai,pos,hoverunit,
  	idle,idle_mil=
-  upc==0,{},{}
+  upc==0,{}
  if loser then
  	poke"24365" --no mouse
  	if rdy and btnp"5" then
@@ -1777,7 +1779,7 @@ function sel_only(unit)
 end
 	
 --x=k&0x00ff
---y=k\256
+--y=k\256 or k>>24<<16
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
@@ -2733,18 +2735,21 @@ function ai_unit1(u)
  	if u.typ.ant then
  		antcount+=1
  		if u.st.res=="r" and
- 			not g(dmaps.r,41,24) then
+ 			--41,24
+ 			not dmaps.r[6185] then
 			 drop(u)
 			 res_alloc=split"b,g,b,g,b,g"
 			end
 			if u.st.rest and
 				u.st.res=="b" then
-			 if u.y>168 and 
-			 	not g(dmaps.b,42,27) then
+			 if u.y>168 and
+			 	--42,7
+			 	not dmaps.b[6954] then
 				 move(u,352,64)
 				end
 				if u.x>288 and
-					not g(dmaps.b,46,8) then
+					--46,8
+					not dmaps.b[2094] then
 					move(u,280,64)
 				end
 			end
@@ -2954,32 +2959,36 @@ end
 
 function trace(name,fn,...)
  if t()~=last_t then
-		run=t()>targ_t
-		if run then
+  last_t=t()
+		run_tr=t()>targ_t and (
+			fps==59 or fps==29)
+		if run_tr then
 			printh("","log")
+			targ_t=t()+freq
 		end
 	end
 	local s,fr=stat(1)
 	
-	if run then
+	if run_tr then
 		local lc=frame.chld[#frame.chld]
 		if lc and lc.name==name then
 			fr=lc
+			fr.n=fr.n+1
 		else
 			fr=add(frame.chld,{
 				name=name,
 				parent=frame,
 				chld={},
-				t=0
+				t=0,
+				n=1
 			})
 		end
 		frame=fr
-		targ_t,last_t=t()+freq,t()
 	end
 	
 	local r=fn(...)
 	
-	if run then
+	if run_tr then
 		fr.t=fr.t+stat(1)-s
 		frame=frame.parent
 		if frame.name=="_" then
@@ -2996,7 +3005,11 @@ function print_frame(f,n)
 		for i=1,n do
 			printh("  \0","log")
 		end
-		printh(f.name..": "..f.t,"log")
+		local name=f.name
+		if f.n>1 then
+			name=name.." ("..f.n..")"
+		end
+		printh(name..": "..f.t,"log")
 	end
 	for c in all(f.chld) do
 		print_frame(c,n+1)
@@ -3004,10 +3017,18 @@ function print_frame(f,n)
 end
 
 trace_fn("_draw")
+trace_fn("draw_map")
+trace_fn("draw_unit")
+trace_fn("draw_menu")
+
 trace_fn("_update")
 trace_fn("ai_unit1")
 trace_fn("ai_unit2")
 trace_fn("ai_frame")
+
+--trace_fn("mine_nxt_res")
+--trace_fn("move")
+--trace_fn("drop")
 --]]
 
 __gfx__
