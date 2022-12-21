@@ -186,7 +186,7 @@ ai_init()
 	 		,"log")
 
 
-
+--gives 0.2 cpu
 	 if (arr[i-1]) line(unspl"-1,0,-1,7")
 	 if (arr[i-256]) line(unspl"0,-1,7,-1")
 	 if (arr[i+256]) line(unspl"0,8,7,8")

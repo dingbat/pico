@@ -3,6 +3,43 @@ version 38
 __lua__
 --main loop
 
+a=[[[[]]
+acct={}
+times={}
+function cpu(str,f,silent)
+	if not f or fps==f then
+		local s,prev=stat(1),
+	 	times[str]
+		if prev then
+			local diff=s-prev
+			times[str]=nil
+			if silent then
+				return diff
+			else
+				printh(str..": "..diff,"log")
+			end
+		else
+			times[str]=s
+		end
+	end
+end
+function cpu_acc(str,f,flush)
+	if not f or fps==f then
+		local s,act=stat(1),
+			acct[str] or 0
+		if flush then
+			printh(str..": "..act,"log")
+			acct[str]=nil
+	 else
+	 	local t=cpu(str,f,true)
+	 	if t then
+	 		acct[str]=act+t
+	 	end
+	 end
+	end
+end
+--]]
+
 function _draw()
  --cls not needed!
  draw_map(0) --mainmap
@@ -24,6 +61,7 @@ function _draw()
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
+	cpu("_draw",0)
 
  local bf,af={},{}
  for u in all(units) do
@@ -65,7 +103,7 @@ function _draw()
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	draw_map(mapw8) --fogmap
-	
+
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
 	pal=_pal
@@ -140,6 +178,7 @@ function _draw()
 	end
 	
 	spr(cursor_spr(),amx,amy)
+	cpu("_draw",0)
 end
 
 function _update()
@@ -164,11 +203,13 @@ function _update()
 		total>=65 and 15 or
 		total>=45 and 10 or 5
 
-	async_dmap()
 	fps+=1
 	fps%=60
 	upc=fps%upcycle
+
+	cpu("_update",0)
 	
+	async_dmap()
  handle_input()
  
  if fps%20==0 then
@@ -185,7 +226,7 @@ function _update()
 		end
 	end
 	
- ai,buttons,pos,hoverunit,
+ upc0,buttons,pos,hoverunit,
  	idle,idle_mil=
   upc==0,{},{}
  if loser then
@@ -197,7 +238,7 @@ function _update()
  	return
 	end
 	
- if ai then --if upc=0
+ if upc0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
@@ -226,7 +267,7 @@ function _update()
  
  foreach(units,tick_unit)
  for u in all(units) do
-		if (ai) ai_unit2(u)	
+		if (upc0) ai_unit2(u)	
  	if selx
  		and (g(viz,u.x\8,u.y\8)
  		 or u.discovered)
@@ -259,9 +300,10 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if ai then
+	if upc0 then
 	 ai_frame()
 	end
+	cpu("_update",0)
 end
 
 -->8
@@ -1336,7 +1378,7 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
-	if (ai) ai_unit1(u)
+	if (upc0) ai_unit1(u)
 
 	update_viz(u)
 
@@ -2536,17 +2578,18 @@ end
 -->8
 --init
 
-mapw,maph,mmx,mmy,mmw,
+ai_diff,
+	mapw,maph,mmx,mmy,mmw,
 	mmh, --maph\(mapw/mmw)
 	mapw8, --mapw/8
 	maph8, --maph/8
 	mmhratio, --maph/mmh
 	mmwratio= --mapw/mmw
-	unspl"384,256,105,107,19,12,48,32,21.333,20.21"
+unspl"0,384,256,105,107,19,12,48,32,21.333,20.21"
 	
-ai_diff,reskeys,f2res,resqty,
+reskeys,f2res,resqty,
  key2resf,rescol
- =0,
+ =
 split"r,g,b,p,pl,ppl,reqs",parse[[
 7=r
 11=g
