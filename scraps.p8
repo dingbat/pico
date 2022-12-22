@@ -46,6 +46,7 @@ todo:
 --[[
 the following will not be saved:
 - unit states
+- ai rebuild
 - resource count in resource tiles
 - units in production, along w/
   the used resources+pop count

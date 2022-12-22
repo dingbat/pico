@@ -5,12 +5,12 @@ __lua__
 
 function _draw()
  --cls not needed!
- draw_map(0) --mainmap
+ draw_map(0,17) --mainmap
 	if menu then
 		camera()
 		spr(unspl"184,45,75,1,1,1")
 		spr(unspl"184,76,75,1,1")
-	 --mascots
+
 	 local x=64+t()\0.5%2*16
 	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
 	 sspr(x,unspl"0,16,8,25,31,32,16")
@@ -19,7 +19,7 @@ function _draw()
 	 sspr(x,unspl"0,16,8,25,30,32,16")
 	 pal(1,2)
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
-	 --pal()
+
 		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0EEOOTY\-0\-8\|f\f6EEOOTY\|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(mapw8) --fogmap
+	draw_map(mapw8,15) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -73,7 +73,6 @@ function _draw()
 	
 	fillp"23130.5"--▒
 	
---	trace("borders", function()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
  	local i=x|y<<8
@@ -85,7 +84,6 @@ function _draw()
 		 if (arr[i+256]) line(unspl"0,8,7,8")
 			if (arr[i+1]) line(unspl"8,0,8,7")
 		end
-
   if not exp[i] then
 	 	brd(exp)
 		elseif not viz[i] then
@@ -94,7 +92,6 @@ function _draw()
 		end
 	end
 	end
---	end)
 	
 	camera(cx,cy)
 
@@ -1416,9 +1413,9 @@ end
 -->8
 --map
 
-function draw_map(offset)
+function draw_map(offset,y)
  camera(cx%8,cy%8)
- map(cx/8+offset,cy/8,unspl"0,0,17,17")
+ map(cx/8+offset,cy/8,0,0,17,y)
  camera(cx,cy)
 end
 
