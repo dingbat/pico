@@ -57,7 +57,7 @@ function _draw()
 	 	({48,t()\0.2%3*16})[loser],
 	 	unspl"0,16,8,14,98,32,16")
 	 pal()		
-		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f2easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f2normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f2hard ai"[ai_diff+1],22,93
+		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f2easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f2normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f2hard ai"[res2.diff+1],22,93
 	 ?split"\^w\^t\fa\|gdefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\fa\|gvictory!\-0\-0\-0\-0\|f\f1victory!"[loser],53,102
 	 ?"\f4\#9\|k\-0\-4\*j \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
 	 return
@@ -1719,7 +1719,7 @@ function check_target(u)
 		end
 		if st.t=="drop" then
 			if u.res then
-				res[u.p][u.res.typ]+=u.res.qty/gather_f[u.p]
+				res[u.p][u.res.typ]+=u.res.qty/(2-res[u.p].diff/2)
 			end
 			u.res=nil
 			if st.farm then
@@ -2551,7 +2551,7 @@ unspl"0,384,256,105,107,19,12,48,32,21.333,20.21"
 reskeys,f2res,resqty,
  key2resf,rescol
  =
-split"r,g,b,p,pl,reqs,tot",parse[[
+split"r,g,b,p,pl,reqs,tot,bo_idx,diff",parse[[
 7=r
 11=g
 19=b
@@ -2602,17 +2602,18 @@ b=20
 p=4
 pl=10
 tot=4
-reqs=0]]
+bo_idx=1
+reqs=0
+diff=-2]]
 
 	res1,res2,
 	--tech can change
-	units_heal,gather_f,
+	units_heal,
 	farm_cycles,farm_renew_cost_b,
 	--global state
 	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
-		{3,2-ai_diff/2},
 		split"5,12",
 		unspl"6,0,0,0,0,59,0"
 
@@ -2656,14 +2657,15 @@ function ai_init()
 	res_alloc,
 		defsqd,offsqd,atksqd,
 		miners,rebuild,
-		bo_idx,nxt_res,
+		res2.diff,
+		nxt_res,
 		antcount,inv,
 		ant[2].carry,
 		uhold=
 		split"r,b,g,r,b",
 		parse"",parse"",{},
-		{},{},
-		unspl"1,1,0,0,9"
+		{},{},ai_diff,
+		unspl"1,0,0,9"
 	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
@@ -2849,7 +2851,7 @@ function ai_bld(boi)
 					y*8+b.typ.h/2,
 					2,nil,nil,0,boi)
 				if not del(rebuild,boi) then
-					bo_idx+=1
+					res2.bo_idx+=1
 				end
 			else
 				uhold=b
@@ -2862,7 +2864,7 @@ function ai_frame()
 	if inv==0 then
 	 foreach(rebuild,ai_bld)
 	end	
-	ai_bld(bo_idx)
+	ai_bld(res2.bo_idx)
 	for i,sqd in next,offsqd do
 		if #sqd>=10 and inv&i==0 then
 			while #sqd>0 do
@@ -2880,7 +2882,7 @@ end
 
 function save()
 	if (menu) return
-	local str=ai_diff..","..bo_idx.."/"
+	local str=""
 	for _ENV in all(units) do
 		str=str..
 		 typ.idx..","..
@@ -2911,7 +2913,6 @@ menuitem(1,"⌂ save to clip",save)
 menuitem(2,"◆ load from clip",function()
 	init()
 	local data=splspl(stat(4),"/")
-	ai_diff,bo_idx=unpack(deli(data,1))
 	for i,t in inext,deli(data) do
 		if t!="" then
 			mset(i%mapw8,i/mapw8,t)
