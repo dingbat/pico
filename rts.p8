@@ -51,7 +51,7 @@ function _draw()
 	foreach(bf,draw_unit)
 	for _ENV in all(proj) do
 		sspr(
-			from_unit.typ.proj_s+proj_so,
+			from_typ.proj_s+proj_so,
 			112,2,2,x,y
 		)
 	end
@@ -230,7 +230,7 @@ function _update()
 	 		{p.x,p.y,p.x,p.y},0
 	 	) then
 		 	deal_dmg(
-		 	 p.from_unit,
+		 	 p.from_typ,
 		 		p.to_unit)
 			end
 		end
@@ -1585,7 +1585,7 @@ function fight(u)
 			 id%typ.proj_freq)
 		then
  		add(proj,{
- 			from_unit=u,
+ 			from_typ=typ,
  			x=u.x-u.dir*typ.proj_xo,
  			y=u.y+typ.proj_yo,
  			to={e.x,e.y},
@@ -1596,7 +1596,7 @@ function fight(u)
  	in_range=intersect(u.r,
  	 e.r,0)
 		if in_range and fps%30==id%30 then
-		 deal_dmg(u,e)
+		 deal_dmg(typ,e)
 		end
  end
  u.st.active=in_range
@@ -1934,8 +1934,8 @@ function register_bldg(b)
 	end
 end
 
-function deal_dmg(from,to)
-	to.hp-=from.typ.atk*dmg_mult[from.typ.atk_typ.."_vs_"..to.typ.def]
+function deal_dmg(from_typ,to)
+	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
 end
 
 function collect(u,res)
