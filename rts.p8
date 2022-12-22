@@ -1365,12 +1365,14 @@ function tick_unit(u)
 	update_viz(u)
 
 	if typ.unit and not u.st.wayp then
-		while g(pos,u.x\4,u.y\4) do
-			u.x+=rnd(2)-1
-			u.y+=rnd(2)-1
-			u_rect(u)
+		local x,y,change=u.x,u.y
+		while g(pos,x\4,y\4) do
+			x+=rnd(1)-0.5
+			y+=rnd(1)-0.5
+			change=1
 		end
-		s(pos,u.x\4,u.y\4,1)
+		if (change) move(u,x,y)
+		s(pos,x\4,y\4,1)
 	end
 end
 
