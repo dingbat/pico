@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(mapw8) --fogmap
+--	draw_map(mapw8) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -2167,10 +2167,10 @@ end
 
 function pay(costs,dir,p)
 	for r in all(split"r,g,b") do
-  res[p or 1][r]+=costs[r]*dir
+  res[p][r]+=costs[r]*dir
 	end
 	if costs.p then
-		res[p or 1].p-=dir
+		res[p].p-=dir
 	end
 end
 
@@ -2275,7 +2275,7 @@ portf=9
 	 	]],20,
 	 	--menuy+3
 	 	107,nil,function()
-	 		pay(sel1.cost,1)
+	 		pay(sel1.cost,1,1)
 	 		sel1.hp=0
 	 	end,sel1.const/sel_typ.const
 	 )
@@ -2306,7 +2306,7 @@ portf=9
 					to_build=b
 					return
 				end
-				pay(b,-1)
+				pay(b,-1,1)
 				if q then
 					q.qty+=1
 				else
@@ -2328,7 +2328,7 @@ portf=9
 		 --menuy+3
 		 107,nil,
 			function()
-				pay(q.b,1)
+				pay(q.b,1,1)
 				if q.qty==1 then
 					sel1.q=nil
 				else
@@ -2620,9 +2620,8 @@ reqs=0]]
 	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
-		{3,3},
-		--{3,2-ai_diff/2},
-		{5,12},
+		{3,2-ai_diff/2},
+		split"5,12",
 		unspl"6,0,0,0,0,59,0"
 
 	init_typs()
@@ -2676,7 +2675,7 @@ function ai_init()
 	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
-	bo=splspl[[6,1,123,27
+	bo=splspl[[5,1,123,27
 8,1,117,26
 8,3,120,18,2
 11,1,123,21
@@ -2781,20 +2780,22 @@ function ai_unit1(u)
 end
 
 function nohold(p)
-	return not uhold or
-		(p.r==0 or res2.r-p.r>=uhold.r) and
-		(p.g==0 or res2.g-p.g>=uhold.g) and
-		(p.b==0 or res2.b-p.b>=uhold.b)
+ for k in all(split"r,g,b") do
+		if uhold and p[k]!=0 and
+			res2[k]-p[k]<uhold[k] then
+			return
+		end
+	end
+	return true
 end
 
 function ai_prod(u)
 	local p=u.prot.prod[u.lastp]
-	if nohold(p) and
-		not u.q and can_pay(p,2) then
+	if not u.q and nohold(p) and
+		can_pay(p,2) then
 		pay(p,-1,2)
 		u.q={
-			b=p,qty=1,t=p.t,
-			fps15=0,
+			b=p,qty=1,t=p.t,fps15=fps,
 		}
 		u.lastp%=u.typ.units
 		u.lastp+=1
@@ -2878,7 +2879,7 @@ function ai_frame()
 		end
 	end
 	movegrp(atksqd,
-		unspl"48,40,1,1")
+	 unspl"48,40,1,1")
 	inv,miners,antcount,uhold=
 		0,{},0
 end

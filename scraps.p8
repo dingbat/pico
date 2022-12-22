@@ -205,3 +205,26 @@ function borders(arr,i,col)
  		if (arr[i+k]) line(unspl(v))
  	end
 end
+
+
+function nohold(p)
+	function x(k)
+		return p[k]==0 or
+			res2[k]-p[k]>=uhold[k] and
+	end
+	return not uhold or
+		x"r" and x"g" and x"b"
+
+	for k in all(split"r,g,b") do
+		if uhold and p[k]!=0 and
+			res2[k]-p[k]<uhold[k] then
+			return
+		end
+	end
+	return true
+
+	return not uhold or
+	 (p.r==0 or res2.r-p.r>=uhold.r) and
+	 (p.g==0 or res2.g-p.g>=uhold.g) and
+	 (p.b==0 or res2.b-p.b>=uhold.b)
+end
