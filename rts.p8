@@ -73,7 +73,7 @@ function _draw()
 	
 	fillp"23130.5"--▒
 	
---	trace("borders", function()
+	trace("borders", function()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+16 do
  	local i=x|y<<8
@@ -85,7 +85,7 @@ function _draw()
 	 borders(viz,i)
 	end
 	end
---	end)
+	end)
 	
 	camera(cx,cy)
 
@@ -1465,7 +1465,7 @@ function draw_unit(u)
 
 	local fw,w,h,
 	 stt,
-	 hpp=
+	 hp=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
 		 u.hp/typ.hp
@@ -1500,11 +1500,11 @@ function draw_unit(u)
   --bldgs shldnt rotate
 		not typ.fire and u.dir==typ.dir)
 	pal()
-	if not u.dead and hpp<=0.5 then			
+	if not u.dead and hp<=0.5 then			
 	 if typ.fire then
 			spr(229+f/20,u.x-3,u.y-8)
 		end
-		bar(xx,yy-1,w,hpp)
+		bar(xx,yy-1,w,hp)
 	end
 end
 
@@ -3020,6 +3020,7 @@ trace_fn("_draw")
 trace_fn("draw_map")
 trace_fn("draw_unit")
 trace_fn("draw_menu")
+trace_fn("cursor_spr")
 
 trace_fn("_update")
 trace_fn("ai_unit1")
