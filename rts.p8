@@ -1497,11 +1497,15 @@ end
 function update_unit(u)
 	local st=u.st
 	local t=st.t
- if (u.q) produce(u)
+ if u.q and fps%15==u.q.fps15 then
+ 	produce(u)
+ end
  if (u.typ.farm) update_farm(u)
  if st.active then
  	if (t=="harvest") farmer(u)
- 	if (t=="build") buildrepair(u)
+ 	if t=="build" and fps%30==0 then
+ 	 buildrepair(u)
+ 	end
   if (t=="gather") mine(u)
  else
  	check_target(u)
@@ -1611,26 +1615,24 @@ end
 
 function buildrepair(u)
 	local b,r=u.st.target,res[u.p]
-	if fps%30==0 then
-		if b.const then
- 		b.const+=1
- 		if b.const>=b.typ.const then
- 			b.const=nil
- 			register_bldg(b)
- 			if b.typ.drop then
- 				r.pl+=5
- 			elseif b.typ.farm then
- 				harvest(u,b)
- 			end
- 		end
- 	elseif b.hp<b.typ.hp and
- 		r.b>=1 then
- 		b.hp+=1
- 		r.b-=0.5
- 	else
- 		rest(u)
- 	end
- end
+	if b.const then
+		b.const+=1
+		if b.const>=b.typ.const then
+			b.const=nil
+			register_bldg(b)
+			if b.typ.drop then
+				r.pl+=5
+			elseif b.typ.farm then
+				harvest(u,b)
+			end
+		end
+	elseif b.hp<b.typ.hp and
+		r.b>=1 then
+		b.hp+=1
+		r.b-=0.5
+	else
+		rest(u)
+	end
 end
 
 function mine(u)
@@ -1656,33 +1658,31 @@ function mine(u)
 end
 
 function produce(u)
-	if fps%15==u.q.fps15 then
-		local b=u.q.b
-		u.q.t-=0.5
-		if u.q.t==0 then
-			if b.tech then
-				u.prot.prod[b.idx]=
-					b.tech(b.techt[1])
+	local b=u.q.b
+	u.q.t-=0.5
+	if u.q.t<=0 then
+		if b.tech then
+			u.prot.prod[b.idx]=
+				b.tech(b.techt[1])
+		else
+			local new=unit(
+				b.typ,u.x,u.y,u.p)
+			new.boi=u.boi
+			if new.typ.ant and
+				u.rtx and
+				fget(mget(u.rtx,u.rty),1)
+			then
+				gather(new,u.rtx,u.rty)
 			else
-				local new=unit(
-					b.typ,u.x,u.y,u.p)
-				new.boi=u.boi
-				if new.typ.ant and
-					u.rtx and
-					fget(mget(u.rtx,u.rty),1)
-				then
-					gather(new,u.rtx,u.rty)
-				else
-					move(new,u.rx or u.x+5,
-						u.ry or u.y+5)
-				end
+				move(new,u.rx or u.x+5,
+					u.ry or u.y+5)
 			end
-			if u.q.qty>1 then
-				u.q.qty-=1
-				u.q.t=b.t
-			else
-				u.q=nil
-			end
+		end
+		if u.q.qty>1 then
+			u.q.qty-=1
+			u.q.t=b.t
+		else
+			u.q=nil
 		end
 	end
 end
@@ -1781,7 +1781,8 @@ end
 
 function tile_as_unit(tx,ty)
 	return u_rect{
-		x=tx*8+4,y=ty*8+4,
+		x=tx*8+4,
+		y=ty*8+4,
 		typ=parse[[w=8
 h=8]],
 	}
@@ -1927,7 +1928,7 @@ function register_bldg(b)
 	if (h>8) reg(x,y-1)
 	
 	if (typ.queen) queens[b.p]=b
-	if not b.const and typ!=farm then
+	if not b.const and not typ.farm then
 		make_dmaps"d"
 		res[b.p].reqs|=typ.bitmap
 	end
