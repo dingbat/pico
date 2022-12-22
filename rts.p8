@@ -64,7 +64,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(mapw8) --fogmap
+	draw_map(mapw8) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -228,8 +228,8 @@ function _update()
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
 	  if intersect(
-	  	del(proj,p).to_unit.rect,
-	 		{p.x,p.y},0
+	  	del(proj,p).to_unit.r,
+	 		{p.x,p.y,p.x,p.y},0
 	 	) then
 		 	deal_dmg(
 		 	 p.from_unit,
@@ -1266,7 +1266,7 @@ function handle_input()
 	
  --buttons added in _draw()
  for b in all(buttons) do
- 	if intersect(b.r,{amx,amy},1) then
+ 	if intersect(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
  	end
 	end
@@ -1280,7 +1280,7 @@ function handle_input()
 end
 
 function update_sel(u)
-	u.sel=intersect(u.rect,selbox,0)
+	u.sel=intersect(u.r,selbox,0)
  if u.sel then
 		if u.p!=1 then
 			enemy_sel={u}
@@ -1294,7 +1294,7 @@ function update_sel(u)
 end
 
 function tick_unit(u)
-	u.onscr=intersect(u.rect,
+	u.onscr=intersect(u.r,
 		{cx,cy,cx+128,cy+128},0)
 
 	local typ=u.typ
@@ -1332,8 +1332,8 @@ function tick_unit(u)
 		u.hp+=0.5
 	end
 	
-	if intersect(u.rect,
-	 {mx,my},1) and (
+	if intersect(u.r,
+	 {mx,my,mx,my},1) and (
 	 not hoverunit or hoverunit.p==1
 	) then
 		hoverunit=u
@@ -1602,8 +1602,8 @@ function fight(u)
  		})
  	end
  else
- 	in_range=intersect(u.rect,
- 	 e.rect,0)
+ 	in_range=intersect(u.r,
+ 	 e.r,0)
 		if in_range and fps%30==id%30 then
 		 deal_dmg(u,e)
 		end
@@ -1706,7 +1706,7 @@ function check_target(u)
 	local t,nxt=st.target,st.nxt
 	if
 		t and
-		intersect(t.rect,u.rect,
+		intersect(t.r,u.r,
 			st.res and -3 or 0)
 	then
 		u.dir,st.active,st.fps=
@@ -1747,9 +1747,8 @@ function step(u)
 	if wayp then
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		u.st.spd or u.typ.spd)
- 	u_rect(u)
  	local x,y=unpack(wayp[1])
- 	if dist(x-u.x,y-u.y)<2 then
+ 	if dist(x-u_rect(u).x,y-u.y)<2 then
  		if #wayp==1 then
  			u.st.wayp=nil
 			else
@@ -1787,35 +1786,28 @@ function s(a,x,y,v)
  a[x|y<<8]=v
 end
 
---r2 can be {x,y}
 function intersect(r1,r2,e)
-	local a,b,c,d=unpack(r2)
-	return r1[1]-e<(c or a) and
-		r1[3]+e>a and
-		r1[2]-e<(d or b) and
-		r1[4]+e>b
+	return r1[1]-e<r2[3] and
+		r1[3]+e>r2[1] and
+		r1[2]-e<r2[4] and
+		r1[4]+e>r2[2]
 end
 
 function tile_as_unit(tx,ty)
-	local u={
+	return u_rect{
 		x=tx*8+4,y=ty*8+4,
 		typ=parse[[w=8
 h=8]],
 	}
-	u_rect(u)
-	return u
 end
 
-function u_rect(u)
-	local w2,h2,e=u.typ.w/2,
-		u.typ.h/2
- u.rect={
- 	u.x-w2,u.y-h2,
- 	u.x+w2,u.y+h2
- }
+function u_rect(_ENV)
+	local w2,h2,e=typ.w/2,typ.h/2
+ r={x-w2,y-h2,x+w2,y+h2}
+ return _ENV
 end
 
--- musurca/freds - /bbs/?tid=36059
+-- musurca/freds /bbs/?tid=36059
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,
@@ -1885,7 +1877,7 @@ function can_build()
 end
 
 function rectaround(u,c)
-	local w,x,y,z=unpack(u.rect)
+	local w,x,y,z=unpack(u.r)
 	rect(w-1,x-1,y,z,c)
 end
 
@@ -2014,8 +2006,7 @@ lastp=1]])
 		tonum(const),
 		discovered==1,
 		flr(rnd"60"),tonum(boi),typ
-	u_rect(u)
-	rest(u)
+	rest(u_rect(u))
 	if typ.farm then
 		u.res,u.cycles=parse[[typ=r
 qty=0]],0
@@ -3029,11 +3020,11 @@ end
 --trace_fn("ai_frame")
 --trace_fn("tick_unit")
 --trace_fn"update_unit"
---trace_fn"update_viz"
+--trace_fn"s"
 
 --trace_fn("mine_nxt_res")
 --trace_fn("move")
---trace_fn("drop")
+--trace_fn"dist"
 --]]
 
 __gfx__

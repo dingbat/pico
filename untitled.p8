@@ -4,15 +4,29 @@ __lua__
 function _draw()
 end
 
+function dist_trig(dx,dy)
+	local ang=atan2(dx,dy)
+	return dx*cos(ang)+dy*sin(ang)
+end
+
+function dist_bit(dx,dy)
+ local maskx,masky=dx>>31,dy>>31
+ local a0,b0=(dx+maskx)^^maskx,
+ 	(dy+masky)^^masky
+ return a0>b0 and
+ 	a0*0.9609+b0*0.3984 or
+  b0*0.9609+a0*0.3984
+end
+
 function _update()
-	trace("bitshift",function()
-		for i=0,20000 do
-			x=i>>24<<16
+	trace("bit",function()
+		for i=0,2000 do
+			dist_bit(13,29)
 		end
 	end)
-	trace("div",function()
-		for i=0,20000 do
-			x=i\256
+	trace("trig",function()
+		for i=0,2000 do
+			dist_trig(13,29)
 		end
 	end)
 
