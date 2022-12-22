@@ -175,10 +175,9 @@ function _update()
 --	end
 	
 	local total=res1.p+res2.p
-	upcycle=total>=110 and 60 or
-		total>=80 and 30 or
-		total>=65 and 15 or
-		total>=45 and 10 or 5
+	upcycle=total>=100 and 30 or
+		total>=75 and 15 or
+		total>=40 and 10 or 5
 
 	fps+=1
 	fps%=60
@@ -187,7 +186,8 @@ function _update()
 	async_dmap()
  handle_input()
  
- if fps%30==0 then
+-- trace("sset",function()
+ if fps%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
 	 	local x,y=tx*mmwratio\8,
@@ -200,8 +200,9 @@ function _update()
 		end
 		end
 	end
+--	end)
 	
- ai,pos,hoverunit,
+ upc_0,pos,hoverunit,
  	idle,idle_mil=
   upc==0,{}
  if loser then
@@ -213,7 +214,8 @@ function _update()
  	return
 	end
 	
- if upc==0 then
+--	trace("turn viz",function()
+ if upc_0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
  		local x,y=k&0x00ff,k\256
@@ -221,7 +223,7 @@ function _update()
 	   0 or mget(x,y))
 		end
  end
-
+--	end)
  for p in all(proj) do
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
@@ -242,7 +244,7 @@ function _update()
  
  foreach(units,tick_unit)
  for u in all(units) do
-		if (ai) ai_unit2(u)	
+		if (upc_0) ai_unit2(u)	
  	if selx
  		and (g(viz,u.x\8,u.y\8)
  		 or u.discovered)
@@ -275,7 +277,7 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if ai then
+	if upc_0 then
 	 ai_frame()
 	end
 end
@@ -710,7 +712,7 @@ bitmap=16]]
 castle=parse[[
 idx=13
 los=45
-hp=800
+hp=600
 range=40
 const=80
 atk=1.8
@@ -772,8 +774,8 @@ breq=0]],tower),
 --13=1|4|8 (t,d,b)
 	parse([[
 r=0
-g=20
-b=40
+g=25
+b=60
 breq=13]],castle),
 }
 
@@ -867,15 +869,16 @@ portw=9]],function(_ENV)
 mound.prod={
 	parse([[
 t=8
-r=8
-g=0
+r=12
+g=8
 b=8
 idx=1
 breq=0]],parse[[
 portx=104
 porty=88
 portw=9]],function()
-		farm_cycles=10
+		--also makes farms grow +25% 
+		farm_cycles[1]=10
 	end),
 }
 
@@ -1337,8 +1340,13 @@ function tick_unit(u)
 	end
 	
 	if (u.const) return
-	if u.st.target and u.st.target.dead then
-		rest(u)
+	local targ=u.st.target
+	if targ and targ.dead then
+		if u.st.t=="attack" then
+			move(u,targ.x,targ.y,true)
+		else
+			rest(u)
+		end
 	end
 	
 	if u.p==1 then
@@ -1352,7 +1360,7 @@ function tick_unit(u)
 	end
 	
 	update_unit(u)
-	if (ai) ai_unit1(u)
+	if (upc_0) ai_unit1(u)
 
 	update_viz(u)
 
@@ -1369,10 +1377,28 @@ end
 function update_viz(u)
 	if u.p==1 and
 		u.id%upcycle==upc then
-		local k0=u.x\8|u.y\8<<8
-		for t in all(viztiles(
-		 u.x,u.y,u.typ.los)
-		) do
+		local k0,los=u.x\8|u.y\8<<8,
+			u.typ.los
+
+		local xo,yo,l=
+			u.x%8\2,u.y%8\2,
+			ceil(los/8)
+		local i=xo|yo*16|los*256
+		local v=vcache[i]
+		if not v then
+			v={}
+			for dx=-l,l do
+			for dy=-l,l do
+			 if dist(xo*2-dx*8-4,
+			  yo*2-dy*8-4)<los then
+					add(v,dx+dy*256)
+				end
+			end
+			end
+			vcache[i]=v
+		end
+		
+		for t in all(v) do
 			local k=k0+t
 			if k<maph8<<8 and k>=0 and
 				k%256<mapw8 then
@@ -1384,28 +1410,6 @@ function update_viz(u)
 			end
 		end
 	end
-end
-
-function viztiles(x,y,los)
-	local xo,yo,l=x%8\2,y%8\2,
-		ceil(los/8)
-	if not vcache[los] then
-		vcache[los]={}
-	end
-	local v=g(vcache[los],xo,yo)
-	if not v then
-		v={}
-		s(vcache[los],xo,yo,v)
-		for dx=-l,l do
-		for dy=-l,l do
-		 if dist(xo*2-dx*8-4,
-		  yo*2-dy*8-4)<los then
-				add(v,dx+dy*256)
-			end
-		end
-		end
-	end
-	return v
 end
 -->8
 --map
@@ -1529,9 +1533,9 @@ function update_farm(u)
 	end
 	if f.st.active and not u.exp and
 		not u.ready and fps==59 then
-		u.res.qty+=0.5
+		u.res.qty+=0.375+farm_cycles[u.p]/40
 		u.sproff+=1
-		u.ready=u.res.qty==9
+		u.ready=u.res.qty>=9
 	end
 end
 
@@ -1541,11 +1545,11 @@ function farmer(u)
 		f.res.qty-=1
 		f.sproff+=1
 		collect(u,"r")
-		if f.res.qty==0 then
+		if f.res.qty<=0 then
 			drop(u)
 			f.cycles+=1
 			f.exp,f.ready=f.p==1 and
-			 f.cycles==farm_cycles
+			 f.cycles==farm_cycles[1]
 			f.sproff=f.exp and 32 or 0
 		end
 		u.st.farm=f
@@ -1577,8 +1581,7 @@ function fight(u)
 	local typ,e,in_range,id,d=
 		u.typ,u.st.target,
 		u.st.active,u.id
-	local dx,dy=
-		e.x-u.x,e.y-u.y
+	local dx,dy=e.x-u.x,e.y-u.y
 	if typ.range then
 		if upc==id%upcycle then
 			d=dist(dx,dy)
@@ -2281,7 +2284,7 @@ portf=9
 	
 	if sel1.cycles then
 		--menuy+6
-		? sel1.cycles.."/"..farm_cycles,unspl"38,111,4"
+		? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4"
 		--menuy+4
 		sspr(unspl"112,96,9,9,51,109")
 	end
@@ -2619,7 +2622,8 @@ reqs=0]]
 		res[1],res[2],{false,true},
 		{3,3},
 		--{3,2-ai_diff/2},
-		unspl"5,3,0,0,0,0,59,0"
+		{5,12},
+		unspl"6,0,0,0,0,59,0"
 
 	init_typs()
 	
@@ -2761,7 +2765,7 @@ function ai_unit1(u)
 		 end
 	 elseif u.typ.atk and
 	 	u.typ.unit then
-	 	if u.dead==0 then
+	 	if u.dead then
 	 		del(u.sqd,u)
 	 	elseif not u.sqd then
 	 		local b=bo[u.boi or 3][5]
@@ -3013,17 +3017,18 @@ function print_frame(f,n)
 	end
 end
 
-trace_fn("_draw")
+--trace_fn("_draw")
 --trace_fn("draw_map")
 --trace_fn("draw_unit")
 --trace_fn("draw_menu")
 
-trace_fn("_update")
+--trace_fn("_update")
 --trace_fn("ai_unit1")
 --trace_fn("ai_unit2")
-trace_fn("ai_frame")
+--trace_fn("ai_frame")
 --trace_fn("tick_unit")
---trace_fn"intersect"
+--trace_fn"update_unit"
+--trace_fn"update_viz"
 
 --trace_fn("mine_nxt_res")
 --trace_fn("move")
