@@ -25,7 +25,8 @@ function _draw()
 		return
 	end
 
- local bf,af={},{}
+ local bf,af,proj_so={},{},
+ 	fps\5%2*2
  for u in all(units) do
  	if u.onscr or loser then
 			if
@@ -48,7 +49,12 @@ function _draw()
 	end
 	
 	foreach(bf,draw_unit)
-	foreach(proj,draw_projectile)
+	for _ENV in all(proj) do
+		sspr(
+			from_unit.typ.proj_s+proj_so,
+			112,2,2,x,y
+		)
+	end
 	if loser then
 		camera()
 		rectfill(unspl"0,96,128,115,9")
@@ -101,7 +107,6 @@ function _draw()
 	
 	fillp()
 	
-	--rally
 	if sel1 and sel1.rx then
 		spr(71+fps\5%3,
 			sel1.rx-2,sel1.ry-5)
@@ -183,7 +188,6 @@ function _update()
 	async_dmap()
  handle_input()
  
--- trace("sset",function()
  if fps%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -197,7 +201,6 @@ function _update()
 		end
 		end
 	end
---	end)
 	
  upc_0,pos,hoverunit,
  	idle,idle_mil=
@@ -211,7 +214,6 @@ function _update()
  	return
 	end
 	
---	trace("turn viz",function()
  if upc_0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
@@ -220,7 +222,6 @@ function _update()
 	   0 or mget(x,y))
 		end
  end
---	end)
  for p in all(proj) do
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
@@ -246,7 +247,17 @@ function _update()
  		and (g(viz,u.x\8,u.y\8)
  		 or u.discovered)
  	then
- 	 update_sel(u)
+ 	 u.sel=intersect(u.r,selbox,0)
+		 if u.sel then
+				if u.p!=1 then
+					enemy_sel={u}
+				elseif u.typ.unit then
+					my_sel=my_sel or {}
+					add(my_sel,u)
+				else
+					bldg_sel={u}
+				end
+			end
 		end
  	if not (u.const or u.dead) then
 		 if upc==u.id%upcycle and
@@ -286,14 +297,14 @@ function unspl(...)
 	return unpack(split(...))
 end
 
-function parse(unit,typ,tech,t)
+function parse(str,typ,tech,t)
 	local p2={}
 	local obj={{},p2,p2,
 		typ=typ,
 		tech=tech,
 		techt=t or {},
 		prod={}}
-	for l in all(split(unit,"\n")) do
+	for l in all(split(str,"\n")) do
 		local k,v=unspl(l,"=")
 		if v then
 			obj[k],obj[1][k],p2[k]=v,v,v
@@ -1252,11 +1263,10 @@ function mouse_cam()
 	 	--menuh=21
  		maph-(loser and 128 or 107)
  	),
- 	mid(0,stat(32),126),
-	 mid(-1,stat(33),126)
+ 	mid(0,stat"32",126),
+	 mid(-1,stat"33",126)
 
- mx,my,hovbtn=
- 	amx+cx,amy+cy
+ mx,my,hovbtn=amx+cx,amy+cy
 end
 
 function handle_input()
@@ -1274,20 +1284,6 @@ function handle_input()
  if to_build then
 	 to_build.x,to_build.y=
 	 	mx\8*8,my\8*8
-	end
-end
-
-function update_sel(u)
-	u.sel=intersect(u.r,selbox,0)
- if u.sel then
-		if u.p!=1 then
-			enemy_sel={u}
-		elseif u.typ.unit then
-			my_sel=my_sel or {}
-			add(my_sel,u)
-		else
-			bldg_sel={u}
-		end
 	end
 end
 
@@ -1443,14 +1439,6 @@ function draw_minimap()
 	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
 	camera()
-end
-
-function draw_projectile(p)
-	sspr(
-		p.from_unit.typ.proj_s+
-			fps\5%2*2,
-		112,2,2,p.x,p.y
-	)
 end
 -->8
 --units
