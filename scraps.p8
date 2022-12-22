@@ -191,3 +191,17 @@ ai_init()
 	 if (arr[i-256]) line(unspl"0,-1,7,-1")
 	 if (arr[i+256]) line(unspl"0,8,7,8")
 		if (arr[i+1]) line(unspl"8,0,8,7")
+
+local borderline={
+	"8,0,8,7",
+	[-1]="-1,0,-1,7",
+	[-256]="0,-1,7,-1",
+	[256]="0,8,7,8"
+}
+
+function borders(arr,i,col)
+ 	for k,v in next,borderline do
+ 		color(col)
+ 		if (arr[i+k]) line(unspl(v))
+ 	end
+end

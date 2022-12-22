@@ -75,14 +75,23 @@ function _draw()
 	
 	trace("borders", function()
 	for x=cx\8,cx\8+16 do
-	for y=cy\8,cy\8+16 do
+	for y=cy\8,cy\8+13 do
  	local i=x|y<<8
-		camera(x*-8+cx,y*-8+cy)
-	 color(not fget(mget(x,y),7)
-	 	and exp[i] and 5)
-		
-		borders(exp,i)
-	 borders(viz,i)
+ 	local brd=function(arr,col)
+			color(col)
+			camera(x*-8+cx,y*-8+cy)		
+			if (arr[i-1]) line(unspl"-1,0,-1,7")
+		 if (arr[i-256]) line(unspl"0,-1,7,-1")
+		 if (arr[i+256]) line(unspl"0,8,7,8")
+			if (arr[i+1]) line(unspl"8,0,8,7")
+		end
+
+  if not exp[i] then
+	 	brd(exp)
+		elseif not viz[i] then
+	 	brd(viz,
+		 	not fget(mget(x,y),7) and 5)
+		end
 	end
 	end
 	end)
@@ -1404,21 +1413,6 @@ function draw_map(offset)
  camera(cx%8,cy%8)
  map(cx/8+offset,cy/8,unspl"0,0,17,17")
  camera(cx,cy)
-end
-
-local borderline={
-	"8,0,8,7",
-	[-1]="-1,0,-1,7",
-	[-256]="0,-1,7,-1",
-	[256]="0,8,7,8"
-}
-
-function borders(arr,i)
- if not arr[i] then
- 	for k,v in next,borderline do
- 		if (arr[i+k]) line(unspl(v))
- 	end
-	end
 end
 
 function draw_minimap()
