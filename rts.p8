@@ -1161,7 +1161,8 @@ function handle_click()
 				1,nil,1,0)
 			b.cost=to_build
 			foreachsel(build,b)
-			to_build,selx=pay(to_build,-1)
+			to_build,selx=
+			 pay(to_build,-1,1)
 		end
 		return
  end
@@ -1307,8 +1308,7 @@ function tick_unit(u)
 		end
 		local r=res[u.p]
 		if typ.drop then
-			r.ppl-=5
-			r.pl=min(r.ppl,99)
+			r.pl-=5
 		elseif typ.unit then
 			r.p-=1
 		end
@@ -1633,8 +1633,7 @@ function buildrepair(u)
  			b.const=nil
  			register_bldg(b)
  			if b.typ.drop then
- 				r.ppl+=5
- 				r.pl=min(r.ppl,99)
+ 				r.pl+=5
  			elseif b.typ.farm then
  				harvest(u,b)
  			end
@@ -2129,9 +2128,9 @@ function print_res(r,x,y,zero)
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
-			flr(r[k]) or zero and
+			min(flr(r[k]),99) or zero and
 			"\-b \-i"..res1.p..
-				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..res1.pl or
+				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if zero and i==3 then
 			newx,v=-2,v.."\-g \-c\^t\|f\f5\^-#|"
@@ -2154,7 +2153,7 @@ function can_pay(costs,p)
  return r.r>=costs.r and
  	r.g>=costs.g and
  	r.b>=costs.b and
- 	(not costs.p or r.p<r.pl) and
+ 	(not costs.p or r.p<min(r.pl,99)) and
  	r.reqs|costs.breq==r.reqs
 end
 
@@ -2552,7 +2551,7 @@ unspl"0,384,256,105,107,19,12,48,32,21.333,20.21"
 reskeys,f2res,resqty,
  key2resf,rescol
  =
-split"r,g,b,p,pl,ppl,reqs",parse[[
+split"r,g,b,p,pl,reqs,tot",parse[[
 7=r
 11=g
 19=b
@@ -2602,7 +2601,7 @@ g=10
 b=20
 p=4
 pl=10
-ppl=10
+tot=4
 reqs=0]]
 
 	res1,res2,
@@ -2659,12 +2658,12 @@ function ai_init()
 		miners,rebuild,
 		bo_idx,nxt_res,
 		antcount,inv,
-		ant[2].carry,tot,
+		ant[2].carry,
 		uhold=
 		split"r,b,g,r,b",
 		parse"",parse"",{},
 		{},{},
-		unspl"1,1,0,0,9,4"
+		unspl"1,1,0,0,9"
 	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
@@ -2792,7 +2791,7 @@ function ai_prod(u)
 		}
 		u.lastp%=u.typ.units
 		u.lastp+=1
-		tot+=1
+		res2.tot+=1
 	end
 end
 
@@ -2842,7 +2841,7 @@ function ai_bld(boi)
 	if bld then
 		local p,pid,x,y=unpack(bld)
 		local b=ant.prod[pid]
-		if tot>=p then
+		if res2.tot>=p then
 			if can_pay(b,2) then
 				pay(b,-1,2)
 				unit(b.typ,
