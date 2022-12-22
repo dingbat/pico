@@ -73,7 +73,7 @@ function _draw()
 	
 	fillp"23130.5"--▒
 	
-	trace("borders", function()
+--	trace("borders", function()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
  	local i=x|y<<8
@@ -94,7 +94,7 @@ function _draw()
 		end
 	end
 	end
-	end)
+--	end)
 	
 	camera(cx,cy)
 
@@ -226,7 +226,7 @@ function _update()
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
 	  if intersect(
-	  	u_rect(del(proj,p).to_unit),
+	  	del(proj,p).to_unit.rect,
 	 		{p.x,p.y},0
 	 	) then
 		 	deal_dmg(
@@ -1110,17 +1110,17 @@ function handle_click()
 		r,action=5
 	end
 	
-	if btnp(l) and hoverunit and
-  selt and t()-selt<0.2 then
-		selection,selx={}
-		for u in all(units) do
-			if u.onscr and
-				u.typ==hoverunit.typ then
-				add(selection,u).sel=true
-			end
-		end
-		return
-	end
+--	if btnp(l) and hoverunit and
+--  selt and t()-selt<0.2 then
+--		selection,selx={}
+--		for u in all(units) do
+--			if u.onscr and
+--				u.typ==hoverunit.typ then
+--				add(selection,u).sel=true
+--			end
+--		end
+--		return
+--	end
 
 	--menuy
 	if amy>104 and not selx then
@@ -1277,7 +1277,7 @@ function handle_input()
 end
 
 function update_sel(u)
-	u.sel=intersect(u_rect(u),selbox,0)
+	u.sel=intersect(u.rect,selbox,0)
  if u.sel then
 		if u.p!=1 then
 			enemy_sel={u}
@@ -1291,7 +1291,7 @@ function update_sel(u)
 end
 
 function tick_unit(u)
-	u.onscr=intersect(u_rect(u),
+	u.onscr=intersect(u.rect,
 		{cx,cy,cx+128,cy+128},0)
 
 	local typ=u.typ
@@ -1329,7 +1329,7 @@ function tick_unit(u)
 		u.hp+=0.5
 	end
 	
-	if intersect(u_rect(u),
+	if intersect(u.rect,
 	 {mx,my},1) and (
 	 not hoverunit or hoverunit.p==1
 	) then
@@ -1360,6 +1360,7 @@ function tick_unit(u)
 		while g(pos,u.x\4,u.y\4) do
 			u.x+=rnd(2)-1
 			u.y+=rnd(2)-1
+			u_rect(u)
 		end
 		s(pos,u.x\4,u.y\4,1)
 	end
@@ -1598,8 +1599,8 @@ function fight(u)
  		})
  	end
  else
- 	in_range=intersect(u_rect(u),
- 	 u_rect(e),0)
+ 	in_range=intersect(u.rect,
+ 	 e.rect,0)
 		if in_range and fps%30==id%30 then
 		 deal_dmg(u,e)
 		end
@@ -1702,7 +1703,7 @@ function check_target(u)
 	local t,nxt=st.target,st.nxt
 	if
 		t and
-		intersect(u_rect(t),u_rect(u),
+		intersect(t.rect,u.rect,
 			st.res and -3 or 0)
 	then
 		u.dir,st.active,st.fps=
@@ -1743,6 +1744,7 @@ function step(u)
 	if wayp then
  	u.x,u.y,u.dir=norm(wayp[1],u,
  		u.st.spd or u.typ.spd)
+ 	u_rect(u)
  	local x,y=unpack(wayp[1])
  	if dist(x-u.x,y-u.y)<2 then
  		if #wayp==1 then
@@ -1792,19 +1794,21 @@ function intersect(r1,r2,e)
 end
 
 function tile_as_unit(tx,ty)
-	return {
+	local u={
 		x=tx*8+4,y=ty*8+4,
 		typ=parse[[w=8
 h=8]],
 	}
+	u_rect(u)
+	return u
 end
 
-function u_rect(_ENV,e)
-	local w2,h2,e=typ.w/2,
-		typ.h/2,e or 0
- return {
- 	x-w2-e,y-h2-e,
- 	x+w2,y+h2
+function u_rect(u)
+	local w2,h2,e=u.typ.w/2,
+		u.typ.h/2
+ u.rect={
+ 	u.x-w2,u.y-h2,
+ 	u.x+w2,u.y+h2
  }
 end
 
@@ -1878,8 +1882,8 @@ function can_build()
 end
 
 function rectaround(u,c)
-	color(c)
-	rect(unpack(u_rect(u,1)))
+	local w,x,y,z=unpack(u.rect)
+	rect(w-1,x-1,y,z,c)
 end
 
 function norm(it,nt,f)
@@ -2007,7 +2011,7 @@ lastp=1]])
 		tonum(const),
 		discovered==1,
 		flr(rnd"60"),tonum(boi),typ
-
+	u_rect(u)
 	rest(u)
 	if typ.farm then
 		u.res,u.cycles=parse[[typ=r
@@ -2659,13 +2663,12 @@ function ai_init()
 		miners,rebuild,
 		bo_idx,nxt_res,
 		antcount,inv,
-		ant[2].carry,
-		tower[2].range,tot,
+		ant[2].carry,tot,
 		uhold=
 		split"r,b,g,r,b",
 		parse"",parse"",{},
 		{},{},
-		unspl"1,1,0,0,9,40,4"
+		unspl"1,1,0,0,9,4"
 	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
@@ -2845,7 +2848,7 @@ function ai_bld(boi)
 			if can_pay(b,2) then
 				pay(b,-1,2)
 				unit(b.typ,
-					(x-80)*8+b.typ.w/2,
+					x*8+b.typ.w/2-640,
 					y*8+b.typ.h/2,
 					2,nil,nil,0,boi)
 				if not del(rebuild,boi) then
@@ -3011,15 +3014,16 @@ function print_frame(f,n)
 end
 
 trace_fn("_draw")
-trace_fn("draw_map")
-trace_fn("draw_unit")
-trace_fn("draw_menu")
-trace_fn("cursor_spr")
+--trace_fn("draw_map")
+--trace_fn("draw_unit")
+--trace_fn("draw_menu")
 
 trace_fn("_update")
-trace_fn("ai_unit1")
-trace_fn("ai_unit2")
+--trace_fn("ai_unit1")
+--trace_fn("ai_unit2")
 trace_fn("ai_frame")
+--trace_fn("tick_unit")
+--trace_fn"intersect"
 
 --trace_fn("mine_nxt_res")
 --trace_fn("move")
