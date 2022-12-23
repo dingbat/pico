@@ -1142,13 +1142,11 @@ function handle_click()
 	 return
 	end
 	
- if btnp(r) and to_build then
- 	to_build=nil
- 	return
- end
-
- if last_l and not btn"5" and to_build then
-  if buildable() then
+ if to_build then
+ 	if btnp(r) then
+	 	to_build=nil
+	 elseif last_l and not btn"5"
+	 	and buildable() then
   	local b=unit(
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
@@ -1159,11 +1157,8 @@ function handle_click()
 			to_build,selx=
 			 pay(to_build,-1,1)
 		end
+		last_l=btn"5"
 		return
- end
- last_l=btn"5"
- if last_l and to_build then
- 	return
  end
 
  if btnp(l) and not selx then
