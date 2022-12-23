@@ -60,10 +60,9 @@ function _draw()
 		rectfill(unspl"0,96,128,115,9")
 		pal(2,0)
 	 sspr(64+
-	 	({48,t()\0.2%3*16})[loser],
+	 	pack(48,fps\5%3*16)[loser],
 	 	unspl"0,16,8,14,98,32,16")
-	 pal()		
-		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f2easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f2normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f2hard ai"[res2.diff+1],22,93
+		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f3easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f5normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f0hard ai"[res2.diff+1],22,93
 	 ?split"\^w\^t\fa\|gdefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\fa\|gvictory!\-0\-0\-0\-0\|f\f1victory!"[loser],53,102
 	 ?"\f4\#9\|k\-0\-4\*j \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
 	 return
