@@ -2904,10 +2904,10 @@ menuitem(2,"◆ load from clip",function()
 	for l in all(data) do
 		unit(unpack(l))
 	end
-	for i=1,res2.bo_idx-1 do
-		add(not g(bldgs,
-			bo[i][3]-80,bo[i][4]) and
-			rebuild,i)
+	for i,b in inext,bo do
+		add(i<res2.bo_idx and
+		 g(bldgs,b[3]-80,b[4],rebuild)
+		 ,i)
 	end
 	make_dmaps"d"
 end)
