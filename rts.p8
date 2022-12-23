@@ -20,7 +20,7 @@ function _draw()
 	 pal(1,2)
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 
-		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0\*6 \-0\-8\|f\f6\*6 \|h\*k \-h\f0V0.2\-0\|f\f6V0.2",22,50
+		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0\*6 \-0\-8\|f\f6\*6 \|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
@@ -1147,7 +1147,7 @@ function handle_click()
  	return
  end
 
- if btnp(l) and to_build then
+ if last_l and not btn"5" and to_build then
   if buildable() then
   	local b=unit(
 				to_build.typ,
@@ -1160,6 +1160,10 @@ function handle_click()
 			 pay(to_build,-1,1)
 		end
 		return
+ end
+ last_l=btn"5"
+ if last_l and to_build then
+ 	return
  end
 
  if btnp(l) and not selx then
@@ -1259,7 +1263,7 @@ end
 function handle_input()
 	mouse_cam()
 	
- --buttons added in _draw()
+ --btns from _draw()
  for b in all(buttons) do
  	if intersect(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
@@ -1473,7 +1477,6 @@ function draw_unit(u)
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p)
 	sspr(sx,sy,w,h,xx,yy,w,h,
-  --bldgs shldnt rotate
 		not typ.fire and u.dir==typ.dir)
 	pal()
 	if not u.dead and hp<=0.5 then			
