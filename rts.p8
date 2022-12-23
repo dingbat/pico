@@ -1472,7 +1472,7 @@ function draw_unit(u)
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
-	pal(2,u.p) --queen eyes
+	pal(2,u.p) --qn ☉
 	pal(1,not loser and u.sel and (
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p)
