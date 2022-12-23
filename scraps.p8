@@ -228,3 +228,5 @@ function nohold(p)
 	 (p.g==0 or res2.g-p.g>=uhold.g) and
 	 (p.b==0 or res2.b-p.b>=uhold.b)
 end
+
+\*6 
