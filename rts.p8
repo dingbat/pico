@@ -2097,7 +2097,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
-	local res1=res2
+--	local res1=res2
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2389,7 +2389,7 @@ portf=13
 		end
 	})
 	
-	local res1=res2
+--	local res1=res2
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
 	line(unspl"-4,120,-128,120,5")
