@@ -2,6 +2,9 @@
 <title>PICO-8 Cartridge</title>
 <meta name="viewport" content="width=device-width, user-scalable=no">
 <script type="text/javascript">
+window.onbeforeunload = function() {
+  return "are you sure you want to quit?";
+};
 
 	// Default shell for PICO-8 0.2.2 (includes @weeble's gamepad mod 1.0)
 	// This file is available under a CC0 license https://creativecommons.org/share-your-work/public-domain/cc0/

@@ -1262,7 +1262,6 @@ end
 function handle_input()
 	mouse_cam()
 	
- --btns from _draw()
  for b in all(buttons) do
  	if intersect(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
@@ -1755,7 +1754,7 @@ function sel_only(unit)
 end
 	
 --x=k&0x00ff
---y=k\256 or k>>24<<16
+--y=k\256
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
