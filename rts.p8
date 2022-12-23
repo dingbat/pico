@@ -1112,7 +1112,8 @@ end
 --update
 
 function handle_click()
-	local l,r,cont,tx,ty=5,4,not action
+	local l,r,cont,tx,ty,axn,htile=
+		5,4,not action,mx\8,my\8
 	
 	if lclk and hovbtn then
 		hovbtn.handle()
@@ -1120,7 +1121,7 @@ function handle_click()
 	end
 
 	if lclk and action then
-		rclk,action=lclk
+		rclk,axn,action=lclk,true
 	end
 
 	--menuy
@@ -1131,7 +1132,7 @@ function handle_click()
 			local x,y=
 				mmwratio*dx,mmhratio*dy
 			if rclk and sel1 then
-				foreachsel(move,x,y,r==5)
+				foreachsel(move,x,y,axn)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
 			elseif lclk then
@@ -1162,10 +1163,9 @@ function handle_click()
 		return
  end
 	
- if rclk and sel1 and
- 	sel1.p==1 then
-	 tx,ty,cont=mx\8,my\8
-	 local htile={
+ if rclk and sel1 and sel1.p==1
+ then
+	 htile={
 	 	t=t(),
 	 	unit=tile_as_unit(tx,ty)
 	 }
@@ -1198,7 +1198,7 @@ function handle_click()
   	hilite_hoverunit()
   	
   elseif sel1.typ.unit then
-  	movegrp(selection,mx,my,r==5)
+  	movegrp(selection,mx,my,axn)
   	hilite={t=t(),cx=mx,cy=my}
   	
   elseif sel1.typ.units then
@@ -1215,15 +1215,14 @@ function handle_click()
  
  if cont then
 	 if btnp"5" and not selx then
-	 	selx,sely,selt=mx,my,t()
+	 	selx,sely=mx,my
 	 end
 	 if btn"5" and selx then
 			selbox={
 				min(selx,mx),
 				min(sely,my),
 				max(selx,mx),
-				max(sely,my),
-				7 --col
+				max(sely,my),7 --col
 	 	}
 	 else
 	 	selx=nil
@@ -1753,9 +1752,7 @@ function sel_only(unit)
 	end)
 	selection,unit.sel={unit},1
 end
-	
---x=k&0x00ff
---y=k\256
+
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
