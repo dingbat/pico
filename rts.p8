@@ -70,7 +70,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(mapw8,15) --fogmap
+	draw_map(mapw8,15) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -2866,17 +2866,17 @@ function save()
 			tostr(const)..","..
 			tostr(boi).."/"
 	end
+	for i=1,mapw8*maph8-1 do
+		str=str..
+		 mget(i%mapw8,i/mapw8)..","
+	end
+	str=str.."/"
 	for k in next,exp do
 		str=str..k..","
 	end
 	str=str.."/"
 	for r in all(reskeys) do
 		str=str..res1[r]..","..res2[r]..","
-	end
-	str=str.."/"
-	for i=1,mapw8*maph8-1 do
-		str=str..
-		 mget(i%mapw8,i/mapw8)..","
 	end
 	printh(str,"@clip")
 end
@@ -2885,11 +2885,6 @@ menuitem(1,"⌂ save to clip",save)
 menuitem(2,"◆ load from clip",function()
 	init()
 	local data=splspl(stat(4),"/")
-	for i,t in inext,deli(data) do
-		if t!="" then
-			mset(i%mapw8,i/mapw8,t)
-		end
-	end
 	local r=deli(data)
 	for i,k in inext,reskeys do
 		i*=2
@@ -2899,6 +2894,11 @@ menuitem(2,"◆ load from clip",function()
 	for k in all(deli(data)) do
 		if k!="" then
 			exp[k]=1
+		end
+	end
+	for i,t in inext,deli(data) do
+		if t!="" then
+			mset(i%mapw8,i/mapw8,t)
 		end
 	end
 	for l in all(data) do
