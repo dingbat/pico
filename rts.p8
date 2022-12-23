@@ -185,7 +185,10 @@ function _update()
 	upc=fps%upcycle
 	
 	async_dmap()
+	lclk,rclk=llclk and not btn"5",
+		lrclk and not btn"4"
  handle_input()
+ llclk,lrclk=btn"5",btn"4"
  
  if fps%30==19 then
 		for tx=0,mmw do
@@ -1109,15 +1112,15 @@ end
 --update
 
 function handle_click()
-	local l,r,cont,tx,ty=5,4,true
+	local l,r,cont,tx,ty=5,4,not action
 	
-	if btnp(l) and hovbtn then
+	if lclk and hovbtn then
 		hovbtn.handle()
 		return
 	end
 
-	if (btnp"5" or btnp"4") and action then
-		r,action=5
+	if lclk and action then
+		rclk,action=lclk
 	end
 
 	--menuy
@@ -1127,26 +1130,25 @@ function handle_click()
 			dx<mmw and dy<mmh+1	then
 			local x,y=
 				mmwratio*dx,mmhratio*dy
-			if btnp(r) and sel1 then
+			if rclk and sel1 then
 				foreachsel(move,x,y,r==5)
 				hilite={t=t(),
 					circ={amx,amy,2,8}}
-			elseif btnp(l) then
+			elseif lclk then
 				cx,cy=
 					mid(0,x-64,mapw-128),
 					--menuh=21
 				 mid(0,y-64,maph-107)
 			end
 		end
-		if (btnp(l)) to_build=nil
+		if (lclk) to_build=nil
 	 return
 	end
 	
  if to_build then
- 	if btnp(r) then
+ 	if rclk then
 	 	to_build=nil
-	 elseif last_l and not btn"5"
-	 	and buildable() then
+	 elseif lclk and buildable() then
   	local b=unit(
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
@@ -1157,11 +1159,10 @@ function handle_click()
 			to_build,selx=
 			 pay(to_build,-1,1)
 		end
-		last_l=btn"5"
 		return
  end
 	
- if btnp(r) and sel1 and
+ if rclk and sel1 and
  	sel1.p==1 then
 	 tx,ty,cont=mx\8,my\8
 	 local htile={
@@ -1213,10 +1214,10 @@ function handle_click()
  end
  
  if cont then
-	 if btnp(l) and not selx then
+	 if btnp"5" and not selx then
 	 	selx,sely,selt=mx,my,t()
 	 end
-	 if btn(l) and selx then
+	 if btn"5" and selx then
 			selbox={
 				min(selx,mx),
 				min(sely,my),
@@ -2379,7 +2380,9 @@ portf=13
 		r=split"116,121,125,128",
 		handle=function()
 			sel_only(idle)
-			cx,cy=idle.x-64,idle.y-64
+			cx,cy,hilite=
+				idle.x-64,idle.y-64,
+				{t=t(),unit=idle}
 			mouse_cam()
 		end
 	})
@@ -2518,9 +2521,8 @@ end
 
 ai_diff,
 	mapw,maph,mmx,mmy,mmw,
-	mmh, --maph\(mapw/mmw)
-	mapw8, --mapw/8
-	maph8, --maph/8
+	mmh, --maph\mmwratio
+	mapw8,maph8,
 	mmhratio, --maph/mmh
 	mmwratio= --mapw/mmw
 unspl"0,384,256,105,107,19,12,48,32,21.333,20.21"
@@ -2563,7 +2565,7 @@ e33=13]]
 
 function init()
 	poke(0x5f2d,3) --mouse
-	reload() --reset maps
+	reload()
 		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
@@ -2584,7 +2586,7 @@ reqs=0
 diff=-2]]
 
 	res1,res2,
-	--tech can change
+	--upgradable
 	units_heal,
 	farm_cycles,farm_renew_cost_b,
 	--global state
