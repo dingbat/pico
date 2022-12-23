@@ -20,7 +20,7 @@ function _draw()
 	 pal(1,2)
 	 sspr(x,unspl"0,16,8,72,30,32,16,1")
 
-		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0\*6 \-0\-8\|f\f6\*6 \|h\*k \-h\f0V0.1\-0\|f\f6V0.1",22,50
+		?"\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\n \^-w\^-t\|l\f0  ai difficulty:\-0\-0\-0\-8\|f\fcai difficulty:\n\n\n\f0  press ❎ to start\-0\-0\-0\-0\-c\|f\f9press ❎ to start\|z\|s\-0\-0\-0\-0\-0\-2\f0\*6 \-0\-8\|f\f6\*6 \|h\*k \-h\f0V0.2\-0\|f\f6V0.2",22,50
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1],57,77
 		return
 	end
@@ -1147,7 +1147,7 @@ function handle_click()
  	return
  end
 
- if btn(l) and to_build then
+ if btnp(l) and to_build then
   if buildable() then
   	local b=unit(
 				to_build.typ,
