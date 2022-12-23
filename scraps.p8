@@ -19,13 +19,12 @@ unspl"512,256,105,107,19,9,64,32,28.444,26.947"
 
 selx,sely,selt=mx,my,t()
 
-if btnp(l) and hoverunit and
-  selt and t()-selt<0.5 then
-		selection,selbox={}
+	if btnp(l) and hoverunit and
+  selt and t()-selt<0.2 then
+		selection,selx={}
 		for u in all(units) do
-			if intersect(u_rect(u),
-				{cx,cy,cx+128,cy+128},0) and
-				u.p==1 and u.typ==hoverunit.typ then
+			if u.onscr and
+				u.typ==hoverunit.typ then
 				add(selection,u).sel=true
 			end
 		end

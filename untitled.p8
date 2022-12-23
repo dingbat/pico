@@ -33,7 +33,7 @@ function _update()
 end
 -->8
 a=[[[[]]
-freq=1
+freq=0.5
 last_t=0
 targ_t=0
 frame={name="_",chld={}}
@@ -46,35 +46,37 @@ end
 
 function trace(name,fn,...)
  if t()~=last_t then
-		run=t()>targ_t
-		if run then
+  last_t=t()
+		run_tr=t()>targ_t and (
+			fps==59 or fps==29)
+		if run_tr then
 			printh("","log")
+			targ_t=t()+freq
 		end
 	end
-	local s,fr
+	local s,fr=stat(1)
 	
-	if run then
-		s,fr=stat(1)
+	if run_tr then
 		local lc=frame.chld[#frame.chld]
 		if lc and lc.name==name then
 			fr=lc
+			fr.n=fr.n+1
 		else
 			fr=add(frame.chld,{
 				name=name,
 				parent=frame,
 				chld={},
-				t=0
+				t=0,
+				n=1
 			})
 		end
 		frame=fr
-		targ_t,last_t=t()+freq,t()
 	end
 	
 	local r=fn(...)
 	
-	if run then
-		local diff=stat(1)-s
-		fr.t=fr.t+diff
+	if run_tr then
+		fr.t=fr.t+stat(1)-s
 		frame=frame.parent
 		if frame.name=="_" then
 			print_frame(frame,-1)
@@ -88,9 +90,13 @@ end
 function print_frame(f,n)
 	if f.t then
 		for i=1,n do
-			printh(" \0","log")
+			printh("  \0","log")
 		end
-		printh(f.name..": "..f.t,"log")
+		local name=f.name
+		if f.n>1 then
+			name=name.." ("..f.n..")"
+		end
+		printh(name..": "..f.t,"log")
 	end
 	for c in all(f.chld) do
 		print_frame(c,n+1)

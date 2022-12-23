@@ -70,7 +70,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(mapw8,15) --fogmap
+--	draw_map(mapw8,15) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -1120,18 +1120,6 @@ function handle_click()
 	if (btnp"5" or btnp"4") and action then
 		r,action=5
 	end
-	
---	if btnp(l) and hoverunit and
---  selt and t()-selt<0.2 then
---		selection,selx={}
---		for u in all(units) do
---			if u.onscr and
---				u.typ==hoverunit.typ then
---				add(selection,u).sel=true
---			end
---		end
---		return
---	end
 
 	--menuy
 	if amy>104 and not selx then
@@ -2110,7 +2098,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
---	local res1=res2
+	local res1=res2
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2402,7 +2390,7 @@ portf=13
 		end
 	})
 	
---	local res1=res2
+	local res1=res2
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
 	line(unspl"-4,120,-128,120,5")
@@ -2708,8 +2696,6 @@ function ai_init()
 65,6,115,4]]
 end
 
---_update60=_update
-
 function ai_unit1(u)
  if u.p==2 then
  	if u.typ.ant then
@@ -2904,117 +2890,30 @@ menuitem(2,"◆ load from clip",function()
 			mset(i%mapw8,i/mapw8,t)
 		end
 	end
-	local r,e=deli(data),
-		deli(data)
+	local r=deli(data)
 	for i,k in inext,reskeys do
 		i*=2
 		i-=1
 		res1[k],res2[k]=r[i],r[i+1]
 	end
-	for l in all(data) do
-		unit(unpack(l))
-	end
-	for k in all(e) do
+	for k in all(deli(data)) do
 		if k!="" then
 			exp[k]=1
 		end
 	end
-	
+	for l in all(data) do
+		unit(unpack(l))
+	end
+	for i=1,res2.bo_idx-1 do
+		add(not g(bldgs,
+			bo[i][3]-80,bo[i][4]) and
+			rebuild,i)
+	end
 	make_dmaps"d"
 end)
 
 menuitem(3,"   (paste first)")
 menuitem(4,"∧ resign",function() loser=1 end)
--->8
-a=[[[[]]
-freq=0.5
-last_t=0
-targ_t=0
-frame={name="_",chld={}}
-function trace_fn(name)
-	local orig=_ENV[name]
-	_ENV[name]=function(...)
-		return trace(name,orig,...)
-	end
-end
-
-function trace(name,fn,...)
- if t()~=last_t then
-  last_t=t()
-		run_tr=t()>targ_t and (
-			fps==59 or fps==29)
-		if run_tr then
-			printh("","log")
-			targ_t=t()+freq
-		end
-	end
-	local s,fr=stat(1)
-	
-	if run_tr then
-		local lc=frame.chld[#frame.chld]
-		if lc and lc.name==name then
-			fr=lc
-			fr.n=fr.n+1
-		else
-			fr=add(frame.chld,{
-				name=name,
-				parent=frame,
-				chld={},
-				t=0,
-				n=1
-			})
-		end
-		frame=fr
-	end
-	
-	local r=fn(...)
-	
-	if run_tr then
-		fr.t=fr.t+stat(1)-s
-		frame=frame.parent
-		if frame.name=="_" then
-			print_frame(frame,-1)
-			frame.chld={}
-		end
-	end
-	
-	return r
-end
-
-function print_frame(f,n)
-	if f.t then
-		for i=1,n do
-			printh("  \0","log")
-		end
-		local name=f.name
-		if f.n>1 then
-			name=name.." ("..f.n..")"
-		end
-		printh(name..": "..f.t,"log")
-	end
-	for c in all(f.chld) do
-		print_frame(c,n+1)
-	end
-end
-
---trace_fn("_draw")
---trace_fn("draw_map")
---trace_fn("draw_unit")
---trace_fn("draw_menu")
-
---trace_fn("_update")
---trace_fn("ai_unit1")
---trace_fn("ai_unit2")
---trace_fn("ai_frame")
---trace_fn("tick_unit")
---trace_fn"update_unit"
---trace_fn"s"
-
---trace_fn("mine_nxt_res")
---trace_fn("move")
---trace_fn"dist"
---]]
-
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000001000100000000000000000000000000110001100000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000110000000101000000000001100011000000000001010000000000000000000
