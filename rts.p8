@@ -1806,8 +1806,7 @@ function all_surr(x,y,n,chk_acc)
 	local st={}
 	for dx=-n,n do
 	 for dy=-n,n do
-	 	local xx,yy,diag=x+dx,y+dy,
-		 	dx!=0 and dy!=0
+	 	local xx,yy=x+dx,y+dy
 	 	if
 	 		min(xx,yy)>=0 and
 	 		xx<mapw8 and yy<maph8 and
@@ -1815,8 +1814,7 @@ function all_surr(x,y,n,chk_acc)
 	 	then
 			 add(st,{
 			  xx,yy,
-			 	diag=diag,
-			 	d=diag and 1.4 or 1,
+			 	d=dx!=0 and dy!=0 and 1.4 or 1,
 			 	k=xx|yy<<8
 			 })
 			end
