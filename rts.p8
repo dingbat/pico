@@ -1652,8 +1652,7 @@ function produce(u)
 	u.q.t-=0.5
 	if u.q.t<=0 then
 		if b.tech then
-			u.prot.prod[b.idx]=
-				b.tech(b.techt[1])
+			b.tech(b.techt[1])
 		else
 			local new=unit(
 				b.typ,u.x,u.y,u.p)
@@ -1981,11 +1980,12 @@ lastp=1]])
  		
  u.typ,u.x,u.y,u.p,u.hp,u.const,
   u.discovered,u.id,u.boi,
-  u.prot=
+  u.prod=
  	typ[p],x,y,p,hp or typ[p].hp,
 		tonum(const),
 		discovered==1,
-		flr(rnd"60"),tonum(boi),typ
+		flr(rnd"60"),tonum(boi),
+		typ.prod
 	rest(u_rect(u))
 	if typ.farm then
 		u.res,u.cycles=parse[[typ=r
@@ -2270,7 +2270,7 @@ portf=9
 		--menuy+4
 		sspr(unspl"112,96,9,9,2,109")
 	end
-	for i,b in next,sel1.prot.prod do
+	for i,b in next,sel1.prod do
 		i-=1
 		draw_port(
 			b.typ,
@@ -2279,16 +2279,18 @@ portf=9
 			106+i\4*11,
 			b,
 			function()
-				if not can_pay(b) or q and
-					(q.b!=b or b.tech or
-					q.qty==9) then
-					return
+				if can_pay(b) and (
+					not q or
+					q.b==b and q.qty<9) then
+					if b.typ.bldg then
+						to_build=b
+						return
+					end
+					queue_prod(sel1,b)
+					if b.tech then
+						sel1.prod[b.idx]=nil
+					end
 				end
-				if b.typ.bldg then
-					to_build=b
-					return
-				end
-				queue_prod(sel1,b)
 			end
 		)
 	end
@@ -2308,6 +2310,7 @@ portf=9
 				else
 					q.qty-=1
 				end
+				u.prod[b.idx]=b
 			end,q.t/q.b.t
 		)
 	end
@@ -2765,7 +2768,7 @@ function nohold(p)
 end
 
 function ai_prod(u)
-	local p=u.prot.prod[u.lastp]
+	local p=u.prod[u.lastp]
 	if not u.q and nohold(p) and
 		can_pay(p,2) then
 		queue_prod(u,p)
