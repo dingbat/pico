@@ -4,8 +4,7 @@ __lua__
 --main loop
 
 function _draw()
- --cls not needed!
- draw_map(0,17) --mainmap
+ draw_map(0,17)
 	if menu then
 		camera()
 		spr(unspl"184,45,75,1,1,1")
@@ -760,32 +759,38 @@ ant.prod={
 r=0
 g=0
 b=6
+idx=1
 breq=0]],mound),
 	parse([[
 r=0
 g=3
 b=3
+idx=2
 breq=2]],farm),
 	parse([[
 r=0
 g=4
 b=15
+idx=3
 breq=0]],barracks),
 	parse([[
 r=0
 g=4
 b=20
+idx=4
 breq=8]],den),
 	parse([[
 r=0
 g=5
 b=15
+idx=5
 breq=0]],tower),
 --t,d,b
 	parse([[
 r=0
 g=25
 b=60
+idx=6
 breq=13]],castle),
 }
 
@@ -796,6 +801,7 @@ r=5
 g=0
 b=0
 p=
+idx=1
 breq=0]],ant),
 nil,nil,nil,
 parse([[
@@ -827,7 +833,8 @@ r=4
 g=0
 b=0
 p=
-breq=0]],ant),1)
+idx=2
+breq=0]],ant))
 	end),
 }
 
@@ -838,6 +845,7 @@ r=0
 g=10
 b=10
 p=
+idx=1
 breq=0]],beetle),
 	parse([[
 t=13
@@ -845,6 +853,7 @@ r=8
 g=8
 b=0
 p=
+idx=2
 breq=0]],spider),
 nil,
 nil,
@@ -899,6 +908,7 @@ r=6
 g=2
 b=0
 p=
+idx=1
 breq=0]],warant),
 	parse([[
 t=14
@@ -906,6 +916,7 @@ r=3
 g=0
 b=5
 p=
+idx=2
 breq=0]],archer),
 	parse([[
 t=10
@@ -959,6 +970,7 @@ r=2
 g=14
 b=14
 p=
+idx=1
 breq=0]],cat),
 nil,nil,nil,
  parse([[
@@ -2295,23 +2307,24 @@ portf=9
 		)
 	end
 	if q then
+		local b=q.b
 		draw_port(
-		 q.b.typ,
-		 q.b.tech and 24 or
+		 b.typ,
+		 b.tech and 24 or
 		  --menuy+6
 		  ?"X"..q.qty,unspl"32,110,7"
 		  and 20,
 		 --menuy+3
 		 107,nil,
 			function()
-				pay(q.b,1,1)
+				pay(b,1,1)
 				if q.qty==1 then
 					sel1.q=nil
 				else
 					q.qty-=1
 				end
-				u.prod[b.idx]=b
-			end,q.t/q.b.t
+				sel1.prod[b.idx]=b
+			end,q.t/b.t
 		)
 	end
 end
@@ -2473,10 +2486,7 @@ end
 
 function dmapcc(q)
 	for i=1,#q.open do
-		if i>20 then
-			--continue next tick
-			return
-		end
+		if (i>20)	return
 		local p=deli(q.open)
 		q.dmap[p.k]=q.c
 		if q.c<8 then
@@ -2596,7 +2606,7 @@ diff=-2]]
 	--upgradable
 	units_heal,
 	farm_cycles,farm_renew_cost_b,
-	--global state
+	--
 	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
