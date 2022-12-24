@@ -30,7 +30,7 @@ function _draw()
  	if u.onscr or loser then
 			if
 				not loser and
-			 not g(viz,u.x\8,u.y\8)
+			 not g(viz,u.x8,u.y8)
 			 and u.discovered
 			then
 	 		add(af,u)
@@ -244,7 +244,7 @@ function _update()
  for u in all(units) do
 		if (upc_0) ai_unit2(u)	
  	if selx
- 		and (g(viz,u.x\8,u.y\8)
+ 		and (g(viz,u.x8,u.y8)
  		 or u.discovered)
  	then
  	 u.sel=intersect(u.r,selbox,0)
@@ -1373,7 +1373,7 @@ end
 function update_viz(u)
 	if u.p==1 and
 		u.id%upcycle==upc then
-		local k0,los=u.x\8|u.y\8<<8,
+		local k0,los=u.x8|u.y8<<8,
 			u.typ.los
 
 		local xo,yo,l=
@@ -1424,7 +1424,7 @@ function draw_minimap()
 	
 	for u in all(units) do
 		if u.discovered or
-			g(viz,u.x\8,u.y\8) then
+			g(viz,u.x8,u.y8) then
 			pset(
 				u.x/mmwratio,
 				u.y/mmhratio,
@@ -1555,7 +1555,7 @@ function aggress(u)
 	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
-			viz[e.x\8|e.y\8<<8] and
+			viz[e.x8|e.y8<<8] and
 			d<los
 		then
 			if (d<targ_d)targ,targ_d=e,d
@@ -1577,7 +1577,7 @@ function fight(u)
 		if upc==id%upcycle then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
-				g(viz,e.x\8,e.y\8)	
+				g(viz,e.x8,e.y8)	
 		end
 		if in_range and
 			fps%typ.proj_freq==
@@ -1786,7 +1786,8 @@ end
 
 function u_rect(_ENV)
 	local w2,h2,e=typ.w/2,typ.h/2
- r={x-w2,y-h2,x+w2,y+h2}
+ r,x8,y8={x-w2,y-h2,x+w2,y+h2},
+ 	x\8,y\8
  return _ENV
 end
 
@@ -2435,8 +2436,8 @@ end
 
 function dmap_find(u,key)
 	local x,y,dmap,wayp,lowest=
-		u.x\8,
-		u.y\8,
+		u.x8,
+		u.y8,
 		dmaps[key],
 		{},9
 	while lowest>=1 do
