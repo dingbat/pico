@@ -1488,7 +1488,7 @@ end
 function update_unit(u)
 	local st=u.st
 	local t=st.t
- if u.q and fps%15==u.q.fps15 then
+ if u.q and fps%15==u.q.fps%15 then
  	produce(u)
  end
  if (u.typ.farm) update_farm(u)
@@ -1997,6 +1997,11 @@ qty=0]],0
 	return u
 end
 
+function queue_prod(u,b)
+	u.q={
+		b=b,qty=1,t=b.t,fps=fps-1,
+	}
+end
 -->8
 --a*
 
@@ -2282,10 +2287,7 @@ portf=9
 				if q then
 					q.qty+=1
 				else
-					sel1.q={
-						b=b,qty=1,t=b.t,
-						fps15=(fps-1)%15
-					}
+					queue_prod(sel1,b)
 				end
 			end
 		)
@@ -2767,9 +2769,7 @@ function ai_prod(u)
 	if not u.q and nohold(p) and
 		can_pay(p,2) then
 		pay(p,-1,2)
-		u.q={
-			b=p,qty=1,t=p.t,fps15=fps,
-		}
+		queue_prod(u,p)
 		u.lastp%=u.typ.units
 		u.lastp+=1
 		res2.tot+=1
