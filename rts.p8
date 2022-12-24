@@ -1123,8 +1123,8 @@ end
 --update
 
 function handle_click()
-	local l,r,cont,tx,ty,axn,htile=
-		5,4,not action,mx\8,my\8
+	local l,r,cont,axn,htile=
+		5,4,not action
 	
 	if lclk and hovbtn then
 		hovbtn.handle()
@@ -1178,7 +1178,7 @@ function handle_click()
  then
 	 htile={
 	 	t=t(),
-	 	unit=tile_as_unit(tx,ty)
+	 	unit=tile_as_unit(mx8,my8)
 	 }
 	 if can_renew_farm() then
 	 	hilite_hoverunit()
@@ -1193,7 +1193,7 @@ function handle_click()
 	 	if avail_farm() then
 	 		harvest(sel1,hoverunit)
 	 	else
-	  	foreachsel(gather,tx,ty)
+	  	foreachsel(gather,mx8,my8)
 	 	end
 	 	
   elseif can_build() then
@@ -1213,12 +1213,12 @@ function handle_click()
   	hilite={t=t(),cx=mx,cy=my}
   	
   elseif sel1.typ.units then
-  	if fget(mget(tx,ty),1) then
+  	if fget(mget(mx8,my8),1) then
  	  hilite=htile
 			end
   	sel1.rx,sel1.ry,
   		sel1.rtx,sel1.rty=
-  		mx,my,tx,ty
+  		mx,my,mx8,my8
   else
    cont=true
   end
@@ -1268,6 +1268,7 @@ function mouse_cam()
 	 mid(-1,stat"33",126)
 
  mx,my,hovbtn=amx+cx,amy+cy
+ mx8,my8=mx\8,my\8
 end
 
 function handle_input()
@@ -1283,7 +1284,7 @@ function handle_input()
  
  if to_build then
 	 to_build.x,to_build.y=
-	 	mx\8*8,my\8*8
+	 	mx8*8,my8*8
 	end
 end
 
@@ -1831,16 +1832,15 @@ function avail_farm()
 end
 
 function can_gather()
-	local x,y=mx\8,my\8
-	return (fget(mget(x,y),1) or
-		avail_farm()) and
+	return (fget(mget(mx8,my8),1)
+	 or avail_farm()) and
 		sel_typ==ant1 and
-		g(exp,x,y) and
-		sur_acc(x,y)
+		g(exp,mx8,my8) and
+		sur_acc(mx8,my8)
 end
 
 function can_attack()
-	local v=g(viz,mx\8,my\8)
+	local v=g(viz,mx8,my8)
 	for u in all(selection) do
 		if hoverunit and
 		 hoverunit.p!=1 and
