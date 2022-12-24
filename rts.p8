@@ -1998,9 +1998,14 @@ qty=0]],0
 end
 
 function queue_prod(u,b)
-	u.q={
-		b=b,qty=1,t=b.t,fps=fps-1,
-	}
+	pay(b,-1,u.p)
+	if u.q then
+		u.q.qty+=1
+	else
+		u.q={
+			b=b,qty=1,t=b.t,fps=fps-1,
+		}
+	end
 end
 -->8
 --a*
@@ -2283,12 +2288,7 @@ portf=9
 					to_build=b
 					return
 				end
-				pay(b,-1,1)
-				if q then
-					q.qty+=1
-				else
-					queue_prod(sel1,b)
-				end
+				queue_prod(sel1,b)
 			end
 		)
 	end
@@ -2768,7 +2768,6 @@ function ai_prod(u)
 	local p=u.prot.prod[u.lastp]
 	if not u.q and nohold(p) and
 		can_pay(p,2) then
-		pay(p,-1,2)
 		queue_prod(u,p)
 		u.lastp%=u.typ.units
 		u.lastp+=1
