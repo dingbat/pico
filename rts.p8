@@ -1284,7 +1284,7 @@ function handle_input()
  
  if to_build then
 	 to_build.x,to_build.y=
-	 	mx8*8,my8*8
+	  mx8*8,my8*8
 	end
 end
 
@@ -1308,14 +1308,10 @@ function tick_unit(u)
 		end
 	end
 	if u.dead then
-		if typ.queen then
-			loser=u.p
-		end
+		if (typ.queen)	loser=u.p
 		u.dead+=1
 		if (typ.unit) update_viz(u)
-		if u.dead==60 then
-			del(units,u)
-		end
+		del(u.dead==60 and units,u)
 		return
 	end
 	
@@ -1328,7 +1324,8 @@ function tick_unit(u)
 	
 	if intersect(u.r,
 	 {mx,my,mx,my},1) and (
-	 not hoverunit or hoverunit.p==1
+	 not hoverunit or
+	  hoverunit.p==1
 	) then
 		hoverunit=u
 	end
