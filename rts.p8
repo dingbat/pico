@@ -62,14 +62,14 @@ function _draw()
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
 	 	unspl"0,16,8,14,98,32,16")
-		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f3easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f5normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f0hard ai"[res2.diff+1],22,93
+		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f7easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f5normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f0hard ai"[res2.diff+1],22,93
 	 ?split"\^w\^t\fa\|gdefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\fa\|gvictory!\-0\-0\-0\-0\|f\f1victory!"[loser],53,102
 	 ?"\f4\#9\|k\-0\-4\*j \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
 	 return
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
-	draw_map(mapw8,15) --fogmap
+--	draw_map(mapw8,15) --fogmap
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -1584,8 +1584,7 @@ function fight(u)
  		})
  	end
  else
- 	in_range=intersect(u.r,
- 	 e.r,0)
+ 	in_range=intersect(u.r,e.r,0)
 		if in_range and fps%30==id%30 then
 		 deal_dmg(typ,e)
 		end
@@ -1925,6 +1924,11 @@ end
 
 function deal_dmg(from_typ,to)
 	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
+	if to.st.rest then
+		move(to,
+			to.x+rnd"6"*2-6,
+			to.y+rnd"6"*2-6,true)
+	end
 end
 
 function collect(u,res)
@@ -2099,7 +2103,7 @@ end
 --menu/cursor
 
 function print_res(r,x,y,zero)
---	local res1=res2
+	local res1=res2
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2251,9 +2255,10 @@ portf=9
 	
 	if sel1.cycles then
 		--menuy+6
-		? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4"
+		local x=? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4"
+		camera(-x)
 		--menuy+4
-		sspr(unspl"112,96,9,9,51,109")
+		sspr(unspl"112,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prot.prod do
 		i-=1
@@ -2350,9 +2355,9 @@ function draw_menu()
 		sel1.typ.unit then
 		draw_port(
 	 	sel_typ==ant1 and parse[[
-portx=24
-porty=32
-portw=8
+portx=63
+porty=72
+portw=9
 porto=2
 portf=13
 ]] or parse[[
@@ -2393,7 +2398,7 @@ portf=13
 		end
 	})
 	
---	local res1=res2
+	local res1=res2
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
 	line(unspl"-4,120,-128,120,5")
@@ -2616,7 +2621,7 @@ splspl[[7,57,44,1
 1,320,184,2
 1,348,187,2
 1,330,196,2
-5,328,170,2
+5,320,170,2
 8,268,169,2
 2,65,150,3]],
 	function(u) unit(unpack(u)) end
@@ -2784,24 +2789,22 @@ function ai_unit2(u)
 				u.w=deli(miners)
 				if (u.w) build(u.w,u)
 			end
-		end
-		if u.w and
-			u.w.st.t!="build" then
-			u.w=nil
-		end
-		if u.typ.farm and
+		elseif u.typ.farm and
 		 not u.const and
 		 not u.farmer then
 			local w=deli(miners)
 			if (w) harvest(w,u)
-		end
-		if u.typ.queen then
+		elseif u.typ.queen then
 			if antcount<30 then
 				ai_prod(u)
 			end
 		elseif u.typ.units and
 			bo[u.boi][5] then
 			ai_prod(u)
+		end
+		if u.w and
+			u.w.st.t!="build" then
+			u.w=nil
 		end
 	elseif u.st.t=="attack" and
 		u.st.active and u.x>232 then
@@ -2811,6 +2814,8 @@ function ai_unit2(u)
 		movegrp(defsqd[b],u.x,u.y,1)
 	end
 end
+
+_update60=_update
 
 function ai_bld(boi)
 	local bld=bo[boi]
@@ -2989,14 +2994,14 @@ fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff
 444444440000000000000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000d1d005001d104300b000b000504d00dddd2462000000
 444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000430000b0050504040005054045000000
 44444444000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000
-0000000000000000050000050000000000000000d0000000000000000000000000000000eeeeeeeeeeeeeeeeeeee000000000000000d00d00000005000000000
-0002000202909092505000505000005000500d00d00d220002200000d0000d0000000000eeeeeeeeeeeeeeeeeeee0000000220b00d777d000050057506000000
-00002020002999205055555050000005050000d777d00020200000000d00d00000000000eeeeeeeeeeeeeeeeeeee00002020b00dd7555700dd55560770600000
-0000444040444400055e5e550002222505000075557000444000b0000333300000000000eeeeeeeeeeeeeeeeeeee0000444000d7d544450d7de5e57607000000
-44047474444e4e0050555550502622dddd0d0054445044e4e0b000000b33b00000000000eeeeeeeeeeeeeeeeeeee0000e4eb4d7d04e4e4d7d055567067600000
-404044404504400050500050502266d5d507d04e4e4040444b0001331333300000000000eeeeeeeeeeeeeeeeeeee0000444004d00044404d0006650770000000
-050504055050050050050500502222dddd0444044400050b050b01331110000000000000eeeeeeeeeeeeeeeeeeee00005b054040050004040050506006000000
-000000000000000005000005005050505000505000500000b00000505000000000000000eeeeeeeeeeeeeeeeeeee000000b00000000000000000000000000000
+0000000000000000050000050000000000000000d0000000000000000000000000555500eeeeeeeeeeeeeeeeeeee000000000000000d00d00000005000000000
+0002000202909092505000505000005000500d00d00d220002200000d0000d0005777750eeeeeeeeeeeeeeeeeeee0000000220b00d777d000050057506000000
+00002020002999205055555050000005050000d777d00020200000000d00d00000557475eeeeeeeeeeeeeeeeeeee00002020b00dd7555700dd55560770600000
+0000444040444400055e5e550002222505000075557000444000b0000333300088844775eeeeeeeeeeeeeeeeeeee0000444000d7d544450d7de5e57607000000
+44047474444e4e0050555550502622dddd0d0054445044e4e0b000000b33b00800484575eeeeeeeeeeeeeeeeeeee0000e4eb4d7d04e4e4d7d055567067600000
+404044404504400050500050502266d5d507d04e4e4040444b0001331333300808480575eeeeeeeeeeeeeeeeeeee0000444004d00044404d0006650770000000
+050504055050050050050500502222dddd0444044400050b050b01331110000854480050eeeeeeeeeeeeeeeeeeee00005b054040050004040050506006000000
+000000000000000005000005005050505000505000500000b00000505000000088800000eeeeeeeeeeeeeeeeeeee000000b00000000000000000000000000000
 0000b000444744444000000000000000000000000000000002200000f66c6c6fcfc6c66feeeeeeeeeeeeeeeeeeee000000000000880055088000000555000000
 000b350044474464400087000070000707000000000000002dd20000f6c6f6ccfb6f6c6feeeeeeeeeeeeeeeeeeee000000990990088577880000005775000000
 00b333504464774640878878000744447000000000000002d4dd2000f76b6b6f6fc6b67feeeeeeeeeeeeeeeeeeee000009889889008878850000557765000000
