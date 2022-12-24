@@ -1806,7 +1806,8 @@ function all_surr(x,y,n,chk_acc)
 	local st={}
 	for dx=-n,n do
 	 for dy=-n,n do
-	 	local xx,yy=x+dx,y+dy
+	 	local xx,yy,diag=x+dx,y+dy,
+		 	dx!=0 and dy!=0
 	 	if
 	 		min(xx,yy)>=0 and
 	 		xx<mapw8 and yy<maph8 and
@@ -1814,7 +1815,8 @@ function all_surr(x,y,n,chk_acc)
 	 	then
 			 add(st,{
 			  xx,yy,
-			 	diag=dx!=0 and dy!=0,
+			 	diag=diag,
+			 	d=diag and 1.4 or 1,
 			 	k=xx|yy<<8
 			 })
 			end
@@ -2035,9 +2037,7 @@ function nearest_acc(x,y,u)
 				end
 			end
 		end
-		if best_t then
-			return best_t,n
-		end
+		if (best_t) return best_t,n
 	end
 end
 
@@ -2099,7 +2099,7 @@ function find_path(start,goal)
   for n in all_surr(p[1],p[2],1,true) do
    local old_best,new_cost_from_start=
     best_table[n.k],
-    shortest.cost_from_start+1
+    shortest.cost_from_start+n.d
    if not old_best then
     old_best={
      last=n,
@@ -2448,8 +2448,7 @@ function dmap_find(u,key)
 		local orig=max(1,g(dmap,x,y,9))
 		for t in all_surr(x,y,1) do
 			local w=dmap[t.k] or 9
-			if (t.diag) w+=0.4
-			if w<lowest then
+			if w+t.d-1<lowest then
 				lowest,x,y=w,unpack(t)
 			end
 		end
