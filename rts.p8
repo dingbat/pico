@@ -1787,7 +1787,8 @@ end
 function u_rect(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
  r,x8,y8={x-w2,y-h2,x+w2,y+h2},
- 	x\8,y\8
+  --get ⬇️⬅️ tile
+ 	(x-2)\8,(y+2)\8
  return _ENV
 end
 
@@ -1899,9 +1900,8 @@ end
 
 function register_bldg(b)
 	local typ=b.typ
-	--get ⬇️⬅️ tile
 	local w,h,x,y=typ.w,typ.h,
-		(b.x-2)\8,(b.y+2)\8
+		b.x8,b.y8
 
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
