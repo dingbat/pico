@@ -208,10 +208,9 @@ function _update()
   upc==0,{}
  if loser then
  	poke"24365" --no mouse
- 	if rdy and btnp"5" then
- 		init_menu()
+ 	if lclk then
+ 		menu,cx,cy=unspl"1,5,35"
  	end
-		rdy=not btnp"5"
  	return
 	end
 	
@@ -2541,8 +2540,10 @@ ai_diff,
 	mmh, --maph\mmwratio
 	mapw8,maph8,
 	mmhratio, --maph/mmh
-	mmwratio= --mapw/mmw
-unspl"0,384,256,105,107,19,12,48,32,21.333,20.21"
+	mmwratio, --mapw/mmw
+	menu,cx,cy,cvx,cvy
+	=
+unspl"0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
 	
 reskeys,f2res,resqty,
  key2resf,rescol
@@ -2606,7 +2607,7 @@ diff=-2]]
 	--upgradable
 	units_heal,
 	farm_cycles,farm_renew_cost_b,
-	--
+
 	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
@@ -2616,11 +2617,6 @@ diff=-2]]
 	init_typs()
 	
 	ai_init()
-end
-
-function init_menu()
-	menu,cx,cy,cvx,cvy=
-		unspl"1,0,30,1,1"
 end
 
 function new_game()
@@ -2644,8 +2640,6 @@ splspl[[7,57,44,1
 	
 	make_dmaps"d"
 end
-
-init_menu()
 -->8
 --ai
 
