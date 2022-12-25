@@ -126,7 +126,6 @@ function _draw()
 	
 	draw_menu()
 	if to_build then
-		local typ=to_build.typ
 		camera(cx-to_build.x,
 			cy-to_build.y)
 		pal(buildable() or
@@ -137,15 +136,16 @@ function _draw()
 			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"--▒
-			rect(typ.fw,typ.fh,
+			rect(to_build.typ.fw,
+				to_build.typ.fh,
 				unspl"-1,-1,3")
 	 	fillp()
 	 end
-		sspr(typ.rest_x,typ.rest_y,
-		 typ.fw,typ.h)
+	 local _ENV=to_build.typ
+		sspr(rest_x,rest_y,fw,h)
 		pal()
-		camera()
 	end
+		camera()
 	
 	if hilite and hilite.circ then
 		circ(unpack(hilite.circ))
