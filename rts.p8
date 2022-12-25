@@ -2891,11 +2891,9 @@ menuitem(2,"◆ load from clip",function()
 		 ,i)
 	end
 	for b in all(techs) do
-		if res1.techs|b.tmap==
-			res1.techs then
-			b.done=true
-			b.tech(b.techt[1])
-		end
+		b.done=
+			res1.techs|b.tmap==res1.techs
+			and not b.tech(b.techt[1])
 	end
 	make_dmaps"d"
 end)
