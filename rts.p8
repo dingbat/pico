@@ -2383,9 +2383,9 @@ portf=13
 		r=split"116,121,125,128",
 		handle=function()
 			sel_only(idle)
-			cx,cy,hilite=
-				idle.x-64,idle.y-64,
-				{t=t(),unit=idle}
+			cx,cy,hoverunit=
+				idle.x-64,idle.y-64,idle
+			hilite_hoverunit()
 			mouse_cam()
 		end
 	})
