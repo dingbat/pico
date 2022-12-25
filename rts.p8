@@ -2224,9 +2224,9 @@ function draw_sel_ports(x)
 		x+=13
 		if i>5 then
 			--menuy+6
-			if (numsel>15) x-=4
-			x=?"\f1+"..numsel-5,x-15,121
-			spr(133,x+1,121)
+			if (numsel>14) x-=4
+			camera(-?"\f1+"..numsel-5,x-15,121)
+			spr(unspl"133,1,121")
 			break
 		end
 		draw_port(
@@ -2348,7 +2348,7 @@ function draw_menu()
 		draw_sel_ports(24)
 	end
 	if numsel>1 then
-		if (numsel<10) camera(-2)
+		camera(numsel<10 and -2)
 		?"X"..numsel,unspl"5,111,1"
 		spr(unspl"133,1,111")
 		add(buttons,{
