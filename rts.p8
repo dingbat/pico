@@ -151,7 +151,18 @@ function _draw()
 		circ(unpack(hilite.circ))
 	end
 	
-	spr(cursor_spr() or 64,amx,amy)
+	--cursor
+	spr(
+	 hovbtn and pset(amx-1,
+	  amy+4,5) and 66 or
+		sel1 and sel1.p==1 and
+		((to_build or
+			can_build() or
+			can_renew_farm()) and 68 or
+		can_gather() and 67 or
+		can_attack() and 65 or
+		can_drop() and 69) or 64,
+	amx,amy)
 end
 
 function _update()
@@ -1788,6 +1799,25 @@ function u_rect(_ENV)
  return _ENV
 end
 
+function can_pay(costs,p)
+	local r=res[p or 1]
+ return r.r>=costs.r and
+ 	r.g>=costs.g and
+ 	r.b>=costs.b and
+ 	(not costs.p or
+ 		r.p<min(r.pl,99)) and
+ 	r.reqs|costs.breq==r.reqs
+end
+
+function pay(costs,dir,p)
+	for r in all(split"r,g,b") do
+  res[p][r]+=costs[r]*dir
+	end
+	if costs.p then
+		res[p].p-=dir
+	end
+end
+
 -- musurca/freds /bbs/?tid=36059
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
@@ -2113,7 +2143,7 @@ function find_path(start,goal)
  return path({closest.last},closest)
 end
 -->8
---menu/cursor
+--menu
 
 function print_res(r,x,y,zero)
 	local res1=res2
@@ -2138,24 +2168,6 @@ function print_res(r,x,y,zero)
 		end
 	end
 	return x-1
-end
-
-function can_pay(costs,p)
-	local r=res[p or 1]
- return r.r>=costs.r and
- 	r.g>=costs.g and
- 	r.b>=costs.b and
- 	(not costs.p or r.p<min(r.pl,99)) and
- 	r.reqs|costs.breq==r.reqs
-end
-
-function pay(costs,dir,p)
-	for r in all(split"r,g,b") do
-  res[p][r]+=costs[r]*dir
-	end
-	if costs.p then
-		res[p].p-=dir
-	end
 end
 
 function draw_port(
@@ -2199,24 +2211,6 @@ function draw_port(
 		)
 	end
 	camera()
-end
-
-function cursor_spr()
- if hovbtn then
-		pset(amx-1,amy+4,5)
-  return 66
-	end
-	if sel1 and sel1.p==1 then
-		if to_build or
-			can_build() or
-			can_renew_farm() then
-			return 68
-		end
-		--75
-		return can_gather() and 67 or
-			can_attack() and 65 or
-			can_drop() and 69
-	end
 end
 
 function draw_sel_ports(x)
