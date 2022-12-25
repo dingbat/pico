@@ -321,11 +321,12 @@ function parse(str,typ,tech,t)
 		end
 	end
 	add(obj.idx and typs,obj)
+	add(obj.tmap and techs,obj)
 	return obj
 end
 
 function init_typs()
-typs={}
+typs,techs={},{}
 ant=parse[[
 idx=1
 spd=0.286
@@ -768,38 +769,32 @@ ant.prod={
 r=0
 g=0
 b=6
-idx=1
 breq=0]],mound),
 	parse([[
 r=0
 g=3
 b=3
-idx=2
 breq=2]],farm),
 	parse([[
 r=0
 g=4
 b=15
-idx=3
 breq=0]],barracks),
 	parse([[
 r=0
 g=4
 b=20
-idx=4
 breq=8]],den),
 	parse([[
 r=0
 g=5
 b=15
-idx=5
 breq=0]],tower),
 --t,d,b
 	parse([[
 r=0
 g=25
 b=60
-idx=6
 breq=13]],castle),
 }
 
@@ -810,7 +805,6 @@ r=5
 g=0
 b=0
 p=
-idx=1
 breq=0]],ant),
 nil,nil,nil,
 parse([[
@@ -818,7 +812,7 @@ t=30
 r=18
 g=0
 b=5
-idx=5
+tmap=1
 breq=0]],parse[[
 portx=96
 porty=88
@@ -831,8 +825,8 @@ t=20
 r=15
 g=15
 b=0
-idx=6
-breq=32]],parse[[
+breq=32
+tmap=2]],parse[[
 portx=44
 porty=80
 portw=9]],function()
@@ -842,7 +836,6 @@ r=4
 g=0
 b=0
 p=
-idx=2
 breq=0]],ant))
 	end),
 }
@@ -854,7 +847,6 @@ r=0
 g=10
 b=10
 p=
-idx=1
 breq=0]],beetle),
 	parse([[
 t=13
@@ -862,7 +854,6 @@ r=8
 g=8
 b=0
 p=
-idx=2
 breq=0]],spider),
 nil,
 nil,
@@ -871,8 +862,8 @@ t=20
 r=0
 g=20
 b=0
-idx=5
-breq=0]],parse[[
+breq=0
+tmap=4]],parse[[
 portx=114
 porty=64
 portw=9]],function(_ENV)
@@ -884,8 +875,8 @@ t=30
 r=10
 g=10
 b=0
-idx=6
-breq=0]],parse[[
+breq=0
+tmap=8]],parse[[
 portx=105
 porty=64
 portw=9]],function(_ENV)
@@ -900,8 +891,8 @@ t=8
 r=12
 g=8
 b=8
-idx=1
-breq=0]],parse[[
+breq=0
+tmap=16]],parse[[
 portx=104
 porty=88
 portw=9]],function()
@@ -917,7 +908,6 @@ r=6
 g=2
 b=0
 p=
-idx=1
 breq=0]],warant),
 	parse([[
 t=14
@@ -925,15 +915,14 @@ r=3
 g=0
 b=5
 p=
-idx=2
 breq=0]],archer),
 	parse([[
 t=10
 r=9
 g=6
 b=0
-idx=3
-breq=0]],parse[[
+breq=0
+tmap=32]],parse[[
 portx=96
 porty=64
 portw=9
@@ -947,8 +936,8 @@ t=18
 r=15
 g=7
 b=0
-idx=5
-breq=0]],parse[[
+breq=0
+tmap=64]],parse[[
 portx=105
 porty=72
 portw=9]],function(_ENV)
@@ -961,8 +950,8 @@ t=10
 r=9
 g=6
 b=0
-idx=6
 breq=0
+tmap=128
 ]],parse[[
 portx=96
 porty=72
@@ -979,7 +968,6 @@ r=2
 g=14
 b=14
 p=
-idx=1
 breq=0]],cat),
 nil,nil,nil,
  parse([[
@@ -987,8 +975,8 @@ t=40
 r=20
 g=0
 b=0
-idx=5
-breq=0]],parse[[
+breq=0
+tmap=256]],parse[[
 portx=96
 porty=80
 portw=8]],function()
@@ -999,8 +987,8 @@ t=10
 r=0
 g=10
 b=20
-idx=6
-breq=0]],parse[[
+breq=0
+tmap=512]],parse[[
 portx=113
 porty=88
 portw=9]],function()
@@ -1669,6 +1657,7 @@ function produce(u)
 	u.q.t-=0.5
 	if u.q.t<=0 then
 		if b.tech then
+			res1.techs|=b.tmap
 			b.tech(b.techt[1])
 		else
 			local new=unit(
@@ -2266,28 +2255,28 @@ portf=9
 		sspr(unspl"112,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
-		i-=1
-		draw_port(
-			b.typ,
-			88-i%4*13,
-			--menuy+2
-			106+i\4*11,
-			b,
-			function()
-				if can_pay(b) and (
-					not q or
-					q.b==b and q.qty<9) then
-					if b.typ.bldg then
-						to_build=b
-						return
-					end
-					queue_prod(sel1,b)
-					if b.tech then
-						sel1.prod[b.idx]=nil
+		if not b.done then
+			i-=1
+			draw_port(
+				b.typ,
+				88-i%4*13,
+				--menuy+2
+				106+i\4*11,
+				b,
+				function()
+					if can_pay(b) and (
+						not q or
+						q.b==b and q.qty<9) then
+						if b.typ.bldg then
+							to_build=b
+							return
+						end
+						queue_prod(sel1,b)
+						b.done=b.tech
 					end
 				end
-			end
-		)
+			)
+		end
 	end
 	if q then
 		local b=q.b
@@ -2300,13 +2289,12 @@ portf=9
 		 --menuy+3
 		 107,nil,
 			function()
-				pay(b,1,1)
+				b.done=pay(b,1,1)
 				if q.qty==1 then
 					sel1.q=nil
 				else
 					q.qty-=1
 				end
-				sel1.prod[b.idx]=b
 			end,q.t/b.t
 		)
 	end
@@ -2531,7 +2519,7 @@ unspl"0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
 reskeys,f2res,resqty,
  key2resf,rescol
  =
-split"r,g,b,p,pl,reqs,tot,bo_idx,diff",parse[[
+split"r,g,b,p,pl,reqs,tot,bo_idx,diff,techs",parse[[
 7=r
 11=g
 19=b
@@ -2584,7 +2572,8 @@ pl=10
 tot=4
 bo_idx=1
 reqs=0
-diff=-2]]
+diff=-2
+techs=0]]
 
 	res1,res2,
 	--upgradable
@@ -2900,6 +2889,13 @@ menuitem(2,"◆ load from clip",function()
 		add(i<res2.bo_idx and
 		 g(bldgs,b[3]-80,b[4],rebuild)
 		 ,i)
+	end
+	for b in all(techs) do
+		if res1.techs|b.tmap==
+			res1.techs then
+			b.done=true
+			b.tech(b.techt[1])
+		end
 	end
 	make_dmaps"d"
 end)
