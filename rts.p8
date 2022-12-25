@@ -126,24 +126,25 @@ function _draw()
 	
 	draw_menu()
 	if to_build then
-		local typ,x,y=to_build.typ,
-			to_build.x-cx,to_build.y-cy
-		
+		local typ=to_build.typ
+		camera(cx-to_build.x,
+			cy-to_build.y)
 		pal(buildable() or
 		 split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		--menuy
 		if amy>=104 then
-			x,y=amx,amy
+			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"--▒
-			rect(x-1,y-1,x+typ.fw,
-			 y+typ.fh,3)
+			rect(typ.fw,typ.fh,
+				unspl"-1,-1,3")
 	 	fillp()
 	 end
 		sspr(typ.rest_x,typ.rest_y,
-		 typ.fw,typ.h,x,y)
+		 typ.fw,typ.h)
 		pal()
+		camera()
 	end
 	
 	if hilite and hilite.circ then
@@ -2269,8 +2270,7 @@ portf=9
 	
 	if sel1.typ.farm then
 		--menuy+6
-		local x=? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4"
-		camera(-x)
+		camera(-? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4")
 		--menuy+4
 		sspr(unspl"112,96,9,9,2,109")
 	end
