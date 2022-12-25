@@ -2891,8 +2891,7 @@ menuitem(2,"◆ load from clip",function()
 	local r=deli(data)
 	for i,k in inext,reskeys do
 		i*=2
-		i-=1
-		res1[k],res2[k]=r[i],r[i+1]
+		res1[k],res2[k]=r[i-1],r[i]
 	end
 	for k in all(deli(data)) do
 		--k can be ""
