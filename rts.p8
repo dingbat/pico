@@ -42,7 +42,7 @@ function _draw()
 		end
  end
 
-	if sel_typ==farm[1] and
+	if sel_typ and sel_typ.farm and
 		not sel1.const then
 	 rectaround(sel1,9)
 	end
@@ -1522,19 +1522,19 @@ function update_farm(u)
 	end
 	if f.st.active and not u.exp and
 		not u.ready and fps==59 then
-		u.res.qty+=0.375+farm_cycles[u.p]/40
+		u.fres+=0.375+farm_cycles[u.p]/40
 		u.sproff+=1
-		u.ready=u.res.qty>=9
+		u.ready=u.fres>=9
 	end
 end
 
 function farmer(u)
 	local f=u.st.farm
 	if f.ready and fps==0 then
-		f.res.qty-=1
+		f.fres-=1
 		f.sproff+=1
 		collect(u,"r")
-		if f.res.qty<=0 then
+		if f.fres<=0 then
 			drop(u)
 			f.cycles+=1
 			f.exp,f.ready=f.p==1 and
@@ -1951,7 +1951,7 @@ end
 
 function can_drop()
  for u in all(selection) do
-		if u.res and u.typ.unit then
+		if u.res then
 			return hoverunit and
 			 hoverunit.typ.drop
 		end
@@ -1984,7 +1984,9 @@ function unit(typ,x,y,p,hp,
  	add(units,
  		parse[[dir=1
 sproff=0
-lastp=1]])
+lastp=1
+cycles=0
+fres=0]])
  		
  u.typ,u.x,u.y,u.p,u.hp,u.const,
   u.discovered,u.id,u.boi,
@@ -1994,11 +1996,7 @@ lastp=1]])
 		discovered==1,
 		flr(rnd"60"),tonum(boi),
 		typ.prod
-	rest(u_rect(u))
-	if typ.farm then
-		u.res,u.cycles=parse[[typ=r
-qty=0]],0
-	end		
+	rest(u_rect(u))		
 	if typ.bldg then
 		register_bldg(u)
 	end
@@ -2269,7 +2267,7 @@ portf=9
 	 return
 	end
 	
-	if sel1.cycles then
+	if sel1.typ.farm then
 		--menuy+6
 		local x=? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4"
 		camera(-x)
