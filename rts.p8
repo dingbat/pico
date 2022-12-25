@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 38
+version 39
 __lua__
 --main loop
 
@@ -229,9 +229,7 @@ function _update()
 	  	del(proj,p).to_unit.r,
 	 		{p.x,p.y,p.x,p.y},0
 	 	) then
-		 	deal_dmg(
-		 	 p.from_typ,
-		 		p.to_unit)
+		 	deal_dmg(p.from_typ,p.to_unit)
 			end
 		end
  end
@@ -1930,7 +1928,9 @@ function register_bldg(b)
 end
 
 function deal_dmg(from_typ,to)
-	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
+	to.hp-=from_typ.atk*dmg_mult[
+		from_typ.atk_typ.."_vs_"..
+		to.typ.def]
 	if to.st.rest then
 		move(to,
 			to.x+rnd"6"*2-6,
