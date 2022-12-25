@@ -321,12 +321,11 @@ function parse(str,typ,tech,t)
 		end
 	end
 	add(obj.idx and typs,obj)
-	add(obj.tmap and techs,obj)
 	return obj
 end
 
 function init_typs()
-typs,techs={},{}
+typs={}
 ant=parse[[
 idx=1
 spd=0.286
@@ -373,7 +372,8 @@ portw=8
 dir=1
 unit=1
 carry=6
-ant=1]]
+ant=1
+tmap=-1]]
 ant1=ant[1]
 
 beetle=parse[[
@@ -406,7 +406,8 @@ portx=26
 porty=72
 portw=9
 unit=1
-dir=1]]
+dir=1
+tmap=-1]]
 
 spider=parse[[
 idx=3
@@ -438,7 +439,8 @@ portx=16
 porty=72
 portw=9
 unit=1
-dir=1]]
+dir=1
+tmap=-1]]
 
 archer=parse[[
 idx=4
@@ -475,7 +477,8 @@ unit=1
 dir=1
 proj_xo=-2
 proj_yo=0
-proj_s=28]]
+proj_s=28
+tmap=-1]]
 
 warant=parse[[
 idx=5
@@ -507,7 +510,8 @@ portx=35
 porty=72
 portw=9
 unit=1
-dir=1]]
+dir=1
+tmap=-1]]
 
 cat=parse[[
 idx=6
@@ -545,7 +549,8 @@ dir=1
 proj_xo=1
 proj_yo=-4
 proj_s=32
-cat=1]]
+cat=1
+tmap=-1]]
 
 queen=parse[[
 idx=7
@@ -582,7 +587,8 @@ proj_yo=2
 proj_s=28
 bitmap=0
 units=1
-queen=1]]
+queen=1
+tmap=-1]]
 
 tower=parse[[
 idx=8
@@ -616,7 +622,8 @@ dir=-1
 proj_yo=-2
 proj_xo=-1
 proj_s=24
-bitmap=1]]
+bitmap=1
+tmap=-1]]
 
 mound=parse[[
 idx=9
@@ -643,7 +650,8 @@ bldg=1
 dir=-1
 has_q=1
 drop=1
-bitmap=2]]
+bitmap=2
+tmap=-1]]
 
 den=parse[[
 idx=10
@@ -671,7 +679,8 @@ dir=-1
 has_q=1
 bitmap=4
 units=2
-mil=1]]
+mil=1
+tmap=-1]]
 
 barracks=parse[[
 idx=11
@@ -699,7 +708,8 @@ dir=-1
 has_q=1
 bitmap=8
 units=2
-mil=1]]
+mil=1
+tmap=-1]]
 
 farm=parse[[
 idx=12
@@ -726,7 +736,8 @@ farm=1
 carry=9
 bldg=1
 dir=-1
-bitmap=16]]
+bitmap=16
+tmap=-1]]
 
 castle=parse[[
 idx=13
@@ -762,7 +773,8 @@ proj_yo=0
 proj_xo=0
 proj_s=24
 bitmap=32
-units=1]]
+units=1
+tmap=-1]]
 
 ant.prod={
 	parse([[
@@ -812,13 +824,14 @@ t=30
 r=18
 g=0
 b=5
+breq=0
 tmap=1
-breq=0]],parse[[
+idx=]],parse[[
 portx=96
 porty=88
 portw=8]],function(_ENV)
 		carry=9
-		spd*=1.15
+		spd*=1.25
 	end,ant),
 parse([[
 t=20
@@ -826,7 +839,8 @@ r=15
 g=15
 b=0
 breq=32
-tmap=2]],parse[[
+tmap=2
+idx=]],parse[[
 portx=44
 porty=80
 portw=9]],function()
@@ -863,7 +877,8 @@ r=0
 g=20
 b=0
 breq=0
-tmap=4]],parse[[
+tmap=4
+idx=]],parse[[
 portx=114
 porty=64
 portw=9]],function(_ENV)
@@ -876,7 +891,8 @@ r=10
 g=10
 b=0
 breq=0
-tmap=8]],parse[[
+tmap=8
+idx=]],parse[[
 portx=105
 porty=64
 portw=9]],function(_ENV)
@@ -892,7 +908,8 @@ r=12
 g=8
 b=8
 breq=0
-tmap=16]],parse[[
+tmap=16
+idx=]],parse[[
 portx=104
 porty=88
 portw=9]],function()
@@ -922,7 +939,8 @@ r=9
 g=6
 b=0
 breq=0
-tmap=32]],parse[[
+tmap=32
+idx=]],parse[[
 portx=96
 porty=64
 portw=9
@@ -937,7 +955,8 @@ r=15
 g=7
 b=0
 breq=0
-tmap=64]],parse[[
+tmap=64
+idx=]],parse[[
 portx=105
 porty=72
 portw=9]],function(_ENV)
@@ -952,7 +971,7 @@ g=6
 b=0
 breq=0
 tmap=128
-]],parse[[
+idx=]],parse[[
 portx=96
 porty=72
 portw=9
@@ -976,7 +995,8 @@ r=20
 g=0
 b=0
 breq=0
-tmap=256]],parse[[
+tmap=256
+idx=]],parse[[
 portx=96
 porty=80
 portw=8]],function()
@@ -988,7 +1008,8 @@ r=0
 g=10
 b=20
 breq=0
-tmap=512]],parse[[
+tmap=512
+idx=]],parse[[
 portx=113
 porty=88
 portw=9]],function()
@@ -2890,7 +2911,7 @@ menuitem(2,"◆ load from clip",function()
 		 g(bldgs,b[3]-80,b[4],rebuild)
 		 ,i)
 	end
-	for b in all(techs) do
+	for b in all(typs) do
 		b.done=
 			res1.techs|b.tmap==res1.techs
 			and not b.tech(b.techt[1])

@@ -31,25 +31,12 @@ selx,sely,selt=mx,my,t()
 		return
 	end
 
-
---[[
-todo:
-- ai
-- balancing
-	- dmg mult table
-	- unit stats (spd,los,hp)
- - costs
-- addtl map?
-]]
-
 --[[
 the following will not be saved:
 - unit states
-- ai rebuild
 - resource count in resource tiles
 - units in production, along w/
   the used resources+pop count
-- techs (research, upgrades)
 - top-left tree will regrow :-)
 ]]
 
