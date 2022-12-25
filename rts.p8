@@ -1970,7 +1970,7 @@ function collect(u,res)
 	if u.res and u.res.typ==res then
 		u.res.qty+=1
 	else
-		u.res={typ=res,qty=1}
+		u.res=parse("qty=1",res)
 	end
 	if u.res.qty>=u.typ.carry then
 		drop(u,res)
