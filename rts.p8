@@ -1133,8 +1133,11 @@ end
 --update
 
 function handle_click()
-	local l,r,cont,axn,htile=
-		5,4,not action
+	local l,r,cont,htile,axn=
+		5,4,not action,{
+	 	t=t(),
+	 	unit=tile_as_unit(mx8,my8)
+	 }
 	
 	if lclk and hovbtn then
 		hovbtn.handle()
@@ -1185,10 +1188,6 @@ function handle_click()
 	
  if rclk and sel1 and sel1.p==1
  then
-	 htile={
-	 	t=t(),
-	 	unit=tile_as_unit(mx8,my8)
-	 }
 	 if can_renew_farm() then
 	 	hilite_hoverunit()
 	 	hoverunit.sproff,
