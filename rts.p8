@@ -145,13 +145,13 @@ function _draw()
 		sspr(rest_x,rest_y,fw,h)
 		pal()
 	end
-		camera()
+	camera()
 	
 	if hilite and hilite.circ then
 		circ(unpack(hilite.circ))
 	end
 	
-	spr(cursor_spr(),amx,amy)
+	spr(cursor_spr() or 64,amx,amy)
 end
 
 function _update()
@@ -2212,11 +2212,11 @@ function cursor_spr()
 			can_renew_farm() then
 			return 68
 		end
-		if (can_gather())	return 67
-		if (can_attack()) return 65
-		if (can_drop()) return 69
+		--75
+		return can_gather() and 67 or
+			can_attack() and 65 or
+			can_drop() and 69
 	end
-	return 64
 end
 
 function draw_sel_ports(x)
