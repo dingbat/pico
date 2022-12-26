@@ -110,17 +110,17 @@ function _draw()
 			sel1.rx-2,sel1.ry-5)
 	end
 
-	if hilite then
-		local dt=t()-hilite.t
+ --hilite
+	if hlv then
+		local dt=t()-hlt
 		if dt>0.5 then
-			hilite=nil
-		elseif hilite.cx then
-			circ(hilite.cx,hilite.cy,
+			hlv=nil
+		elseif hlv.cx then
+			circ(hlv.cx,hlv.cy,
 			 min(0.5/dt,4),8)
-		elseif dt<=0.1 or dt>=0.25 then
-			if hilite.unit then
-				rectaround(hilite.unit,8)
-			end
+		elseif (dt<=0.1 or dt>=0.25)
+			and hlv.x then
+			rectaround(hlv,8)
 		end
 	end
 	
@@ -147,9 +147,8 @@ function _draw()
 	end
 	camera()
 	
-	if hilite and hilite.circ then
-		circ(unpack(hilite.circ))
-	end
+	--mm hilite
+	if (hlv) circ(unpack(hlv))
 	
 	--cursor
 	spr(
@@ -1143,10 +1142,8 @@ end
 
 function handle_click()
 	local l,r,cont,htile,axn=
-		5,4,not action,{
-	 	t=t(),
-	 	unit=tile_as_unit(mx8,my8)
-	 }
+		5,4,not action,
+		tile_as_unit(mx8,my8)
 	
 	if lclk and hovbtn then
 		hovbtn.handle()
@@ -1166,8 +1163,7 @@ function handle_click()
 				mmwratio*dx,mmhratio*dy
 			if rclk and sel1 then
 				foreachsel(move,x,y,axn)
-				hilite={t=t(),
-					circ={amx,amy,2,8}}
+				hilite{amx,amy,2,8}
 			elseif lclk then
 				cx,cy=
 					mid(0,x-64,mapw-128),
@@ -1198,7 +1194,7 @@ function handle_click()
  if rclk and sel1 and sel1.p==1
  then
 	 if can_renew_farm() then
-	 	hilite_hoverunit()
+	 	hilite(hoverunit)
 	 	hoverunit.sproff,
 	 		hoverunit.cycles,
 	 		hoverunit.exp=0,0
@@ -1206,7 +1202,7 @@ function handle_click()
 	 	harvest(sel1,hoverunit)
 	 	
 	 elseif can_gather() then
-	 	hilite=htile
+	 	hilite(htile)
 	 	if avail_farm() then
 	 		harvest(sel1,hoverunit)
 	 	else
@@ -1215,23 +1211,23 @@ function handle_click()
 	 	
   elseif can_build() then
   	foreachsel(build,hoverunit)
-			hilite_hoverunit()
+			hilite(hoverunit)
 			
 	 elseif can_attack() then
   	foreachsel(attack,hoverunit)
-  	hilite_hoverunit()
+  	hilite(hoverunit)
   	
   elseif can_drop() then
   	foreachsel(drop,nil,hoverunit)
-  	hilite_hoverunit()
+  	hilite(hoverunit)
   	
   elseif sel1.typ.unit then
   	movegrp(selection,mx,my,axn)
-  	hilite={t=t(),cx=mx,cy=my}
+  	hilite{cx=mx,cy=my}
   	
   elseif sel1.typ.units then
   	if fget(mget(mx8,my8),1) then
- 	  hilite=htile
+ 	  hilite(htile)
 			end
   	sel1.rx,sel1.ry,
   		sel1.rtx,sel1.rty=
@@ -1264,8 +1260,8 @@ function foreachsel(func,...)
 	end
 end
 
-function hilite_hoverunit()
-	hilite={t=t(),unit=hoverunit}
+function hilite(v)
+	hlt,hlv=t(),v
 end
 
 function mouse_cam()
@@ -1772,7 +1768,7 @@ end
 
 function sel_only(unit)
 	foreachsel(function(u)
-		u.sel=nil
+		u.sel=hilite(unit)
 	end)
 	selection,unit.sel={unit},1
 end
@@ -2392,9 +2388,7 @@ portf=13
 		r=split"116,121,125,128",
 		handle=function()
 			sel_only(idle)
-			cx,cy,hoverunit=
-				idle.x-64,idle.y-64,idle
-			hilite_hoverunit()
+			cx,cy=idle.x-64,idle.y-64
 			mouse_cam()
 		end
 	})
