@@ -1581,12 +1581,14 @@ function aggress(u)
 end
 
 function fight(u)
-	local typ,e,in_range,id,d=
+	local typ,e,in_range,d=
 		u.typ,u.st.target,
-		u.st.active,u.id
-	local dx,dy=e.x-u.x,e.y-u.y
+		u.st.active
+	local dx,dy,upd=
+		e.x-u.x,e.y-u.y,
+		upc==u.id%upcycle
 	if typ.range then
-		if upc==id%upcycle then
+		if upd then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
 				g(viz,e.x8,e.y8)	
@@ -1594,7 +1596,7 @@ function fight(u)
 		if in_range and
 			fps%typ.proj_freq==
 			(typ.cat and 0 or
-			 id%typ.proj_freq)
+			 u.id%typ.proj_freq)
 		then
  		add(proj,{
  			from_typ=typ,
@@ -1613,7 +1615,7 @@ function fight(u)
  u.st.active=in_range
  if in_range then
  	u.dir,u.st.wayp=sgn(dx)
-	elseif upc==id%upcycle then
+	elseif upd then
 		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
 	 	attack(u,e) --pursue
