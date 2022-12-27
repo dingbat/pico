@@ -558,6 +558,7 @@ def=queen
 
 w=16
 h=8
+h8=1
 fw=16
 rest_x=64
 rest_y=-1
@@ -596,6 +597,7 @@ atk_typ=tower
 def=building
 
 w=8
+w8=1
 fw=8
 h=16
 fh=16
@@ -630,6 +632,8 @@ w=8
 fw=8
 h=8
 fh=8
+w8=1
+h8=1
 rest_x=16
 rest_y=96
 portx=35
@@ -658,6 +662,8 @@ w=8
 fw=8
 h=8
 fh=8
+w8=1
+h8=1
 rest_x=16
 rest_y=104
 fire=1
@@ -687,6 +693,8 @@ w=8
 fw=8
 h=8
 fh=8
+w8=1
+h8=1
 rest_x=16
 rest_y=112
 fire=1
@@ -716,6 +724,8 @@ w=8
 fw=8
 h=8
 fh=8
+w8=1
+h8=1
 rest_x=16
 rest_y=120
 fire=1
@@ -1178,7 +1188,7 @@ function handle_click()
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1,nil,0)
+				1,nil,0,1)
 			foreachsel(build,b)
 			b.cost,to_build,selx=
 			 to_build,pay(to_build,-1,1)
@@ -1910,21 +1920,20 @@ function acc(x,y,strict)
 end
 
 function buildable()
-	local x,y,w,h=
+	local x,y,w8,h8=
 		to_build.x/8,
 		to_build.y/8,
-		to_build.typ.w,
-		to_build.typ.h
+		to_build.typ.w8,
+		to_build.typ.h8
 	return	acc(x,y,true) and
-		(w<9 or acc(x+1,y,true)) and
-		(h<9 or acc(x,y+1,true)) and
-		(h<9 or w<9 or acc(x+1,y+1,true))
+		(w8 or acc(x+1,y,true)) and
+		(h8 or acc(x,y+1,true)) and
+		(h8 or w8 or acc(x+1,y+1,true))
 end
 
 function register_bldg(b)
 	local typ=b.typ
-	local w,h,x,y=typ.w,typ.h,
-		b.x8,b.y8
+	local x,y=b.x8,b.y8
 
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
@@ -1939,12 +1948,15 @@ function register_bldg(b)
 			s(dmap_st.d,xx,yy,{xx,yy})
 		end
 	end
-	reg(x,y)
-	if w>8 then
-		reg(x+1,y)
-		if (h>8) reg(x+1,y-1)
-	end
-	if (h>8) reg(x,y-1)
+-- return	acc(x,y,true) and
+--		(w8 or acc(x+1,y,true)) and
+--		(h8 or acc(x,y+1,true)) and
+--		(h8 or w8 or acc(x+1,y+1,true))
+
+	x=reg(x,y) or
+		(typ.w8 or reg(x+1,y)) or
+		(typ.h8 or reg(x,y-1)) or
+		(typ.h8 or typ.w8 or reg(x+1,y-1))
 	
 	if (typ.queen) queens[b.p]=b
 	if not b.const and not typ.farm then
