@@ -1948,15 +1948,11 @@ function register_bldg(b)
 			s(dmap_st.d,xx,yy,{xx,yy})
 		end
 	end
--- return	acc(x,y,true) and
---		(w8 or acc(x+1,y,true)) and
---		(h8 or acc(x,y+1,true)) and
---		(h8 or w8 or acc(x+1,y+1,true))
-
-	x=reg(x,y) or
-		(typ.w8 or reg(x+1,y)) or
-		(typ.h8 or reg(x,y-1)) or
-		(typ.h8 or typ.w8 or reg(x+1,y-1))
+	reg(x,y,typ.h8 or reg(x,y-1))
+	if not typ.w8 then
+		reg(x+1,y,
+			typ.h8 or reg(x+1,y-1))
+	end
 	
 	if (typ.queen) queens[b.p]=b
 	if not b.const and not typ.farm then
