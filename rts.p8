@@ -1300,10 +1300,12 @@ function handle_input()
 end
 
 function tick_unit(u)
-	u.onscr=intersect(u.r,
+	local typ=u.typ
+	u.hp+=typ.hp-u.max_hp
+	u.max_hp,u.onscr=typ.hp,
+		intersect(u.r,
 		{cx,cy,cx+128,cy+128},0)
 
-	local typ=u.typ
 	if u.hp<=0 and not u.dead then
 		del(selection,u)
 		u.dead,
@@ -1324,8 +1326,7 @@ function tick_unit(u)
 		if (typ.unit) update_viz(u)
 		del(u.dead==60 and units,u)
 		return
-	end
-	
+	end 
 	if units_heal[u.p] and
 		not u.fire and
 	 u.hp<typ.hp and
@@ -2009,21 +2010,23 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
-function unit(typ,x,y,p,boi,
+function unit(t,x,y,p,boi,
 	const,discovered,hp)
  local typ,u=
- 	typs[typ] or typ,
+ 	typs[t] or t,
  	add(units,
  		parse[[dir=1
 sproff=0
 lastp=1
 cycles=0
 fres=0]])
- 		
- u.typ,u.x,u.y,u.p,u.hp,u.const,
+	local typp=typ[p]
+ u.typ,u.x,u.y,u.p,
+ 	u.hp,u.max_hp,u.const,
   u.discovered,u.id,u.boi,
   u.prod=
- 	typ[p],x,y,p,hp or typ[p].hp,
+ 	typp,x,y,p,
+ 	hp or typp.hp,typp.hp,
 		tonum(const),
 		discovered==1,
 		flr(rnd"60"),tonum(boi),
@@ -2895,6 +2898,11 @@ menuitem(2,"◆ load from clip",function()
 	for i,t in inext,deli(data) do
 		mset(i%mapw8,i/mapw8,t)
 	end
+	for b in all(typs) do
+		b.done=
+			res1.techs|b.tmap==res1.techs
+			and not b.tech(b.techt[1])
+	end
 	for l in all(data) do
 		unit(unpack(l))
 	end
@@ -2902,11 +2910,6 @@ menuitem(2,"◆ load from clip",function()
 		add(i<res2.bo_idx and
 		 g(bldgs,b[3]-80,b[4],rebuild)
 		 ,i)
-	end
-	for b in all(typs) do
-		b.done=
-			res1.techs|b.tmap==res1.techs
-			and not b.tech(b.techt[1])
 	end
 	make_dmaps"d"
 end)
