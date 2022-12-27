@@ -187,14 +187,20 @@ function _update()
 
 	fps+=1
 	fps%=60
-	upc=fps%upcycle
 	
-	async_dmap()
-	lclk,rclk=llclk and not btn"5",
+	upc,lclk,rclk=fps%upcycle,
+		llclk and not btn"5",
 		lrclk and not btn"4"
+
  handle_input()
- llclk,lrclk=btn"5",btn"4"
- 
+
+ llclk,lrclk,upc_0,pos,
+ 	hoverunit,idle,idle_mil=
+ 	btn"5",btn"4",
+ 	upc==0,{}
+
+	async_dmap()
+
  if fps%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -209,9 +215,6 @@ function _update()
 		end
 	end
 	
- upc_0,pos,hoverunit,
- 	idle,idle_mil=
-  upc==0,{}
  if loser then
  	poke"24365" --no mouse
  	if lclk then
@@ -228,6 +231,7 @@ function _update()
 	   0 or mget(x,y))
 		end
  end
+ 
  for p in all(proj) do
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
@@ -264,7 +268,7 @@ function _update()
 			end
 		end
  	if not (u.const or u.dead) then
-		 if upc==u.id%upcycle and
+		 if u.upd and
 		  u.st.aggress and
 		  u.typ.atk
 		 then
@@ -1306,10 +1310,11 @@ end
 function tick_unit(u)
 	local typ=u.typ
 	u.hp+=typ.hp-u.max_hp
-	u.max_hp,u.onscr=typ.hp,
+	u.max_hp,u.onscr,u.upd=
+		typ.hp,
 		intersect(u.r,
-		{cx,cy,cx+128,cy+128},0)
-
+			{cx,cy,cx+128,cy+128},0),
+		u.id%upcycle==upc
 	if u.hp<=0 and not u.dead then
 		del(selection,u)
 		u.dead,
@@ -1387,8 +1392,7 @@ function tick_unit(u)
 end
 
 function update_viz(u)
-	if u.p==1 and
-		u.id%upcycle==upc then
+	if u.p==1 and u.upd then
 		local k0,los=u.x8|u.y8<<8,
 			u.typ.los
 
@@ -1584,11 +1588,9 @@ function fight(u)
 	local typ,e,in_range,d=
 		u.typ,u.st.target,
 		u.st.active
-	local dx,dy,upd=
-		e.x-u.x,e.y-u.y,
-		upc==u.id%upcycle
+	local dx,dy=e.x-u.x,e.y-u.y
 	if typ.range then
-		if upd then
+		if u.upd then
 			d=dist(dx,dy)
 			in_range=d<=typ.range and
 				g(viz,e.x8,e.y8)	
@@ -1615,7 +1617,7 @@ function fight(u)
  u.st.active=in_range
  if in_range then
  	u.dir,u.st.wayp=sgn(dx)
-	elseif upd then
+	elseif u.upd then
 		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
 	 	attack(u,e) --pursue
@@ -2027,9 +2029,9 @@ fres=0]])
 				tonum(_const),_disc==1,
 				_id,tonum(_boi),_typ.prod
 	end
-	rest(u)
+	rest(u_rect(u))
 	if (_typ.bldg)register_bldg(u)
-	return u_rect(u)
+	return u
 end
 
 function queue_prod(u,b)
@@ -2568,11 +2570,11 @@ function init()
 		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
-		proj,bldgs,spiders,viz,
-		new_viz,
+		proj,bldgs,viz,new_viz,
 		dmap_st,res,loser,menu,selx=
-		{},{},{},{},{},{},{},
-		{},{},{},{},{},{d={}},
+		{},{},{},{},
+		{},{},{},
+		{},{},{},{},{d={}},
 	 parse[[
 r=20
 g=10
