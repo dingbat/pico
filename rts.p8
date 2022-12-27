@@ -2005,32 +2005,29 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
-function unit(t,x,y,p,boi,
-	const,discovered,hp)
- local typ,u=
+function unit(t,_x,_y,_p,_boi,
+	_const,_disc,_hp)
+ local _typ,_id,u=
  	typs[t] or t,
+ 	flr(rnd"60"),
  	add(units,
  		parse[[dir=1
 sproff=0
 lastp=1
 cycles=0
 fres=0]])
-	local typp=typ[p]
- u.typ,u.x,u.y,u.p,
- 	u.hp,u.max_hp,u.const,
-  u.discovered,u.id,u.boi,
-  u.prod=
- 	typp,x,y,p,
- 	hp or typp.hp,typp.hp,
-		tonum(const),
-		discovered==1,
-		flr(rnd"60"),tonum(boi),
-		typ.prod
-	rest(u_rect(u))		
-	if typ.bldg then
-		register_bldg(u)
+	do
+		local ptyp,_ENV=_typ[_p],u
+	 typ,x,y,p,hp,max_hp,const,
+	  discovered,id,boi,prod=
+		 	ptyp,_x,_y,_p,
+		 	_hp or ptyp.hp,ptyp.hp,
+				tonum(_const),_disc==1,
+				_id,tonum(_boi),_typ.prod
 	end
-	return u
+	rest(u)
+	if (_typ.bldg)register_bldg(u)
+	return u_rect(u)
 end
 
 function queue_prod(u,b)
