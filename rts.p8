@@ -68,7 +68,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(mapw8,15) --fogmap
+--	draw_map(mapw8,15) --fog
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -144,10 +144,8 @@ function _draw()
 	end
 	camera()
 	
-	--mm hilite
 	if (hlv) circ(unpack(hlv))
 	
-	--cursor
 	spr(
 	 hovbtn and pset(amx-1,
 	  amy+4,5) and 66 or
@@ -806,7 +804,6 @@ r=0
 g=5
 b=15
 breq=0]],tower),
---t,d,b
 	parse([[
 r=0
 g=25
@@ -917,7 +914,7 @@ idx=]],parse[[
 portx=104
 porty=88
 portw=9]],function()
-		--also makes farms grow +25% 
+		--also +25% grwr8 
 		farm_cycles[1]=10
 	end),
 }
@@ -1420,7 +1417,7 @@ function update_viz(u)
 				if bldgs[k] then
 					bldgs[k].discovered=1
 				end
-				--"v" to index into rescol
+				--"v" for rescol
 				exp[k],new_viz[k]=1,"v"
 			end
 		end
@@ -1662,7 +1659,7 @@ function mine(u)
 		then
 			mset(x,y,t+16)
 		elseif n==1 then
-			mset(x,y,74) --exhaust
+			mset(x,y,74)
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
 			make_dmaps(r)
@@ -1908,7 +1905,6 @@ function norm(it,nt,f)
 		d
 end
 
---strict incl farms+const
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0) and
@@ -1932,8 +1928,7 @@ function buildable()
 end
 
 function register_bldg(b)
-	local typ=b.typ
-	local x,y=b.x8,b.y8
+	local typ,x,y=b.typ,b.x8,b.y8
 
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
@@ -2093,7 +2088,7 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---a* based on t.co/NaSUd3d1ix
+--based on t.co/NaSUd3d1ix (morgan3d)
 function find_path(start,goal)
  local shortest,best_table={
   last=start,
@@ -2593,10 +2588,8 @@ diff=-2
 techs=0]]
 
 	res1,res2,
-	--upgradable
 	units_heal,
 	farm_cycles,farm_renew_cost_b,
-
 	cx,cy,mx,my,fps,numsel,
 	dmaps_ready=
 		res[1],res[2],{false,true},
@@ -2893,7 +2886,6 @@ menuitem(2,"◆ load from clip",function()
 		res1[k],res2[k]=r[i-1],r[i]
 	end
 	for k in all(deli(data)) do
-		--k can be ""
 		exp[k]=tonum(k)
 	end
 	for i,t in inext,deli(data) do
