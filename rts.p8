@@ -1104,7 +1104,7 @@ end
 function drop(u,nxt_res,dropu)
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
-		dropu=not wayp and queens[u.p]
+		dropu=not wayp and units[u.p]
 	end
 	if dropu then
 		wayp=get_wayp(u,dropu.x,
@@ -1458,7 +1458,7 @@ function draw_minimap()
 	camera()
 end
 -->8
---units
+--unit
 
 function draw_unit(u)
 	local typ,st,res_typ=
@@ -1949,7 +1949,6 @@ function register_bldg(b)
 			typ.h8 or reg(x+1,y-1))
 	end
 	
-	if (typ.queen) queens[b.p]=b
 	if not b.const and not typ.farm then
 		make_dmaps"d"
 		res[b.p].reqs|=typ.bitmap
@@ -2571,10 +2570,10 @@ function init()
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
 		proj,bldgs,spiders,viz,
-		new_viz,queens,
+		new_viz,
 		dmap_st,res,loser,menu,selx=
 		{},{},{},{},{},{},{},
-		{},{},{},{},{},{},{d={}},
+		{},{},{},{},{},{d={}},
 	 parse[[
 r=20
 g=10
@@ -2606,11 +2605,11 @@ function new_game()
 	--q=6,5
 	foreach(
 splspl[[7,55,44,1
+7,337,188,2
 1,40,40,1
 1,68,43,1
 1,50,32,1
 5,48,56,1
-7,337,188,2
 1,320,184,2
 1,348,187,2
 1,330,196,2
