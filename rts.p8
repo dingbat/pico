@@ -1457,21 +1457,17 @@ end
 --units
 
 function draw_unit(u)
-	local typ,st,
-		res_typ=
+	local typ,st,res_typ=
 			u.typ,u.st,
 			u.res and u.res.typ or ""
 
-	local fw,w,h,
-	 stt,
-	 hp=
+	local fw,w,h,stt,hp,xx,yy=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 u.hp/typ.hp
+		 u.hp/typ.hp,unpack(u.r)
 
-	local xx,yy,sx,sy,ufps,fr,f=
-		u.x-w/2,u.y-h\2,
-	 typ[stt.."_x"]+
+	local sx,sy,ufps,fr,f=
+		typ[stt.."_x"]+
 	 	max(typ["xoff_"..res_typ])+
 	 	u.sproff\8*8,
 	 typ[stt.."_y"]+max(typ["yoff_"..res_typ]),
@@ -1637,7 +1633,7 @@ function buildrepair(u)
 				harvest(u,b)
 			end
 		end
-	elseif b.hp<b.typ.hp and
+	elseif b.hp<b.max_hp and
 		r.b>=1 then
 		b.hp+=1
 		r.b-=0.5
@@ -1885,7 +1881,7 @@ function can_build()
 	return hoverunit and
 		hoverunit.typ.bldg and
 		(hoverunit.const or
-			hoverunit.hp<hoverunit.typ.hp
+			hoverunit.hp<hoverunit.max_hp
 	 ) and
 		sel_typ==ant1
 end
@@ -2773,7 +2769,7 @@ end
 function ai_unit2(u)
 	if u.p==2 then
 		if u.typ.bldg and
-			(u.hp<u.typ.hp*0.75 or 
+			(u.hp<u.max_hp*0.75 or 
 			 u.const)
 		then
 			if u.dead then
