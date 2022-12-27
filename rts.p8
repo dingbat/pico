@@ -1610,7 +1610,7 @@ function fight(u)
  	end
  else
  	in_range=intersect(u.r,e.r,0)
-		if in_range and fps%30==id%30 then
+		if in_range and fps%30==u.id%30 then
 		 deal_dmg(typ,e)
 		end
  end
