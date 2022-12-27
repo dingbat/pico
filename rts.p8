@@ -181,9 +181,9 @@ function _update()
 	end
 
 	--autosave
---	if time()%15<1 and fps==0 then
---		save()
---	end
+	if time()%5<1 and fps==0 then
+		save()
+	end
 
 	local total=res1.p+res2.p
 	upcycle=total>=100 and 30 or
@@ -1468,7 +1468,7 @@ function draw_unit(u)
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
 		 u.hp/typ.hp
-	
+
 	local xx,yy,sx,sy,ufps,fr,f=
 		u.x-w/2,u.y-h\2,
 	 typ[stt.."_x"]+
@@ -1964,7 +1964,7 @@ function deal_dmg(from_typ,to)
 	to.hp-=from_typ.atk*dmg_mult[
 		from_typ.atk_typ.."_vs_"..
 		to.typ.def]
-	if to.st.rest then
+	if to.typ.unit and to.st.rest then
 		move(to,
 			to.x+rnd"6"*2-6,
 			to.y+rnd"6"*2-6,true)
@@ -2435,8 +2435,8 @@ function dmap_find(u,key)
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
 		for t in all_surr(x,y,1) do
-			local w=dmap[t.k] or 9
-			if w+t.d-1<lowest then
+			local w=(dmap[t.k] or 9)+t.d-1
+			if w<lowest then
 				lowest,x,y=w,unpack(t)
 			end
 		end
