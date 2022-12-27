@@ -99,9 +99,7 @@ function _draw()
 	
 	camera(cx,cy)
 
-	if selx then
-		rect(unpack(selbox))
-	end
+	if (selx) rect(unpack(selbox))
 	
 	fillp()
 	
@@ -118,9 +116,8 @@ function _draw()
 		elseif hlv.cx then
 			circ(hlv.cx,hlv.cy,
 			 min(0.5/dt,4),8)
-		elseif (dt<=0.1 or dt>=0.25)
-			and hlv.x then
-			rectaround(hlv,8)
+		elseif dt<=0.1 or dt>=0.25 then
+			if (hlv.x) rectaround(hlv,8)
 		end
 	end
 	
