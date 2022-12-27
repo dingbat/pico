@@ -68,7 +68,7 @@ function _draw()
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
---	draw_map(mapw8,15) --fog
+	draw_map(mapw8,15) --fog
 
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
@@ -176,9 +176,9 @@ function _update()
 	end
 
 	--autosave
-	if time()%5<1 and fps==0 then
-		save()
-	end
+--	if time()%5<1 and fps==0 then
+--		save()
+--	end
 
 	local total=res1.p+res2.p
 	upcycle=total>=100 and 30 or
@@ -2148,7 +2148,7 @@ end
 --menu
 
 function print_res(r,x,y,zero)
-	local res1=res2
+--	local res1=res2
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2399,7 +2399,7 @@ portf=13
 		end
 	})
 	
-	local res1=res2
+--	local res1=res2
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
 	line(unspl"-4,120,-128,120,5")
@@ -2803,7 +2803,7 @@ function ai_unit2(u)
 	end
 end
 
-_update60=_update
+--_update60=_update
 
 function ai_bld(boi)
 	local bld=bo[boi]
