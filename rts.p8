@@ -376,7 +376,7 @@ beetle=parse[[
 idx=2
 spd=0.19
 los=20
-hp=30
+hp=20
 atk=1
 def=seige
 atk_typ=seige
@@ -1019,7 +1019,11 @@ portx=113
 porty=88
 portw=9]],function()
 		for x in all(typs) do
-			if (x.bldg) x[1].los+=10
+			local t=x[1]
+			if x.bldg then
+			 t.los+=10
+			 t.range=t.los
+			end
 		end
 	end),
 }
