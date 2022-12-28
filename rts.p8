@@ -480,7 +480,7 @@ tmap=-1]]
 
 warant=parse[[
 idx=5
-spd=0.321
+spd=0.33
 los=25
 hp=10
 atk=1
@@ -1236,7 +1236,7 @@ function handle_click()
   elseif sel1.typ.unit then
   	movegrp(selection,mx,my,axn)
   	hilite{cx=mx,cy=my}
-  	
+
   elseif sel1.typ.units then
   	if fget(mget(mx8,my8),1) then
  	  hilite(htile)
@@ -1969,7 +1969,8 @@ function deal_dmg(from_typ,to)
 	to.hp-=from_typ.atk*dmg_mult[
 		from_typ.atk_typ.."_vs_"..
 		to.typ.def]
-	if to.typ.unit and to.st.rest then
+	if to.typ.unit and (
+		to.st.rest or to.st.res) then
 		move(to,
 			to.x+rnd"6"*2-6,
 			to.y+rnd"6"*2-6,true)
@@ -2053,18 +2054,16 @@ end
 -->8
 --a*
 
-function nearest_acc(x,y,u)
+function nearest_acc(x,y)
 	for n=0,16 do
 		local best_d,best_t=32767
-		for t in all_surr(x\8,y\8,n) do
-			if acc(unpack(t)) then
-				local d=dist(
-					t[1]*8+4-u.x,
-					t[2]*8+4-u.y
-				)
-				if d<best_d then
-					best_t,best_d=t,d
-				end
+		for t in all_surr(x\8,y\8,n,true) do
+			local d=dist(
+				t[1]*8+4-x,
+				t[2]*8+4-y
+			)
+			if d<best_d then
+				best_t,best_d=t,d
 			end
 		end
 		if (best_t) return best_t,n
@@ -2075,10 +2074,10 @@ function get_wayp(u,x,y,tol)
 	if u.typ.unit then
 		local wayp,dest,dest_d=
 			{},
-			nearest_acc(x,y,u)
+			nearest_acc(x,y)
 		--unstick
 		local path,exists=find_path(
-		 nearest_acc(u.x,u.y,u),
+		 nearest_acc(u.x,u.y),
 		 dest)
 		deli(path) --start
 		for n in all(path) do
@@ -2810,7 +2809,7 @@ function ai_unit2(u)
 		local b=u.y<112 and 1 or
 			u.y>208 and 4 or 2
 		inv|=b
-		movegrp(defsqd[b],u.x,u.y,1)
+		movegrp(defsqd[b],u.x,u.y,1,1)
 	end
 end
 
@@ -3179,7 +3178,7 @@ __label__
 
 __gff__
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007070b0b13130121012121000000000007070b0b131321a1212121000000000007070b0b131301210101010000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000707002121000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000707002121000000000000000000a1a1a1a10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 54545454545454555253525352525352525151545454545454555454535353525353555554546c4f4c4d4e4f7b5252524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b525151545454545454555454535353525353555554546c4f4c4d4e4f7b525252
 545454545554545f7b525353535253524c4d545455545554545454555352525353545455546c5e5f5c5352535c5353524b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4c4d545455545554545454555352525353545455546c5e5f5c5352535c535352
