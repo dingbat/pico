@@ -1,7 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 39
 __lua__
---main loop
+--age of ants
+--eeooty (dan h)
 
 function _draw()
  draw_map(0,17)
@@ -130,7 +131,6 @@ function _draw()
 		pal(buildable() or
 		 split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
-		--menuy
 		if amy>=104 then
 			camera(4-amx,4-amy)
 		else
@@ -299,7 +299,7 @@ function _update()
 end
 
 -->8
---units/states
+--units
 
 function unspl(...)
 	return unpack(split(...))
@@ -954,7 +954,6 @@ idx=]],parse[[
 portx=104
 porty=88
 portw=9]],function()
-		--also +25% grwr8 
 		farm_cycles[1]=10
 	end),
 }
@@ -1200,7 +1199,6 @@ function handle_click()
 		rclk,axn,action=lclk,true
 	end
 
-	--menuy
 	if amy>104 and not selx then
 		local dx,dy=amx-mmx,amy-mmy
 		if min(dx,dy)>=0 and
@@ -1213,7 +1211,6 @@ function handle_click()
 			elseif lclk then
 				cx,cy=
 					mid(0,x-64,mapw-128),
-					--menuh=21
 				 mid(0,y-64,maph-107)
 			end
 		end
@@ -1320,7 +1317,6 @@ function mouse_cam()
  	),
  	mid(0,
  		cy+band(b,0x8)/4-band(b,0x4)/2,
-	 	--menuh=21
  		maph-(loser and 128 or 107)
  	),
  	mid(0,stat"32",126),
@@ -2261,14 +2257,12 @@ function draw_sel_ports(x)
 	for i,u in inext,selection do
 		x+=13
 		if i>5 then
-			--menuy+6
 			if (numsel>14) x-=4
 			camera(-?"\f1+"..numsel-5,x-15,121)
 			spr(unspl"133,1,121")
 			break
 		end
 		draw_port(
-			--menuy+3
 			u.typ,x,107,nil,
 			function()
 				del(selection,u).sel=false
@@ -2295,7 +2289,6 @@ portw=9
 porto=8
 portf=9
 	 	]],20,
-	 	--menuy+3
 	 	107,nil,function()
 	 		pay(sel1.cost,1,1)
 	 		sel1.hp=0
@@ -2305,9 +2298,7 @@ portf=9
 	end
 	
 	if sel1.typ.farm then
-		--menuy+6
 		camera(-? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4")
-		--menuy+4
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2316,7 +2307,6 @@ portf=9
 			draw_port(
 				b.typ,
 				88-i%4*13,
-				--menuy+2
 				106+i\4*11,
 				b,
 				function()
@@ -2339,10 +2329,8 @@ portf=9
 		draw_port(
 		 b.typ,
 		 b.tech and 24 or
-		  --menuy+6
 		  ?"X"..q.qty,unspl"32,110,7"
 		  and 20,
-		 --menuy+3
 		 107,nil,
 			function()
 				b.done=pay(b,1,1)
@@ -2412,7 +2400,6 @@ portw=9
 porto=2
 portf=13
 ]],20,
-	 	--menuy+3
 	 	108,nil,function()
 	 		action=not action
 	 	end
