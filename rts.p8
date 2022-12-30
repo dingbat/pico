@@ -1535,7 +1535,7 @@ function draw_unit(u)
 		not loser and u.sel and (
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p,
-	 u.p,--qn ☉
+	 u.p,--qn☉
 	 [14]=0
 	}
 	sspr(sx,sy,w,h,xx,yy,w,h,
