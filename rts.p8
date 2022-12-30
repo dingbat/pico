@@ -1186,8 +1186,8 @@ end
 --update
 
 function handle_click()
-	local l,r,cont,htile,axn=
-		5,4,not action,
+	local cont,htile,axn=
+	 not action,
 		tile_as_unit(mx8,my8)
 	
 	if lclk and hovbtn then
@@ -1217,7 +1217,7 @@ function handle_click()
 		if (lclk) to_build=nil
 	 return
 	end
-	
+
  if to_build then
  	if rclk then
 	 	to_build=nil
@@ -1233,6 +1233,18 @@ function handle_click()
 		end
 		return
  end
+	
+	if btnp"5" and hoverunit and
+  t()-selt<0.2 then
+		selection,selx={}
+		for u in all(units) do
+			if u.onscr and
+				u.typ==hoverunit.typ then
+				add(selection,u).sel=true
+			end
+		end
+		return
+	end
 	
  if rclk and sel1 and sel1.p==1
  then
@@ -1282,7 +1294,7 @@ function handle_click()
  
  if cont then
 	 if btnp"5" and not selx then
-	 	selx,sely=mx,my
+	 	selx,sely,selt=mx,my,t()
 	 end
 	 if btn"5" and selx then
 			selbox={
@@ -1865,7 +1877,7 @@ function pay(costs,dir,p)
 	end
 end
 
--- musurca/freds /bbs/?tid=36059
+--see credits
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,
@@ -2126,7 +2138,7 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---based on t.co/NaSUd3d1ix (morgan3d)
+--see credits
 function find_path(start,goal)
  local shortest,best_table={
   last=start,
@@ -2619,11 +2631,11 @@ techs=0]]
 	res1,res2,
 	units_heal,
 	farm_cycles,farm_renew_cost_b,
-	cx,cy,mx,my,fps,numsel,
+	cx,cy,mx,my,fps,numsel,selt,
 	dmaps_ready=
 		res[1],res[2],{false,true},
 		split"5,12",
-		unspl"6,0,0,0,0,59,0"
+		unspl"6,0,0,0,0,59,0,0"
 
 	init_typs()
 	
