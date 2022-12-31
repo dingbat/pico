@@ -217,3 +217,10 @@ function nohold(p)
 end
 
 \*6 
+
+
+	--autosave
+	if time()%15<1 and fps==0 then
+		save()
+	end
+
