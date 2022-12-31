@@ -32,7 +32,7 @@ function _draw()
 			if
 				not loser and
 			 not g(viz,u.x8,u.y8)
-			 and u.discovered
+			 and u.disc
 			then
 	 		add(af,u)
 	 	elseif u.typ.bldg then
@@ -154,7 +154,7 @@ function _draw()
 		sel1 and sel1.p==1 and
 		((to_build or
 			can_build() or
-			can_renew_farm()) and 68 or
+			can_renew()) and 68 or
 		can_gather() and 67 or
 		can_attack() and 65 or
 		can_drop() and 69) or 64,
@@ -189,14 +189,14 @@ function _update()
 		llclk and not btn"5",
 		lrclk and not btn"4"
 
- handle_input()
+ input()
 
  llclk,lrclk,upc_0,pos,
  	hoverunit,idle,idle_mil=
  	btn"5",btn"4",
  	upc==0,{}
 
-	async_dmap()
+	dmap()
 
  if fps%30==19 then
 		for tx=0,mmw do
@@ -250,7 +250,7 @@ function _update()
 		if (upc_0) ai_unit2(u)	
  	if selx
  		and (g(viz,u.x8,u.y8)
- 		 or u.discovered)
+ 		 or u.disc)
  	then
  	 u.sel=intersect(u.r,selbox,0)
 		 if u.sel then
@@ -352,10 +352,10 @@ build_x=40
 build_y=8
 build_fr=2
 build_fps=15
-harvest_x=32
-harvest_y=8
-harvest_fr=2
-harvest_fps=15
+farm_x=32
+farm_y=8
+farm_fr=2
+farm_fps=15
 dead_x=40
 dead_y=12
 portx=0
@@ -407,8 +407,8 @@ spd=0.482
 los=30
 hp=15
 atk=1.667
-def=spider
-atk_typ=spider
+def=spd
+atk_typ=spd
 
 w=8
 fw=8
@@ -578,7 +578,7 @@ bldg=1
 proj_xo=-4
 proj_yo=2
 proj_s=28
-bitmap=0
+breq=0
 units=1
 queen=1
 tmap=-1]]
@@ -591,8 +591,8 @@ range=30
 const=32
 atk=1.2
 proj_freq=30
-atk_typ=tower
-def=building
+atk_typ=bld
+def=bld
 
 w=8
 w8=1
@@ -616,7 +616,7 @@ dir=-1
 proj_yo=-2
 proj_xo=-1
 proj_s=24
-bitmap=1
+breq=1
 tmap=-1]]
 
 mound=parse[[
@@ -624,7 +624,7 @@ idx=9
 los=5
 hp=100
 const=10
-def=building
+def=bld
 
 w=8
 fw=8
@@ -646,7 +646,7 @@ bldg=1
 dir=-1
 has_q=1
 drop=1
-bitmap=2
+breq=2
 tmap=-1]]
 
 den=parse[[
@@ -654,7 +654,7 @@ idx=10
 los=10
 hp=250
 const=25
-def=building
+def=bld
 
 w=8
 fw=8
@@ -675,7 +675,7 @@ portw=9
 bldg=1
 dir=-1
 has_q=1
-bitmap=4
+breq=4
 units=2
 mil=1
 tmap=-1]]
@@ -685,7 +685,7 @@ idx=11
 los=10
 hp=200
 const=20
-def=building
+def=bld
 
 w=8
 fw=8
@@ -706,7 +706,7 @@ portw=8
 bldg=1
 dir=-1
 has_q=1
-bitmap=8
+breq=8
 units=2
 mil=1
 tmap=-1]]
@@ -716,7 +716,7 @@ idx=12
 los=0
 hp=50
 const=6
-def=building
+def=bld
 
 w=8
 fw=8
@@ -738,7 +738,7 @@ farm=1
 carry=9
 bldg=1
 dir=-1
-bitmap=16
+breq=16
 tmap=-1]]
 
 castle=parse[[
@@ -749,8 +749,8 @@ range=40
 const=80
 atk=1.8
 proj_freq=15
-atk_typ=tower
-def=building
+atk_typ=bld
+def=bld
 
 w=15
 fw=16
@@ -774,7 +774,7 @@ dir=-1
 proj_yo=0
 proj_xo=0
 proj_s=24
-bitmap=32
+breq=32
 units=1
 tmap=-1]]
 
@@ -1066,33 +1066,33 @@ end
 dmg_mult=parse[[
 ant_vs_ant=1
 ant_vs_queen=0.7
-ant_vs_spider=0.8
+ant_vs_spd=0.8
 ant_vs_seige=1.5
-ant_vs_building=0.5
+ant_vs_bld=0.5
 
 acid_vs_ant=1
 acid_vs_queen=0.6
-acid_vs_spider=1.5
+acid_vs_spd=1.5
 acid_vs_seige=0.7
-acid_vs_building=0.25
+acid_vs_bld=0.25
 
-spider_vs_ant=1.5
-spider_vs_queen=0.9
-spider_vs_spider=1
-spider_vs_seige=1
-spider_vs_building=0.1
+spd_vs_ant=1.5
+spd_vs_queen=0.9
+spd_vs_spd=1
+spd_vs_seige=1
+spd_vs_bld=0.1
 
 seige_vs_ant=0.9
 seige_vs_queen=3
-seige_vs_spider=0.7
+seige_vs_spd=0.7
 seige_vs_seige=1
-seige_vs_building=15
+seige_vs_bld=15
 
-tower_vs_ant=1
-tower_vs_queen=0.75
-tower_vs_spider=1.25
-tower_vs_seige=0.9
-tower_vs_building=0.1]]
+bld_vs_ant=1
+bld_vs_queen=0.75
+bld_vs_spd=1.25
+bld_vs_seige=0.9
+bld_vs_bld=0.1]]
 
 function rest(u)
 	u.st=parse[[t=rest
@@ -1163,7 +1163,7 @@ end
 
 function attack(u,e)
 	if u.typ.atk and e then
-		u.st,u.discovered={
+		u.st,u.disc={
 			t="attack",
 			target=e,
 			wayp=get_wayp(u,e.x,e.y),
@@ -1171,9 +1171,9 @@ function attack(u,e)
 	end
 end
 
-function harvest(u,f)
+function frm(u,f)
 	f.farmer,u.st,u.res=u,{
-		t="harvest",
+		t="farm",
 		target=f,
   wayp=get_wayp(u,
   	f.x-3+rnd(6),
@@ -1184,7 +1184,7 @@ end
 -->8
 --update
 
-function handle_click()
+function click()
 	local cont,htile,axn=
 	 not action,
 		tile_as_unit(mx8,my8)
@@ -1247,18 +1247,18 @@ function handle_click()
 	
  if rclk and sel1 and sel1.p==1
  then
-	 if can_renew_farm() then
+	 if can_renew() then
 	 	hilite(hoverunit)
 	 	hoverunit.sproff,
 	 		hoverunit.cycles,
 	 		hoverunit.exp=0,0
 	 	res1.b-=farm_renew_cost_b
-	 	harvest(sel1,hoverunit)
+	 	frm(sel1,hoverunit)
 	 	
 	 elseif can_gather() then
 	 	hilite(htile)
 	 	if avail_farm() then
-	 		harvest(sel1,hoverunit)
+	 		frm(sel1,hoverunit)
 	 	else
 	  	foreachsel(gather,mx8,my8)
 	 	end
@@ -1337,7 +1337,7 @@ function mouse_cam()
  mx8,my8=mx\8,my\8
 end
 
-function handle_input()
+function input()
 	mouse_cam()
 	
  for b in all(buttons) do
@@ -1346,7 +1346,7 @@ function handle_input()
  	end
 	end
 
- handle_click()
+ click()
  
  if to_build then
 	 to_build.x,to_build.y=
@@ -1466,7 +1466,7 @@ function update_viz(u)
 			if k<maph8<<8 and k>=0 and
 				k%256<mapw8 then
 				if bldgs[k] then
-					bldgs[k].discovered=1
+					bldgs[k].disc=1
 				end
 				exp[k],new_viz[k]=1,"v"
 			end
@@ -1489,7 +1489,7 @@ function draw_minimap()
 	sspr(unspl"72,72,19,12,0,0")
 	
 	for u in all(units) do
-		if u.discovered or
+		if u.disc or
 			g(viz,u.x8,u.y8) then
 			pset(
 				u.x/mmwratio,
@@ -1567,7 +1567,7 @@ function update_unit(u)
  end
  if (u.typ.farm) update_farm(u)
  if st.active then
- 	if (t=="harvest") farmer(u)
+ 	if (t=="farm") farmer(u)
  	if t=="build" and fps%30==0 then
  	 buildrepair(u)
  	end
@@ -1687,7 +1687,7 @@ function buildrepair(u)
 			if b.typ.drop then
 				r.pl+=5
 			elseif b.typ.farm then
-				harvest(u,b)
+				frm(u,b)
 			end
 		end
 	elseif b.hp<b.max_hp and
@@ -1768,7 +1768,7 @@ function check_target(u)
 	then
 		u.dir,st.active,st.fps=
 			sgn(t.x-u.x),true,fps
-		if st.t=="harvest" then
+		if st.t=="farm" then
 			if (st.farm.exp)	rest(u)	
 		else
 			st.wayp=nil
@@ -1779,7 +1779,7 @@ function check_target(u)
 			end
 			u.res=nil
 			if st.farm then
-				harvest(u,st.farm)
+				frm(u,st.farm)
 			else
 				rest(u)
 				u.st.res=nxt
@@ -1935,7 +1935,7 @@ function can_attack()
 		if hoverunit and
 		 hoverunit.p!=1 and
 			u.typ.atk and
-			(v or hoverunit.discovered)
+			(v or hoverunit.disc)
 		then
 			return true
 		end
@@ -2012,7 +2012,7 @@ function register_bldg(b)
 	
 	if not b.const and not typ.farm then
 		make_dmaps"d"
-		res[b.p].reqs|=typ.bitmap
+		res[b.p].reqs|=typ.breq
 	end
 end
 
@@ -2048,7 +2048,7 @@ function can_drop()
 	end
 end
 
-function can_renew_farm()
+function can_renew()
 	return hoverunit and
 		res1.b>=farm_renew_cost_b and
 		sel_typ==ant1 and
@@ -2081,7 +2081,7 @@ fres=0]])
 	do
 		local ptyp,_ENV=_typ[_p],u
 	 typ,x,y,p,hp,max_hp,const,
-	  discovered,id,boi,prod=
+	  disc,id,boi,prod=
 		 	ptyp,_x,_y,_p,
 		 	_hp or ptyp.hp,ptyp.hp,
 				tonum(_const),_disc==1,
@@ -2498,7 +2498,7 @@ b=b,g,r,d
 d=d,r,g,b]][r])
 end
 
-function async_dmap()
+function dmap()
 	local q=queue[1]
 	if q then
 		if #q==1 then
@@ -2835,7 +2835,7 @@ function ai_unit2(u)
 		 not u.const and
 		 not u.farmer then
 			local w=deli(miners)
-			if (w) harvest(w,u)
+			if (w) frm(w,u)
 		elseif u.typ.queen then
 			if antcount<30 then
 				ai_prod(u)
@@ -2910,7 +2910,7 @@ function save()
 			p..","..
 			tostr(boi)..","..
 			tostr(const)..","..
-			max(discovered)..","..
+			max(disc)..","..
 			hp..",/"
 	end
 	for i=1,mapw8*maph8-1 do
