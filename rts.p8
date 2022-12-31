@@ -914,7 +914,7 @@ b=0
 breq=0
 tmap=4
 up=0
-idx=]],parse[[
+idx=16]],parse[[
 portx=104
 porty=64
 portw=8]],function(_ENV)
@@ -929,7 +929,7 @@ b=0
 breq=0
 tmap=8
 up=0
-idx=]],parse[[
+idx=14]],parse[[
 portx=96
 porty=64
 portw=8]],function(_ENV)
@@ -993,7 +993,7 @@ b=0
 breq=0
 tmap=64
 up=0
-idx=]],parse[[
+idx=12]],parse[[
 portx=120
 porty=64
 portw=8]],function(_ENV)
@@ -1009,7 +1009,7 @@ b=9
 breq=0
 tmap=128
 up=0
-idx=]],parse[[
+idx=10]],parse[[
 portx=112
 porty=64
 portw=8
@@ -1734,7 +1734,7 @@ function produce(u)
 				r*=1.6
 				g*=2
 				b*=2
-				done=nil
+				tmap,done=up>>idx
 			end
 		else
 			local new=unit(
@@ -2944,9 +2944,17 @@ menuitem(2,"◆ load from clip",function()
 		mset(i%mapw8,i/mapw8,t)
 	end
 	for b in all(typs) do
-		b.done=
-			res1.techs|b.tmap==res1.techs
-			and not b.tech(b.techt[1])
+		if res1.techs|b.tmap==res1.techs then
+		 b.tech(b.techt[1])
+		 b.done=true
+		 if b.up then
+		 	for i=0,res1.techs<<b.idx&0x3 do
+				 b.tech(b.techt[1])
+				end
+				b.tmap=b.idx<<b.up
+ 		 b.done=b.up==3
+			end
+		end
 	end
 	for l in all(data) do
 		unit(unpack(l))
