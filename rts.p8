@@ -784,7 +784,7 @@ idx=14
 spd=0.21
 los=20
 hp=8
-atk=0.5
+atk=0.47
 def=ant
 atk_typ=ant
 
@@ -2657,6 +2657,10 @@ function new_game()
 splspl[[7,55,44,1
 7,337,188,2
 14,65,150,3
+14,170,140,3
+14,88,245,3
+14,250,32,3
+14,138,16,3
 1,40,40,1
 1,68,43,1
 1,50,32,1
@@ -2674,7 +2678,7 @@ end
 -->8
 --ai
 
---ai_debug=true
+ai_debug=true
 if ai_debug then
 	_update60=_update
 end
@@ -2686,12 +2690,11 @@ function ai_init()
 		res2.diff,
 		nxt_res,
 		antcount,inv,
-		ant[2].carry,
 		uhold=
 		split"r,b,g,r,b",
 		parse"",parse"",{},
 		{},{},ai_diff,
-		unspl"1,0,0,9"
+		unspl"1,0,0"
 	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
