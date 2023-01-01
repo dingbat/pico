@@ -711,7 +711,7 @@ units=2
 mil=1
 tmap=-1]]
 
-farm=parse[[
+local farm=parse[[
 idx=12
 los=0
 hp=50
@@ -950,7 +950,7 @@ idx=]],parse[[
 portx=104
 porty=88
 portw=9]],function()
-		farm_cycles[1]=10
+		cycles[1]=10
 	end),
 }
 
@@ -1171,7 +1171,7 @@ function attack(u,e)
 	end
 end
 
-function frm(u,f)
+function farm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
 		target=f,
@@ -1252,13 +1252,13 @@ function click()
 	 	hoverunit.sproff,
 	 		hoverunit.cycles,
 	 		hoverunit.exp=0,0
-	 	res1.b-=farm_renew_cost_b
-	 	frm(sel1,hoverunit)
+	 	res1.b-=renew_b
+	 	farm(sel1,hoverunit)
 	 	
 	 elseif can_gather() then
 	 	hilite(htile)
 	 	if avail_farm() then
-	 		frm(sel1,hoverunit)
+	 		farm(sel1,hoverunit)
 	 	else
 	  	foreachsel(gather,mx8,my8)
 	 	end
@@ -1589,7 +1589,7 @@ function update_farm(u)
 	end
 	if f.st.active and not u.exp and
 		not u.ready and fps==59 then
-		u.fres+=0.375+farm_cycles[u.p]/40
+		u.fres+=0.375+cycles[u.p]/40
 		u.sproff+=1
 		u.ready=u.fres>=9
 	end
@@ -1605,7 +1605,7 @@ function farmer(u)
 			drop(u)
 			f.cycles+=1
 			f.exp,f.ready=f.p==1 and
-			 f.cycles==farm_cycles[1]
+			 f.cycles==cycles[1]
 			f.sproff=f.exp and 32 or 0
 		end
 		u.st.farm=f
@@ -1687,7 +1687,7 @@ function buildrepair(u)
 			if b.typ.drop then
 				r.pl+=5
 			elseif b.typ.farm then
-				frm(u,b)
+				farm(u,b)
 			end
 		end
 	elseif b.hp<b.max_hp and
@@ -1779,7 +1779,7 @@ function check_target(u)
 			end
 			u.res=nil
 			if st.farm then
-				frm(u,st.farm)
+				farm(u,st.farm)
 			else
 				rest(u)
 				u.st.res=nxt
@@ -2050,7 +2050,7 @@ end
 
 function can_renew()
 	return hoverunit and
-		res1.b>=farm_renew_cost_b and
+		res1.b>=renew_b and
 		sel_typ==ant1 and
 		hoverunit.exp
 end
@@ -2318,7 +2318,7 @@ portf=9
 	end
 	
 	if sel1.typ.farm then
-		camera(-? sel1.cycles.."/"..farm_cycles[1],unspl"38,111,4")
+		camera(-? sel1.cycles.."/"..cycles[1],unspl"38,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2638,7 +2638,7 @@ techs=0]]
 
 	res1,res2,
 	units_heal,
-	farm_cycles,farm_renew_cost_b,
+	cycles,renew_b,
 	cx,cy,mx,my,fps,numsel,selt,
 	dmaps_ready=
 		res[1],res[2],{false,true},
@@ -2835,7 +2835,7 @@ function ai_unit2(u)
 		 not u.const and
 		 not u.farmer then
 			local w=deli(miners)
-			if (w) frm(w,u)
+			if (w) farm(w,u)
 		elseif u.typ.queen then
 			if antcount<30 then
 				ai_prod(u)
@@ -3259,4 +3259,8 @@ __map__
 54555455555454556c6d6e6f6c6d6e6f6c6d6e566a676769586e6f4c4d4c6e6f4d4c4d4c4d6d545454545554545455544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b6c6d6e566a676769586e6f4c4d4c6e6fc54cd54c4d6d54545454555454545554
 5454545454545454547d7e7f7c7d7e7f7c7d5d666767b46769587f5c5d5c7e7f5d5c5d5c5d55555455545454555454544b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b7c7d5d666767676769587f5c5d5c7e7fd55c5d5c5d5555545554545455545454
 __sfx__
-0001000027000000001f000200002200024000270002900029000290002800027000250002200020000200001f0001e0001e0001f00020000220002400024000210001d0001b0001900017000170000000000000
+910300001a0531a0531f003200031a0531a0531a0531a05329003290032800327003250032200320003200031f0031e0031e0031f00320003220032400324003210031d0031b0031900317003170030000300003
+4b040000197511b751197511775013700127001270012700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
+010300000e5520e5520e550005001a5521a5521a550005001a5521a5521a550005001a5521a5521a5550050000500005000050000500005000050000500005000050000500005000050000500005000050000500
+0504000010041100411c0411803118031180311003110031100230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010700001075110751137511375213752137520070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
