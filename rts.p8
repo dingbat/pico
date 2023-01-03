@@ -2135,40 +2135,34 @@ end
 
 function get_wayp(u,x,y,tol)
 	if u.typ.unit then
-		local wayp,dest,dest_d=
-			{},
+		local dest,dest_d=
 			nearest_acc(x,y)
-		local path,exists=find_path(
+		local wayp,exists=find_path(
 		 nearest_acc(u.x,u.y),
 		 dest)
-		deli(path) --start
-		for n in all(path) do
-			add(wayp,
-				{n[1]*8+4,
-				 n[2]*8+4},1)
-		end
 		if exists and
 			dest_d<=(tol or 1) then
-			add(wayp,{x,y})
+			wayp[#wayp]={x,y}
 		end
 		return #wayp>0 and wayp
 	end
 end
 
 --credit on bbs
-function find_path(start,goal)
- local shortest,best_table={
+function find_path(start,goal,gl)
+ local shortest,best_table,f={
   last=start,
   cost_from_start=0,
   cost_to_goal=32767
- },{}
+ },{},{}
  best_table[start.k]=shortest
- function path(p,s)
-	 while s.prev do
+ function path(s)
+	 while s.last!=start do
+   add(f,{s.last[1]*8+4,
+   s.last[2]*8+4},1)
    s=best_table[s.prev.k]
-   add(p,s.last)
   end
-  return p
+ 	return f
  end
  local frontier,frontier_len,
  	closest={shortest},1,
@@ -2185,7 +2179,7 @@ function find_path(start,goal)
   
   local p=shortest.last
   if p.k==goal.k then
-   return path({goal},shortest),1
+   return path(shortest),1
   end
   for n in all_surr(p[1],p[2],1,true) do
    local old_best,new_cost_from_start=
@@ -2209,7 +2203,7 @@ function find_path(start,goal)
 			end
   end
  end
- return path({closest.last},closest)
+ return path(closest)
 end
 -->8
 --menu
