@@ -190,7 +190,11 @@ function _update()
 		lrclk and not btn"4"
 
  input()
-
+ if to_build then
+	 to_build.x,to_build.y=
+	  mx8*8,my8*8
+	end
+	
  llclk,lrclk,upc_0,pos,
  	hoverunit,idle,idle_mil=
  	btn"5",btn"4",
@@ -1184,7 +1188,44 @@ end
 -->8
 --update
 
-function click()
+function foreachsel(func,...)
+	for u in all(selection) do
+		func(u,...)
+	end
+end
+
+function hilite(v)
+	hlt,hlv=t(),v
+end
+
+function mouse_cam()
+	local b=btn()
+	if (b>32) b>>=8 --esdf
+	cx,cy,amx,amy=
+ 	mid(0,
+ 		cx+(b&0x2)-(b&0x1)*2,
+ 		mapw-128
+ 	),
+ 	mid(0,
+ 		cy+(b&0x8)/4-(b&0x4)/2,
+ 		maph-(loser and 128 or 107)
+ 	),
+ 	mid(0,stat"32",126),
+	 mid(-1,stat"33",126)
+
+ mx,my,hovbtn=amx+cx,amy+cy
+ mx8,my8=mx\8,my\8
+end
+
+function input()
+	mouse_cam()
+	
+ for b in all(buttons) do
+ 	if intersect(b.r,{amx,amy,amx,amy},1) then
+			hovbtn=b
+ 	end
+	end
+	
 	local cont,htile,axn=
 	 not action,
 		tile_as_unit(mx8,my8)
@@ -1286,6 +1327,7 @@ function click()
   	sel1.rx,sel1.ry,
   		sel1.rtx,sel1.rty=
   		mx,my,mx8,my8
+
   else
    cont=true
   end
@@ -1308,60 +1350,16 @@ function click()
  end
 end
 
-function foreachsel(func,...)
-	for u in all(selection) do
-		func(u,...)
-	end
-end
-
-function hilite(v)
-	hlt,hlv=t(),v
-end
-
-function mouse_cam()
-	local b=btn()
-	if (b>32) b>>=8 --esdf
-	cx,cy,amx,amy=
- 	mid(0,
- 		cx+band(b,0x2)-band(b,0x1)*2,
- 		mapw-128
- 	),
- 	mid(0,
- 		cy+band(b,0x8)/4-band(b,0x4)/2,
- 		maph-(loser and 128 or 107)
- 	),
- 	mid(0,stat"32",126),
-	 mid(-1,stat"33",126)
-
- mx,my,hovbtn=amx+cx,amy+cy
- mx8,my8=mx\8,my\8
-end
-
-function input()
-	mouse_cam()
-	
- for b in all(buttons) do
- 	if intersect(b.r,{amx,amy,amx,amy},1) then
-			hovbtn=b
- 	end
-	end
-
- click()
- 
- if to_build then
-	 to_build.x,to_build.y=
-	  mx8*8,my8*8
-	end
-end
-
 function tick_unit(u)
-	local typ=u.typ
+	local typ,targ=u.typ,
+		u.st.target
 	u.hp+=typ.hp-u.max_hp
 	u.max_hp,u.onscr,u.upd=
 		typ.hp,
 		intersect(u.r,
 			{cx,cy,cx+128,cy+128},0),
 		u.id%upcycle==upc
+
 	if u.hp<=0 and not u.dead then
 		del(selection,u)
 		u.dead,
@@ -1376,13 +1374,15 @@ function tick_unit(u)
 			r.p-=1
 		end
 	end
+
 	if u.dead then
 		if (typ.queen)	loser=u.p
 		u.dead+=1
 		if (typ.unit) update_viz(u)
 		del(u.dead==60 and units,u)
 		return
-	end 
+	end
+	
 	if units_heal[u.p] and
 		not u.fire and
 	 u.hp<typ.hp and
@@ -1399,7 +1399,6 @@ function tick_unit(u)
 	end
 	
 	if (u.const) return
-	local targ=u.st.target
 	if targ and targ.dead then
 		if u.st.t=="attack" then
 			move(u,targ.x,targ.y,true)
