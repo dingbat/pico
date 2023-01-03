@@ -332,10 +332,6 @@ def=ant
 w=4
 fw=4
 h=4
-xoff_r=16
-yoff_g=4
-xoff_b=16
-yoff_b=4
 rest_x=0
 rest_y=8
 rest_fr=2
@@ -1268,8 +1264,8 @@ function input()
 				to_build.y+to_build.typ.h\2,
 				1,nil,0,1)
 			foreachsel(build,b)
-			b.cost,to_build,selx=
-			 to_build,pay(to_build,-1,1)
+			pay(to_build,-1,1)
+			b.cost,to_build,selx=to_build
 		end
 		return
  end
@@ -1512,7 +1508,7 @@ end
 function draw_unit(u)
 	local typ,st,res_typ=
 			u.typ,u.st,
-			u.res and u.res.typ or ""
+			u.res and u.res.typ or "_"
 
 	local fw,w,h,stt,hp,xx,yy=
 		 typ.fw,typ.w,typ.h,
@@ -1521,9 +1517,10 @@ function draw_unit(u)
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
-	 	max(typ["xoff_"..res_typ])+
+	 	resoffx[res_typ]+
 	 	u.sproff\8*8,
-	 typ[stt.."_y"]+max(typ["yoff_"..res_typ]),
+	 typ[stt.."_y"]+
+	  resoffy[res_typ],
 	 typ[stt.."_fps"],
 	 typ[stt.."_fr"],
 		u.dead or fps
@@ -2577,7 +2574,8 @@ ai_diff,
 unspl"0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
 	
 reskeys,f2res,resqty,
- key2resf,rescol
+ key2resf,rescol,
+ resoffx,resoffy
  =
 split"r,g,b,p,pl,reqs,tot,bo_idx,diff,techs",parse[[
 7=r
@@ -2610,7 +2608,17 @@ e1=5
 e7=8
 e11=3
 e19=4
-e33=13]]
+e33=13]],parse[[
+_=0
+r=16
+g=0
+b=16
+]],parse[[
+_=0
+r=0
+g=4
+b=4
+]]
 
 function init()
 	poke(0x5f2d,3) --mouse
@@ -2663,7 +2671,7 @@ splspl[[7,55,44,1
 1,40,40,1
 1,68,43,1
 1,50,32,1
-5,48,56,1
+13,48,56,1
 1,320,184,2
 1,348,187,2
 1,330,196,2
