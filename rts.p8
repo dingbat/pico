@@ -2382,7 +2382,6 @@ function draw_menu()
  for i,sec in inext,secs do
  	pal(i%2!=0 and 4,15)
  	camera(x)
- 	--104=menuy
  	spr(unspl"129,0,104")
  	spr(129,sec-8,104)
  	line(sec-4,unspl"105,3,105,7")
