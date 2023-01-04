@@ -1103,16 +1103,16 @@ rest=1
 aggress=1]]
 end
 
-function movegrp(us,x,y,aggress,rest)
+function mvg(units,x,y,aggress,rest)
 	local lowest=999
-	for u in all(us) do
+	for u in all(units) do
 		if not rest or
 		 u.st.rest then
 			move(u,x,y,aggress)
 		end
 		lowest=min(u.typ.spd,lowest)
 	end
-	for u in all(us) do
+	for u in all(units) do
 		u.st.spd=lowest
 	end
 end
@@ -1324,7 +1324,7 @@ function input()
   	
   elseif sel1.typ.unit then
   	sfx"1"
-  	movegrp(selection,mx,my,axn)
+  	mvg(selection,mx,my,axn)
   	hilite{cx=mx,cy=my}
 
   elseif sel1.typ.units then
@@ -1349,7 +1349,7 @@ function input()
 				min(selx,mx),
 				min(sely,my),
 				max(selx,mx),
-				max(sely,my),7 --col
+				max(sely,my),7
 	 	}
 	 else
 	 	selx=nil
@@ -1555,7 +1555,7 @@ function draw_unit(u)
 		not loser and u.sel and (
 	 u.p==1 and typ.unit
 	 or u==sel1) and 9 or u.p,
-	 u.p,--qn☉
+	 u.p,
 	 [14]=0
 	}
 	sspr(sx,sy,w,h,xx,yy,w,h,
@@ -2153,12 +2153,12 @@ end
 
 --credit on bbs
 function find_path(start,goal,gl)
- local shortest,best_table,f={
+ local sh,best_table,f={
   last=start,
-  cost_from_start=0,
-  cost_to_goal=32767
+  cfs=0,
+  ctg=32767
  },{},{}
- best_table[start.k]=shortest
+ best_table[start.k]=sh
  function path(s)
 	 while s.last!=start do
    add(f,{s.last[1]*8+4,
@@ -2167,41 +2167,41 @@ function find_path(start,goal,gl)
   end
  	return f
  end
- local frontier,frontier_len,
- 	closest={shortest},1,
- 	shortest
- while frontier_len>0 do
+ local fr,fr_len,
+ 	closest={sh},1,
+ 	sh
+ while fr_len>0 do
   local cost,index_of_min=32767
-  for i=1,frontier_len do
-   local temp=frontier[i].cost_from_start+frontier[i].cost_to_goal
+  for i=1,fr_len do
+   local temp=fr[i].cfs+fr[i].ctg
    if (temp<=cost) index_of_min,cost=i,temp
   end
-  shortest=frontier[index_of_min]
-  frontier[index_of_min],shortest.dead=frontier[frontier_len],true
-  frontier_len-=1
+  sh=fr[index_of_min]
+  fr[index_of_min],sh.dead=fr[fr_len],true
+  fr_len-=1
   
-  local p=shortest.last
+  local p=sh.last
   if p.k==goal.k then
-   return path(shortest),1
+   return path(sh),1
   end
   for n in all_surr(p[1],p[2],1,true) do
-   local old_best,new_cost_from_start=
+   local old_best,ncfs=
     best_table[n.k],
-    shortest.cost_from_start+n.d
+    sh.cfs+n.d
    if not old_best then
     old_best={
      last=n,
-     cost_from_start=32767,
-     cost_to_goal=
+     cfs=32767,
+     ctg=
      	dist(n[1]-goal[1],n[2]-goal[2])
     }
-    frontier_len+=1
-    frontier[frontier_len],best_table[n.k]=old_best,old_best
+    fr_len+=1
+    fr[fr_len],best_table[n.k]=old_best,old_best
    end
-   if not old_best.dead and old_best.cost_from_start>new_cost_from_start then
-    old_best.cost_from_start,old_best.prev=new_cost_from_start,p
+   if not old_best.dead and old_best.cfs>ncfs then
+    old_best.cfs,old_best.prev=ncfs,p
    end
-			if old_best.cost_to_goal<closest.cost_to_goal then
+			if old_best.ctg<closest.ctg then
 				closest=old_best
 			end
   end
@@ -2881,7 +2881,7 @@ function ai_unit2(u)
 		local b=u.y<112 and 1 or
 			u.y>208 and 4 or 2
 		inv|=b
-		movegrp(defsqd[b],u.x,u.y,1,1)
+		mvg(defsqd[b],u.x,u.y,1,1)
 	end
 end
 
@@ -2919,7 +2919,7 @@ function ai_frame()
 			end
 		end
 	end
-	movegrp(atksqd,
+	mvg(atksqd,
 	 unspl"48,40,1,1")
 	inv,miners,antcount,uhold=
 		0,{},0
