@@ -224,3 +224,10 @@ end
 		save()
 	end
 
+ai_diff,
+	mapw,maph,mmx,mmy,mmw,
+	mmh, --maph\mmwratio
+	mapw8,maph8,
+	mmhratio, --maph/mmh
+	mmwratio, --mapw/mmw
+	menu,cx,cy,cvx,cvy
