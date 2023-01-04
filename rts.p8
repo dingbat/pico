@@ -1733,8 +1733,8 @@ function buildrepair(u)
 	if b.const then
 		b.const+=1
 		if b.const>=b.typ.const then
-			if (u.hu) sfx"26"
-			b.const=register_bldg(b)
+			b.const=u.hu and sfx"26"
+			register_bldg(b)
 			if b.typ.drop then
 				r.pl+=5
 			elseif b.typ.farm then
