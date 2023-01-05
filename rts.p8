@@ -2134,7 +2134,7 @@ function get_wayp(u,x,y,tol)
 	if u.typ.unit then
 		local dest,dest_d=
 			nearest_acc(x,y)
-		local wayp,exists=find_path(
+		local wayp,exists=as(
 		 nearest_acc(u.x,u.y),
 		 dest)
 		if exists and
@@ -2147,7 +2147,7 @@ function get_wayp(u,x,y,tol)
 end
 
 --credit on bbs
-function find_path(start,goal,gl)
+function as(start,goal,gl)
  local sh,best_table,f={
   last=start,
   cfs=0,
@@ -2456,7 +2456,7 @@ portf=13
 	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
 	camera()
-		
+
 	sspr(idle and 48 or 56,
 	 unspl"105,8,6,116,121")
 	add(buttons,idle and {
