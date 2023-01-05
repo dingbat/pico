@@ -60,9 +60,9 @@ function _draw()
 		local secs=res1.t\1%60
 		camera()
 		rectfill(unspl"0,96,128,115,9")
-	 line(unspl"6,95,44,95")
-	 line(unspl"86,95,125,95")
-	 line(unspl"25,116,105,116")
+	 l"6,95,44,95"
+	 l"86,95,125,95"
+	 l"25,116,105,116"
 		line(
 			?split"\^j2n\|e\#9\f5 easy ai ,\^j2n\|e\#9\f2 normal ai ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
 	 	-3+res2.diff%2,unspl"88,8,88,9")
@@ -96,10 +96,10 @@ function _draw()
  	local brd=function(arr,col)
 			color(col)
 			camera(x*-8+cx,y*-8+cy)		
-			if (arr[i-1]) line(unspl"-1,0,-1,7")
-		 if (arr[i-256]) line(unspl"0,-1,7,-1")
-		 if (arr[i+256]) line(unspl"0,8,7,8")
-			if (arr[i+1]) line(unspl"8,0,8,7")
+			if (arr[i-1]) l"-1,0,-1,7"
+		 if (arr[i-256]) l"0,-1,7,-1"
+		 if (arr[i+256]) l"0,8,7,8"
+			if (arr[i+1]) l"8,0,8,7"
 		end
   if not exp[i] then
 	 	brd(exp)
@@ -1832,6 +1832,10 @@ end
 -->8
 --utils
 
+function l(str)
+	line(unspl(str))
+end
+
 function splspl(str,spl)
 	local x={}
 	foreach(split(str,spl or "\n"),
@@ -2480,7 +2484,7 @@ portf=13
 	local res1=ai_debug and res2 or res1
 	camera(-print_res(res1,
 	 unspl"1,122,2"))
-	line(unspl"-4,120,-128,120,5")
+	l"-4,120,-128,120,5"
 	pset(-3,121)
 	
 	if hovbtn and hovbtn.costs and
