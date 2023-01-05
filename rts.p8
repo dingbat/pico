@@ -1697,7 +1697,7 @@ function fight(u)
 		end
 		if in_range and
 			fps%typ.proj_freq==
-			(typ.cat and 0 or
+			max(typ.cat or
 			 u.id%typ.proj_freq)
 		then
  		add(proj,{
