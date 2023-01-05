@@ -2719,9 +2719,9 @@ end
 --ai
 
 --ai_debug=true
---if ai_debug then
---	_update60=_update
---end
+if ai_debug then
+	_update60=_update
+end
 
 function ai_init()
 	res_alloc,
@@ -2732,10 +2732,9 @@ function ai_init()
 		antcount,inv,
 		uhold=
 		split"r,b,g,r,b",
-		parse"",parse"",{},
+		{},{},{},
 		{},{},ai_diff,
 		unspl"1,0,0"
-	defsqd[4],offsqd[4]={},{}
 	
 	--1m 2f 3b 4d 5t 6c
 	bo=splspl[[5,1,123,27
@@ -2828,12 +2827,11 @@ function ai_unit1(u)
 	 	if u.dead then
 	 		del(u.sqd,u)
 	 	elseif not u.sqd then
-	 		local b=bo[u.boi][5]
-	 		u.sqd=(#defsqd[b]>
-	 									#offsqd[b] or
+	 		u.sqd=(#defsqd>
+	 									#offsqd or
 	 		 u.typ.atk_typ=="seige") and
-	 			offsqd[b] or
-	 			defsqd[b]
+	 			offsqd or
+	 			defsqd
 	 		add(u.sqd,u)
 	 	end
 	 end
@@ -2893,10 +2891,8 @@ function ai_unit2(u)
 		end
 	elseif u.st.t=="attack" and
 		u.st.active and u.x>232 then
-		local b=u.y<112 and 1 or
-			u.y>208 and 4 or 2
-		inv|=b
-		mvg(defsqd[b],u.x,u.y,1,1)
+		inv=1
+		mvg(defsqd,u.x,u.y,1,1)
 	end
 end
 
@@ -2927,12 +2923,8 @@ function ai_frame()
 	 foreach(rebuild,ai_bld)
 	end	
 	ai_bld(res2.bo_idx)
-	for i,sqd in next,offsqd do
-		if #sqd>=20 and inv&i==0 then
-			while #sqd>0 do
-				add(atksqd,deli(sqd))
-			end
-		end
+	if #offsqd>=20 and inv==0 then
+		atksqd,offsqd=offsqd,{}
 	end
 	mvg(atksqd,
 	 unspl"48,40,1,1")
