@@ -440,9 +440,9 @@ tmap=-1]]
 archer=parse[[
 idx=4
 spd=0.343
-los=30
+los=33
 hp=5
-range=25
+range=28
 atk=0.667
 proj_freq=30
 atk_typ=acid
@@ -984,8 +984,8 @@ portx=104
 porty=80
 portw=9
 ]],function(_ENV)
-		range+=5
-		los+=5
+		range+=7
+		los+=7
 	end,archer),
 nil,
 parse([[
