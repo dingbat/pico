@@ -254,27 +254,27 @@ function _update()
  
  foreach(units,tick_unit)
  for u in all(units) do
-		if (upc_0) ai_unit2(u)	
- 	if selx
- 		and (g(viz,u.x8,u.y8)
- 		 or u.disc)
- 	then
- 	 u.sel=intersect(u.r,selbox,0)
-		 if u.sel then
-				if u.p!=1 then
-					enemy_sel={u}
-				elseif u.typ.unit then
-					my_sel=my_sel or {}
-					add(my_sel,u)
-				else
-					bldg_sel={u}
+		if (upc_0) ai_unit2(u)
+		if not u.dead then
+	 	if selx
+	 		and (g(viz,u.x8,u.y8)
+	 		 or u.disc)
+	 	then
+	 	 u.sel=intersect(u.r,selbox,0)
+			 if u.sel then
+					if u.p!=1 then
+						enemy_sel={u}
+					elseif u.typ.unit then
+						my_sel=my_sel or {}
+						add(my_sel,u)
+					else
+						bldg_sel={u}
+					end
 				end
 			end
-		end
- 	if not (u.const or u.dead) then
 		 if u.upd and
 		  u.st.aggress and
-		  u.typ.atk
+		  u.typ.atk and not u.const
 		 then
 				aggress(u)
 	 	end
@@ -1275,6 +1275,7 @@ function input()
  end
 	
 	if btnp"5" and hoverunit and
+		hoverunit.typ.unit and
   t()-selt<0.2 then
 		selection,selx={}
 		for u in all(units) do
@@ -1371,11 +1372,11 @@ function tick_unit(u)
 		if u.onscr then
 			sfx(typ.bldg and 17 or 3)
 		end
-		u.dead,
-			u.st,u.sel=0,parse"t=dead"
-		if typ.bldg then
-			register_bldg(u)
-		end
+		u.dead,u.st,
+			u.sel,u.farmer=
+			0,parse"t=dead",
+		 typ.bldg and register_bldg(u)
+		
 		local r=res[u.p]
 		if typ.drop and not u.const then
 			r.pl-=5
@@ -1606,7 +1607,7 @@ function update_unit(u)
 					u.st.res=nxt
 				end
 			end
-		elseif st.res and not st.wayp then
+		elseif st.res and not wayp then
 	 	mine_nxt_res(u,st.res)
 		end
  end
@@ -1616,28 +1617,25 @@ function update_unit(u)
  		st.spd or u.typ.spd)
  	local x,y=unpack(wayp[1])
  	if dist(x-u_rect(u).x,y-u.y)<0.5 then
- 		if #wayp==1 then
+			deli(wayp,1)
+ 		if #wayp==0 then
  			st.wayp=nil
-			else
-			 deli(wayp,1)
 			end
  	end
  else
  	if (t=="move") rest(u)
- 	if t=="farm" then
- 		st.active=st.farm.exp and
- 			rest(u)
- 	end
+ 	if (t=="farm")	st.active=true
  end
 end
 
 function update_farm(u)
 	local f=u.farmer
-	if not f or f.dead or f.st.farm!=u then
+	if not f or f.st.farm!=u
+	 or u.exp then
 		u.farmer=nil
 		return
 	end
-	if f.st.active and not u.exp and
+	if f.st.active and
 		not u.ready and fps==59 then
 		u.fres+=0.375+cycles[u.p]/40
 		u.sproff+=1
@@ -1647,7 +1645,9 @@ end
 
 function farmer(u)
 	local f=u.st.farm
-	if f.ready and fps==0 then
+	if not f.farmer then
+		rest(u)
+	elseif f.ready and fps==0 then
 		f.fres-=1
 		f.sproff+=1
 		collect(u,"r")
@@ -1656,8 +1656,8 @@ function farmer(u)
 			f.cycles+=1
 			f.exp,f.ready=f.hu and
 			 f.cycles>=cycles[1]
-			f.sproff=f.exp and 32 or 0
-			if (f.exp) sfx"20"
+			f.sproff=f.exp and
+				(sfx"20" or 32) or 0
 		end
 		u.st.farm=f
 	end
@@ -1676,7 +1676,7 @@ function aggress(u)
 		then
 			if (d<targ_d)targ,targ_d=e,d
 			if typ.atk_typ=="seige"
-				and e.typ.fire then
+				and e.typ.bldg then
 				pref=e
 			end
 		end
@@ -1733,7 +1733,8 @@ function buildrepair(u)
 	if b.const then
 		b.const+=1
 		if b.const>=b.typ.const then
-			b.const=u.hu and sfx"26"
+			b.const,b.cost=
+				u.hu and sfx"26"
 			register_bldg(b)
 			if b.typ.drop then
 				r.pl+=5
@@ -2310,7 +2311,7 @@ function single_unit_section()
  
  if (sel1.p!=1) return
 	
-	if sel1.const then
+	if sel1.cost then
 	 draw_port(
 	 	parse[[
 portx=97
