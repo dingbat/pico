@@ -250,11 +250,11 @@ function _update()
  for p in all(proj) do
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
-	  if intersect(
+	  if int(
 	  	del(proj,p).to_unit.r,
 	 		{p.x,p.y,p.x,p.y},0
 	 	) then
-		 	deal_dmg(p.from_typ,p.to_unit)
+		 	dmg(p.from_typ,p.to_unit)
 			end
 		end
  end
@@ -263,7 +263,7 @@ function _update()
  	bldg_sel,my_sel,enemy_sel=nil
  end
  
- foreach(units,tick_unit)
+ foreach(units,tunit)
  for u in all(units) do
 		if (upc_0) ai_unit2(u)
 		if not u.dead then
@@ -271,7 +271,7 @@ function _update()
 	 		and (g(viz,u.x8,u.y8)
 	 		 or u.disc)
 	 	then
-	 	 u.sel=intersect(u.r,selbox,0)
+	 	 u.sel=int(u.r,selbox,0)
 			 if u.sel then
 					if u.p!=1 then
 						enemy_sel={u}
@@ -284,10 +284,10 @@ function _update()
 				end
 			end
 		 if u.upd and
-		  u.st.aggress and
+		  u.st.agg and
 		  u.typ.atk and not u.const
 		 then
-				aggress(u)
+				agg(u)
 	 	end
 	 	if u.st.t=="attack" then
 	 		fight(u)
@@ -1111,15 +1111,15 @@ bld_vs_bld=0.1]]
 function rest(u)
 	u.st=parse[[t=rest
 rest=1
-aggress=1]]
+agg=1]]
 end
 
-function mvg(units,x,y,aggress,rest)
+function mvg(units,x,y,agg,rest)
 	local lowest=999
 	for u in all(units) do
 		if not rest or
 		 u.st.rest then
-			move(u,x,y,aggress)
+			move(u,x,y,agg)
 		end
 		lowest=min(u.typ.spd,lowest)
 	end
@@ -1128,11 +1128,11 @@ function mvg(units,x,y,aggress,rest)
 	end
 end
 
-function move(u,x,y,aggress)
+function move(u,x,y,agg)
 	u.st={
 		t="move",
 		wayp=get_wayp(u,x,y,0),
-		aggress=aggress,
+		agg=agg,
 	}
 end
 
@@ -1207,7 +1207,7 @@ function hilite(v)
 	hlt,hlv=t(),v
 end
 
-function mouse_cam()
+function cam()
 	local b=btn()
 	if (b>32) b>>=8 --esdf
 	cx,cy,amx,amy=
@@ -1227,10 +1227,10 @@ function mouse_cam()
 end
 
 function input()
-	mouse_cam()
+	cam()
 	
  for b in all(buttons) do
- 	if intersect(b.r,{amx,amy,amx,amy},1) then
+ 	if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
  	end
 	end
@@ -1368,14 +1368,13 @@ function input()
  end
 end
 
-function tick_unit(u)
+function tunit(u)
 	local typ,targ=u.typ,
 		u.st.target
 	u.hp+=typ.hp-u.max_hp
 	u.max_hp,u.onscr,u.upd=
 		typ.hp,
-		intersect(u.r,
-			{cx,cy,cx+128,cy+104},0),
+		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc
 
 	if u.hp<=0 and not u.dead then
@@ -1386,7 +1385,7 @@ function tick_unit(u)
 		u.dead,u.st,
 			u.sel,u.farmer=
 			0,parse"t=dead",
-		 typ.bldg and register_bldg(u)
+		 typ.bldg and reg_bldg(u)
 		
 		local r=res[u.p]
 		if typ.drop and not u.const then
@@ -1414,9 +1413,8 @@ function tick_unit(u)
 		u.hp+=0.5
 	end
 	
-	if intersect(u.r,
-	 {mx,my,mx,my},1) and (
-	 not hoverunit or
+	if int(u.r,{mx,my,mx,my},1)
+		and (not hoverunit or
 	  hoverunit.hu
 	) then
 		hoverunit=u
@@ -1447,16 +1445,15 @@ function tick_unit(u)
 	update_viz(u)
 
 	if typ.unit and not u.st.wayp then
-		local x,y,change=u.x,u.y
+		local x,y,c=u.x,u.y
 		while g(pos,x\4,y\4) and
 			not u.st.adj do
 			x+=rnd"4"-2
 			y+=rnd"4"-2
-			change=1
+			c=1
 		end
-		if change then
-			u.st.wayp,u.st.adj={{x,y}},1
-		end
+		u.st.wayp,u.st.adj=
+			c and {{x,y}},c
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1600,8 +1597,7 @@ function update_unit(u)
  else
 		if
 			targ and
-			intersect(targ.r,u.r,
-				st.res and -3 or 0)
+			int(targ.r,u.r,st.res and -3 or 0)
 		then
 			u.dir,st.active,st.fps,
 				st.wayp=
@@ -1674,7 +1670,7 @@ function farmer(u)
 	end
 end
 
-function aggress(u)
+function agg(u)
 	local typ=u.typ
 	local los,targ_d,targ,pref=max(
 		typ.unit and typ.los,
@@ -1720,9 +1716,9 @@ function fight(u)
  		})
  	end
  else
- 	in_range=intersect(u.r,e.r,0)
+ 	in_range=int(u.r,e.r,0)
 		if in_range and fps%30==u.id%30 then
-		 deal_dmg(typ,e)
+		 dmg(typ,e)
 		end
  end
  u.st.active=in_range
@@ -1745,7 +1741,7 @@ function buildrepair(u)
 		if b.const>=b.typ.const then
 			b.const,b.cost=
 				u.hu and sfx"26"
-			register_bldg(b)
+			reg_bldg(b)
 			if b.typ.drop then
 				r.pl+=5
 			elseif b.typ.farm then
@@ -1858,7 +1854,7 @@ function s(a,x,y,v)
  a[x|y<<8]=v
 end
 
-function intersect(r1,r2,e)
+function int(r1,r2,e)
 	return r1[1]-e<r2[3] and
 		r1[3]+e>r2[1] and
 		r1[2]-e<r2[4] and
@@ -2007,7 +2003,7 @@ function buildable()
 		(h8 or w8 or acc(x+1,y+1,true))
 end
 
-function register_bldg(b)
+function reg_bldg(b)
 	local typ,x,y=b.typ,b.x8,b.y8
 
 	function reg(xx,yy)
@@ -2035,7 +2031,7 @@ function register_bldg(b)
 	end
 end
 
-function deal_dmg(from_typ,to)
+function dmg(from_typ,to)
 	to.hp-=from_typ.atk*dmg_mult[
 		from_typ.atk_typ.."_vs_"..
 		to.typ.def]
@@ -2120,7 +2116,7 @@ fres=0]])
 				_id,_typ.prod
 	end
 	rest(u_rect(u))
-	if (_typ.bldg)register_bldg(u)
+	if (_typ.bldg)reg_bldg(u)
 	return u
 end
 
@@ -2465,7 +2461,7 @@ portf=13
 		handle=function()
 			sel_only(idle)
 			cx,cy=idle.x-64,idle.y-64
-			mouse_cam()
+			cam()
 		end
 	})
 	
