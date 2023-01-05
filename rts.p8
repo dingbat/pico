@@ -57,15 +57,18 @@ function _draw()
 		)
 	end
 	if loser then
+		local secs=res1.t\1%60
 		camera()
 		rectfill(unspl"0,96,128,115,9")
+		line(
+			?split"\^j2n\|e\#9\f2 easy ai,\^j2n\|e\#9\f5 normal ai,\^j2n\|e\#9\f0 hard ai"[res2.diff+1].."  \|e\f5\^:000e040e1915110e\|i"..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	 	-1,unspl"88,7,88,9")
 		pal(2,0)
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
 	 	unspl"0,16,8,14,98,32,16")
-		?split"\#9\|d\-0\*8 \-0\-4\-e\|h\f7easy ai,\#9\|d\-0\*a \-0\-0\-a\|h\f5normal ai,\#9\|d\-0\*8 \-0\-4\-e\|h\f0hard ai"[res2.diff+1],22,93
-	 ?split"\^w\^t\fa\|gdefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\fa\|gvictory!\-0\-0\-0\-0\|f\f1victory!"[loser],53,102
-	 ?"\f4\#9\|k\-0\-4\*j \-0\-0\-0\-e\|d\-0\-a\|ipress ❎ for menu"
+	 ?"\^j7t\|i\^y7\#9\|f\-f\f4 press ❎ for menu \^jep\|h\0"
+	 ?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 	 return
 	end
 	
@@ -227,6 +230,8 @@ function _update()
  	return
 	end
 	
+	res1.t+=0.033333
+
  if upc_0 then
  	viz,new_viz=new_viz,{}
 		for k in next,exp do
@@ -2599,7 +2604,7 @@ reskeys,f2res,resqty,
  key2resf,rescol,
  resoffx,resoffy,renewcost
  =
-split"r,g,b,p,pl,reqs,tot,bo_idx,diff,techs",parse[[
+split"r,g,b,p,pl,reqs,tot,bo_idx,diff,techs,t",parse[[
 7=r
 11=g
 19=b
@@ -2668,7 +2673,8 @@ tot=4
 bo_idx=1
 reqs=0
 diff=-2
-techs=0]]
+techs=0
+t=0]]
 
 	res1,res2,
 	units_heal,
@@ -2710,9 +2716,9 @@ end
 --ai
 
 --ai_debug=true
-if ai_debug then
-	_update60=_update
-end
+--if ai_debug then
+--	_update60=_update
+--end
 
 function ai_init()
 	res_alloc,
