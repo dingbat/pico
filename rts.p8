@@ -1274,7 +1274,7 @@ function input()
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1,nil,0,1)
+				1,0,1)
 			foreachsel(build,b)
 			pay(to_build,-1)
 			b.cost,to_build,selx=to_build
@@ -1798,7 +1798,7 @@ function produce(u)
 		else
 			if (u.onscr and u.hu) sfx"19"
 			local new=unit(
-				bld.typ,u.x,u.y,u.p,u.boi)
+				bld.typ,u.x,u.y,u.p)
 			if new.typ.ant and
 				u.rtx and
 				fget(mget(u.rtx,u.rty),1)
@@ -2096,7 +2096,7 @@ function make_units(data)
 	end)
 end
 
-function unit(t,_x,_y,_p,_boi,
+function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
  local _typ,_id,u=
  	typs[t] or t,
@@ -2110,11 +2110,11 @@ fres=0]])
 	do
 		local ptyp,_ENV=_typ[_p],u
 	 typ,x,y,p,hu,hp,max_hp,const,
-	  disc,id,boi,prod=
+	  disc,id,prod=
 		 	ptyp,_x,_y,_p,_p==1,
 		 	_hp or ptyp.hp,ptyp.hp,
 				tonum(_const),_disc==1,
-				_id,tonum(_boi),_typ.prod
+				_id,_typ.prod
 	end
 	rest(u_rect(u))
 	if (_typ.bldg)register_bldg(u)
@@ -2726,7 +2726,7 @@ end
 function ai_init()
 	res_alloc,
 		defsqd,offsqd,atksqd,
-		miners,rebuild,
+		miners,
 		res2.diff,
 		nxt_res,
 		antcount,inv,
@@ -2865,10 +2865,7 @@ function ai_unit2(u)
 			(u.hp<u.max_hp*0.75 or 
 			 u.const)
 		then
-			if u.dead then
-			 del(rebuild,u.boi)
-			 add(rebuild,u.boi)
-			elseif not u.w then
+			if not u.w then
 				u.w=deli(miners)
 				if (u.w) build(u.w,u)
 			end
@@ -2881,8 +2878,7 @@ function ai_unit2(u)
 			if antcount<30 then
 				ai_prod(u)
 			end
-		elseif u.typ.units and
-			bo[u.boi][5] then
+		elseif u.typ.units then
 			ai_prod(u)
 		end
 		if u.w and
@@ -2907,8 +2903,8 @@ function ai_bld(boi)
 				unit(b.typ,
 					x*8+b.typ.w/2-640,
 					y*8+b.typ.h/2,
-					2,boi,0)
-				if not del(rebuild,boi) then
+					2,0)
+				if res2.bo_idx==boi then
 					res2.bo_idx+=1
 				end
 			else
@@ -2919,9 +2915,12 @@ function ai_bld(boi)
 end
 
 function ai_frame()
-	if inv==0 then
-	 foreach(rebuild,ai_bld)
-	end	
+	for i=1,res2.bo_idx-1 do
+		if inv==0 and not g(bldgs,
+		 bo[i][3]-80,bo[i][4])
+			ai_bld(i)
+		end
+	end
 	ai_bld(res2.bo_idx)
 	if #offsqd>=20 and inv==0 then
 		atksqd,offsqd=offsqd,{}
@@ -2943,7 +2942,6 @@ function save()
 			x..","..
 			y..","..
 			p..","..
-			tostr(boi)..","..
 			tostr(const)..","..
 			max(disc)..","..
 			hp..",/"
@@ -2986,11 +2984,6 @@ menuitem(2,"◆ load from clip",function()
 		end
 	end
 	make_units(data)
-	for i,b in inext,bo do
-		add(i<res2.bo_idx and
-		 g(bldgs,b[3]-80,b[4],rebuild)
-		 ,i)
-	end
 	make_dmaps"d"
 end)
 
