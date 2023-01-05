@@ -2815,11 +2815,9 @@ function ai_unit1(u)
 	 	if u.dead then
 	 		del(u.sqd,u)
 	 	elseif not u.sqd then
-	 		u.sqd=(#defsqd>
-	 									#offsqd or
+	 		u.sqd=(#defsqd>#offsqd or
 	 		 u.typ.atk_typ=="seige") and
-	 			offsqd or
-	 			defsqd
+	 			offsqd or defsqd
 	 		add(u.sqd,u)
 	 	end
 	 end
@@ -2903,12 +2901,11 @@ function ai_bld(boi)
 end
 
 function ai_frame()
-	for i=1,res2.boi-1 do
+	for i=1,res2.boi do
 		if inv==0 then
 			ai_bld(i)
 		end
 	end
-	ai_bld(res2.boi)
 	if #offsqd>=20 and inv==0 then
 		atksqd,offsqd=offsqd,{}
 	end
