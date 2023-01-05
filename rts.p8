@@ -1504,32 +1504,6 @@ function draw_map(offset,y)
  map(cx/8+offset,cy/8,0,0,17,y)
  camera(cx,cy)
 end
-
-function draw_minimap()
-	camera(-mmx,-mmy)
-	
-	pal(14,0)
-	sspr(unspl"72,72,19,12,0,0")
-	
-	for u in all(units) do
-		if u.disc or
-			g(viz,u.x8,u.y8) then
-			pset(
-				u.x/mmwratio,
-				u.y/mmhratio,
-				u.sel and 9 or u.p
-			)
-		end
-	end
-	
-	camera(
-		-mmx-ceil(cx/mmwratio),
-	 -mmy-ceil(cy/mmhratio)
-	)
-	--7=128/mmwratio+1
-	rect(unspl"-1,-1,7,7,10")
-	camera()
-end
 -->8
 --unit
 
@@ -2303,7 +2277,7 @@ function draw_port(
 	camera()
 end
 
-function draw_sel_ports(x)
+function sel_ports(x)
 	for i,u in inext,selection do
 		x+=13
 		if i>5 then
@@ -2321,11 +2295,11 @@ function draw_sel_ports(x)
 	end
 end
 
-function single_unit_section()
+function single()
 	local q=sel1.q
 	
 	if numsel==1 then
-		draw_sel_ports(-10)
+		sel_ports(-10)
  end
  
  if (sel1.p!=1) return
@@ -2421,9 +2395,9 @@ function draw_menu()
  camera()
 
  if numsel==1 or sel_typ==ant1 then
-		single_unit_section()
+		single()
 	else
-		draw_sel_ports(24)
+		sel_ports(24)
 	end
 	if numsel>1 then
 		camera(numsel<10 and -2)
@@ -2459,8 +2433,30 @@ portf=13
 	 )
 	end
 	
-	draw_minimap()
+	camera(-mmx,-mmy)
 	
+	pal(14,0)
+	sspr(unspl"72,72,19,12,0,0")
+	
+	for u in all(units) do
+		if u.disc or
+			g(viz,u.x8,u.y8) then
+			pset(
+				u.x/mmwratio,
+				u.y/mmhratio,
+				u.sel and 9 or u.p
+			)
+		end
+	end
+	
+	camera(
+		-mmx-ceil(cx/mmwratio),
+	 -mmy-ceil(cy/mmhratio)
+	)
+	--7=128/mmwratio+1
+	rect(unspl"-1,-1,7,7,10")
+	camera()
+		
 	sspr(idle and 48 or 56,
 	 unspl"105,8,6,116,121")
 	add(buttons,idle and {
