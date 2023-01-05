@@ -1806,6 +1806,10 @@ end
 -->8
 --utils
 
+function un(f)
+	return function(s) f(unspl(s)) end
+end
+
 function sel_only(unit)
  sfx"1"
 	foreachsel(function(u)
@@ -2092,14 +2096,6 @@ function queue_prod(u,b)
 		}
 	end
 end
-
-function un(f)
-	return function(s) f(unspl(s)) end
-end
-
-l=un(line)
-ununit=un(unit)
-unspr=un(spr)
 -->8
 --a*
 
@@ -2585,14 +2581,16 @@ end
 -->8
 --init
 
-ai_diff,
+l,ununit,unspr,
+ ai_diff,
 	mapw,maph,mmx,mmy,mmw,mmh,
 	mapw8,maph8,
 	mmhratio,
 	mmwratio,
 	menu,cx,cy,cvx,cvy
 	=
-unspl"0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
+	un(line),un(unit),un(spr),
+ unspl"0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
 	
 reskeys,f2res,resqty,
  key2resf,rescol,
