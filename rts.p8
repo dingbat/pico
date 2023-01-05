@@ -1685,13 +1685,13 @@ function aggress(u)
 end
 
 function fight(u)
-	local typ,e,in_range,d=
+	local typ,e,in_range=
 		u.typ,u.st.target,
 		u.st.active
-	local dx,dy=e.x-u.x,e.y-u.y
+	local dx=e.x-u.x
+	local d=u.upd and dist(dx,e.y-u.y)
 	if typ.range then
 		if u.upd then
-			d=dist(dx,dy)
 			in_range=d<=typ.range and
 				g(viz,e.x8,e.y8)	
 		end
@@ -1718,7 +1718,6 @@ function fight(u)
  if in_range then
  	u.dir,u.st.wayp=sgn(dx)
 	elseif u.upd then
-		if (not d)	d=dist(dx,dy)
 		if typ.los>=d and typ.unit then
 	 	attack(u,e)
 	 end
