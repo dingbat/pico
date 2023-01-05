@@ -2082,6 +2082,12 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
+function make_units(data)
+	foreach(data,function(l)
+		unit(unpack(l))
+	end)
+end
+
 function unit(t,_x,_y,_p,_boi,
 	_const,_disc,_hp)
  local _typ,_id,u=
@@ -2680,7 +2686,7 @@ end
 
 function new_game()
 	menu=init()
-	foreach(splspl[[7,55,44,1
+	make_units(splspl[[7,55,44,1
 7,337,188,2
 14,65,150,3
 14,170,140,3
@@ -2695,8 +2701,7 @@ function new_game()
 1,348,187,2
 1,330,196,2
 5,320,170,2,3
-8,268,169,2]],
-	function(u) unit(unpack(u)) end
+8,268,169,2]]
 )
 	
 	make_dmaps"d"
@@ -2979,9 +2984,7 @@ menuitem(2,"◆ load from clip",function()
 				not b.up
 		end
 	end
-	for l in all(data) do
-		unit(unpack(l))
-	end
+	make_units(data)
 	for i,b in inext,bo do
 		add(i<res2.bo_idx and
 		 g(bldgs,b[3]-80,b[4],rebuild)
