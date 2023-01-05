@@ -10,7 +10,7 @@ function _draw()
  draw_map(0,17)
 	if menu then
 		camera()
-		spr(unspl"229,48,74,5,1")
+		unspr"229,48,74,5,1"
 
 	 local x=64+t()\0.5%2*16
 	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
@@ -1806,19 +1806,6 @@ end
 -->8
 --utils
 
-function l(str)
-	line(unspl(str))
-end
-
-function splspl(str,spl)
-	local x={}
-	foreach(split(str,spl or "\n"),
-		function(s)
-			add(x,split(s))
-		end)
-	return x
-end
-
 function sel_only(unit)
  sfx"1"
 	foreachsel(function(u)
@@ -2070,12 +2057,6 @@ function sur_acc(x,y)
 		acc(x,y+1)
 end
 
-function make_units(data)
-	foreach(data,function(l)
-		unit(unpack(l))
-	end)
-end
-
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
  local _typ,_id,u=
@@ -2111,6 +2092,14 @@ function queue_prod(u,b)
 		}
 	end
 end
+
+function un(f)
+	return function(s) f(unspl(s)) end
+end
+
+l=un(line)
+ununit=un(unit)
+unspr=un(spr)
 -->8
 --a*
 
@@ -2283,7 +2272,7 @@ function sel_ports(x)
 		if i>5 then
 			if (numsel>14) x-=4
 			camera(-?"\f1+"..numsel-5,x-15,121)
-			spr(unspl"133,1,121")
+			unspr"133,1,121"
 			break
 		end
 		draw_port(
@@ -2384,7 +2373,7 @@ function draw_menu()
  for i,sec in inext,secs do
  	pal(i%2!=0 and 4,15)
  	camera(x)
- 	spr(unspl"129,0,104")
+ 	unspr"129,0,104"
  	spr(129,sec-8,104)
  	line(sec-4,unspl"105,3,105,7")
  	rectfill(sec-4,unspl"106,3,108,4")
@@ -2402,7 +2391,7 @@ function draw_menu()
 	if numsel>1 then
 		camera(numsel<10 and -2)
 		?"X"..numsel,unspl"5,111,1"
-		spr(unspl"133,1,111")
+		unspr"133,1,111"
 		add(buttons,{
 			r=split"0,110,14,119",
 			handle=function()
@@ -2698,7 +2687,7 @@ end
 
 function new_game()
 	menu=init()
-	make_units(splspl[[7,55,44,1
+	foreach(split([[7,55,44,1
 7,337,188,2
 14,65,150,3
 14,170,140,3
@@ -2713,8 +2702,7 @@ function new_game()
 1,348,187,2
 1,330,196,2
 5,320,170,2
-8,268,169,2]]
-)
+8,268,169,2]],"\n"),ununit)
 	
 	make_dmaps"d"
 end
@@ -2738,7 +2726,7 @@ function ai_init()
 		unspl"1,0,0"
 	
 	--1m 2f 3b 4d 5t 6c
-	bo=splspl[[5,1,123,27
+	bo=split([[5,1,123,27
 8,1,117,26
 8,3,120,18,2
 11,1,123,21
@@ -2788,7 +2776,8 @@ function ai_init()
 65,2,121,27
 65,2,121,28
 65,1,114,8
-65,6,115,4]]
+65,6,115,4
+150,1,1,1]],"\n")
 end
 
 function ai_unit1(u)
@@ -2894,15 +2883,15 @@ function ai_unit2(u)
 end
 
 function ai_bld(boi)
-	local bld=bo[boi]
-	if bld then
-		local p,pid,x,y=unpack(bld)
+	local p,pid,x,y=unspl(bo[boi])
+	x-=80
+	if not g(bldgs,x,y) then
 		local b=ant.prod[pid]
 		if res2.tot>=p then
 			if can_pay(b,2) then
 				pay(b,-1,2)
 				unit(b.typ,
-					x*8+b.typ.w/2-640,
+					x*8+b.typ.w/2,
 					y*8+b.typ.h/2,
 					2,0)
 				if res2.boi==boi then
@@ -2917,8 +2906,7 @@ end
 
 function ai_frame()
 	for i=1,res2.boi-1 do
-		if inv==0 and not g(bldgs,
-		 bo[i][3]-80,bo[i][4]) then
+		if inv==0 then
 			ai_bld(i)
 		end
 	end
@@ -2964,16 +2952,16 @@ end)
 
 menuitem(2,"◆ load from clip",function()
 	init()
-	local data=splspl(stat"4","/")
-	local r=deli(data)
+	local data=split(stat"4","/")
+	local r=split(deli(data))
 	for i,k in inext,reskeys do
 		i*=2
 		res1[k],res2[k]=r[i-1],r[i]
 	end
-	for k in all(deli(data)) do
+	for k in all(split(deli(data))) do
 		exp[k]=tonum(k)
 	end
-	for i,t in inext,deli(data) do
+	for i,t in inext,split(deli(data)) do
 		mset(i%mapw8,i/mapw8,t)
 	end
 	for b in all(typs) do
@@ -2983,7 +2971,7 @@ menuitem(2,"◆ load from clip",function()
 				not b.up
 		end
 	end
-	make_units(data)
+	foreach(data,ununit)
 	make_dmaps"d"
 end)
 
