@@ -61,8 +61,11 @@ function _draw()
 		camera()
 		rectfill(unspl"0,96,128,115,9")
 		line(
-			?split"\^j2n\|e\#9\f2 easy ai,\^j2n\|e\#9\f5 normal ai,\^j2n\|e\#9\f0 hard ai"[res2.diff+1].."  \|e\f5\^:000e040e1915110e\|i"..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	 	-1,unspl"88,7,88,9")
+			?split"\^j2n\|e\#9\f2 easy ai ,\^j2n\|e\#9\f5 normal ai ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
+	 	-2,unspl"88,7,88,9")
+		line(
+			?"\^jmn\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	 	-1,unspl"88,87,88,9")
 		pal(2,0)
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
