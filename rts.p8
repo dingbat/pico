@@ -61,23 +61,23 @@ function _draw()
 		camera()
 		rectfill(unspl"0,96,128,115,9")
 		line(
-			?split"\^j2n\|e\#9\f2 easy ai ,\^j2n\|e\#9\f5 normal ai ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
-	 	-2,unspl"88,7,88,9")
+			?split"\^j2n\|e\#9\f5 easy ai ,\^j2n\|e\#9\f2 normal ai ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
+	 	-3+res2.diff%2,unspl"88,8,88,9")
 		line(
 			?"\^jmn\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	 	-1,unspl"88,87,88,9")
+	 	-2,unspl"88,88,88,9")
 		pal(2,0)
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
 	 	unspl"0,16,8,14,98,32,16")
-	 ?"\^j7t\|i\^y7\#9\|f\-f\f4 press ❎ for menu \^jep\|h\0"
+	 ?"\^j7t\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jep\|h\0"
 	 ?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 	 return
 	end
 	
  pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
 	if not ai_debug then
-	draw_map(mapw8,15) --fog
+	draw_map(mapw8,15)
 	end
 	
 	_pal,pal,buttons=pal,max,{}
@@ -236,7 +236,7 @@ function _update()
  	return
 	end
 	
-	res1.t+=0.033333
+	res1.t+=0x.0888
 
  if upc_0 then
  	viz,new_viz=new_viz,{}
