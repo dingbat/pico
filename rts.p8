@@ -60,6 +60,9 @@ function _draw()
 		local secs=res1.t\1%60
 		camera()
 		rectfill(unspl"0,96,128,115,9")
+	 line(unspl"6,95,44,95")
+	 line(unspl"86,95,125,95")
+	 line(unspl"25,116,105,116")
 		line(
 			?split"\^j2n\|e\#9\f5 easy ai ,\^j2n\|e\#9\f2 normal ai ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
 	 	-3+res2.diff%2,unspl"88,8,88,9")
@@ -2497,11 +2500,11 @@ end
 -->8
 --dmaps
 
-function dmap_find(u,key)
+function dmap_find(u,k)
 	local x,y,dmap,wayp,lowest=
 		u.x8,
 		u.y8,
-		dmaps[key],
+		dmaps[k],
 		{},9
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
@@ -2532,7 +2535,7 @@ function dmap()
 		else
 			dmapcc(q)
 			if q.c==9 then
-				dmaps[q.key]=
+				dmaps[q.k]=
 					deli(queue,1).dmap
 			end
 		end
@@ -2559,29 +2562,29 @@ function dmapcc(q)
 	q.open,q.nxt=q.nxt,{}
 end
 
-function make_dmap(key)
-	if not dmap_st[key] then
-		dmap_st[key]={}
+function make_dmap(k)
+	if not dmap_st[k] then
+		dmap_st[k]={}
 		for x=0,mapw8 do
 		for y=0,maph8 do
 			if
-				fget(mget(x,y),key2resf[key])
+				fget(mget(x,y),key2resf[k])
 		 then
-		 	s(dmap_st[key],x,y,{x,y})
+		 	s(dmap_st[k],x,y,{x,y})
 		 end
 		end
 		end
 	end
 	
 	local open={}
-	for i,t in next,dmap_st[key] do
+	for i,t in next,dmap_st[k] do
 		if	sur_acc(unpack(t)) then
 			add(open,t).k=i
 		end
 	end
 	
 	return {
-		key=key,
+		k=k,
 		dmap={},
 		open=open,
 		c=0,
@@ -2657,6 +2660,7 @@ function init()
 	poke(0x5f2d,3)
 	reload()
 	music"1"
+	menuitem(4,"∧ resign",function() units[1].hp=0 end)
 		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
@@ -2930,7 +2934,7 @@ end
 -->8
 --save
 
-function save()
+menuitem(1,"⌂ save to clip",function()
 	if (menu) return
 	local str=""
 	for _ENV in all(units) do
@@ -2956,8 +2960,7 @@ function save()
 		str=str..res1[r]..","..res2[r]..","
 	end
 	printh(str,"@clip")
-end
-menuitem(1,"⌂ save to clip",save)
+end)
 
 menuitem(2,"◆ load from clip",function()
 	init()
@@ -2985,7 +2988,7 @@ menuitem(2,"◆ load from clip",function()
 end)
 
 menuitem(3,"   (paste first)")
-menuitem(4,"∧ resign",function() units[1].hp=0 end)
+
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000011000000010100000000000110001100000000000101000000000000000000
