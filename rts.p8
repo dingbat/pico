@@ -2076,7 +2076,7 @@ fres=0]])
 				_id,_typ.prod
 	end
 	rest(u_rect(u))
-	if (_typ.bldg)reg_bldg(u)
+	if (_typ.bldg) reg_bldg(u)
 	return u
 end
 
@@ -2085,9 +2085,7 @@ function queue_prod(u,b)
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q={
-			b=b,qty=1,t=b.t,fps=fps-1,
-		}
+		u.q={b=b,qty=1,t=b.t,fps=fps-1}
 	end
 end
 -->8
