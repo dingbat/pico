@@ -254,7 +254,7 @@ function _draw()
 	 	brd(exp)
 		elseif not viz[i] then
 	 	brd(viz,
-		 	not fget(mget(x,y),7) and 5)
+		  fget(mget(x,y),7) or 5)
 		end
 	end
 	end
@@ -1583,9 +1583,10 @@ function update_unit(u)
  			st.wayp=nil
 			end
  	end
- else
- 	if (t=="move") rest(u)
- 	if (t=="farm")	st.active=true
+ elseif t=="move" then
+ 	rest(u)
+ elseif t=="farm" then
+ 	st.active=true
  end
 end
 
@@ -1968,7 +1969,7 @@ function reg_bldg(b)
 
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
-			not b.dead and b or nil)
+			not b.dead and b)
 		if b.dead then
 			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
@@ -2226,7 +2227,7 @@ function draw_port(
 	)
 	p(cant_pay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
-	pal(not costs and 6,7)
+	pal(costs or 6,7)
 	sspr(typ.portx,typ.porty,
 	 unspl"9,8,1,1")
 	if costs and costs.up then
@@ -2651,11 +2652,11 @@ function init()
 		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
-		proj,bldgs,new_viz,
-		dmap_st,res,loser,menu=
+		proj,bldgs,new_viz,dmap_st,
+		res,loser,menu=
+		{},{},{},{},
 		{},{},{},
-		{},{},{},
-		{},{},{},{},{d={}},
+		{},{},{},{d={}},
 	 parse[[
 r=20
 g=10
@@ -2706,7 +2707,7 @@ end
 -->8
 --ai
 
-ai_debug=true
+--ai_debug=true
 if ai_debug then
 	_update60=_update
 end
@@ -2720,7 +2721,7 @@ function ai_init()
 		split"r,b,g,r,b",
 		{},{},{},
 		{},ai_diff,
-		unspl"1,0,0"
+		unspl"1,0"
 	
 	--1m 2f 3b 4d 5t 6c
 	bo=split([[5,1,123,27

@@ -240,7 +240,10 @@ ai_diff,
 	?"\^:000e040e1915110e"
 
 
-token savers
+dirty token savers
 ============
 - remove `.."_vs_"..`
 - organic endscreen
+- 	pal(14,0) => 	p"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
+
+memset(0x5f01,1,15)=memset(unspl"24321,1,15")
