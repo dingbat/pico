@@ -232,9 +232,15 @@ ai_diff,
 	mmwratio, --mapw/mmw
 	menu,cx,cy,cvx,cvy
 
-
+--stopwatches
 	--right aligned
 	?"\^:00702070c8a88870"
 
 	--left aligned
 	?"\^:000e040e1915110e"
+
+
+token savers
+============
+- remove `.."_vs_"..`
+- organic endscreen
