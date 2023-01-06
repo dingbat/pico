@@ -6,6 +6,155 @@ __lua__
 
 music(63,2000)
 
+function draw_map(offset,y)
+ camera(cx%8,cy%8)
+ map(cx/8+offset,cy/8,0,0,17,y)
+ camera(cx,cy)
+end
+
+function _update()
+	if menu then
+		cx+=cvx
+		cy+=cvy
+		if (cx%256==0) cvx*=-1
+		if (cy%127==0) cvy*=-1
+ 	if btnp"5" then
+ 		new_game()
+ 		if ai_debug then
+ 			_update=_update60
+ 		end
+ 		_update()
+ 	else
+			ai_diff-=btnp()
+			ai_diff%=3
+		end
+		pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
+ 	return
+	end
+
+	local total=res1.p+res2.p
+	upcycle=total>=100 and 30 or
+		total>=75 and 15 or
+		total>=40 and 10 or 5
+
+	fps+=1
+	fps%=60
+	
+	upc,lclk,rclk=fps%upcycle,
+		llclk and not btn"5",
+		lrclk and not btn"4"
+
+ input()
+ if to_build then
+	 to_build.x,to_build.y=
+	  mx8*8,my8*8
+	end
+	
+ llclk,lrclk,upc_0,pos,
+ 	hoverunit,idle,idle_mil=
+ 	btn"5",btn"4",
+ 	upc==0,{}
+
+	dmap()
+
+ if fps%30==19 then
+ 	mmready=true
+		for tx=0,mmw do
+		for ty=0,mmh do
+	 	local x,y=tx*mmwratio\8,
+	 		ty*mmhratio\8
+	 	sset(72+tx,72+ty,
+				g(exp,x,y) and rescol[
+					g(viz,x,y,"e")..
+					fget(mget(x,y))
+				] or 14)
+		end
+		end
+	end
+	
+ if loser then
+ 	poke"24365"
+ 	if lclk then
+ 		menu,cx,cy=unspl"1,5,35"
+ 		music"63"
+ 	end
+ 	return
+	end
+	
+	res1.t+=0x.0888
+
+ if upc_0 then
+ 	viz,new_viz=new_viz,{}
+		for k in next,exp do
+ 		local x,y=k&0x00ff,k\256
+ 		mset(x+mapw8,y,viz[k] and
+	   0 or mget(x,y))
+		end
+ end
+ 
+ for p in all(proj) do
+ 	p.x,p.y,_,d=norm(p.to,p,.8)
+  if d<0.5 then
+	  if int(
+	  	del(proj,p).to_unit.r,
+	 		{p.x,p.y,p.x,p.y},0
+	 	) then
+		 	dmg(p.from_typ,p.to_unit)
+			end
+		end
+ end
+
+ if selx then
+ 	bldg_sel,my_sel,enemy_sel=nil
+ end
+ 
+ foreach(units,tunit)
+ for u in all(units) do
+		if (upc_0) ai_unit2(u)
+		if not u.dead then
+	 	if selx
+	 		and (g(viz,u.x8,u.y8)
+	 		 or u.disc)
+	 	then
+	 	 u.sel=int(u.r,selbox,0)
+			 if u.sel then
+					if not u.hu then
+						enemy_sel={u}
+					elseif u.typ.unit then
+						my_sel=my_sel or {}
+						add(my_sel,u)
+					else
+						bldg_sel={u}
+					end
+				end
+			end
+		 if u.upd and
+		  u.st.agg and
+		  u.typ.atk and not u.const
+		 then
+				agg(u)
+	 	end
+	 	if u.st.t=="attack" then
+	 		fight(u)
+	 	end
+	 end
+ end
+
+ if selx then
+		selection=my_sel or
+			bldg_sel or
+			enemy_sel or {}
+	end
+	sel1,numsel,sel_typ=
+		selection[1],#selection
+	foreachsel(function(s)
+		sel_typ=(sel_typ==nil or
+			s.typ==sel_typ) and s.typ
+	end)
+	
+	if (upc_0) ai_frame()
+end
+
 function _draw()
  draw_map(0,17)
 	if menu then
@@ -169,150 +318,6 @@ function _draw()
 		can_attack() and 65 or
 		can_drop() and 69) or 64)
 end
-
-function _update()
-	if menu then
-		cx+=cvx
-		cy+=cvy
-		if (cx%256==0) cvx*=-1
-		if (cy%127==0) cvy*=-1
- 	if btnp"5" then
- 		new_game()
- 		if ai_debug then
- 			_update=_update60
- 		end
- 		_update()
- 	else
-			ai_diff-=btnp()
-			ai_diff%=3
-		end
-		pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
- 	return
-	end
-
-	local total=res1.p+res2.p
-	upcycle=total>=100 and 30 or
-		total>=75 and 15 or
-		total>=40 and 10 or 5
-
-	fps+=1
-	fps%=60
-	
-	upc,lclk,rclk=fps%upcycle,
-		llclk and not btn"5",
-		lrclk and not btn"4"
-
- input()
- if to_build then
-	 to_build.x,to_build.y=
-	  mx8*8,my8*8
-	end
-	
- llclk,lrclk,upc_0,pos,
- 	hoverunit,idle,idle_mil=
- 	btn"5",btn"4",
- 	upc==0,{}
-
-	dmap()
-
- if fps%30==19 then
- 	mmready=true
-		for tx=0,mmw do
-		for ty=0,mmh do
-	 	local x,y=tx*mmwratio\8,
-	 		ty*mmhratio\8
-	 	sset(72+tx,72+ty,
-				g(exp,x,y) and rescol[
-					g(viz,x,y,"e")..
-					fget(mget(x,y))
-				] or 14)
-		end
-		end
-	end
-	
- if loser then
- 	poke"24365"
- 	if lclk then
- 		menu,cx,cy=unspl"1,5,35"
- 		music"63"
- 	end
- 	return
-	end
-	
-	res1.t+=0x.0888
-
- if upc_0 then
- 	viz,new_viz=new_viz,{}
-		for k in next,exp do
- 		local x,y=k&0x00ff,k\256
- 		mset(x+mapw8,y,viz[k] and
-	   0 or mget(x,y))
-		end
- end
- 
- for p in all(proj) do
- 	p.x,p.y,_,d=norm(p.to,p,.8)
-  if d<0.5 then
-	  if int(
-	  	del(proj,p).to_unit.r,
-	 		{p.x,p.y,p.x,p.y},0
-	 	) then
-		 	dmg(p.from_typ,p.to_unit)
-			end
-		end
- end
-
- if selx then
- 	bldg_sel,my_sel,enemy_sel=nil
- end
- 
- foreach(units,tunit)
- for u in all(units) do
-		if (upc_0) ai_unit2(u)
-		if not u.dead then
-	 	if selx
-	 		and (g(viz,u.x8,u.y8)
-	 		 or u.disc)
-	 	then
-	 	 u.sel=int(u.r,selbox,0)
-			 if u.sel then
-					if u.p!=1 then
-						enemy_sel={u}
-					elseif u.typ.unit then
-						my_sel=my_sel or {}
-						add(my_sel,u)
-					else
-						bldg_sel={u}
-					end
-				end
-			end
-		 if u.upd and
-		  u.st.agg and
-		  u.typ.atk and not u.const
-		 then
-				agg(u)
-	 	end
-	 	if u.st.t=="attack" then
-	 		fight(u)
-	 	end
-	 end
- end
-
- if selx then
-		selection=my_sel or
-			bldg_sel or
-			enemy_sel or {}
-	end
-	sel1,numsel,sel_typ=
-		selection[1],#selection
-	foreachsel(function(s)
-		sel_typ=(sel_typ==nil or
-			s.typ==sel_typ) and s.typ
-	end)
-	
-	if (upc_0) ai_frame()
-end
-
 -->8
 --units
 
@@ -1116,6 +1121,8 @@ bld_vs_queen=0.75
 bld_vs_spd=1.25
 bld_vs_seige=0.9
 bld_vs_bld=0.1]]
+-->8
+--tick
 
 function rest(u)
 	u.st=parse[[t=rest
@@ -1203,18 +1210,137 @@ function farm(u,f)
   farm=f
 	}
 end
--->8
---update
 
-function foreachsel(func,...)
-	for u in all(selection) do
-		func(u,...)
+function tunit(u)
+	local typ,targ=u.typ,
+		u.st.target
+	if not u.const then
+		u.hp+=typ.hp-u.max_hp
+		u.max_hp=typ.hp
+	end
+	
+	u.onscr,u.upd=
+		int(u.r,{cx,cy,cx+128,cy+104},0),
+		u.id%upcycle==upc
+
+	if u.hp<=0 and not u.dead then
+		del(selection,u)
+		if u.onscr then
+			sfx(typ.bldg and 17 or 3)
+		end
+		u.dead,u.st,
+			u.sel,u.farmer=
+			0,parse"t=dead",
+		 typ.bldg and reg_bldg(u)
+		
+		local r=res[u.p]
+		if typ.drop and not u.const then
+			r.pl-=5
+		elseif typ.unit then
+			r.p-=1
+		end
+	end
+
+	if u.dead then
+		if typ.queen then
+			loser=u.p
+			music"40"
+		end
+		u.dead+=1
+		if (typ.unit) update_viz(u)
+		del(u.dead==60 and units,u)
+		return
+	end
+	
+	if units_heal[u.p] and
+		not u.fire and
+	 u.hp<typ.hp and
+		fps==0 then
+		u.hp+=0.5
+	end
+	
+	if int(u.r,{mx,my,mx,my},1)
+		and (not hoverunit or
+	  hoverunit.hu
+	) then
+		hoverunit=u
+	end
+	
+	if (u.const) return
+	if targ and targ.dead then
+		if u.st.t=="attack" then
+			move(u,targ.x,targ.y,true)
+		else
+			rest(u)
+		end
+	end
+	
+	if u.hu then
+		if typ.ant and 
+			u.st.rest then
+			if (u.st.idle) idle=u
+			u.st.idle=1
+		elseif typ.mil and not u.q then
+			idle_mil=u
+		end
+	end
+	
+	update_unit(u)
+	if (upc_0) ai_unit1(u)
+
+	update_viz(u)
+
+	if typ.unit and not u.st.wayp then
+		local x,y,c=u.x,u.y
+		while g(pos,x\4,y\4) and
+			not u.st.adj do
+			x+=rnd"4"-2
+			y+=rnd"4"-2
+			c=1
+		end
+		u.st.wayp,u.st.adj=
+			c and {{x,y}},c
+		s(pos,x\4,y\4,1)
 	end
 end
 
-function hilite(v)
-	hlt,hlv=t(),v
+function update_viz(u)
+	if u.hu and u.upd then
+		local k0,los=u.x8|u.y8<<8,
+			u.typ.los
+
+		local xo,yo,l=
+			u.x%8\2,u.y%8\2,
+			ceil(los/8)
+		local i=xo|yo*16|los*256
+		local v=vcache[i]
+		if not v then
+			v={}
+			for dx=-l,l do
+			for dy=-l,l do
+			 if dist(xo*2-dx*8-4,
+			  yo*2-dy*8-4)<los then
+					add(v,dx+dy*256)
+				end
+			end
+			end
+			vcache[i]=v
+		end
+		
+		for t in all(v) do
+			local k=k0+t
+			if k<maph8<<8 and k>=0 and
+				k%256<mapw8 then
+				if bldgs[k] then
+					bldgs[k].disc=1
+				end
+				exp[k],new_viz[k]=1,"v"
+			end
+		end
+	end
 end
+-->8
+--input
 
 function cam()
 	local b=btn()
@@ -1233,6 +1359,12 @@ function cam()
 
  mx,my,hovbtn=amx+cx,amy+cy
  mx8,my8=mx\8,my\8
+end
+
+function foreachsel(func,...)
+	for u in all(selection) do
+		func(u,...)
+	end
 end
 
 function input()
@@ -1375,143 +1507,6 @@ function input()
 	 	selx=nil
 	 end
  end
-end
-
-function tunit(u)
-	local typ,targ=u.typ,
-		u.st.target
-	if not u.const then
-		u.hp+=typ.hp-u.max_hp
-		u.max_hp=typ.hp
-	end
-	
-	u.onscr,u.upd=
-		int(u.r,{cx,cy,cx+128,cy+104},0),
-		u.id%upcycle==upc
-
-	if u.hp<=0 and not u.dead then
-		del(selection,u)
-		if u.onscr then
-			sfx(typ.bldg and 17 or 3)
-		end
-		u.dead,u.st,
-			u.sel,u.farmer=
-			0,parse"t=dead",
-		 typ.bldg and reg_bldg(u)
-		
-		local r=res[u.p]
-		if typ.drop and not u.const then
-			r.pl-=5
-		elseif typ.unit then
-			r.p-=1
-		end
-	end
-
-	if u.dead then
-		if typ.queen then
-			loser=u.p
-			music"40"
-		end
-		u.dead+=1
-		if (typ.unit) update_viz(u)
-		del(u.dead==60 and units,u)
-		return
-	end
-	
-	if units_heal[u.p] and
-		not u.fire and
-	 u.hp<typ.hp and
-		fps==0 then
-		u.hp+=0.5
-	end
-	
-	if int(u.r,{mx,my,mx,my},1)
-		and (not hoverunit or
-	  hoverunit.hu
-	) then
-		hoverunit=u
-	end
-	
-	if (u.const) return
-	if targ and targ.dead then
-		if u.st.t=="attack" then
-			move(u,targ.x,targ.y,true)
-		else
-			rest(u)
-		end
-	end
-	
-	if u.hu then
-		if typ.ant and 
-			u.st.rest then
-			if (u.st.idle) idle=u
-			u.st.idle=1
-		elseif typ.mil and not u.q then
-			idle_mil=u
-		end
-	end
-	
-	update_unit(u)
-	if (upc_0) ai_unit1(u)
-
-	update_viz(u)
-
-	if typ.unit and not u.st.wayp then
-		local x,y,c=u.x,u.y
-		while g(pos,x\4,y\4) and
-			not u.st.adj do
-			x+=rnd"4"-2
-			y+=rnd"4"-2
-			c=1
-		end
-		u.st.wayp,u.st.adj=
-			c and {{x,y}},c
-		s(pos,x\4,y\4,1)
-	end
-end
-
-function update_viz(u)
-	if u.hu and u.upd then
-		local k0,los=u.x8|u.y8<<8,
-			u.typ.los
-
-		local xo,yo,l=
-			u.x%8\2,u.y%8\2,
-			ceil(los/8)
-		local i=xo|yo*16|los*256
-		local v=vcache[i]
-		if not v then
-			v={}
-			for dx=-l,l do
-			for dy=-l,l do
-			 if dist(xo*2-dx*8-4,
-			  yo*2-dy*8-4)<los then
-					add(v,dx+dy*256)
-				end
-			end
-			end
-			vcache[i]=v
-		end
-		
-		for t in all(v) do
-			local k=k0+t
-			if k<maph8<<8 and k>=0 and
-				k%256<mapw8 then
-				if bldgs[k] then
-					bldgs[k].disc=1
-				end
-				exp[k],new_viz[k]=1,"v"
-			end
-		end
-	end
-end
--->8
---map
-
-function draw_map(offset,y)
- camera(cx%8,cy%8)
- map(cx/8+offset,cy/8,0,0,17,y)
- camera(cx,cy)
 end
 -->8
 --unit
@@ -1837,6 +1832,10 @@ function s(a,x,y,v)
  a[x|y<<8]=v
 end
 
+function hilite(v)
+	hlt,hlv=t(),v
+end
+
 function int(r1,r2,e)
 	return r1[1]-e<r2[3] and
 		r1[3]+e>r2[1] and
@@ -1931,7 +1930,7 @@ function can_attack()
 	local v=g(viz,mx8,my8)
 	for u in all(selection) do
 		if hoverunit and
-		 hoverunit.p!=1 and
+		 not hoverunit.hu and
 			u.typ.atk and
 			(v or hoverunit.disc)
 		then
@@ -2283,7 +2282,7 @@ function sel_ports(x)
 			if (numsel>14) x-=4
 			camera(-?"\f1+"..numsel-5,x-15,121)
 			unspr"133,1,121"
-			break
+			return
 		end
 		draw_port(
 			u.typ,x,107,nil,
@@ -2296,13 +2295,6 @@ end
 
 function single()
 	local q=sel1.q
-	
-	if numsel==1 then
-		sel_ports(-10)
- end
- 
- if (sel1.p!=1) return
-	
 	if sel1.cost then
 	 draw_port(
 	 	parse[[
@@ -2398,7 +2390,10 @@ function draw_menu()
 	end
 	
  if numsel==1 or sel_typ==ant1 then
-		single()
+		if numsel==1 then
+			sel_ports(-10)
+	 end
+	 if (sel1.hu) single()
 	else
 		sel_ports(24)
 	end
@@ -2796,14 +2791,14 @@ function ai_init()
 end
 
 function ai_unit1(u)
- if u.p==2 then
+ if not u.hu then
  	if u.typ.ant then
  		antcount+=1
  		if u.st.res=="r" and
  			--41,24
  			not dmaps.r[6185] then
 			 drop(u)
-			 res_alloc=split"b,g,b,g,b,g"
+			 res_alloc=split"b,g,b,b,b,g"
 			end
 			if u.st.rest and
 				u.st.res=="b" then
@@ -2863,7 +2858,7 @@ function ai_prod(u)
 end
 
 function ai_unit2(u)
-	if u.p==2 then
+	if not u.hu then
 		if u.typ.bldg and
 			(u.hp<u.max_hp*0.75 or 
 			 u.const)
