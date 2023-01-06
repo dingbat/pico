@@ -28,7 +28,7 @@ function _update()
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
-		pal(split"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5")
+		p"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
  	return
 	end
 
@@ -162,12 +162,12 @@ function _draw()
 		unspr"229,48,74,5,1"
 
 	 local x=64+t()\0.5%2*16
-	 pal(split"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0")
+	 p"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
 	 sspr(x,unspl"0,16,8,25,28,32,16")
 	 sspr(x,unspl"0,16,8,72,28,32,16,1")
-	 pal(split"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15")
+	 p"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
 	 sspr(x,unspl"0,16,8,25,27,32,16")
-	 pal{2}
+	 p"2"
 	 sspr(x,unspl"0,16,8,72,27,32,16,1")
 
 		?"\^j5c\-j\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\^-w\^-t\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V0.1\-0\|f\f6V0.1\^jej\-j\0"
@@ -218,7 +218,7 @@ function _draw()
 		line(
 			?"\^jmn\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
 	 	-2,unspl"88,88,88,9")
-		pal(2,0)
+		p"1,0"
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
 	 	unspl"0,16,8,14,98,32,16")
@@ -227,7 +227,7 @@ function _draw()
 	 return
 	end
 	
- pal(split"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5")
+ p"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
 	draw_map(mapw8,15)
 	end
@@ -286,8 +286,8 @@ function _draw()
 	if to_build then
 		camera(cx-to_build.x,
 			cy-to_build.y)
-		pal(buildable() or
-		split"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
+		p(buildable() or
+		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
 			camera(4-amx,4-amy)
@@ -1791,6 +1791,10 @@ end
 -->8
 --utils
 
+function p(s)
+	pal(split(s))
+end
+
 function un(f)
 	return function(s) f(unspl(s)) end
 end
@@ -2227,7 +2231,7 @@ function draw_port(
  	axnsel and 9 or
  	typ.portf or 6
 	)
-	pal(cant_pay and split"5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	p(cant_pay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
 	pal(not costs and 6,7)
 	sspr(typ.portx,typ.porty,
@@ -2364,7 +2368,7 @@ function draw_menu()
 		end
 	end
  for i,sec in inext,secs do
- 	pal(i%2!=0 and 4,15)
+ 	p(i%2!=0 and "1,2,3,15")
  	camera(x)
  	unspr"129,0,104"
  	spr(129,sec-8,104)
@@ -2731,7 +2735,7 @@ function ai_init()
 	--1m 2f 3b 4d 5t 6c
 	bo=split([[5,1,123,27
 8,1,117,26
-8,3,120,18,2
+8,3,120,18
 11,1,123,21
 12,5,118,16
 15,2,121,24
@@ -2741,19 +2745,19 @@ function ai_init()
 20,2,123,23
 21,2,123,22
 21,1,122,20
-22,4,118,21,2
+22,4,118,21
 23,1,123,16
 23,2,122,22
 24,2,121,22
 25,1,119,28
-26,6,114,17,2
+26,6,114,17
 27,2,120,22
 29,2,120,23
 30,2,120,24
 31,2,124,24
 31,1,118,19
-32,4,120,20,2
-34,3,120,16,2
+32,4,120,20
+34,3,120,16
 36,1,125,9
 39,5,120,7
 40,1,127,22
@@ -2765,12 +2769,12 @@ function ai_init()
 43,6,114,11
 45,5,117,20
 48,1,113,28
-49,3,121,8,1
+49,3,121,8
 50,5,112,30
-52,4,122,8,1
+52,4,122,8
 53,1,122,28
 53,2,123,26
-53,3,115,28,4
+53,3,115,28
 53,5,118,23
 54,2,122,26
 54,2,122,27
