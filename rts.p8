@@ -2215,7 +2215,8 @@ function print_res(r,x,y,zero)
 				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if zero and i==3 then
-			newx,v=-2,v.."\-g \-c\^t\|f\f5\^-#|"
+			newx=-2
+			v..="\-g \-c\^t\|f\f5\^-#|"
 		end
 		if v!=0 or zero then
 			v=(

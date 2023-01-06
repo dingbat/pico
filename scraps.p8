@@ -231,3 +231,10 @@ ai_diff,
 	mmhratio, --maph/mmh
 	mmwratio, --mapw/mmw
 	menu,cx,cy,cvx,cvy
+
+
+	--right aligned
+	?"\^:00702070c8a88870"
+
+	--left aligned
+	?"\^:000e040e1915110e"
