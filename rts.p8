@@ -388,7 +388,6 @@ carry=6
 ant=1
 a2=1
 tmap=-1]]
-ant1=ant.p1
 
 beetle=parse[[
 idx=2
@@ -1739,7 +1738,7 @@ function produce(u)
 	if u.q.t<=0 then
 		if bld.tech then
 			res1.techs|=bld.tmap
-			bld.tech(bld.techt[1])
+			bld.tech(bld.techt.p1)
 			sfx"33"
 			local _ENV=bld
 			if up and up<2 then
@@ -2664,16 +2663,16 @@ diff=-2
 techs=0
 t=0]]
 
-	res1,res2,
+	init_typs()
+	ant1,res1,res2,
 	units_heal,
 	cycles,
 	cx,cy,fps,selt,
 	dmaps_ready=
-		res[1],res[2],{false,true},
+		ant.p1,res.p1,res[2],
+		{false,true},
 		split"5,12",
 		unspl"0,0,59,0"
-
-	init_typs()
 	
 	ai_init()
 end
@@ -2955,7 +2954,7 @@ menuitem(2,"◆ load from clip",function()
 	end
 	foreach(typs,function(b)
 		if res1.techs|b.tmap==res1.techs then
-			b.tech(b.techt[1])
+			b.tech(b.techt.p1)
 			b.up,b.done=b.up and 1,
 				not b.up
 		end
