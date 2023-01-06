@@ -1131,15 +1131,15 @@ function build(u,b)
 	}
 end
 
-function gather(u,tx,ty,wp)
-	local t=tile_as_unit(tx,ty)
+function gather(u,wp,...)
+	local t=tile_as_unit(...)
 	u.st={
-		tx,ty,
 		t="gather",
-		res=f2res[fget(mget(tx,ty))],
+		res=f2res[fget(mget(...))],
 		wayp=wp or
 			get_wayp(u,t.x,t.y),
 		target=t,
+		...
 	}
 end
 
@@ -1427,7 +1427,7 @@ function input()
 	 	if avail_farm() then
 	 		farm(sel1,hoverunit)
 	 	else
-	  	foreachsel(gather,mx8,my8)
+	  	foreachsel(gather,nil,mx8,my8)
 	 	end
 	 	
   elseif can_build() then
@@ -1758,7 +1758,7 @@ function produce(u)
 				u.rtx and
 				fget(mget(u.rtx,u.rty),1)
 			then
-				gather(new,u.rtx,u.rty)
+				gather(new,nil,u.rtx,u.rty)
 			else
 				move(new,u.rx or u.x+5,
 					u.ry or u.y+5)
@@ -1776,8 +1776,8 @@ end
 function mine_nxt_res(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
-		gather(u,x,y,wp)
-	elseif not u.st.rest then
+		gather(u,wp,x,y)
+	elseif u.res then
 		drop(u,res)
 	end
 end
