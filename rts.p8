@@ -2017,9 +2017,7 @@ function reg_bldg(b)
 end
 
 function dmg(from_typ,to)
-	to.hp-=from_typ.atk*dmg_mult[
-		from_typ.atk_typ.."_vs_"..
-		to.typ.def]
+	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
 	if to.typ.unit and (
 		to.st.rest or to.st.res) then
 		move(to,
@@ -2954,9 +2952,9 @@ end
 
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
-	local str=""
+	local s=""
 	for _ENV in all(units) do
-		str=str..
+		s..=
 		 typ.idx..","..
 			x..","..
 			y..","..
@@ -2966,18 +2964,18 @@ menuitem(1,"⌂ save to clip",function()
 			hp..",/"
 	end
 	for i=1,mapw8*maph8-1 do
-		str=str..
+		s..=
 		 mget(i%mapw8,i/mapw8)..","
 	end
-	str=str.."/"
+	s..="/"
 	for k in next,exp do
-		str=str..k..","
+		s..=k..","
 	end
-	str=str.."/"
+	s..="/"
 	for r in all(reskeys) do
-		str=str..res1[r]..","..res2[r]..","
+		s..=res1[r]..","..res2[r]..","
 	end
-	printh(str,"@clip")
+	printh(s,"@clip")
 end)
 
 menuitem(2,"◆ load from clip",function()
