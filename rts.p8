@@ -325,8 +325,9 @@ function unspl(...)
 end
 
 function parse(str,typ,tech,t)
-	local p2={}
-	local obj={{},p2,p2,
+	local p1,p2={},{}
+	local obj={p1,p2,p2,
+		p1=p1,
 		typ=typ,
 		tech=tech,
 		techt=t or {},
@@ -334,7 +335,7 @@ function parse(str,typ,tech,t)
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
-			obj[k],obj[1][k],p2[k]=v,v,v
+			obj[k],p1[k],p2[k]=v,v,v
 		end
 	end)
 	add(obj.idx and typs,obj)
@@ -387,7 +388,7 @@ carry=6
 ant=1
 a2=1
 tmap=-1]]
-ant1=ant[1]
+ant1=ant.p1
 
 beetle=parse[[
 idx=2
@@ -887,7 +888,7 @@ tmap=2
 idx=]],parse[[
 portx=40
 porty=80]],function()
-		mound[1].units=
+		mound.p1.units=
 		add(mound.prod,parse([[
 t=8
 r=4
@@ -1052,10 +1053,9 @@ idx=]],parse[[
 portx=113
 porty=88]],function()
 		foreach(typs,function(_ENV)
-			local t=_ENV[1]
 			if bldg then
-			 t.los+=10
-			 t.range=t.los
+			 p1.los+=10
+			 p1.range=p1.los
 			end
 		end)
 	end),
