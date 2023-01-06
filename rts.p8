@@ -2361,6 +2361,18 @@ portf=9
 			end,q.t/b.t
 		)
 	end
+	if sel1.typ.has_q then
+		draw_port(parse[[
+portx=55
+porty=32
+portw=9
+porto=2
+portf=13
+]],44,108,nil,function()
+	action+=1
+	action%=2
+end)
+	end
 end
 
 function draw_menu()
