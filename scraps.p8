@@ -244,6 +244,7 @@ dirty token savers
 ============
 - remove `.."_vs_"..`
 - organic endscreen
-- 	pal(14,0) => 	p"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
+- pal(14,0) => 	p"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
+- ef1e473f60a8ad3cf9be7f27bef94cd65647d599 (... hack, 2 tokens)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
