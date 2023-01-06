@@ -603,9 +603,10 @@ tmap=-1]]
 tower=parse[[
 idx=8
 los=30
-hp=350
-range=30
+hp=352
 const=32
+hpr=11
+range=30
 atk=1.2
 proj_freq=30
 atk_typ=bld
@@ -641,6 +642,7 @@ idx=9
 los=5
 hp=100
 const=10
+hpr=10
 def=bld
 
 w=8
@@ -671,6 +673,7 @@ idx=10
 los=10
 hp=250
 const=25
+hpr=10
 def=bld
 
 w=8
@@ -702,6 +705,7 @@ idx=11
 los=10
 hp=200
 const=20
+hpr=10
 def=bld
 
 w=8
@@ -731,8 +735,9 @@ tmap=-1]]
 local farm=parse[[
 idx=12
 los=0
-hp=50
+hp=48
 const=6
+hpr=8
 def=bld
 
 w=8
@@ -761,9 +766,10 @@ tmap=-1]]
 castle=parse[[
 idx=13
 los=45
-hp=650
-range=40
+hp=640
 const=80
+hpr=8
+range=40
 atk=1.8
 proj_freq=15
 atk_typ=bld
@@ -1280,7 +1286,7 @@ function input()
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
-				1,0,1)
+				unspl"1,1,1")
 			foreachsel(build,b)
 			pay(to_build,-1)
 			b.cost,to_build,selx=to_build
@@ -1515,7 +1521,7 @@ function draw_unit(u)
 	local fw,w,h,stt,hp,xx,yy=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 u.hp/typ.hp,unpack(u.r)
+		 u.hp/u.tmax_hp,unpack(u.r)
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
@@ -1715,6 +1721,8 @@ function buildrepair(u)
 	local b,r=u.st.target,res[u.p]
 	if b.const then
 		b.const+=1
+		b.tmax_hp+=b.typ.hpr
+		b.hp+=b.typ.hpr
 		if b.const>=b.typ.const then
 			b.const,b.cost=
 				u.hu and sfx"26"
@@ -2074,10 +2082,15 @@ cycles=0
 fres=0]])
 	do
 		local ptyp,_ENV=_typ[_p],u
-	 typ,x,y,p,hu,hp,max_hp,const,
+		local tmax=_const and
+			ptyp.hp/ptyp.const or
+		 ptyp.hp
+	 typ,x,y,p,hu,hp,max_hp,
+	 tmax_hp,const,
 	  disc,id,prod=
 		 	ptyp,_x,_y,_p,_p==1,
-		 	_hp or ptyp.hp,ptyp.hp,
+		 	_hp or tmax,ptyp.hp,
+		 	tmax,
 				tonum(_const),_disc==1,
 				_id,_typ.prod
 	end
@@ -2254,7 +2267,7 @@ function draw_port(
 
 	if u or prog then
 		bar(0,11,10,
-			prog or u.hp/typ.hp,
+			prog or u.hp/u.tmax_hp,
 			prog and 12,
 			prog and 5
 		)
