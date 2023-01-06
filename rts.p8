@@ -1865,25 +1865,23 @@ function dist(dx,dy)
   b0*0.9609+a0*0.3984
 end
 
-function all_surr(x,y,n,chk_acc)
-	local st={}
+function surr(x,y,n,fn,ig_acc)
 	for dx=-n,n do
 	 for dy=-n,n do
 	 	local xx,yy=x+dx,y+dy
 	 	if
 	 		min(xx,yy)>=0 and
 	 		xx<mapw8 and yy<maph8 and
-	 		(not chk_acc or acc(xx,yy))
+	 		(ig_acc or acc(xx,yy))
 	 	then
-			 add(st,{
+			 fn{
 			  xx,yy,
 			 	d=dx!=0 and dy!=0 and 1.4 or 1,
 			 	k=xx|yy<<8
-			 })
+			 }
 			end
 		end
 	end
-	return all(st)
 end
 
 function avail_farm()
@@ -2087,7 +2085,7 @@ end
 function nearest_acc(x,y)
 	for n=0,16 do
 		local best_d,best_t=32767
-		for t in all_surr(x\8,y\8,n,true) do
+		surr(x\8,y\8,n,function(t)
 			local d=dist(
 				t[1]*8+4-x,
 				t[2]*8+4-y
@@ -2095,7 +2093,7 @@ function nearest_acc(x,y)
 			if d<best_d then
 				best_t,best_d=t,d
 			end
-		end
+		end)
 		if (best_t) return best_t,n
 	end
 end
@@ -2149,7 +2147,7 @@ function as(start,goal,gl)
   if p.k==goal.k then
    return path(sh),1
   end
-  for n in all_surr(p[1],p[2],1,true) do
+  surr(p[1],p[2],1,function(n)
    local old_best,ncfs=
     best_table[n.k],
     sh.cfs+n.d
@@ -2169,7 +2167,7 @@ function as(start,goal,gl)
 			if old_best.ctg<closest.ctg then
 				closest=old_best
 			end
-  end
+  end)
  end
  return path(closest)
 end
@@ -2490,12 +2488,12 @@ function dmap_find(u,k)
 		{},9
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
-		for t in all_surr(x,y,1) do
+		surr(x,y,1,function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<lowest then
 				lowest,x,y=w,unpack(t)
 			end
-		end
+		end,true)
 		if (lowest>=orig) return
 		add(wayp,{x*8+3,y*8+3})
 	end
@@ -2532,11 +2530,11 @@ function dmapcc(q)
 		local p=deli(q.open)
 		q.dmap[p.k]=q.c
 		if q.c<8 then
-			for t in all_surr(p[1],p[2],1,true) do
+			surr(p[1],p[2],1,function(t)
 				if not q.closed[t.k] then
 					q.closed[t.k]=add(q.nxt,t)
 				end
-			end
+			end)
 		end
 	end
 
