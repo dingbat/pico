@@ -308,8 +308,8 @@ function _draw()
 	
 	camera(-amx,-amy)
 	spr(
-	 hovbtn and pset(amx-1,
-	  amy+4,5) and 66 or
+	 hovbtn and pset(unspl"-1,4,5")
+	 	and 66 or
 		sel1 and sel1.hu and
 		((to_build or
 			can_build() or
@@ -2337,9 +2337,9 @@ portf=9
 		draw_port(parse[[
 portx=80
 porty=88
-porto=2
-portf=13
-]],44,108,nil,axn)
+porto=15
+portf=15
+]],42,108,nil,axn)
 	end
 end
 
