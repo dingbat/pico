@@ -387,6 +387,7 @@ dir=1
 unit=1
 carry=6
 ant=1
+a2=1
 tmap=-1]]
 ant1=ant[1]
 
@@ -603,6 +604,7 @@ proj_s=28
 breq=0
 units=1
 queen=1
+a2=1
 tmap=-1]]
 
 tower=parse[[
@@ -1382,6 +1384,7 @@ function input()
 	
 	if lclk and hovbtn then
 		hovbtn.handle()
+		if (axn==action) action=0
 		return
 	end
 
@@ -2368,11 +2371,14 @@ porty=32
 portw=9
 porto=2
 portf=13
-]],44,108,nil,function()
-	action+=1
-	action%=2
-end)
+]],44,108,nil,axn)
 	end
+end
+
+function axn()
+	action+=1
+	action%=sel_typ and
+		sel_typ.a2 and 2 or 3
 end
 
 function draw_menu()
@@ -2444,10 +2450,7 @@ portw=9
 porto=2
 portf=13
 ]],20,
-	 	108,nil,function()
-	 		action+=1
-	 		action%=sel_typ==ant1 and 2 or 3
-	 	end
+	 	108,nil,axn
 	 )
 	end
 	
