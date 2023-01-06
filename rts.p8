@@ -244,7 +244,7 @@ function _draw()
  	local i=x|y<<8
  	local brd=function(arr,col)
 			color(col)
-			camera(x*-8+cx,y*-8+cy)		
+			camera(cx-x*8,cy-y*8)		
 			if (arr[i-1]) l"-1,0,-1,7"
 		 if (arr[i-256]) l"0,-1,7,-1"
 		 if (arr[i+256]) l"0,8,7,8"
@@ -283,6 +283,8 @@ function _draw()
 	end
 	
 	draw_menu()
+	camera()
+	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
 			cy-to_build.y)
@@ -302,9 +304,6 @@ function _draw()
 		sspr(rest_x,rest_y,fw,h)
 		pal()
 	end
-	camera()
-	
-	if (hlv) circ(unpack(hlv))
 	
 	camera(-amx,-amy)
 	spr(
@@ -2479,7 +2478,6 @@ portf=13
 		print_res(hovbtn.costs,2,2)
 		rect(len+2,unspl"0,0,8,1")
 	end
-	camera()
 end
 -->8
 --dmaps
