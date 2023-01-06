@@ -588,7 +588,6 @@ dead_y=0
 dir=-1
 portx=9
 porty=72
-has_q=1
 drop=1
 bldg=1
 proj_xo=-4
@@ -661,7 +660,6 @@ dead_fr=8
 dead_fps=7.5
 bldg=1
 dir=-1
-has_q=1
 drop=1
 breq=2
 tmap=-1]]
@@ -691,7 +689,6 @@ portx=49
 porty=80
 bldg=1
 dir=-1
-has_q=1
 breq=4
 units=2
 mil=1
@@ -722,7 +719,6 @@ portx=7
 porty=80
 bldg=1
 dir=-1
-has_q=1
 breq=8
 units=2
 mil=1
@@ -786,7 +782,6 @@ dead_fps=15
 portx=58
 porty=80
 bldg=1
-has_q=1
 dir=-1
 proj_yo=0
 proj_xo=0
@@ -2282,8 +2277,7 @@ portx=97
 porty=72
 porto=8
 portf=9
-	 	]],20,
-	 	107,nil,function()
+	 	]],24,107,nil,function()
 	 		pay(sel1.cost,1)
 	 		sel1.hp=0
 	 	end,sel1.const/sel_typ.const
@@ -2292,7 +2286,7 @@ portf=9
 	end
 	
 	if sel1.typ.farm then
-		camera(-? sel1.cycles.."/"..cycles[1],unspl"38,111,4")
+		camera(-? sel1.cycles.."/"..cycles[1],unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2359,7 +2353,7 @@ end
 function draw_menu()
 	local x,secs=0,split"102,26"
 	if sel1 and sel1.hu then
-		if sel1.typ.has_q then
+		if sel1.typ.bldg then
 			secs=split"17,24,61,26"
 		else
 	 	secs=split"17,17,68,26"
