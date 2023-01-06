@@ -2389,11 +2389,11 @@ function draw_menu()
 		? (res1.t\60)..":"..res1.t\1%60,80,122
 	end
 	
- if numsel==1 or sel_typ==ant1 then
-		if numsel==1 then
-			sel_ports(-10)
-	 end
-	 if (sel1.hu) single()
+	if numsel==1 then
+		sel_ports(-10)
+		if (sel1.hu) single()
+	elseif sel_typ==ant1 then
+		single()
 	else
 		sel_ports(24)
 	end
