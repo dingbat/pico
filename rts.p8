@@ -92,7 +92,7 @@ function _update()
 		end
  end
  
- for p in all(proj) do
+ foreach(proj,function(p)
  	p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
 	  if int(
@@ -102,14 +102,14 @@ function _update()
 		 	dmg(p.from_typ,p.to_unit)
 			end
 		end
- end
+ end)
 
  if selx then
  	bldg_sel,my_sel,enemy_sel=nil
  end
  
  foreach(units,tunit)
- for u in all(units) do
+ foreach(units,function(u)
 		if (upc_0) ai_unit2(u)
 		if not u.dead then
 	 	if selx
@@ -138,7 +138,7 @@ function _update()
 	 		fight(u)
 	 	end
 	 end
- end
+ end)
 
  if selx then
 		selection=my_sel or
@@ -177,7 +177,7 @@ function _draw()
 
  local bf,af,proj_so={},{},
  	fps\5%2*2
- for u in all(units) do
+ foreach(units,function(u)
  	if u.onscr or loser then
 			if
 				not loser and
@@ -191,7 +191,7 @@ function _draw()
 		 	add(bf,u)
 		 end
 		end
- end
+ end)
 
 	if sel_typ and sel_typ.farm and
 		not sel1.const then
@@ -199,12 +199,12 @@ function _draw()
 	end
 	
 	foreach(bf,draw_unit)
-	for _ENV in all(proj) do
+	foreach(proj,function(_ENV)
 		sspr(
 			from_typ.proj_s+proj_so,
 			112,2,2,x,y
 		)
-	end
+	end)
 	if loser then
 		local secs=res1.t\1%60
 		camera()
@@ -331,12 +331,12 @@ function parse(str,typ,tech,t)
 		tech=tech,
 		techt=t or {},
 		prod={}}
-	for l in all(split(str,"\n")) do
+	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
 			obj[k],obj[1][k],p2[k]=v,v,v
 		end
-	end
+	end)
 	add(obj.idx and typs,obj)
 	return obj
 end
@@ -1051,13 +1051,13 @@ tmap=512
 idx=]],parse[[
 portx=113
 porty=88]],function()
-		for x in all(typs) do
-			local t=x[1]
-			if x.bldg then
+		foreach(typs,function(_ENV)
+			local t=_ENV[1]
+			if bldg then
 			 t.los+=10
 			 t.range=t.los
 			end
-		end
+		end)
 	end),
 }
 end
@@ -1103,13 +1103,13 @@ end
 
 function mvg(units,x,y,agg,rest)
 	local lowest=999
-	for u in all(units) do
+	foreach(units,function(u)
 		if not rest or
 		 u.st.rest then
 			move(u,x,y,agg)
 		end
 		lowest=min(u.typ.spd,lowest)
-	end
+	end)
 	foreach(units,function(_ENV)
 		st.spd=lowest end)
 end
@@ -1296,7 +1296,7 @@ function update_viz(u)
 			vcache[i]=v
 		end
 		
-		for t in all(v) do
+		foreach(v,function(t)
 			local k=k0+t
 			if k<maph8<<8 and k>=0 and
 				k%256<mapw8 then
@@ -1305,7 +1305,7 @@ function update_viz(u)
 				end
 				exp[k],new_viz[k]=1,"v"
 			end
-		end
+		end)
 	end
 end
 -->8
@@ -1339,11 +1339,11 @@ end
 function input()
 	cam()
 	
- for b in all(buttons) do
+ foreach(buttons,function(b)
  	if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
  	end
-	end
+	end)
 	
 	local cont,htile,axn=
 	 action==0,
@@ -1400,12 +1400,12 @@ function input()
 		hoverunit.typ.unit and
   t()-selt<0.2 then
 		selection,selx={}
-		for u in all(units) do
+		foreach(units,function(u)
 			if u.onscr and
 				u.typ==hoverunit.typ then
 				add(selection,u).sel=true
 			end
-		end
+		end)
 		return
 	end
 	
@@ -1627,7 +1627,7 @@ function agg(u)
 	local los,targ_d,targ,pref=max(
 		typ.unit and typ.los,
 		typ.range),9999
-	for e in all(units) do
+	foreach(units,function(e)
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
 			viz[e.x8|e.y8<<8] and
@@ -1639,7 +1639,7 @@ function agg(u)
 				pref=e
 			end
 		end
-	end
+	end)
 	attack(u,pref or targ)
 end
 
@@ -1847,9 +1847,9 @@ end
 
 function pay(costs,dir,p)
 	local r=res[p or 1]
-	for k in all(split"r,g,b") do
+	foreach(split"r,g,b",function(k)
   r[k]+=costs[k]*dir
-	end
+	end)
 	if costs.p then
 		r.p-=dir
 	end
@@ -2421,7 +2421,7 @@ portf=13
 	pal(14,0)
 	sspr(unspl"72,72,19,12,0,0")
 	
-	for u in all(units) do
+	foreach(units,function(u)
 		if u.disc or
 			g(viz,u.x8,u.y8) then
 			pset(
@@ -2430,7 +2430,7 @@ portf=13
 				u.sel and 9 or u.p
 			)
 		end
-	end
+	end)
 	
 	camera(
 		-mmx-ceil(cx/mmwratio),
@@ -2916,7 +2916,7 @@ end
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
 	local s=""
-	for _ENV in all(units) do
+	foreach(units,function(_ENV)
 		s..=
 		 typ.idx..","..
 			x..","..
@@ -2925,7 +2925,7 @@ menuitem(1,"⌂ save to clip",function()
 			tostr(const)..","..
 			max(disc)..","..
 			hp..",/"
-	end
+	end)
 	for i=1,mapw8*maph8-1 do
 		s..=
 		 mget(i%mapw8,i/mapw8)..","
@@ -2935,9 +2935,9 @@ menuitem(1,"⌂ save to clip",function()
 		s..=k..","
 	end
 	s..="/"
-	for r in all(reskeys) do
+	foreach(reskeys,function(r)
 		s..=res1[r]..","..res2[r]..","
-	end
+	end)
 	printh(s,"@clip")
 end)
 
@@ -2949,19 +2949,19 @@ menuitem(2,"◆ load from clip",function()
 		i*=2
 		res1[k],res2[k]=r[i-1],r[i]
 	end
-	for k in all(split(deli(data))) do
+	foreach(split(deli(data)),function(k)
 		exp[k]=tonum(k)
-	end
+	end)
 	for i,t in inext,split(deli(data)) do
 		mset(i%mapw8,i/mapw8,t)
 	end
-	for b in all(typs) do
+	foreach(typs,function(b)
 		if res1.techs|b.tmap==res1.techs then
 			b.tech(b.techt[1])
 			b.up,b.done=b.up and 1,
 				not b.up
 		end
-	end
+	end)
 	foreach(data,ununit)
 	make_dmaps"d"
 end)
