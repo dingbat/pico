@@ -2351,15 +2351,13 @@ function axn()
 end
 
 function draw_menu()
-	local x,secs=0,split"102,26"
-	if sel1 and sel1.hu then
-		if sel1.typ.bldg then
-			secs=split"17,24,61,26"
-		else
-	 	secs=split"17,17,68,26"
-		end
-	end
- for i,sec in inext,secs do
+	local x=0
+ for i,sec in inext,split(
+		sel1 and sel1.hu and
+		(sel1.typ.bldg and
+			"17,24,61,26" or
+			"17,17,68,26") or "102,26")
+	do
  	p(i%2!=0 and "1,2,3,15")
  	camera(x)
  	unspr"129,0,104"
