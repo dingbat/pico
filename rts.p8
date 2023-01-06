@@ -1380,9 +1380,12 @@ end
 function tunit(u)
 	local typ,targ=u.typ,
 		u.st.target
-	u.hp+=typ.hp-u.max_hp
-	u.max_hp,u.onscr,u.upd=
-		typ.hp,
+	if not u.const then
+		u.hp+=typ.hp-u.max_hp
+		u.max_hp=typ.hp
+	end
+	
+	u.onscr,u.upd=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc
 
@@ -1521,7 +1524,7 @@ function draw_unit(u)
 	local fw,w,h,stt,hp,xx,yy=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 u.hp/u.tmax_hp,unpack(u.r)
+		 u.hp/u.max_hp,unpack(u.r)
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
@@ -1721,7 +1724,7 @@ function buildrepair(u)
 	local b,r=u.st.target,res[u.p]
 	if b.const then
 		b.const+=1
-		b.tmax_hp+=b.typ.hpr
+		b.max_hp+=b.typ.hpr
 		b.hp+=b.typ.hpr
 		if b.const>=b.typ.const then
 			b.const,b.cost=
@@ -2082,15 +2085,13 @@ cycles=0
 fres=0]])
 	do
 		local ptyp,_ENV=_typ[_p],u
-		local tmax=_const and
+		max_hp=_const and
 			ptyp.hp/ptyp.const or
 		 ptyp.hp
-	 typ,x,y,p,hu,hp,max_hp,
-	 tmax_hp,const,
+	 typ,x,y,p,hu,hp,const,
 	  disc,id,prod=
 		 	ptyp,_x,_y,_p,_p==1,
-		 	_hp or tmax,ptyp.hp,
-		 	tmax,
+		 	_hp or max_hp,
 				tonum(_const),_disc==1,
 				_id,_typ.prod
 	end
@@ -2267,7 +2268,7 @@ function draw_port(
 
 	if u or prog then
 		bar(0,11,10,
-			prog or u.hp/u.tmax_hp,
+			prog or u.hp/u.max_hp,
 			prog and 12,
 			prog and 5
 		)
