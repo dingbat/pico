@@ -2393,6 +2393,10 @@ function draw_menu()
  end
  camera()
 
+	if ai_debug then
+		? (res1.t\60)..":"..res1.t\1%60,80,122
+	end
+	
  if numsel==1 or sel_typ==ant1 then
 		single()
 	else
@@ -2700,7 +2704,7 @@ end
 function new_game()
 	menu=init()
 	foreach(split([[7,55,44,1
-7,337,188,2
+7,335,188,2
 14,65,150,3
 14,170,140,3
 14,88,245,3
@@ -2715,13 +2719,12 @@ function new_game()
 1,330,196,2
 5,320,170,2
 8,268,169,2]],"\n"),ununit)
-	
 	make_dmaps"d"
 end
 -->8
 --ai
 
---ai_debug=true
+ai_debug=true
 if ai_debug then
 	_update60=_update
 end
@@ -2920,7 +2923,7 @@ function ai_frame()
 			ai_bld(i)
 		end
 	end
-	if #offsqd>=20 and inv==0 then
+	if #offsqd>=14 and inv==0 then
 		atksqd,offsqd=offsqd,{}
 	end
 	mvg(atksqd,
