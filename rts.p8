@@ -1111,9 +1111,8 @@ function mvg(units,x,y,agg,rest)
 		end
 		lowest=min(u.typ.spd,lowest)
 	end
-	for u in all(units) do
-		u.st.spd=lowest
-	end
+	foreach(units,function(_ENV)
+		st.spd=lowest end)
 end
 
 function move(u,x,y,agg)
@@ -1135,9 +1134,8 @@ end
 function gather(u,tx,ty,wp)
 	local t=tile_as_unit(tx,ty)
 	u.st={
+		tx,ty,
 		t="gather",
-		tx=tx,
-		ty=ty,
 		res=f2res[fget(mget(tx,ty))],
 		wayp=wp or
 			get_wayp(u,t.x,t.y),
@@ -1715,7 +1713,7 @@ function buildrepair(u)
 end
 
 function mine(u)
-	local x,y,r=u.st.tx,u.st.ty,u.st.res
+	local r,x,y=u.st.res,unpack(u.st)
 	local full,t=resqty[r],mget(x,y)
 	local n=g(restiles,x,y,full)
 	if n==0 then
