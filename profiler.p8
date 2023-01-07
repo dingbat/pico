@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 38
+version 39
 __lua__
 -- cpu cycle profiler v1.1
 --  by pancelor
@@ -31,12 +31,20 @@ see the second tab for an explanation of the
 calculation that figures out how many cycles
 the given code takes
 ]]
+
+arr={}
+for i=1,100 do
+add(arr,i)
+end
+
 function analyze()
-  profile("trig", function()
-  	dist_trig(13,29)
+  profile("foreach", function()
+  	foreach(arr,function(i)
+  	end)
   end)
-  profile("bit", function()
-  	dist_bit(13,29)
+  profile("for all", function()
+  	for i in all(arr) do
+  	end
   end)
 end
 

@@ -10,7 +10,7 @@ function draw_map(offset,y)
  camera(cx%8,cy%8)
  map(cx/8+offset,cy/8,0,0,17,y)
  camera(cx,cy)
-end
+ end
 
 function _update()
 	if menu then
@@ -1900,16 +1900,10 @@ function can_gather()
 end
 
 function can_attack()
-	local v=g(viz,mx8,my8)
-	for u in all(selection) do
-		if hoverunit and
-		 not hoverunit.hu and
-			u.typ.atk and
-			(v or hoverunit.disc)
-		then
-			return true
-		end
-	end
+	return (not sel_typ or
+		sel_typ.atk) and hoverunit
+		 and not hoverunit.hu and
+			g(viz,mx8,my8,hoverunit.disc)
 end
 
 function can_build()

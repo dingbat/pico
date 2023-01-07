@@ -1,7 +1,23 @@
 pico-8 cartridge // http://www.pico-8.com
-version 38
+version 39
 __lua__
 function _draw()
+	cls()
+end
+
+arr={}
+for i=1,200 do
+add(arr,i)
+end
+
+function fe()
+  	foreach(arr,function(i)
+  	end)
+end
+
+function fa()
+  	for i in all(arr) do
+  	end
 end
 
 function dist_trig(dx,dy)
@@ -19,17 +35,27 @@ function dist_bit(dx,dy)
 end
 
 function _update()
-	trace("bit",function()
-		for i=0,2000 do
-			dist_bit(13,29)
-		end
+	fps=59
+--	trace("bit",function()
+--		for i=0,2000 do
+--			dist_bit(13,29)
+--		end
+--	end)
+--	trace("trig",function()
+--		for i=0,2000 do
+--			dist_trig(13,29)
+--		end
+--	end)
+	trace("fe",function()
+		fe()
 	end)
-	trace("trig",function()
-		for i=0,2000 do
-			dist_trig(13,29)
-		end
+	trace("fa",function()
+		fa()
 	end)
-
+--trace_fn"fe"
+--trace_fn"fa"
+--fe()
+--fa()
 end
 -->8
 a=[[[[]]
@@ -103,10 +129,7 @@ function print_frame(f,n)
 	end
 end
 
-trace_fn("_draw")
 trace_fn("_update")
-trace_fn("cls")
-trace_fn("sqrt")
 --]]
 
 __gfx__
