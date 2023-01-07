@@ -735,7 +735,7 @@ proj_freq=15
 atk_typ=bld
 def=bld
 
-w=15
+w=16
 fw=16
 h=16
 fh=16
@@ -1201,6 +1201,23 @@ function tunit(u)
 		hoverunit=u
 	end
 	
+	if selx
+		and (g(viz,u.x8,u.y8)
+		 or u.disc)
+	then
+	 u.sel=int(u.r,selbox,0)
+	 if u.sel then
+			if not u.hu then
+				enemy_sel={u}
+			elseif typ.unit then
+				hu_sel=hu_sel or {}
+				add(hu_sel,u)
+			else
+				bldg_sel={u}
+			end
+		end
+	end
+	
 	if (u.const) return
 	if targ and targ.dead then
 		if u.st.t=="attack" then
@@ -1236,22 +1253,6 @@ function tunit(u)
 		s(pos,x\4,y\4,1)
 	end
 	
-	if selx
-		and (g(viz,u.x8,u.y8)
-		 or u.disc)
-	then
-	 u.sel=int(u.r,selbox,0)
-	 if u.sel then
-			if not u.hu then
-				enemy_sel={u}
-			elseif typ.unit then
-				hu_sel=hu_sel or {}
-				add(hu_sel,u)
-			else
-				bldg_sel={u}
-			end
-		end
-	end
  if u.upd and u.st.agg and
   typ.atk then
 		agg(u)
@@ -1495,7 +1496,8 @@ function draw_unit(u)
 			u==sel1 and 9 or 12)
 		fillp()
 		local p=u.const/typ.const
-		bar(xx,yy,fw-1,p,14,5)
+		line(xx+fw-1,yy,xx,yy,5)
+		line(xx+fw*p,yy,14)
 		sx-=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif ufps then
@@ -1511,11 +1513,15 @@ function draw_unit(u)
 	sspr(sx,sy,w,h,xx,yy,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
+	hp=0.4
 	if not u.dead and hp<=0.5 then			
 	 if typ.fire then
 			spr(247+f/20,u.x-3,u.y-8)
 		end
-		bar(xx,yy-1,w,hp)
+		camera(-xx,-yy)
+		line(w,unspl"-1,0,-1,8")
+		line(flr(w*hp),-1,11)
+		camera(cx,cy)
 	end
 end
 
@@ -1829,8 +1835,8 @@ function can_pay(costs,_p)
  	g>=costs.g and
  	b>=costs.b and
  	(not costs.p or
- 	 p<min(pl,99)) and
- 	reqs|costs.breq==reqs
+ 	 p<min(pl,99))
+ 	and reqs|costs.breq==reqs
 end
 
 function pay(costs,dir,p)
@@ -2013,11 +2019,6 @@ function can_renew(t)
 		rect(unspl"8,0,18,8,4")
 		return	can_pay(renewcost) or t
 	end
-end
-
-function bar(x,y,w,prog,fg,bg)
-	line(x+w,y,x,y,bg or 8)
-	line(x+flr(w*prog),y,fg or 11)
 end
 
 function unit(t,_x,_y,_p,
@@ -2214,11 +2215,9 @@ function draw_port(
 	})
 
 	if u or prog then
-		bar(0,11,10,
-			prog or u.hp/u.max_hp,
-			prog and 12,
-			prog and 5
-		)
+		color(prog and 5 or 8)
+		l"10,11,0,11"
+	 line(10*(prog or u.hp/u.max_hp),11,prog and 12 or 11)
 	end
 	camera()
 end
@@ -2630,9 +2629,9 @@ function init()
 		{},{},{},
 		{},{},{},{d={}},
 	 parse[[
-r=20
-g=10
-b=20
+r=520
+g=510
+b=520
 p=4
 pl=10
 tot=4
