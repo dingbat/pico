@@ -1834,13 +1834,13 @@ function u_rect(_ENV)
  return _ENV
 end
 
-function can_pay(costs,p)
-	local _ENV=res[p or 1]
+function can_pay(costs,_p)
+	local _ENV=res[_p or 1]
  return r>=costs.r and
  	g>=costs.g and
  	b>=costs.b and
  	(not costs.p or
- 		p<min(pl,99)) and
+ 	 p<min(pl,99)) and
  	reqs|costs.breq==reqs
 end
 
@@ -1884,11 +1884,12 @@ function surr(x,y,n,fn,ig_acc)
 end
 
 function avail_farm()
-	return hoverunit and
-		hoverunit.typ.farm and
-		not hoverunit.exp and
-		not hoverunit.farmer and
-		not hoverunit.const
+	local _ENV=hoverunit
+	return _ENV and
+		typ.farm and
+		not exp and
+		not farmer and
+		not const
 end
 
 function can_gather()
@@ -2223,7 +2224,7 @@ function draw_port(
 	end
 	pal()
 	
-	add(buttons,{
+	add(onclick and buttons,{
 		r={x,y,x+10,y+8},
 		handle=onclick,
 		costs=costs,
@@ -2250,7 +2251,7 @@ function sel_ports(x)
 		end
 		draw_port(
 			u.typ,x,107,nil,
-			function()
+			numsel>1 and function()
 				del(selection,u).sel=false
 			end,
 			nil,u)
