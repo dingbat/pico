@@ -1475,10 +1475,10 @@ function draw_unit(u)
 			u.typ,u.st,
 			u.res and u.res.typ or "_"
 
-	local fw,w,h,stt,hp,xx,yy=
+	local fw,w,h,stt,hp=
 		 typ.fw,typ.w,typ.h,
 		 st.wayp and "move" or st.t,
-		 u.hp/u.max_hp,unpack(u.r)
+		 u.hp/u.max_hp
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
@@ -1489,15 +1489,17 @@ function draw_unit(u)
 	 typ[stt.."_fps"],
 	 typ[stt.."_fr"],
 		u.dead or fps
-	
+
+	camera(cx-u.r[1],cy-u.r[2])
+
 	if u.const and not u.dead then
 		fillp"23130.5"--▒
-		rectaround(u,
+		rect(-1,-1,w,h,
 			u==sel1 and 9 or 12)
 		fillp()
 		local p=u.const/typ.const
-		line(xx+fw-1,yy,xx,yy,5)
-		line(xx+fw*p,yy,14)
+		line(fw-1,unspl"0,0,0,5")
+		line(fw*p,0,14)
 		sx-=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif ufps then
@@ -1510,18 +1512,16 @@ function draw_unit(u)
 	 u.p,
 	 [14]=0
 	}
-	sspr(sx,sy,w,h,xx,yy,w,h,
+	sspr(sx,sy,w,h,0,0,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
-	hp=0.4
 	if not u.dead and hp<=0.5 then			
-	 if typ.fire then
-			spr(247+f/20,u.x-3,u.y-8)
-		end
-		camera(-xx,-yy)
 		line(w,unspl"-1,0,-1,8")
 		line(flr(w*hp),-1,11)
-		camera(cx,cy)
+		camera(-u.x,-u.y)
+		if typ.fire then
+			spr(247+f/20,-3,-8)
+		end
 	end
 end
 
