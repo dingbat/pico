@@ -1864,7 +1864,7 @@ function surr(x,y,n,fn,ig_acc)
 	 	then
 			 fn{
 			  xx,yy,
-			 	d=dx!=0 and dy!=0 and 1.4 or 1,
+			 	d=dx&dy!=0 and 1.4 or 1,
 			 	k=xx|yy<<8
 			 }
 			end
