@@ -105,13 +105,13 @@ function _update()
  end)
 
  if selx then
- 	bldg_sel,my_sel,enemy_sel=nil
+ 	bldg_sel,hu_sel,enemy_sel=nil
  end
  
  foreach(units,tunit)
 	
  if selx then
-		selection=my_sel or
+		selection=hu_sel or
 			bldg_sel or
 			enemy_sel or {}
 	end
@@ -1245,8 +1245,8 @@ function tunit(u)
 			if not u.hu then
 				enemy_sel={u}
 			elseif typ.unit then
-				my_sel=my_sel or {}
-				add(my_sel,u)
+				hu_sel=hu_sel or {}
+				add(hu_sel,u)
 			else
 				bldg_sel={u}
 			end
