@@ -1835,13 +1835,13 @@ function u_rect(_ENV)
 end
 
 function can_pay(costs,p)
-	local r=res[p or 1]
- return r.r>=costs.r and
- 	r.g>=costs.g and
- 	r.b>=costs.b and
+	local _ENV=res[p or 1]
+ return r>=costs.r and
+ 	g>=costs.g and
+ 	b>=costs.b and
  	(not costs.p or
- 		r.p<min(r.pl,99)) and
- 	r.reqs|costs.breq==r.reqs
+ 		p<min(pl,99)) and
+ 	reqs|costs.breq==reqs
 end
 
 function pay(costs,dir,p)
