@@ -1853,7 +1853,8 @@ function dist(dx,dy)
   b0*0.9609+a0*0.3984
 end
 
-function surr(x,y,n,fn,ig_acc)
+function surr(x,y,fn,n,ig_acc)
+	local n,exist=n or 1
 	for dx=-n,n do
 	 for dy=-n,n do
 	 	local xx,yy=x+dx,y+dy
@@ -1862,15 +1863,18 @@ function surr(x,y,n,fn,ig_acc)
 	 		xx<mapw8 and yy<maph8 and
 	 		(ig_acc or acc(xx,yy))
 	 	then
-			 fn{
-			  xx,yy,
-			  nz=dx|dy!=0,
-			 	d=dx&dy!=0 and 1.4 or 1,
-			 	k=xx|yy<<8
-			 }
+	 		if (dx|dy!=0) exist=true
+	 		if fn then
+				 fn{
+				  xx,yy,
+				 	d=dx&dy!=0 and 1.4 or 1,
+				 	k=xx|yy<<8
+				 }
+			 end
 			end
 		end
 	end
+	return exist
 end
 
 function avail_farm()
@@ -1887,7 +1891,7 @@ function can_gather()
 	 or avail_farm()) and
 		sel_typ==ant1 and
 		g(exp,mx8,my8) and
-		sur_acc(mx8,my8)
+		surr(mx8,my8)
 end
 
 function can_attack()
@@ -2019,14 +2023,6 @@ function bar(x,y,w,prog,fg,bg)
 	line(x+flr(w*prog),y,fg or 11)
 end
 
-function sur_acc(x,y)
-	local sa
-	surr(x,y,1,function(t)
-		if (t.nz) sa=true
-	end)
-	return sa
-end
-
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
  local _typ,_id,u=
@@ -2069,7 +2065,7 @@ end
 function nearest_acc(x,y)
 	for n=0,16 do
 		local best_d,best_t=32767
-		surr(x\8,y\8,n,function(t)
+		surr(x\8,y\8,function(t)
 			local d=dist(
 				t[1]*8+4-x,
 				t[2]*8+4-y
@@ -2077,7 +2073,7 @@ function nearest_acc(x,y)
 			if d<best_d then
 				best_t,best_d=t,d
 			end
-		end)
+		end,n)
 		if (best_t) return best_t,n
 	end
 end
@@ -2131,7 +2127,7 @@ function as(start,goal,gl)
   if p.k==goal.k then
    return path(sh),1
   end
-  surr(p[1],p[2],1,function(n)
+  surr(p[1],p[2],function(n)
    local old_best,ncfs=
     best_table[n.k],
     sh.cfs+n.d
@@ -2473,12 +2469,12 @@ function dmap_find(u,k)
 		{},9
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
-		surr(x,y,1,function(t)
+		surr(x,y,function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<lowest then
 				lowest,x,y=w,unpack(t)
 			end
-		end,true)
+		end,1,true)
 		if (lowest>=orig) return
 		add(wayp,{x*8+3,y*8+3})
 	end
@@ -2515,7 +2511,7 @@ function dmapcc(q)
 		local p=deli(q.open)
 		q.dmap[p.k]=q.c
 		if q.c<8 then
-			surr(p[1],p[2],1,function(t)
+			surr(p[1],p[2],function(t)
 				if not q.closed[t.k] then
 					q.closed[t.k]=add(q.nxt,t)
 				end
@@ -2543,7 +2539,7 @@ function make_dmap(k)
 	
 	local open={}
 	for i,t in next,dmap_st[k] do
-		if	sur_acc(unpack(t)) then
+		if	surr(unpack(t)) then
 			add(open,t).k=i
 		end
 	end
