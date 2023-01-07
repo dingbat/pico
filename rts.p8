@@ -1193,19 +1193,16 @@ function tunit(u)
 
 	if u.hp<=0 and not u.dead then
 		del(selection,u)
-		if u.onscr then
-			sfx(typ.bldg and 17 or 3)
-		end
-		u.dead,u.st,
-			u.sel,u.farmer=
-			0,parse"t=dead",
-		 typ.bldg and reg_bldg(u)
-		
-		local r=res[u.p]
+		u.dead,u.sel,u.farmer=0
+		u.st=
+			parse"t=dead",
+		 typ.bldg and reg_bldg(u),
+		 u.onscr and sfx(typ.bldg and 17 or 3)
+		local _ENV=res[u.p]
 		if typ.drop and not u.const then
-			r.pl-=5
+			pl-=5
 		elseif typ.unit then
-			r.p-=1
+			p-=1
 		end
 	end
 
@@ -1955,7 +1952,6 @@ end
 
 function reg_bldg(b)
 	local typ,x,y=b.typ,b.x8,b.y8
-
 	function reg(xx,yy)
 		s(bldgs,xx,yy,
 			not b.dead and b)
