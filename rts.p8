@@ -1927,12 +1927,9 @@ end
 
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
-	return not fget(mget(x,y),0) and
-		min(x,y)>=0 and
-		x<mapw8 and y<maph8 and
-		(not b or (not strict and (
-			b.const or b.typ.farm
-	)))
+	return not fget(mget(x,y),0)
+		and (not b or not strict and
+			(b.const or b.typ.farm))
 end
 
 function buildable()
