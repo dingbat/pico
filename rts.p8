@@ -109,10 +109,7 @@ function _update()
  end
  
  foreach(units,tunit)
-	if upc_0 then
-		foreach(units,ai_unit2)
-	end
-
+	
  if selx then
 		selection=my_sel or
 			bldg_sel or
@@ -1224,8 +1221,6 @@ function tunit(u)
 	end
 	
 	update_unit(u)
-	if (upc_0) ai_unit1(u)
-
 	update_viz(u)
 
 	if typ.unit and not u.st.wayp then
@@ -2883,6 +2878,9 @@ function ai_bld(boi)
 end
 
 function ai_frame()
+	foreach(units,ai_unit1)
+	foreach(units,ai_unit2)
+
 	for i=1,res2.boi do
 		if inv==0 then
 			ai_bld(i)
