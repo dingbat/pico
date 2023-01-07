@@ -254,6 +254,7 @@ function _draw()
 	
 	draw_menu()
 	camera()
+	pal()
 	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
@@ -1987,6 +1988,14 @@ function dmg(from_typ,to)
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32",rnd"32")
 		sfx"10"
+		alert=t()
+	elseif to.hu and t()-alert>10 then
+		sfx"34"
+		alert=t()
+		hlt,hlv=alert+2.5,{
+			mmx+to.x/mmwratio,
+			mmy+to.y/mmhratio,
+			4,14}
 	end
 end
 
@@ -2167,7 +2176,7 @@ function print_res(r,x,y,zero)
 		if v!=0 or zero then
 			v=(
 				(i==4 and oop or
-				res1[k]<v\1) and "\#a "
+				res1[k]<flr(v)) and "\#a "
 				or "\#7\-f\^x5 \^x4")..v
 			newx+=? v,x,y,rescol[k]
 			spr(129+i,x,y)
@@ -2394,6 +2403,26 @@ portf=13
 	
 	camera(-mmx,-mmy)
 	
+	sspr(idle and 48 or 56,
+	 unspl"105,8,6,11,14")
+	add(buttons,idle and {
+		r=split"116,121,125,128",
+		handle=function()
+			sel_only(idle)
+			cx,cy=idle.x-64,idle.y-64
+			cam()
+		end
+	})
+	
+	sspr(idle_mil and 24 or 32,
+ unspl"114,8,6,0,14")
+ add(buttons,idle_mil and {
+		r=split"106,121,113,128",
+		handle=function()
+			sel_only(idle_mil)
+		end
+	})
+	
 	pal(14,0)
 	sspr(unspl"72,72,19,12,0,0")
 	
@@ -2415,26 +2444,6 @@ portf=13
 	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
 	camera()
-
-	sspr(idle and 48 or 56,
-	 unspl"105,8,6,116,121")
-	add(buttons,idle and {
-		r=split"116,121,125,128",
-		handle=function()
-			sel_only(idle)
-			cx,cy=idle.x-64,idle.y-64
-			cam()
-		end
-	})
-	
-	sspr(idle_mil and 24 or 32,
- unspl"114,8,6,106,121")
- add(buttons,idle_mil and {
-		r=split"106,121,113,128",
-		handle=function()
-			sel_only(idle_mil)
-		end
-	})
 	
 	local res1=ai_debug and res2 or res1
 	camera(-print_res(res1,
@@ -2646,12 +2655,12 @@ t=0]]
 	ant1,res1,res2,
 	units_heal,
 	cycles,
-	cx,cy,fps,selt,
+	cx,cy,fps,selt,alert,
 	dmaps_ready=
 		ant.p1,res.p1,res[2],
 		{false,true},
 		split"5,12",
-		unspl"0,0,59,0"
+		unspl"0,0,59,0,0"
 	
 	ai_init()
 end
@@ -3277,6 +3286,7 @@ b11900000e254102500e257102520e242102400e2300e22015254152401524215232152201522015
 011900000207002070020720207202072020700207002070100611006010062100621006010060100621006013051130501305013052110521105212050120500e0520e0520e0500e0500c0520c0520e0620e050
 b11900000e254102500e250102520e242102400e2300e2201525415240152421523217227172201722515200132541324015242182361d2321d2321e2301e2200c2400c2400e2401724017247172401524215245
 490900001a5561c556265561f55600500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
+070700001d7601d7501d7452976029762297622976029740297302972500700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000000000000000000000
 __music__
 00 44084b44
 00 05084c44
