@@ -109,36 +109,9 @@ function _update()
  end
  
  foreach(units,tunit)
- foreach(units,function(u)
-		if (upc_0) ai_unit2(u)
-		if not u.dead then
-	 	if selx
-	 		and (g(viz,u.x8,u.y8)
-	 		 or u.disc)
-	 	then
-	 	 u.sel=int(u.r,selbox,0)
-			 if u.sel then
-					if not u.hu then
-						enemy_sel={u}
-					elseif u.typ.unit then
-						my_sel=my_sel or {}
-						add(my_sel,u)
-					else
-						bldg_sel={u}
-					end
-				end
-			end
-		 if u.upd and
-		  u.st.agg and
-		  u.typ.atk and not u.const
-		 then
-				agg(u)
-	 	end
-	 	if u.st.t=="attack" then
-	 		fight(u)
-	 	end
-	 end
- end)
+	if upc_0 then
+		foreach(units,ai_unit2)
+	end
 
  if selx then
 		selection=my_sel or
@@ -1266,6 +1239,30 @@ function tunit(u)
 		u.st.wayp,u.st.adj=
 			c and {{x,y}},c
 		s(pos,x\4,y\4,1)
+	end
+	
+	if selx
+		and (g(viz,u.x8,u.y8)
+		 or u.disc)
+	then
+	 u.sel=int(u.r,selbox,0)
+	 if u.sel then
+			if not u.hu then
+				enemy_sel={u}
+			elseif typ.unit then
+				my_sel=my_sel or {}
+				add(my_sel,u)
+			else
+				bldg_sel={u}
+			end
+		end
+	end
+ if u.upd and u.st.agg and
+  typ.atk then
+		agg(u)
+	end
+	if u.st.t=="attack" then
+		fight(u)
 	end
 end
 
