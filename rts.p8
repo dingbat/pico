@@ -10,7 +10,7 @@ function draw_map(offset,y)
  camera(cx%8,cy%8)
  map(cx/8+offset,cy/8,0,0,17,y)
  camera(cx,cy)
- end
+end
 
 function _update()
 	if menu then
@@ -1784,7 +1784,7 @@ end
 --utils
 
 function p(s)
-	pal(split(s))
+	pal(split(s),false)
 end
 
 function un(f)
@@ -2324,12 +2324,13 @@ portf=9
 		)
 	end
 	if sel1.typ.units then
+	 p"13"
 		draw_port(parse[[
 portx=80
 porty=88
 porto=15
 portf=15
-]],42,108,nil,axn)
+]],42,107,nil,axn)
 	end
 end
 
