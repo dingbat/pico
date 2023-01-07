@@ -1864,6 +1864,7 @@ function surr(x,y,n,fn,ig_acc)
 	 	then
 			 fn{
 			  xx,yy,
+			  nz=dx|dy!=0,
 			 	d=dx&dy!=0 and 1.4 or 1,
 			 	k=xx|yy<<8
 			 }
@@ -2019,10 +2020,11 @@ function bar(x,y,w,prog,fg,bg)
 end
 
 function sur_acc(x,y)
-	return acc(x-1,y) or
-		acc(x+1,y) or
-		acc(x,y-1) or
-		acc(x,y+1)
+	local sa
+	surr(x,y,1,function(t)
+		if (t.nz) sa=true
+	end)
+	return sa
 end
 
 function unit(t,_x,_y,_p,
