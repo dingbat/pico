@@ -2024,7 +2024,7 @@ function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
  local _typ,_id,u=
  	typs[t] or t,
- 	flr(rnd"60"),
+ 	rnd"60"\1,
  	add(units,
  		parse[[dir=1
 sproff=0
@@ -2156,7 +2156,7 @@ function print_res(r,x,y,zero)
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
-			min(flr(r[k]),99) or zero and
+			min(r[k]\1,99) or zero and
 			"\-b \-i"..res1.p..
 				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..min(res1.pl,99) or
 			oop and r[k] or 0
@@ -2167,7 +2167,7 @@ function print_res(r,x,y,zero)
 		if v!=0 or zero then
 			v=(
 				(i==4 and oop or
-				res1[k]<flr(v)) and "\#a "
+				res1[k]<v\1) and "\#a "
 				or "\#7\-f\^x5 \^x4")..v
 			newx+=? v,x,y,rescol[k]
 			spr(129+i,x,y)

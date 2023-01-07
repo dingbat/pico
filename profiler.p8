@@ -39,12 +39,14 @@ end
 
 function analyze()
   profile("foreach", function()
-  	foreach(arr,function(i)
-  	end)
+  	a=flr(5)
+--  	foreach(arr,function(i)
+--  	end)
   end)
   profile("for all", function()
-  	for i in all(arr) do
-  	end
+  	a=5/1
+--  	for i in all(arr) do
+--  	end
   end)
 end
 
