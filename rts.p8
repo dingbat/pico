@@ -368,6 +368,7 @@ hp=20
 atk=0.75
 def=seige
 atk_typ=seige
+seige=1
 
 w=8
 fw=8
@@ -501,8 +502,9 @@ hp=15
 range=50
 atk=1.5
 proj_freq=60
-atk_typ=seige
 def=seige
+atk_typ=seige
+seige=1
 
 w=16
 fw=16
@@ -1617,7 +1619,7 @@ function farmer(u)
 end
 
 function agg(u)
-	local typ,pref=u.typ
+	local typ=u.typ
 	local los,targ_d,targ=max(
 		typ.unit and typ.los,
 		typ.range),9999
@@ -1627,17 +1629,15 @@ function agg(u)
 			viz[e.x8|e.y8<<8] and
 			d<los
 		then
-			if (e.typ.bldg) d+=999
+			if e.typ.bldg then
+			 d+=typ.seige and e.typ.bldg==1 and -999 or 999
+			end
 			if d<targ_d then
 				targ,targ_d=e,d
 			end
-			if typ.atk_typ=="seige"
-				and e.typ.bldg==1 then
-				pref=e
-			end
 		end
 	end)
-	attack(u,pref or targ)
+	attack(u,targ)
 end
 
 function fight(u)
