@@ -27,7 +27,7 @@ function _update()
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
-		p"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
+		unp"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
 		return
 	end
 
@@ -72,7 +72,7 @@ function _update()
 	end
 	
 	if loser then
-		poke"24365"
+		poke"24365" --no mouse
 		if lclk then
 			menu,cx,cy=unspl"1,5,35"
 			music"63"
@@ -117,6 +117,7 @@ function _update()
 	sel1,numsel,sel_typ=
 		selection[1],#selection
 	foreachsel(function(s)
+		--check nil, can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
@@ -131,12 +132,12 @@ function _draw()
 		unspr"229,48,74,5,1"
 
 		local x=64+t()\0.5%2*16
-		p"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
+		unp"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
 		sspr(x,unspl"0,16,8,25,28,32,16")
 		sspr(x,unspl"0,16,8,72,28,32,16,1")
-		p"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
+		unp"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
 		sspr(x,unspl"0,16,8,25,27,32,16")
-		p"2"
+		unp"2"
 		sspr(x,unspl"0,16,8,72,27,32,16,1")
 
 		?"\^j5c\-j\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\^-w\^-t\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V0.1\-0\|f\f6V0.1\^jej\-j\0"
@@ -174,16 +175,16 @@ function _draw()
 		local secs=res1.t\1%60
 		camera()
 		rectfill(unspl"0,88,128,107,9")
-		l"6,87,44,87"
-		l"86,87,125,87"
-		l"25,108,105,108"
+		unl"6,87,44,87"
+		unl"86,87,125,87"
+		unl"25,108,105,108"
 		line(
 			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff+1]
 			-3,unspl"80,8,80,9")
 		line(
 			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
 			-2,unspl"80,88,80,9")
-		p"1,0"
+		unp"1,0"
 		sspr(64+
 			pack(48,fps\5%3*16)[loser],
 			unspl"0,16,8,14,90,32,16")
@@ -192,7 +193,7 @@ function _draw()
 		return
 	end
 	
-	p"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
+	unp"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
 	draw_map(mapw8,15)
 	end
@@ -210,10 +211,10 @@ function _draw()
 	local brd=function(arr,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)		
-			if (arr[i-1]) l"-1,0,-1,7"
-			if (arr[i-256]) l"0,-1,7,-1"
-			if (arr[i+256]) l"0,8,7,8"
-			if (arr[i+1]) l"8,0,8,7"
+			if (arr[i-1]) unl"-1,0,-1,7"
+			if (arr[i-256]) unl"0,-1,7,-1"
+			if (arr[i+256]) unl"0,8,7,8"
+			if (arr[i+1]) unl"8,0,8,7"
 		end
 		if not exp[i] then
 			brd(exp)
@@ -931,6 +932,7 @@ tmap=16
 idx=]],parse[[
 portx=76
 porty=80]],function()
+		--makes farms 25% fastr too
 		cycles[1]=10
 	end),
 }
@@ -1302,6 +1304,7 @@ function update_viz(u)
 				if bldgs[k] then
 					bldgs[k].disc=1
 				end
+				--"v" to index into rescol
 				exp[k],new_viz[k]=1,"v"
 			end
 		end)
@@ -1312,7 +1315,8 @@ end
 
 function cam()
 	local b=btn()
-	if (b>32) b>>=8 --esdf
+	--allow esdf
+	if (b>32) b>>=8
 	cx,cy,amx,amy=
 	mid(0,
 		cx+(b&0x2)-(b&0x1)*2,
@@ -1470,7 +1474,8 @@ function input()
 				min(selx,mx),
 				min(sely,my),
 				max(selx,mx),
-				max(sely,my),7
+				max(sely,my),
+				7 --col
 			}
 		else
 			selx=nil
@@ -1510,6 +1515,7 @@ function draw_unit(u)
 		local p=u.const/typ.const
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
+		--switch spr after 0.5
 		sx-=fw*ceil(p*2)
 		if (p<=0.1) return
 	elseif ufps then
@@ -1519,7 +1525,7 @@ function draw_unit(u)
 		not loser and u.sel and (
 			u.hu and typ.unit or u==sel1
 		) and 9 or u.p,
-		u.p,
+		u.p,--qn☉
 		[14]=0
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -1731,7 +1737,7 @@ function mine(u)
 			end
 			mset(x,y,t+16)
 		elseif n==1 then
-			mset(x,y,68)
+			mset(x,y,68) --exhaust
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
 			make_dmaps(r)
@@ -1791,12 +1797,12 @@ end
 -->8
 --utils
 
-function p(s)
-	pal(split(s),false)
-end
-
 function un(f)
 	return function(s) f(unspl(s)) end
+end
+
+function unp(s)
+	pal(split(s),false)
 end
 
 function sel_only(unit)
@@ -1862,7 +1868,7 @@ function pay(costs,dir,p)
 	end
 end
 
---credit on bbs
+-- musurca/freds bbs/?tid=36059
 function dist(dx,dy)
 	local maskx,masky=dx>>31,dy>>31
 	local a0,b0=(dx+maskx)^^maskx,
@@ -1940,6 +1946,7 @@ function norm(it,nt,f)
 		d
 end
 
+--strict incl farms+const
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0)
@@ -2108,7 +2115,7 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---credit on bbs
+--based on a* by morgan3d
 function as(start,goal,gl)
 	local sh,best_table,f={
 		last=start,
@@ -2196,23 +2203,23 @@ end
 function draw_port(
 	typ,x,y,costs,fn,r,bg,fg,u)
 	camera(-x,-y)
-	local g,axnsel=
+	local nopay,axnsel=
 		costs and not can_pay(costs),
 		typ.portf and action>0
 	rect(0,0,10,9,
 		u and u.p or
-		g and 6 or
+		nopay and 6 or
 		costs and 3 or
 		axnsel and 10 or
 		typ.porto or 1
 	)
 	rectfill(1,1,9,8,
-		g and 7 or costs and
+		nopay and 7 or costs and
 		costs.tech and 10 or
 		axnsel and 9 or
 		typ.portf or 6
 	)
-	p(g and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	p(nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
 	pal(costs or 6,7)
 	sspr(typ.portx,typ.porty,
@@ -2230,7 +2237,7 @@ function draw_port(
 
 	if fg then
 		color(bg)
-		l"10,11,0,11"
+		unl"10,11,0,11"
 		line(10*r,11,fg)
 	end
 	camera()
@@ -2320,7 +2327,7 @@ portf=9]],24,107,nil,
 		)
 	end
 	if sel1.typ.units then
-		p"13"
+		unp"13"
 		draw_port(parse[[
 portx=0
 porty=32
@@ -2423,9 +2430,9 @@ portf=13
 		end
 	})
 	
+	--minimap
 	pal(14,0)
 	sspr(unspl"109,72,19,12,0,0")
-	
 	foreach(units,function(u)
 		if g(viz,u.x8,u.y8,u.disc) then
 			pset(
@@ -2435,7 +2442,6 @@ portf=13
 			)
 		end
 	end)
-	
 	camera(
 		-mmx-ceil(cx/mmwratio),
 		-mmy-ceil(cy/mmhratio)
@@ -2464,7 +2470,7 @@ function resbar()
 	local res1=ai_debug and res2 or res1
 	camera(-print_res(res1,
 		unspl"1,122,2"))
-	l"-4,120,-128,120,5"
+	unl"-4,120,-128,120,5"
 	pset(-3,121)
 end
 -->8
@@ -2566,7 +2572,7 @@ end
 -->8
 --init
 
-l,ununit,unspr,
+unl,ununit,unspr,
 	ai_diff,action,
 	mapw,maph,mmx,mmy,mmw,mmh,
 	mapw8,maph8,
@@ -2707,7 +2713,6 @@ function ai_init()
 		2-ai_diff/2,
 		unspl"1,0"
 
-	--i cost .17%
 	--1m 2f 3b 4d 5t 6c
 	bo=split([[5,1,123,27
 8,1,117,26
@@ -2941,6 +2946,7 @@ menuitem(2,"◆ load pasted",function()
 		res1[k],res2[k]=r[i-1],r[i]
 	end
 	foreach(split(deli(data)),function(k)
+		--k can be "" (trlng ,)
 		exp[k]=tonum(k)
 	end)
 	for i,t in inext,split(deli(data)) do
