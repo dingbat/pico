@@ -252,6 +252,7 @@ dirty token savers
 - organic endscreen
 - pal(14,0) => 	p"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert 0532b54 (... hack, 2 tokens)
+- revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
