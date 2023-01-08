@@ -2665,12 +2665,11 @@ t=0]]
 		ant.p1,res.p1,res[2],
 		parse"qty=0",split"5,12",
 		unspl"0,0,59,0,0"
-	
-	ai_init()
 end
 
 function new_game()
-	menu=init()
+	init()
+	res2.diff=ai_diff
 	foreach(split([[7,55,44,1
 7,335,188,2
 14,65,150,3
@@ -2687,7 +2686,7 @@ function new_game()
 1,330,196,2
 5,320,170,2
 8,268,169,2]],"\n"),ununit)
-	make_dmaps"d"
+	ai_init()
 end
 -->8
 --ai
@@ -2697,21 +2696,8 @@ if ai_debug then
 	_update60=_update
 end
 
-function ai_init()
-	res_alloc,
-		defsqd,offsqd,atksqd,
-		miners,res2.diff,
-		ant[2].gr,
-		nxt_res,ants,inv,
-		uhold=
-		split"r,b,g,r,b",
-		{},{},{},
-		{},ai_diff,
-		2-ai_diff/2,
-		unspl"1,0"
-
-	--1m 2f 3b 4d 5t 6c
-	bo=split([[5,1,123,27
+--1m 2f 3b 4d 5t 6c
+bo=split([[5,1,123,27
 8,1,117,26
 8,3,120,18
 11,1,123,21
@@ -2763,6 +2749,19 @@ function ai_init()
 65,1,114,8
 65,6,115,4
 150,1,1,1]],"\n")
+
+function ai_init()
+	res_alloc,
+		defsqd,offsqd,atksqd,miners,
+		ant[2].gr,
+		nxt_res,ants,inv,
+		uhold=
+		split"r,b,g,r,b",
+		{},{},{},{},
+		2-res2.diff/2,
+		unspl"1,0"
+
+	make_dmaps"d"
 end
 
 function ai_unit1(u)
@@ -2957,7 +2956,7 @@ menuitem(2,"◆ load pasted",function()
 		end
 	end)
 	foreach(data,ununit)
-	make_dmaps"d"
+	ai_init()
 end)
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
