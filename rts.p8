@@ -23,7 +23,7 @@ function _update()
 				_update=_update60
 			end
 			_update()
-			else
+		else
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
@@ -257,7 +257,7 @@ function _draw()
 	if to_build then
 		camera(cx-to_build.x,
 			cy-to_build.y)
-		p(buildable() or
+		unp(buildable() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
@@ -2219,7 +2219,7 @@ function draw_port(
 		axnsel and 9 or
 		typ.portf or 6
 	)
-	p(nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	unp(nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
 	pal(costs or 6,7)
 	sspr(typ.portx,typ.porty,
@@ -2351,7 +2351,7 @@ function draw_menu()
 			"17,24,61,26" or
 			"17,17,68,26") or "102,26")
 	do
-		p(i%2!=0 and "1,2,3,15")
+		unp(i%2!=0 and "1,2,3,15")
 		camera(x)
 		unspr"129,0,104"
 		spr(129,sec-8,104)
