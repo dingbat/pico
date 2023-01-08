@@ -2205,27 +2205,25 @@ function print_res(r,x,y,zero)
 end
 
 function draw_port(
-	typ,x,y,costs,fn,prog,
-	bg,fg,u
-)
+	typ,x,y,costs,fn,p,bg,fg,u)
 	camera(-x,-y)
-	local cant_pay,axnsel=
+	local g,axnsel=
 		costs and not can_pay(costs),
 	 typ.portf and action>0
 	rect(0,0,10,9,
 		u and u.p or
-		cant_pay and 6 or
+		g and 6 or
 		costs and 3 or
 		axnsel and 10 or
 		typ.porto or 1
 	)
 	rectfill(1,1,9,8,
-		cant_pay and 7 or costs and
+		g and 7 or costs and
  costs.tech and 10 or
  axnsel and 9 or
  typ.portf or 6
 	)
-	p(cant_pay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	p(g and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
 	pal(costs or 6,7)
 	sspr(typ.portx,typ.porty,
@@ -2244,7 +2242,7 @@ function draw_port(
 	if fg then
 		color(bg)
 		l"10,11,0,11"
-	 line(10*prog,11,fg)
+	 line(10*p,11,fg)
 	end
 	camera()
 end
