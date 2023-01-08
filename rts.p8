@@ -1726,7 +1726,9 @@ function mine(u)
 		if t<112 and
 			(n==full\3 or n==full\1.25)
 		then
-			del(units,g(ladys,x,y))
+			if del(units,g(ladys,x,y)) then
+				n+=20
+			end
 			mset(x,y,t+16)
 		elseif n==1 then
 			mset(x,y,67)
