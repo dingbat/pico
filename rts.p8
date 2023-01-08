@@ -242,8 +242,10 @@ function _draw()
 		elseif hlv.cx then
 			circ(hlv.cx,hlv.cy,
 			 min(0.5/dt,4),8)
-		elseif dt<=0.1 or dt>=0.25 then
-			if (hlv.x) rectaround(hlv,8)
+		elseif mid(dt,0.1,0.25)!=dt
+			and hlv.r then
+			local w,x,y,z=unpack(hlv.r)
+	  rect(w-1,x-1,y,z,8)
 		end
 	end
 	
@@ -1380,11 +1382,11 @@ function input()
 	end
 
  if to_build then
- if rclk then
-	 to_build=nil
+  if rclk then
+	  to_build=nil
 	 elseif lclk and buildable() then
-  sfx"1"
-  local b=unit(
+   sfx"1"
+   local b=unit(
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
@@ -1929,11 +1931,6 @@ function can_build()
 			hoverunit.hp<hoverunit.max_hp
 	 ) and
 		sel_typ==ant1
-end
-
-function rectaround(u,c)
-	local w,x,y,z=unpack(u.r)
-	rect(w-1,x-1,y,z,c)
 end
 
 function norm(it,nt,f)
