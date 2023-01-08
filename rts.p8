@@ -6,10 +6,9 @@ __lua__
 
 music(63,2000)
 
-function draw_map(offset,y)
+function draw_map(o,y)
  camera(cx%8,cy%8)
- map(cx/8+offset,cy/8,0,0,17,y)
- camera(cx,cy)
+ map(cx/8+o,cy/8,0,0,17,y)
 end
 
 function _update()
@@ -146,9 +145,9 @@ function _draw()
 	end
 
  local bf,af,proj_so={},{},
- fps\5%2*2
+  fps\5%2*2
  foreach(units,function(u)
- if u.onscr or loser then
+  if u.onscr or loser then
 			if
 				not loser and
 			 not g(viz,u.x8,u.y8)
@@ -163,11 +162,6 @@ function _draw()
 		end
  end)
 
-	if sel_typ and sel_typ.farm and
-		not sel1.const then
-	 rectaround(sel1,9)
-	end
-	
 	foreach(bf,draw_unit)
 	foreach(proj,function(_ENV)
 		sspr(
@@ -185,14 +179,14 @@ function _draw()
 	 l"25,108,105,108"
 		line(
 			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff+1]
-	 -3,unspl"80,8,80,9")
+	  -3,unspl"80,8,80,9")
 		line(
 			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	 -2,unspl"80,88,80,9")
+	  -2,unspl"80,88,80,9")
 		p"1,0"
 	 sspr(64+
-	 pack(48,fps\5%3*16)[loser],
-	 unspl"0,16,8,14,90,32,16")
+	  pack(48,fps\5%3*16)[loser],
+	  unspl"0,16,8,14,90,32,16")
 	 ?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jen\|h\0"
 	 ?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 	 return
@@ -222,9 +216,9 @@ function _draw()
 			if (arr[i+1]) l"8,0,8,7"
 		end
   if not exp[i] then
-	 brd(exp)
+	  brd(exp)
 		elseif not viz[i] then
-	 brd(viz,
+	  brd(viz,
 		  fget(mget(x,y),7) or 5)
 		end
 	end
@@ -270,7 +264,7 @@ function _draw()
 			rect(to_build.typ.fw,
 				to_build.typ.fh,
 				unspl"-1,-1,3")
-	 fillp()
+	  fillp()
 	 end
 	 local _ENV=to_build.typ
 		sspr(rest_x,rest_y,fw,h)
@@ -324,6 +318,7 @@ hp=6
 atk=0.2
 def=ant
 atk_typ=ant
+gr=3
 
 w=4
 fw=4
@@ -844,9 +839,9 @@ breq=0]],ant),
 nil,nil,nil,
 parse([[
 t=30
-r=18
+r=20
 g=0
-b=5
+b=20
 breq=0
 tmap=1
 idx=]],parse[[
@@ -854,6 +849,7 @@ portx=31
 porty=80]],function(_ENV)
 		carry=12
 		spd*=1.25
+		gr-=0.5
 	end,ant),
 parse([[
 t=20
@@ -1544,14 +1540,14 @@ function update_unit(u)
 	local t,wayp,nxt,targ=
 		st.t,st.wayp,st.nxt,st.target
  if u.q and fps%15==u.q.fps%15 then
- produce(u)
+  produce(u)
  end
  if (u.typ.farm) update_farm(u)
  if st.active then
- if (st.farm) farmer(u)
- if t=="build" and fps%30==0 then
-  buildrepair(u)
- end
+  if (st.farm) farmer(u)
+  if t=="build" and fps%30==0 then
+   buildrepair(u)
+  end
   if (t=="gather") mine(u)
  else
 		if
@@ -1563,7 +1559,7 @@ function update_unit(u)
 				sgn(targ.x-u.x),true,fps
 			if t=="drop" then
 				if u.res then
-					res[u.p][u.res.typ]+=u.res.qty/(2-res[u.p].diff/2)
+					res[u.p][u.res.typ]+=u.res.qty/u.typ.gr
 				end
 				u.res=nil
 				if st.farm then
@@ -1574,7 +1570,7 @@ function update_unit(u)
 				end
 			end
 		elseif st.res and not wayp then
-	 mine_nxt_res(u,st.res)
+	  mine_nxt_res(u,st.res)
 		end
  end
  
@@ -1583,15 +1579,15 @@ function update_unit(u)
  	st.spd or u.typ.spd)
  local x,y=unpack(wayp[1])
  if dist(x-u_rect(u).x,y-u.y)<0.5 then
-			deli(wayp,1)
+		deli(wayp,1)
  	if #wayp==0 then
  		st.wayp=nil
-			end
+		end
  end
  elseif t=="move" then
- rest(u)
+  rest(u)
  elseif t=="farm" then
- st.active=true
+  st.active=true
  end
 end
 
@@ -2284,9 +2280,7 @@ portf=9]],24,107,nil,function()
 	end
 	
 	if sel1.typ.farm then
-		camera(
-			-?sel1.cycles.."/"..cycles[1]
-			,unspl"45,111,4")
+		camera(-?sel1.cycles.."/"..cycles[1],unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2672,13 +2666,11 @@ t=0]]
 
 	init_typs()
 	ant1,res1,res2,
-	heal,
-	cycles,
+	heal,cycles,
 	cx,cy,fps,selt,alert,
 	dmaps_ready=
 		ant.p1,res.p1,res[2],
-		parse"qty=0",
-		split"5,12",
+		parse"qty=0",split"5,12",
 		unspl"0,0,59,0,0"
 	
 	ai_init()
@@ -2716,12 +2708,15 @@ function ai_init()
 	res_alloc,
 		defsqd,offsqd,atksqd,
 		miners,res2.diff,
+		ant[2].gr,
 		nxt_res,ants,inv,
 		uhold=
 		split"r,b,g,r,b",
 		{},{},{},
 		{},ai_diff,
+		2-ai_diff/2,
 		unspl"1,0"
+
 	--i cost .17%
 	--1m 2f 3b 4d 5t 6c
 	bo=split([[5,1,123,27
@@ -3093,14 +3088,14 @@ b4444450747074700004000098888890500000500000474747441144000b00444000000008804044
 011111000011100041111140994114995541145500e7000000000000000000000000000007e0000005150000000000000000000000000000041400b350041400
 44111440501110504d111d409944449955444455000e00000000000000000000000000000e0000000414000300000000000000000000000004140b3335041400
 40404040404040404d404d4009999990055555500000000000000000000000000000000000000000044403313300000000000000000000000444b33133544400
-00000000000000003453345334533453345334533453345303033450000506000000000000060060041405111505000000000000000000000414051115041400
-434b4043434040b04533453345334533453875334533453343434345000600000006050000050006041455555554050000000000000000000414555555541400
-554355b343b300005334533453345334587887845338733455435533000006000005606000006050044454545454440000000505050000000444545454544400
-34435343044043b03345334533478845388888853388884534435340000060000050500000a00000044444444444450000000444444005000444444544444500
-3b0b40550300b0b4345334533458885334377453345374530334435500a00a0000a0a000000a0a00045444414444440000005441444055000454445154444400
-455b3453b0b0044045334533453375334537753345377533455334530099a0000a9aa9000099a900044444111444540005004411144044000444451115445400
-454445b3b04b400053345334533473345357753453377334454445330a889000098890000a899000044544111444440004404411144044000445451115444400
-05335540030033b03345334533453345335555453345334505035540009200000029000000280000000000000000000000000000000000000000000000000000
+00000000000000003413341334133413341334133413341303033410000506000000000000060060041405111505000000000000000000000414051115041400
+434b4043434040b04133413341334133413871334133413343434341000600000006050000050006041455555554050000000000000000000414555555541400
+554355b343b300001334133413341334187887841338733411431133000006000005606000006050044454545454440000000505050000000444545454544400
+34435343044043b03341334133478841388888813388884134431340000060000050500000a00000044444444444450000000444444005000444444544444500
+3b0b40550300b0b4341334133418881334377413341374130334431100a00a0000a0a000000a0a00045444414444440000005441444055000454445154444400
+455b3453b0b0044041334133413371334137713341377133411334130099a0000a9aa9000099a900044444111444540005004411144044000444451115445400
+454445b3b04b400013341334133473341357753413577534414441330a889000098890000a899000044544111444440004404411144044000445451115444400
+05335540030033b03341334133413341335555413355554101031140009200000029000000280000000000000000000000000000000000000000000000000000
 __label__
 555555555555555555555555555ddddd111111111111111111111111111111111111111111ddddd555dddddd5555555555555555555555555555555555555555
 555555555555555555655555555ddddd111dd111111dd111111dd111111dd111111dd11111ddddd5555dddd5d555555555555555555555555565555555555555
