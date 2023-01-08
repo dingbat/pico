@@ -2632,7 +2632,7 @@ function init()
 	poke(0x5f2d,3)
 	reload()
 	music"1"
-	menuitem(4,"∧ resign",function() units[1].hp=0 end)
+	menuitem(3,"∧ resign",function() units[1].hp=0 end)
 		
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,
@@ -2932,7 +2932,7 @@ menuitem(1,"⌂ save to clip",function()
 	printh(s,"@clip")
 end)
 
-menuitem(2,"◆ load from clip",function()
+menuitem(2,"◆ paste & load",function()
 	init()
 	local data=split(stat"4","/")
 	local r=split(deli(data))
@@ -2956,9 +2956,6 @@ menuitem(2,"◆ load from clip",function()
 	foreach(data,ununit)
 	make_dmaps"d"
 end)
-
-menuitem(3,"   (paste first)")
-
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000011000000010100000000000110001100000000000101000000000000000000

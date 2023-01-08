@@ -248,3 +248,35 @@ dirty token savers
 - revert 0532b54 (... hack, 2 tokens)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
+
+
+sfx/music toggle (56)
+
+sm,_sfx,_music,smd=
+ 1,sfx,music,
+	split"♪ music+sfx,♪ music only,♪ sfx only"
+menuitem(5,smd[1],function()
+	sm%=3
+	sm+=1
+	sfx,music=
+		sm%2==1 and _sfx or max,
+		sm<3 and (_music"1" or _music)
+		 or _music"-1" or max
+	menuitem(5,smd[sm])
+end)
+
+worse (61)
+
+_music,_sfx=music,sfx
+function stog(m,o)
+	local fn=split"music,sfx"[m]
+ menuitem(3+m,
+ 	"♪ "..fn..
+ 	split" on, off"[o],
+ 	function()
+ 		_𝘦𝘯𝘷[fn]=pack(_𝘦𝘯𝘷["_"..fn],max)[o]
+ 		stog(m,o%2+1)
+ end)
+end
+stog(1,1)
+stog(2,1)
