@@ -1353,7 +1353,7 @@ function input()
 		tile_as_unit(mx8,my8),action
 	
 	if lclk and hovbtn then
-		hovbtn.handle()
+		hovbtn.fn()
 		if (axn==action) action=0
 		return
 	end
@@ -2205,7 +2205,7 @@ function print_res(r,x,y,zero)
 end
 
 function draw_port(
-	typ,x,y,costs,onclick,prog,
+	typ,x,y,costs,fn,prog,
 	bg,fg,u
 )
 	camera(-x,-y)
@@ -2235,9 +2235,9 @@ function draw_port(
 	end
 	pal()
 	
-	add(onclick and buttons,{
+	add(fn and buttons,{
 		r={x,y,x+10,y+8},
-		handle=onclick,
+		fn=fn,
 		costs=costs,
 	})
 
@@ -2389,7 +2389,7 @@ function draw_menu()
 		unspr"133,1,111"
 		add(buttons,{
 			r=split"0,110,14,119",
-			handle=function()
+			fn=function()
 			 deli(selection).sel=false
 			end
 		})
@@ -2422,7 +2422,7 @@ portf=13
 	 unspl"105,8,6,11,14")
 	add(buttons,idle and {
 		r=split"116,121,125,128",
-		handle=function()
+		fn=function()
 			sel_only(idle)
 			cx,cy=idle.x-64,idle.y-64
 			cam()
@@ -2433,7 +2433,7 @@ portf=13
  unspl"114,8,6,0,14")
  add(buttons,idle_mil and {
 		r=split"106,121,113,128",
-		handle=function()
+		fn=function()
 			sel_only(idle_mil)
 		end
 	})
