@@ -701,9 +701,9 @@ tmap=-1]]
 
 local farm=parse[[
 idx=12
-los=0
+los=1
 hp=48
-const=6
+const=8
 hpr=8
 def=bld
 
@@ -1517,7 +1517,7 @@ function draw_unit(u)
 		line(fw*p,0,14)
 		--switch spr after 0.5
 		sx-=fw*ceil(p*2)
-		if (p<=0.1) return
+		if (p<=0.15) return
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
@@ -1928,11 +1928,8 @@ function can_attack()
 end
 
 function can_build()
-	return hoverunit and
-		hoverunit.typ.bldg and
-		(hoverunit.const or
-			hoverunit.hp<hoverunit.max_hp
-		) and
+	return hbld and
+		hbld.hp<hbld.typ.hp and
 		sel_typ==ant1
 end
 
