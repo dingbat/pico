@@ -286,3 +286,14 @@ function stog(m,o)
 end
 stog(1,1)
 stog(2,1)
+
+
+
+====
+res collection
+you: /3 (-2)
+you+up: /2.5 (-1)
+
+easy: /2
+med: /1.5
+hard: /1
