@@ -2427,8 +2427,7 @@ portf=13
 	sspr(unspl"109,72,19,12,0,0")
 	
 	foreach(units,function(u)
-		if u.disc or
-			g(viz,u.x8,u.y8) then
+		if g(viz,u.x8,u.y8,u.disc) then
 			pset(
 				u.x/mmwratio,
 				u.y/mmhratio,
