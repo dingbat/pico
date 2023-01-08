@@ -1016,9 +1016,9 @@ breq=0
 tmap=256
 idx=]],parse[[
 portx=23
-porty=80]],function()
-	units_heal[1]=true
-end),
+porty=80]],function(_ENV)
+ qty=0.5
+end,heal),
 parse([[
 t=10
 r=0
@@ -1202,11 +1202,10 @@ function tunit(u)
 		return
 	end
 	
-	if units_heal[u.p] and
-		not u.fire and
+	if not u.fire and
 	 u.hp<typ.hp and
 		fps==0 then
-		u.hp+=0.5
+		u.hp+=heal[u.p].qty
 	end
 	
 	if int(u.r,{mx,my,mx,my},1)
@@ -2673,12 +2672,12 @@ t=0]]
 
 	init_typs()
 	ant1,res1,res2,
-	units_heal,
+	heal,
 	cycles,
 	cx,cy,fps,selt,alert,
 	dmaps_ready=
 		ant.p1,res.p1,res[2],
-		{false,true},
+		parse"qty=0",
 		split"5,12",
 		unspl"0,0,59,0,0"
 	
