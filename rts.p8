@@ -1617,8 +1617,8 @@ function farmer(u)
 end
 
 function agg(u)
-	local typ=u.typ
-	local los,targ_d,targ,pref=max(
+	local typ,pref=u.typ
+	local los,targ_d,targ=max(
 		typ.unit and typ.los,
 		typ.range),9999
 	foreach(units,function(e)
@@ -1627,9 +1627,14 @@ function agg(u)
 			viz[e.x8|e.y8<<8] and
 			d<los
 		then
-			if (d<targ_d)targ,targ_d=e,d
+			if d<targ_d then
+				targ,targ_d=e,
+				 e.typ.bldg and 9999
+				 or d
+			end
 			if typ.atk_typ=="seige"
-				and e.typ.bldg then
+				and e.typ.bldg and
+				not e.typ.farm then
 				pref=e
 			end
 		end
