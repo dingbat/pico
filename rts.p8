@@ -49,10 +49,10 @@ function _update()
 			mx8*8,my8*8
 	end
 	
-	llclk,lrclk,upc_0,pos,
+	llclk,lrclk,upc_0,pos,hbld,
 		hoverunit,idle,idle_mil=
 		btn"5",btn"4",
-		upc==0,{}
+		upc==0,{},g(bldgs,mx8,my8)
 
 	dmap()
 
@@ -1416,12 +1416,12 @@ function input()
 	then
 		if can_renew() then
 			sfx"0"
-			hilite(hoverunit)
-			hoverunit.sproff,
-				hoverunit.cycles,
-				hoverunit.exp=0,0
+			hilite(hbld)
+			hbld.sproff,
+				hbld.cycles,
+				hbld.exp=0,0
 			pay(renewcost,-1)
-			farm(sel1,hoverunit)
+			farm(sel1,hbld)
 		
 		elseif can_gather() then
 			sfx"0"
@@ -1524,7 +1524,7 @@ function draw_unit(u)
 	pal{
 		not loser and u.sel and (
 			u.hu and typ.unit or u==sel1
-		) and 9 or u.p,
+		) and 9 or typ.farm and 5 or u.p,
 		u.p,--qn☉
 		[14]=0
 	}
@@ -2035,9 +2035,9 @@ function can_drop()
 end
 
 function can_renew(t)
-	if hoverunit and
+	if hbld and
 		sel_typ==ant1 and
-		hoverunit.exp then
+		hbld.exp then
 		print_res(renewcost,10,2)
 		rect(unspl"8,0,18,8,4")
 		return	can_pay(renewcost) or t
