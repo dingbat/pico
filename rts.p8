@@ -719,7 +719,7 @@ portx=0
 porty=88
 farm=1
 carry=9
-bldg=1
+bldg=farm
 dir=-1
 breq=16
 tmap=-1]]
@@ -1633,8 +1633,7 @@ function agg(u)
 				 or d
 			end
 			if typ.atk_typ=="seige"
-				and e.typ.bldg and
-				not e.typ.farm then
+				and e.typ.bldg==1 then
 				pref=e
 			end
 		end
