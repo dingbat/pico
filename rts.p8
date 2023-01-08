@@ -1627,10 +1627,9 @@ function agg(u)
 			viz[e.x8|e.y8<<8] and
 			d<los
 		then
+			if (e.typ.bldg) d+=999
 			if d<targ_d then
-				targ,targ_d=e,
-				 e.typ.bldg and 9999
-				 or d
+				targ,targ_d=e,d
 			end
 			if typ.atk_typ=="seige"
 				and e.typ.bldg==1 then
