@@ -18,18 +18,18 @@ function _update()
 		cy+=cvy
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
- 	if btnp"5" then
- 		new_game()
- 		if ai_debug then
- 			_update=_update60
- 		end
- 		_update()
- 	else
+ if btnp"5" then
+ 	new_game()
+ 	if ai_debug then
+ 		_update=_update60
+ 	end
+ 	_update()
+ else
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
 		p"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
- 	return
+ return
 	end
 
 	local total=res1.p+res2.p
@@ -51,19 +51,19 @@ function _update()
 	end
 	
  llclk,lrclk,upc_0,pos,
- 	hoverunit,idle,idle_mil=
- 	btn"5",btn"4",
- 	upc==0,{}
+ hoverunit,idle,idle_mil=
+ btn"5",btn"4",
+ upc==0,{}
 
 	dmap()
 
  if fps%30==19 then
- 	mmready=true
+ mmready=true
 		for tx=0,mmw do
 		for ty=0,mmh do
-	 	local x,y=tx*mmwratio\8,
-	 		ty*mmhratio\8
-	 	sset(109+tx,72+ty,
+	 local x,y=tx*mmwratio\8,
+	 	ty*mmhratio\8
+	 sset(109+tx,72+ty,
 				g(exp,x,y) and rescol[
 					g(viz,x,y,"e")..
 					fget(mget(x,y))
@@ -73,39 +73,39 @@ function _update()
 	end
 	
  if loser then
- 	poke"24365"
- 	if lclk then
- 		menu,cx,cy=unspl"1,5,35"
- 		music"63"
- 	end
- 	return
+ poke"24365"
+ if lclk then
+ 	menu,cx,cy=unspl"1,5,35"
+ 	music"63"
+ end
+ return
 	end
 	
 	res1.t+=0x.0888
 
  if upc_0 then
- 	viz,new_viz=new_viz,{}
+ viz,new_viz=new_viz,{}
 		for k in next,exp do
- 		local x,y=k&0x00ff,k\256
- 		mset(x+mapw8,y,viz[k] and
+ 	local x,y=k&0x00ff,k\256
+ 	mset(x+mapw8,y,viz[k] and
 	   0 or mget(x,y))
 		end
  end
  
  foreach(proj,function(p)
- 	p.x,p.y,_,d=norm(p.to,p,.8)
+ p.x,p.y,_,d=norm(p.to,p,.8)
   if d<0.5 then
 	  if int(
-	  	del(proj,p).to_unit.r,
-	 		{p.x,p.y,p.x,p.y},0
-	 	) then
-		 	dmg(p.from_typ,p.to_unit)
+	  del(proj,p).to_unit.r,
+	 	{p.x,p.y,p.x,p.y},0
+	 ) then
+		 dmg(p.from_typ,p.to_unit)
 			end
 		end
  end)
 
  if selx then
- 	bldg_sel,hu_sel,enemy_sel=nil
+ bldg_sel,hu_sel,enemy_sel=nil
  end
  
  foreach(units,tunit)
@@ -146,19 +146,19 @@ function _draw()
 	end
 
  local bf,af,proj_so={},{},
- 	fps\5%2*2
+ fps\5%2*2
  foreach(units,function(u)
- 	if u.onscr or loser then
+ if u.onscr or loser then
 			if
 				not loser and
 			 not g(viz,u.x8,u.y8)
 			 and u.disc
 			then
-	 		add(af,u)
-	 	elseif u.typ.bldg then
-		 	draw_unit(u)
+	 	add(af,u)
+	 elseif u.typ.bldg then
+		 draw_unit(u)
 		 else
-		 	add(bf,u)
+		 add(bf,u)
 		 end
 		end
  end)
@@ -185,14 +185,14 @@ function _draw()
 	 l"25,108,105,108"
 		line(
 			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff+1]
-	 	-3,unspl"80,8,80,9")
+	 -3,unspl"80,8,80,9")
 		line(
 			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	 	-2,unspl"80,88,80,9")
+	 -2,unspl"80,88,80,9")
 		p"1,0"
 	 sspr(64+
-	 	pack(48,fps\5%3*16)[loser],
-	 	unspl"0,16,8,14,90,32,16")
+	 pack(48,fps\5%3*16)[loser],
+	 unspl"0,16,8,14,90,32,16")
 	 ?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jen\|h\0"
 	 ?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 	 return
@@ -212,8 +212,8 @@ function _draw()
 	
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
- 	local i=x|y<<8
- 	local brd=function(arr,col)
+ local i=x|y<<8
+ local brd=function(arr,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)		
 			if (arr[i-1]) l"-1,0,-1,7"
@@ -222,9 +222,9 @@ function _draw()
 			if (arr[i+1]) l"8,0,8,7"
 		end
   if not exp[i] then
-	 	brd(exp)
+	 brd(exp)
 		elseif not viz[i] then
-	 	brd(viz,
+	 brd(viz,
 		  fget(mget(x,y),7) or 5)
 		end
 	end
@@ -270,7 +270,7 @@ function _draw()
 			rect(to_build.typ.fw,
 				to_build.typ.fh,
 				unspl"-1,-1,3")
-	 	fillp()
+	 fillp()
 	 end
 	 local _ENV=to_build.typ
 		sspr(rest_x,rest_y,fw,h)
@@ -280,7 +280,7 @@ function _draw()
 	camera(-amx,-amy)
 	spr(
 	 hovbtn and pset(unspl"-1,4,5")
-	 	and 188 or
+	 and 188 or
 		sel1 and sel1.hu and
 		((to_build or
 			can_build() or
@@ -1151,8 +1151,8 @@ function farm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
   wayp=get_wayp(u,
-  	f.x-3+rnd"6",
-  	f.y-3+rnd"6"),
+  f.x-3+rnd"6",
+  f.y-3+rnd"6"),
   farm=f
 	}
 end
@@ -1180,7 +1180,7 @@ function tunit(u)
 		if typ.lady then
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
-	 	s(dmap_st.r,x8,y8,{x8,y8})
+	 s(dmap_st.r,x8,y8,{x8,y8})
 			make_dmaps"r"
 		end
 		local _ENV=res[u.p]
@@ -1319,15 +1319,15 @@ function cam()
 	local b=btn()
 	if (b>32) b>>=8 --esdf
 	cx,cy,amx,amy=
- 	mid(0,
- 		cx+(b&0x2)-(b&0x1)*2,
- 		mapw-128
- 	),
- 	mid(0,
- 		cy+(b&0x8)/4-(b&0x4)/2,
- 		maph-(loser and 128 or 107)
- 	),
- 	mid(0,stat"32",126),
+ mid(0,
+ 	cx+(b&0x2)-(b&0x1)*2,
+ 	mapw-128
+ ),
+ mid(0,
+ 	cy+(b&0x8)/4-(b&0x4)/2,
+ 	maph-(loser and 128 or 107)
+ ),
+ mid(0,stat"32",126),
 	 mid(-1,stat"33",126)
 
  mx,my,hovbtn=amx+cx,amy+cy
@@ -1344,9 +1344,9 @@ function input()
 	cam()
 	
  foreach(buttons,function(b)
- 	if int(b.r,{amx,amy,amx,amy},1) then
+ if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
- 	end
+ end
 	end)
 	
 	local cont,htile,axn=
@@ -1384,11 +1384,11 @@ function input()
 	end
 
  if to_build then
- 	if rclk then
-	 	to_build=nil
+ if rclk then
+	 to_build=nil
 	 elseif lclk and buildable() then
-  	sfx"1"
-  	local b=unit(
+  sfx"1"
+  local b=unit(
 				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
@@ -1416,50 +1416,50 @@ function input()
  if rclk and sel1 and sel1.hu
  then
 	 if can_renew() then
-	 	sfx"0"
-	 	hilite(hoverunit)
-	 	hoverunit.sproff,
-	 		hoverunit.cycles,
-	 		hoverunit.exp=0,0
-	 	pay(renewcost,-1)
-	 	farm(sel1,hoverunit)
-	 	
+	 sfx"0"
+	 hilite(hoverunit)
+	 hoverunit.sproff,
+	 	hoverunit.cycles,
+	 	hoverunit.exp=0,0
+	 pay(renewcost,-1)
+	 farm(sel1,hoverunit)
+	 
 	 elseif can_gather() then
-	 	sfx"0"
-	 	hilite(htile)
-	 	if avail_farm() then
-	 		farm(sel1,hoverunit)
-	 	else
-	  	foreachsel(gather,mx8,my8)
-	 	end
-	 	
+	 sfx"0"
+	 hilite(htile)
+	 if avail_farm() then
+	 	farm(sel1,hoverunit)
+	 else
+	  foreachsel(gather,mx8,my8)
+	 end
+	 
   elseif can_build() then
-  	sfx"0"
-  	foreachsel(build,hoverunit)
+  sfx"0"
+  foreachsel(build,hoverunit)
 			hilite(hoverunit)
 			
 	 elseif can_attack() then
-	 	sfx"4"
-  	foreachsel(attack,hoverunit)
-  	hilite(hoverunit)
-  	
+	 sfx"4"
+  foreachsel(attack,hoverunit)
+  hilite(hoverunit)
+  
   elseif can_drop() then
-  	sfx"0"
-  	foreachsel(drop,nil,hoverunit)
-  	hilite(hoverunit)
-  	
+  sfx"0"
+  foreachsel(drop,nil,hoverunit)
+  hilite(hoverunit)
+  
   elseif sel1.typ.unit then
-  	sfx"1"
-  	mvg(selection,mx,my,axn==1)
-  	hilite{cx=mx,cy=my}
+  sfx"1"
+  mvg(selection,mx,my,axn==1)
+  hilite{cx=mx,cy=my}
 
   elseif sel1.typ.units then
-  	if fget(mget(mx8,my8),1) then
- 	  hilite(htile)
+  if fget(mget(mx8,my8),1) then
+   hilite(htile)
 			end
-  	sel1.rx,sel1.ry,
-  		sel1.rtx,sel1.rty=
-  		mx,my,mx8,my8
+  sel1.rx,sel1.ry,
+  	sel1.rtx,sel1.rty=
+  	mx,my,mx8,my8
 			sfx"1"
   else
    cont=true
@@ -1468,7 +1468,7 @@ function input()
  
  if cont then
 	 if btnp"5" and not selx then
-	 	selx,sely,selt=mx,my,t()
+	 selx,sely,selt=mx,my,t()
 	 end
 	 if btn"5" and selx then
 			selbox={
@@ -1476,9 +1476,9 @@ function input()
 				min(sely,my),
 				max(selx,mx),
 				max(sely,my),7
-	 	}
+	 }
 	 else
-	 	selx=nil
+	 selx=nil
 	 end
  end
 end
@@ -1497,8 +1497,8 @@ function draw_unit(u)
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
-	 	resoffx[res_typ]+
-	 	u.sproff\8*8,
+	 resoffx[res_typ]+
+	 u.sproff\8*8,
 	 typ[stt.."_y"]+
 	  resoffy[res_typ],
 	 typ[stt.."_fps"],
@@ -1544,14 +1544,14 @@ function update_unit(u)
 	local t,wayp,nxt,targ=
 		st.t,st.wayp,st.nxt,st.target
  if u.q and fps%15==u.q.fps%15 then
- 	produce(u)
+ produce(u)
  end
  if (u.typ.farm) update_farm(u)
  if st.active then
- 	if (st.farm) farmer(u)
- 	if t=="build" and fps%30==0 then
- 	 buildrepair(u)
- 	end
+ if (st.farm) farmer(u)
+ if t=="build" and fps%30==0 then
+  buildrepair(u)
+ end
   if (t=="gather") mine(u)
  else
 		if
@@ -1574,24 +1574,24 @@ function update_unit(u)
 				end
 			end
 		elseif st.res and not wayp then
-	 	mine_nxt_res(u,st.res)
+	 mine_nxt_res(u,st.res)
 		end
  end
  
 	if wayp then
- 	u.x,u.y,u.dir=norm(wayp[1],u,
- 		st.spd or u.typ.spd)
- 	local x,y=unpack(wayp[1])
- 	if dist(x-u_rect(u).x,y-u.y)<0.5 then
+ u.x,u.y,u.dir=norm(wayp[1],u,
+ 	st.spd or u.typ.spd)
+ local x,y=unpack(wayp[1])
+ if dist(x-u_rect(u).x,y-u.y)<0.5 then
 			deli(wayp,1)
- 		if #wayp==0 then
- 			st.wayp=nil
+ 	if #wayp==0 then
+ 		st.wayp=nil
 			end
- 	end
+ end
  elseif t=="move" then
- 	rest(u)
+ rest(u)
  elseif t=="farm" then
- 	st.active=true
+ st.active=true
  end
 end
 
@@ -1668,29 +1668,29 @@ function fight(u)
 			max(typ.cat or
 			 u.id%typ.proj_freq)
 		then
- 		add(proj,{
- 			from_typ=typ,
- 			x=u.x-u.dir*typ.proj_xo,
- 			y=u.y+typ.proj_yo,
- 			to={e.x,e.y},
- 			to_unit=e,
- 		})
- 	end
+ 	add(proj,{
+ 		from_typ=typ,
+ 		x=u.x-u.dir*typ.proj_xo,
+ 		y=u.y+typ.proj_yo,
+ 		to={e.x,e.y},
+ 		to_unit=e,
+ 	})
+ end
  else
- 	in_range=int(u.r,e.r,0)
+ in_range=int(u.r,e.r,0)
 		if in_range and fps%30==u.id%30 then
 		 dmg(typ,e)
 		end
  end
  u.st.active=in_range
  if in_range then
- 	u.dir,u.st.wayp=sgn(dx)
+ u.dir,u.st.wayp=sgn(dx)
 	elseif u.upd then
 		if typ.los>=d and typ.unit then
-	 	attack(u,e)
+	 attack(u,e)
 	 end
 	 if not u.st.wayp then
-	 	rest(u)
+	 rest(u)
 	 end
  end
 end
@@ -1850,11 +1850,11 @@ end
 function can_pay(costs,_p)
 	local _ENV=res[_p or 1]
  return r>=costs.r and
- 	g>=costs.g and
- 	b>=costs.b and
- 	(not costs.p or
- 	 p<min(pl,99))
- 	and reqs|costs.breq==reqs
+ g>=costs.g and
+ b>=costs.b and
+ (not costs.p or
+  p<min(pl,99))
+ and reqs|costs.breq==reqs
 end
 
 function pay(costs,dir,p)
@@ -1871,9 +1871,9 @@ end
 function dist(dx,dy)
  local maskx,masky=dx>>31,dy>>31
  local a0,b0=(dx+maskx)^^maskx,
- 	(dy+masky)^^masky
+ (dy+masky)^^masky
  return a0>b0 and
- 	a0*0.9609+b0*0.3984 or
+ a0*0.9609+b0*0.3984 or
   b0*0.9609+a0*0.3984
 end
 
@@ -1881,18 +1881,18 @@ function surr(x,y,fn,n,ig_acc)
 	local n,exist=n or 1
 	for dx=-n,n do
 	 for dy=-n,n do
-	 	local xx,yy=x+dx,y+dy
-	 	if
-	 		min(xx,yy)>=0 and
-	 		xx<mapw8 and yy<maph8 and
-	 		(ig_acc or acc(xx,yy))
-	 	then
-	 		if (dx|dy!=0) exist=true
-	 		if fn then
+	 local xx,yy=x+dx,y+dy
+	 if
+	 	min(xx,yy)>=0 and
+	 	xx<mapw8 and yy<maph8 and
+	 	(ig_acc or acc(xx,yy))
+	 then
+	 	if (dx|dy!=0) exist=true
+	 	if fn then
 				 fn{
 				  xx,yy,
-				 	d=dx&dy!=0 and 1.4 or 1,
-				 	k=xx|yy<<8
+				 d=dx&dy!=0 and 1.4 or 1,
+				 k=xx|yy<<8
 				 }
 			 end
 			end
@@ -2051,10 +2051,10 @@ end
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
  local _typ,_id,u=
- 	typs[t] or t,
- 	rnd"60"\1,
- 	add(units,
- 		parse[[dir=1
+ typs[t] or t,
+ rnd"60"\1,
+ add(units,
+ 	parse[[dir=1
 sproff=0
 lastp=1
 cycles=0
@@ -2066,8 +2066,8 @@ fres=0]])
 		 ptyp.hp
 	 typ,x,y,p,hu,hp,const,
 	  disc,id,prod=
-		 	ptyp,_x,_y,_p,_p==1,
-		 	_hp or max_hp,
+		 ptyp,_x,_y,_p,_p==1,
+		 _hp or max_hp,
 				tonum(_const),_disc==1,
 				_id,_typ.prod
 	end
@@ -2133,11 +2133,11 @@ function as(start,goal,gl)
    s.last[2]*8+4},1)
    s=best_table[s.prev.k]
   end
- 	return f
+ return f
  end
  local fr,fr_len,
- 	closest={sh},1,
- 	sh
+ closest={sh},1,
+ sh
  while fr_len>0 do
   local cost,index_of_min=32767
   for i=1,fr_len do
@@ -2161,7 +2161,7 @@ function as(start,goal,gl)
      last=n,
      cfs=32767,
      ctg=
-     	dist(n[1]-goal[1],n[2]-goal[2])
+     dist(n[1]-goal[1],n[2]-goal[2])
     }
     fr_len+=1
     fr[fr_len],best_table[n.k]=old_best,old_best
@@ -2222,9 +2222,9 @@ function draw_port(
 	)
 	rectfill(1,1,9,8,
 		cant_pay and 7 or costs and
- 	costs.tech and 10 or
- 	axnsel and 9 or
- 	typ.portf or 6
+ costs.tech and 10 or
+ axnsel and 9 or
+ typ.portf or 6
 	)
 	p(cant_pay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
@@ -2272,16 +2272,16 @@ function single()
 	local q=sel1.q
 	if sel1.cost then
 	 draw_port(
-	 	parse[[
+	 parse[[
 portx=72
 porty=72
 porto=8
 portf=9
-	 	]],24,107,nil,function()
-	 		pay(sel1.cost,1)
-	 		sel1.hp=0
-	 	end,sel1.const/sel_typ.const,
-	 	5,12
+	 ]],24,107,nil,function()
+	 	pay(sel1.cost,1)
+	 	sel1.hp=0
+	 end,sel1.const/sel_typ.const,
+	 5,12
 	 )
 	 return
 	end
@@ -2360,15 +2360,15 @@ function draw_menu()
 			"17,24,61,26" or
 			"17,17,68,26") or "102,26")
 	do
- 	p(i%2!=0 and "1,2,3,15")
- 	camera(x)
- 	unspr"129,0,104"
- 	spr(129,sec-8,104)
- 	line(sec-4,unspl"105,3,105,7")
- 	rectfill(sec-4,unspl"106,3,108,4")
- 	rectfill(sec,unspl"108,0,128")
- 	x-=sec
- 	pal()
+ p(i%2!=0 and "1,2,3,15")
+ camera(x)
+ unspr"129,0,104"
+ spr(129,sec-8,104)
+ line(sec-4,unspl"105,3,105,7")
+ rectfill(sec-4,unspl"106,3,108,4")
+ rectfill(sec,unspl"108,0,128")
+ x-=sec
+ pal()
  end
  camera()
 
@@ -2399,7 +2399,7 @@ function draw_menu()
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
-	 	action==2 and parse[[
+	 action==2 and parse[[
 portx=99
 porty=72
 porto=2
@@ -2518,7 +2518,7 @@ function dmap()
 	local q=queue[1]
 	if q then
 		if #q==1 then
-	 	queue[1]=make_dmap(q)
+	 queue[1]=make_dmap(q)
 		else
 			dmapcc(q)
 			if q.c==9 then
@@ -2557,7 +2557,7 @@ function make_dmap(k)
 			if
 				fget(mget(x,y),key2resf[k])
 		 then
-		 	s(dmap_st[k],x,y,{x,y})
+		 s(dmap_st[k],x,y,{x,y})
 		 end
 		end
 		end
@@ -2781,19 +2781,19 @@ end
 
 function ai_unit1(u)
  if u.p==2 then
- 	if u.typ.ant then
- 		antcount+=1
- 		if u.st.res=="r" and
- 			--41,24
- 			not dmaps.r[6185] then
+ if u.typ.ant then
+ 	antcount+=1
+ 	if u.st.res=="r" and
+ 		--41,24
+ 		not dmaps.r[6185] then
 			 drop(u)
 			 res_alloc=split"b,g,b,b,b,g"
 			end
 			if u.st.rest and
 				u.st.res=="b" then
 			 if u.y>168 and
-			 	--42,7
-			 	not dmaps.b[6954] then
+			 --42,7
+			 not dmaps.b[6954] then
 				 move(u,352,64)
 				end
 				if u.x>288 and
@@ -2802,25 +2802,25 @@ function ai_unit1(u)
 					move(u,280,64)
 				end
 			end
- 		if u.st.res then			
-		 	add(miners,u)
+ 	if u.st.res then			
+		 add(miners,u)
 		 elseif u.st.rest and
-		 	dmaps_ready then
+		 dmaps_ready then
 				mine_nxt_res(u,
-		 		res_alloc[nxt_res])
-		 	nxt_res%=#res_alloc
+		 	res_alloc[nxt_res])
+		 nxt_res%=#res_alloc
 				nxt_res+=1
 		 end
 	 elseif u.typ.atk and
-	 	u.typ.unit then
-	 	if u.dead then
-	 		del(u.sqd,u)
-	 	elseif not u.sqd then
-	 		u.sqd=(#defsqd>#offsqd or
-	 		 u.typ.atk_typ=="seige") and
-	 			offsqd or defsqd
-	 		add(u.sqd,u)
-	 	end
+	 u.typ.unit then
+	 if u.dead then
+	 	del(u.sqd,u)
+	 elseif not u.sqd then
+	 	u.sqd=(#defsqd>#offsqd or
+	 	 u.typ.atk_typ=="seige") and
+	 		offsqd or defsqd
+	 	add(u.sqd,u)
+	 end
 	 end
  end
 end

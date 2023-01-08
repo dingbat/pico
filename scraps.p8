@@ -239,6 +239,12 @@ ai_diff,
 	--left aligned
 	?"\^:000e040e1915110e"
 
+-- more clockly clock (right)
+?"\^:107c8292b282827c"
+
+-- more clockly clock (left)
+?"\^:083e41495941413e"
+
 
 dirty token savers
 ============
