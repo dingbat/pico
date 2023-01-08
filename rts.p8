@@ -12,6 +12,11 @@ function draw_map(o,y)
 end
 
 function _update()
+	lclk,rclk,llclk,lrclk=
+		llclk and not btn"5",
+		lrclk and not btn"4",
+		btn"5",btn"4"
+
 	if menu then
 		cx+=cvx
 		cy+=cvy
@@ -38,10 +43,6 @@ function _update()
 
 	fps+=1
 	fps%=60
-	
-	upc,lclk,rclk=fps%upcycle,
-		llclk and not btn"5",
-		lrclk and not btn"4"
 
 	input()
 	if to_build then
@@ -49,10 +50,9 @@ function _update()
 			mx8*8,my8*8
 	end
 	
-	llclk,lrclk,upc_0,pos,hbld,
+	upc,pos,hbld,
 		hoverunit,idle,idle_mil=
-		btn"5",btn"4",
-		upc==0,{},g(bldgs,mx8,my8)
+		fps%upcycle,{},g(bldgs,mx8,my8)
 
 	dmap()
 
@@ -82,7 +82,7 @@ function _update()
 	
 	res1.t+=0x.0888
 
-	if upc_0 then
+	if upc==0 then
 		viz,new_viz=new_viz,{}
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
@@ -122,7 +122,7 @@ function _update()
 			s.typ==sel_typ) and s.typ
 	end)
 	
-	if (upc_0) ai_frame()
+	if (upc==0) ai_frame()
 end
 
 function _draw()
