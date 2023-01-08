@@ -1180,7 +1180,8 @@ function tunit(u)
 		if typ.lady then
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
-	 s(dmap_st.r,x8,y8,{x8,y8})
+	  s(dmap_st.r or {},x8,y8,
+	  	{x8,y8})
 			make_dmaps"r"
 		end
 		local _ENV=res[u.p]
@@ -2205,7 +2206,7 @@ function print_res(r,x,y,zero)
 end
 
 function draw_port(
-	typ,x,y,costs,fn,p,bg,fg,u)
+	typ,x,y,costs,fn,r,bg,fg,u)
 	camera(-x,-y)
 	local g,axnsel=
 		costs and not can_pay(costs),
@@ -2242,7 +2243,7 @@ function draw_port(
 	if fg then
 		color(bg)
 		l"10,11,0,11"
-	 line(10*p,11,fg)
+	 line(10*r,11,fg)
 	end
 	camera()
 end
@@ -2273,8 +2274,7 @@ function single()
 portx=72
 porty=72
 porto=8
-portf=9
-	 ]],24,107,nil,function()
+portf=9]],24,107,nil,function()
 	 	pay(sel1.cost,1)
 	 	sel1.hp=0
 	 end,sel1.const/sel_typ.const,
@@ -2284,7 +2284,9 @@ portf=9
 	end
 	
 	if sel1.typ.farm then
-		camera(-? sel1.cycles.."/"..cycles[1],unspl"45,111,4")
+		camera(
+			-?sel1.cycles.."/"..cycles[1]
+			,unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2714,13 +2716,13 @@ function ai_init()
 	res_alloc,
 		defsqd,offsqd,atksqd,
 		miners,res2.diff,
-		nxt_res,antcount,inv,
+		nxt_res,ants,inv,
 		uhold=
 		split"r,b,g,r,b",
 		{},{},{},
 		{},ai_diff,
 		unspl"1,0"
-	
+	--i cost .17%
 	--1m 2f 3b 4d 5t 6c
 	bo=split([[5,1,123,27
 8,1,117,26
@@ -2779,7 +2781,7 @@ end
 function ai_unit1(u)
  if u.p==2 then
  if u.typ.ant then
- 	antcount+=1
+ 	ants+=1
  	if u.st.res=="r" and
  		--41,24
  		not dmaps.r[6185] then
@@ -2859,7 +2861,7 @@ function ai_unit2(u)
 			local w=deli(miners)
 			if (w) farm(w,u)
 		elseif u.typ.queen then
-			if antcount<30 then
+			if ants<30 then
 				ai_prod(u)
 			end
 		elseif u.typ.units then
@@ -2912,7 +2914,7 @@ function ai_frame()
 	end
 	mvg(atksqd,
 	 unspl"48,40,1,1")
-	inv,miners,antcount,uhold=
+	inv,miners,ants,uhold=
 		0,{},0
 end
 -->8
@@ -2946,7 +2948,7 @@ menuitem(1,"⌂ save to clip",function()
 	printh(s,"@clip")
 end)
 
-menuitem(2,"◆ paste & load",function()
+menuitem(2,"◆ load pasted",function()
 	init()
 	local data=split(stat"4","/")
 	local r=split(deli(data))
