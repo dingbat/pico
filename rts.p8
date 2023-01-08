@@ -176,23 +176,24 @@ function _draw()
 		)
 	end)
 	if loser then
+		resbar()
 		local secs=res1.t\1%60
 		camera()
-		rectfill(unspl"0,96,128,115,9")
-	 l"6,95,44,95"
-	 l"86,95,125,95"
-	 l"25,116,105,116"
+		rectfill(unspl"0,88,128,107,9")
+	 l"6,87,44,87"
+	 l"86,87,125,87"
+	 l"25,108,105,108"
 		line(
-			?split"\^j2n\|e\#9\f5 easy ai ,\^j2n\|e\#9\f2 normal ai \|m\^x1 ,\^j2n\|e\#9\f0 hard ai "[res2.diff+1]
-	 	-3,unspl"88,8,88,9")
+			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff+1]
+	 	-3,unspl"80,8,80,9")
 		line(
-			?"\^jmn\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	 	-2,unspl"88,88,88,9")
+			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	 	-2,unspl"80,88,80,9")
 		p"1,0"
 	 sspr(64+
 	 	pack(48,fps\5%3*16)[loser],
-	 	unspl"0,16,8,14,98,32,16")
-	 ?"\^j7t\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jep\|h\0"
+	 	unspl"0,16,8,14,90,32,16")
+	 ?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jen\|h\0"
 	 ?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 	 return
 	end
@@ -565,7 +566,7 @@ dead_y=0
 dir=-1
 portx=9
 porty=72
-drop=1
+drop=0
 bldg=1
 proj_xo=-4
 proj_yo=2
@@ -636,7 +637,7 @@ dead_fr=8
 dead_fps=7.5
 bldg=1
 dir=-1
-drop=1
+drop=5
 breq=2
 tmap=-1]]
 
@@ -1184,7 +1185,7 @@ function tunit(u)
 		end
 		local _ENV=res[u.p]
 		if typ.drop and not u.const then
-			pl-=5
+			pl-=typ.drop
 		elseif typ.unit then
 			p-=1
 		end
@@ -2458,13 +2459,8 @@ portf=13
 	)
 	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
-	camera()
 	
-	local res1=ai_debug and res2 or res1
-	camera(-print_res(res1,
-	 unspl"1,122,2"))
-	l"-4,120,-128,120,5"
-	pset(-3,121)
+	resbar()
 	
 	if hovbtn and hovbtn.costs and
 		res1.reqs|hovbtn.costs.breq==
@@ -2478,6 +2474,15 @@ portf=13
 		print_res(hovbtn.costs,2,2)
 		rect(len+2,unspl"0,0,8,1")
 	end
+end
+
+function resbar()
+	camera()
+	local res1=ai_debug and res2 or res1
+	camera(-print_res(res1,
+	 unspl"1,122,2"))
+	l"-4,120,-128,120,5"
+	pset(-3,121)
 end
 -->8
 --dmaps
