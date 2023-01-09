@@ -18,22 +18,21 @@ function _update()
 		btn"5",btn"4"
 
 	if menu then
+		unp"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
 		cx+=cvx
 		cy+=cvy
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
-		if btnp"5" then
-			new_game()
-			if ai_debug then
-				_update=_update60
-			end
-			_update()
-		else
+		if btnp()<4 then
 			ai_diff-=btnp()
 			ai_diff%=3
 		end
-		unp"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
-		return
+		if lclk then
+			new_game()
+			if (ai_debug)_update=_update60
+		else
+			return
+		end
 	end
 
 	local total=res1.p+res2.p
@@ -57,7 +56,6 @@ function _update()
 	dmap()
 
 	if fps%30==19 then
-		mmready=true
 		for tx=0,mmw do
 		for ty=0,mmh do
 			local x,y=tx*mmwratio\8,
@@ -1372,7 +1370,7 @@ function input()
 				sfx"0"
 				foreachsel(move,x,y,axn==1)
 				hilite{amx,amy,2,8}
-			elseif axn==0 and mmready and btn"5" then
+			elseif axn==0 and btn"5" then
 				cx,cy=
 					mid(0,x-64,mapw-128),
 					mid(0,y-64,maph-107)
