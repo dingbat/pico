@@ -537,10 +537,10 @@ tmap=-1]]
 
 queen=parse[[
 idx=7
-los=20
+los=25
 hp=400
 atk=1.5
-range=20
+range=25
 proj_freq=30
 atk_typ=acid
 def=queen
@@ -1631,15 +1631,12 @@ function farmer(u)
 end
 
 function agg(u)
-	local typ=u.typ
-	local los,targ_d,targ=max(
-		typ.unit and typ.los,
-		typ.range),9999
+	local targ_d,targ=9999
 	foreach(units,function(e)
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
 			viz[e.x8|e.y8<<8] and
-			d<los
+			d<=u.typ.los
 		then
 			if e.typ.bldg then
 				d+=typ.seige and e.typ.bldg==1 and -999 or 999
