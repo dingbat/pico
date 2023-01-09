@@ -162,6 +162,7 @@ function _draw()
 	end)
 
 	foreach(bf,draw_unit)
+	camera(cx,cy)
 	foreach(proj,function(_ENV)
 		sspr(
 			from_typ.proj_s+proj_so,
@@ -250,7 +251,7 @@ function _draw()
 	
 	draw_menu()
 	camera()
-	pal()
+	pal() --allow pink for alert
 	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
@@ -540,7 +541,7 @@ idx=7
 los=25
 hp=400
 atk=1.5
-range=25
+range=23
 proj_freq=30
 atk_typ=acid
 def=queen
@@ -1632,20 +1633,20 @@ end
 
 function agg(u)
 	local targ_d,targ=9999
-	foreach(units,function(e)
+	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
 			viz[e.x8|e.y8<<8] and
 			d<=u.typ.los
 		then
 			if e.typ.bldg then
-				d+=typ.seige and e.typ.bldg==1 and -999 or 999
+				d+=u.typ.seige and e.typ.bldg==1 and -999 or 999
 			end
 			if d<targ_d then
 				targ,targ_d=e,d
 			end
 		end
-	end)
+	end
 	attack(u,targ)
 end
 
@@ -1999,11 +2000,11 @@ function dmg(from_typ,to)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
-		alert=t()
-		hlt,hlv=alert+2.5,{
+		hilite{
 			mmx+to.x/mmwratio,
-			mmy+to.y/mmhratio,
-			4,14}
+			mmy+to.y/mmhratio,4,14}
+		alert=hlt
+		hlt+=2.5
 	end
 end
 
