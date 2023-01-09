@@ -1181,6 +1181,7 @@ function tunit(u)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
 			make_dmaps"r"
+			u.dead=61
 		end
 		local _ENV=res[u.p]
 		if typ.drop and not u.const then
@@ -1190,13 +1191,13 @@ function tunit(u)
 		end
 	end
 
-	if u.dead and not typ.lady then
+	if u.dead then
 		if typ.queen then
 			loser=u.p
 			music"40"
 		end
 		u.dead+=1
-		if (typ.unit) update_viz(u)
+		update_viz(u)
 		del(u.dead==60 and units,u)
 		return
 	end
