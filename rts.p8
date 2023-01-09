@@ -797,7 +797,7 @@ dir=-1
 tmap=-1]]
 
 ant.prod={
- parse([[
+	parse([[
 r=0
 g=0
 b=6
@@ -1215,7 +1215,7 @@ function tunit(u)
 	end
 	
 	if selx and
-	 g(viz,x8,y8,u.disc) then
+		g(viz,x8,y8,u.disc) then
 		u.sel=int(u.r,selbox,0)
 		if u.sel then
 			if not u.hu then
@@ -1495,8 +1495,8 @@ function draw_unit(u)
 
 	local sx,sy,ufps,fr,f=
 		typ[stt.."_x"]+
-		 resoffx[res_typ]+
-		 u.sproff\8*8,
+			resoffx[res_typ]+
+			u.sproff\8*8,
 		typ[stt.."_y"]+
 			resoffy[res_typ],
 		typ[stt.."_fps"],
