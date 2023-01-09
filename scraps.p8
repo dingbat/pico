@@ -254,6 +254,7 @@ dirty token savers
 - revert 0532b54 (... hack, 2 tokens)
 - revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
+- revert bf60644 (lady wandering, 25 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
@@ -299,3 +300,12 @@ you+up: /2.5 (-1)
 easy: /2
 med: /1.5
 hard: /1
+
+		ms,mms=mms,{}
+		foreach(ms,function(s)
+			surr(s[1],s[2],function(t)
+				del(mms,t)
+				add(mms,t)
+				mset(t[1]+mapw8,t[2],0)
+			end,1,1)
+		end)
