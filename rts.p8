@@ -105,7 +105,7 @@ function _update()
 		bldg_sel,hu_sel,enemy_sel=nil
 	end
 	
-	foreach(units,tunit)
+	foreach(units,tick)
 	
 	if selx then
 		selection=hu_sel or
@@ -194,7 +194,7 @@ function _draw()
 	
 	unp"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
-	draw_map(mapw8,15)
+	draw_map(mapw8,15) --fog
 	end
 	
 	_pal,pal,buttons=pal,max,{}
@@ -767,7 +767,7 @@ tmap=-1]]
 parse[[
 idx=14
 spd=0.21
-los=20
+los=15
 hp=8
 atk=0.47
 lady=1
@@ -1155,7 +1155,7 @@ function farm(u,f)
 	}
 end
 
-function tunit(u)
+function tick(u)
 	local typ,targ=u.typ,
 		u.st.target
 	if not u.const then
@@ -1272,6 +1272,10 @@ function tunit(u)
 	end
 	if u.st.t=="attack" then
 		fight(u)
+	end
+	if typ.lady and u.st.rest and
+		t()%6<1 then
+		wander(u)
 	end
 end
 
@@ -1986,13 +1990,17 @@ function reg_bldg(b)
 	end
 end
 
+function wander(u)
+	move(u,
+		u.x+rnd"6"*2-6,
+		u.y+rnd"6"*2-6,true)
+end
+
 function dmg(from_typ,to)
 	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
 	if to.typ.unit and (
 		to.st.rest or to.st.res) then
-		move(to,
-			to.x+rnd"6"*2-6,
-			to.y+rnd"6"*2-6,true)
+		wander(to)
 	end
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32",rnd"32")
