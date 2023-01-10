@@ -704,6 +704,8 @@ hp=48
 const=8
 hpr=8
 def=bld
+cycles=5
+gr=0.5
 
 w=8
 fw=8
@@ -930,9 +932,9 @@ tmap=16
 idx=]],parse[[
 portx=76
 porty=80]],function(_ENV)
-		--makes farms 25% faster too
-		qty=10
-	end,cycles),
+		gr*=1.3
+		cycles=10
+	end,farm),
 }
 
 barracks.prod={
@@ -1608,8 +1610,8 @@ function update_farm(u)
 	end
 	if f.st.active and
 		not u.ready and fps==59 then
-		u.fres+=0.375+cycles[u.p].qty/40
-		u.sproff+=1
+		u.fres+=u.typ.gr
+		u.sproff+=u.typ.gr*2
 		u.ready=u.fres>=9
 	end
 end
@@ -1626,7 +1628,7 @@ function farmer(u)
 			drop(u)
 			f.cycles+=1
 			f.exp,f.ready=f.hu and
-				f.cycles>=cycles[1]
+				f.cycles>=f.typ.cycles
 			f.sproff=f.exp and
 				(sfx"20" or 32) or 0
 		end
@@ -2279,7 +2281,7 @@ portf=9]],24,107,nil,
 	end
 	
 	if sel1.typ.farm then
-		camera(-?sel1.cycles.."/"..cycles.p1.qty,unspl"45,111,4")
+		camera(-?sel1.cycles.."/"..sel_typ.cycles,unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2663,11 +2665,11 @@ t=0]]
 
 	init_typs()
 	ant1,res1,res2,
-	heal,cycles,
+	heal,
 	cx,cy,fps,selt,alert,
 	dmaps_ready=
 		ant.p1,res.p1,res[2],
-		parse"qty=0",parse"qty=5",
+		parse"qty=0",
 		unspl"0,0,59,0,0"
 end
 
