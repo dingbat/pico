@@ -16,13 +16,21 @@ function _init()
 end
 
 function make_map()
-	for i,a in inext,{
+	local data={
 		bo,pos1,pos2,pos3,pos4
-	} do
+	}
+	for i,a in inext,data do
 		i-=1
 		sermap(a,0x2060+i*128*4)
 	end
 	cstore()
+	for y=0,#data*4-1 do
+		cstore(
+			0x2060+y*128,
+			0x2060+y*128,
+			32,
+			"rts.p8")
+	end
 end
 
 function make_vars()
