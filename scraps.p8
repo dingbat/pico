@@ -255,7 +255,9 @@ dirty token savers
 - revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
 - revert bf60644 (lady wandering, 25 tok)
-- remove sfx from save
+- remove sfx from save (2 tok)
+- hbanner (11 tok)
+
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
