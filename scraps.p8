@@ -262,20 +262,22 @@ dirty token savers
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
 
-sfx/music toggle (56)
+sfx/music toggle (47) (45 if combine assignment and smd is unspl'd)
 
-sm,_sfx,_music,smd=
- 1,sfx,music,
-	split"♪ music+sfx,♪ music only,♪ sfx only"
-menuitem(5,smd[1],function()
+sm,_sfx,_music=3,sfx,music
+function snd()
+	_music"-1"
 	sm%=3
 	sm+=1
 	sfx,music=
-		sm%2==1 and _sfx or max,
-		sm<3 and (_music"1" or _music)
-		 or _music"-1" or max
-	menuitem(5,smd[sm])
-end)
+		pack(_sfx,max,_sfx)[sm],
+		pack(_music,_music,max)[sm]
+	music"1"
+	menuitem(5,
+		split"♪ music+sfx,♪ music only,♪ sfx only"[sm],
+		snd)
+end
+snd()
 
 worse (61)
 

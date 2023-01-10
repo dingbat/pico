@@ -4,8 +4,6 @@ __lua__
 --age of ants
 --eeooty (dan h)
 
-music(0,2000)
-
 function draw_map(o,y)
 	camera(cx%8,cy%8)
 	map(cx/8+o,cy/8,0,0,17,y)
@@ -72,8 +70,8 @@ function _update()
 	if loser then
 		poke"24365" --no mouse
 		if lclk then
-			menu,cx,cy=unspl"1,5,35"
-			music"0"
+			menu,cx,cy=unspl"63,5,35"
+			music"63"
 		end
 		if rclk then
 			hbanner=not hbanner
@@ -2582,6 +2580,7 @@ end
 --init
 
 unl,ununit,unspr,
+	_sfx,_music,sm,
 	ai_diff,action,
 	mapw,maph,mmx,mmy,mmw,mmh,
 	mapw8,maph8,
@@ -2590,7 +2589,8 @@ unl,ununit,unspr,
 	menu,cx,cy,cvx,cvy
 	=
 	un(line),un(unit),un(spr),
-	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
+	sfx,music,
+	unspl"3,0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 reskeys,f2res,resqty,
 	key2resf,rescol,
@@ -2646,7 +2646,7 @@ breq=0]]
 function init()
 	poke(0x5f2d,3)
 	reload()
-	music"1"
+	music"0"
 	menuitem(3,"∧ resign",function() units[1].hp=0 end)
 
 	queue,exp,vcache,dmaps,
@@ -2915,6 +2915,22 @@ menuitem(2,"◆ load pasted",function()
 	foreach(data,ununit)
 	ai_init()
 end)
+
+function snd()
+	_music"-1"
+	sm%=3
+	sm+=1
+	sfx,music=
+		pack(_sfx,max,_sfx)[sm],
+		pack(_music,_music,max)[sm]
+	music(max(menu),1000)
+	menuitem(5,
+		split"♪ music+sfx,♪ music only,♪ sfx only"[sm],
+		snd)
+end
+snd()
+
+
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000011000000010100000000000110001100000000000101000000000000000000
@@ -3274,7 +3290,6 @@ c5170000021650216500100051501600418031180221802202165021653952300501001500415521
 a91900000e244102400e247102420e232102300e2200e210152341523015232152321523215220152250020013244132301523217221172221722013220132250c2300c2300e2301323113232132321522015220
 a91900000e244102400e240102420e232102300e2200e2101524415230152321522217217172101721515200132441323015232182201d2211d2221d2221d2100c2300c2300e2301a23017231172301723217235
 __music__
-03 08484b44
 00 05084c44
 01 05080b44
 00 05080c44
@@ -3330,6 +3345,7 @@ __music__
 00 41424344
 00 41424344
 00 41424344
+00 41424344
 00 1b1c5844
 01 1c5e1d44
 00 1c481f44
@@ -3337,4 +3353,5 @@ __music__
 00 1c3d1f44
 00 1c1e1d44
 02 1c201f44
+03 08484b44
 
