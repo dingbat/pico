@@ -257,6 +257,7 @@ dirty token savers
 - revert bf60644 (lady wandering, 25 tok)
 - remove sfx from save (2 tok)
 - hbanner (11 tok)
+- 886adb3 msuic/sfx toggle (45 tok)
 
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
