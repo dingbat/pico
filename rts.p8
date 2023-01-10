@@ -2710,25 +2710,22 @@ end
 
 function ai_init()
 	res_alloc,
-		defsqd,offsqd,atksqd,miners,
-		ant[2].gr,
-		nxt_res,ants,inv,
-		uhold=
+		defsqd,offsqd,atksqd,
+		ant[2].gr,nxt_res=
 		split"r,b,g,r,b",
-		{},{},{},{},
-		2-res2.diff/2,
-		unspl"1,0"
+		{},{},{},
+		2-res2.diff/2,1
 
 	make_dmaps"d"
 end
 
 function ai_unit1(u)
 	if u.p==2 then
-	if u.typ.ant then
-		ants+=1
-		if u.st.res=="r" and
-			--41,24
-			not dmaps.r[6185] then
+		if u.typ.ant then
+			ants+=1
+			if u.st.res=="r" and
+				--41,24
+				not dmaps.r[6185] then
 				drop(u)
 				res_alloc=split"b,g,b,b,b,g"
 			end
@@ -2846,6 +2843,8 @@ function ai_bld(i)
 end
 
 function ai_frame()
+	inv,miners,ants,uhold=0,{},0
+
 	foreach(units,ai_unit1)
 	foreach(units,ai_unit2)
 
@@ -2858,8 +2857,6 @@ function ai_frame()
 		atksqd,offsqd=offsqd,{}
 	end
 	mvg(atksqd,unspl"48,40,1,1")
-	inv,miners,ants,uhold=
-		0,{},0
 end
 -->8
 --save
