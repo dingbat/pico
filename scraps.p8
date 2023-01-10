@@ -309,3 +309,10 @@ hard: /1
 				mset(t[1]+mapw8,t[2],0)
 			end,1,1)
 		end)
+
+putting research in bo:
+
+	if pid>6 then
+		b.tech(b.techt[2])
+	end
+

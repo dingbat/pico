@@ -929,10 +929,10 @@ breq=0
 tmap=16
 idx=]],parse[[
 portx=76
-porty=80]],function()
-		--makes farms 25% fastr too
-		cycles[1]=10
-	end),
+porty=80]],function(_ENV)
+		--makes farms 25% faster too
+		qty=10
+	end,cycles),
 }
 
 barracks.prod={
@@ -1608,7 +1608,7 @@ function update_farm(u)
 	end
 	if f.st.active and
 		not u.ready and fps==59 then
-		u.fres+=0.375+cycles[u.p]/40
+		u.fres+=0.375+cycles[u.p].qty/40
 		u.sproff+=1
 		u.ready=u.fres>=9
 	end
@@ -2279,7 +2279,7 @@ portf=9]],24,107,nil,
 	end
 	
 	if sel1.typ.farm then
-		camera(-?sel1.cycles.."/"..cycles[1],unspl"45,111,4")
+		camera(-?sel1.cycles.."/"..cycles.p1.qty,unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
 	end
 	for i,b in next,sel1.prod do
@@ -2667,7 +2667,7 @@ t=0]]
 	cx,cy,fps,selt,alert,
 	dmaps_ready=
 		ant.p1,res.p1,res[2],
-		parse"qty=0",split"5,12",
+		parse"qty=0",parse"qty=5",
 		unspl"0,0,59,0,0"
 end
 
@@ -2814,8 +2814,8 @@ function ai_unit2(u)
 	end
 end
 
-function ai_bld(boi)
-	local off=0x2060+boi%32+boi\32*128
+function ai_bld(i)
+	local off=0x2060+i%32+i\32*128
 	local p,pid=peek(off,2)
 	local x,y=peek(off+512,2)
 	if not g(bldgs,x,y) then
@@ -2827,7 +2827,7 @@ function ai_bld(boi)
 					x*8+b.typ.w/2,
 					y*8+b.typ.h/2,
 					2,0)
-				if res2.boi==boi then
+				if res2.boi==i then
 					res2.boi+=2
 				end
 			else
