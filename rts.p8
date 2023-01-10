@@ -127,18 +127,17 @@ function _draw()
 	draw_map(0,17)
 	if menu then
 		camera()
-		unspr"229,48,74,5,1"
 
 		local x=64+t()\0.5%2*16
 		unp"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
 		sspr(x,unspl"0,16,8,25,28,32,16")
-		sspr(x,unspl"0,16,8,72,28,32,16,1")
+		sspr(x,unspl"0,16,8,74,28,32,16,1")
 		unp"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
 		sspr(x,unspl"0,16,8,25,27,32,16")
 		unp"2"
-		sspr(x,unspl"0,16,8,72,27,32,16,1")
+		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"\^j5c\-j\f0\^w\^tage of ants\-0\-0\-0\-0\-0\-7\|f\f7age of ants\^-w\^-t\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V0.1\-0\|f\f6V0.1\^jej\-j\0"
+		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcj\-h\f0◀\-z\-p▶\^jcj\|f\f6\-h◀\-z\-p▶\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V0.1\-0\|f\f6V0.1\^jej\-j\0"
 		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1]
 		return
 	end
