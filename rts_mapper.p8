@@ -30,7 +30,7 @@ end
 
 function out(arr)
 	return (
-		"	des\""..ser(arr,1).."\",\n"
+		"	\""..ser(arr,1).."\",\n"
 	)
 end
 

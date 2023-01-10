@@ -2700,17 +2700,9 @@ if ai_debug then
 	_update60=_update
 end
 
-function des(s)
-	local a={}
-	foreach(split(s,2),function(b)
-		add(a,pack(ord(b,1,2)))
-	end)
-	return a
-end
-
 bo,bop1=
-	des"⁵¹⁸¹⁸³ᵇ¹ᶜ⁵ᶠ²▮¹▮²■²⁘²‖²‖¹◀⁴▶¹▶²「²」¹¥⁶•²。²゛²゜²゜¹ ⁴\"³$¹'⁵(¹)²)²*²*²+¹+⁶-⁵0¹1³2⁵4⁴5¹5²5³5⁵6²6²9¹<⁵a²a²a¹a⁶∧¹",
-	des"+•%¥(□+‖&▮)「-」*「+「+▶+◀*⁘&‖+▮*◀)◀'、\\\"■(◀(▶(「,「&⁙(⁘(▮-	(⁷/◀-「.「,」,¥,ᶜ\\\"ᵇ%⁘!、)⁸ ゛*⁸*、+¥#、&▶*¥*•+⁵\\\"。)•)、\\\"⁸#⁴dd"
+	"⁵¹⁸¹⁸³ᵇ¹ᶜ⁵ᶠ²▮¹▮²■²⁘²‖²‖¹◀⁴▶¹▶²「²」¹¥⁶•²。²゛²゜²゜¹ ⁴\"³$¹'⁵(¹)²)²*²*²+¹+⁶-⁵0¹1³2⁵4⁴5¹5²5³5⁵6²6²9¹<⁵a²a²a¹a⁶∧¹",
+	"+•%¥(□+‖&▮)「-」*「+「+▶+◀*⁘&‖+▮*◀)◀'、\\\"■(◀(▶(「,「&⁙(⁘(▮-	(⁷/◀-「.「,」,¥,ᶜ\\\"ᵇ%⁘!、)⁸ ゛*⁸*、+¥#、&▶*¥*•+⁵\\\"。)•)、\\\"⁸#⁴dd"
 
 function ai_init()
 	res_alloc,
@@ -2827,8 +2819,8 @@ function ai_unit2(u)
 end
 
 function ai_bld(boi)
-	local p,pid=unpack(bo[boi])
-	local x,y=unpack(bop1[boi])
+	local p,pid=ord(bo,boi,2)
+	local x,y=ord(bop1,boi,2)
 	if not g(bldgs,x,y) then
 		local b=ant.prod[pid]
 		if res2.tot>=p then
@@ -2839,7 +2831,7 @@ function ai_bld(boi)
 					y*8+b.typ.h/2,
 					2,0)
 				if res2.boi==boi then
-					res2.boi+=1
+					res2.boi+=2
 				end
 			else
 				uhold=b
@@ -2852,7 +2844,7 @@ function ai_frame()
 	foreach(units,ai_unit1)
 	foreach(units,ai_unit2)
 
-	for i=1,res2.boi do
+	for i=1,res2.boi,2 do
 		if inv==0 then
 			ai_bld(i)
 		end
