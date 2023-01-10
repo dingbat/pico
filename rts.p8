@@ -48,7 +48,7 @@ function _update()
 		to_build.x,to_build.y=
 			mx8*8,my8*8
 	end
-	
+
 	upc,pos,hbld,
 		hoverunit,idle,idle_mil=
 		fps%upcycle,{},g(bldgs,mx8,my8)
@@ -68,7 +68,7 @@ function _update()
 		end
 		end
 	end
-	
+
 	if loser then
 		poke"24365" --no mouse
 		if lclk then
@@ -80,7 +80,7 @@ function _update()
 		end
 		return
 	end
-	
+
 	res1.t+=0x.0888
 
 	if upc==0 then
@@ -91,7 +91,7 @@ function _update()
 				0 or mget(x,y))
 		end
 	end
-	
+
 	foreach(proj,function(p)
 		p.x,p.y,_,d=norm(p.to,p,.8)
 		if d<0.5 then
@@ -107,9 +107,9 @@ function _update()
 	if selx then
 		bldg_sel,hu_sel,enemy_sel=nil
 	end
-	
+
 	foreach(units,tick)
-	
+
 	if selx then
 		selection=hu_sel or
 			bldg_sel or
@@ -122,7 +122,7 @@ function _update()
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
-	
+
 	if (upc==0) ai_frame()
 end
 
@@ -194,25 +194,25 @@ function _draw()
 		?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
 		return
 	end
-	
+
 	unp"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
 	draw_map(mapw8,15) --fog
 	end
-	
+
 	_pal,pal,buttons=pal,max,{}
 	foreach(af,draw_unit)
 	pal=_pal
 	pal()
-	
+
 	fillp"23130.5"--▒
-	
+
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 	local i=x|y<<8
 	local brd=function(arr,col)
 			color(col)
-			camera(cx-x*8,cy-y*8)		
+			camera(cx-x*8,cy-y*8)
 			if (arr[i-1]) unl"-1,0,-1,7"
 			if (arr[i-256]) unl"0,-1,7,-1"
 			if (arr[i+256]) unl"0,8,7,8"
@@ -226,13 +226,13 @@ function _draw()
 		end
 	end
 	end
-	
+
 	camera(cx,cy)
 
 	if (selx) rect(unpack(selbox))
-	
+
 	fillp()
-	
+
 	if sel1 and sel1.rx then
 		spr(64+fps\5%3,
 			sel1.rx-2,sel1.ry-5)
@@ -251,7 +251,7 @@ function _draw()
 			rect(w-1,x-1,y,z,8)
 		end
 	end
-	
+
 	draw_menu()
 	camera()
 	pal() --allow pink for alert
@@ -275,7 +275,7 @@ function _draw()
 		sspr(rest_x,rest_y,fw,h)
 		pal()
 	end
-	
+
 	camera(-amx,-amy)
 	spr(
 		hovbtn and pset(unspl"-1,4,5")
@@ -1167,7 +1167,7 @@ function tick(u)
 		u.hp+=typ.hp-u.max_hp
 		u.max_hp=typ.hp
 	end
-	
+
 	u.onscr,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
@@ -1208,20 +1208,20 @@ function tick(u)
 		del(u.dead==60 and units,u)
 		return
 	end
-	
+
 	if not u.fire and
 		u.hp<typ.hp and
 		fps==0 then
 		u.hp+=heal[u.p].qty
 	end
-	
+
 	if int(u.r,{mx,my,mx,my},1)
 		and (not hoverunit or
 			hoverunit.hu
 	) then
 		hoverunit=u
 	end
-	
+
 	if selx and
 		g(viz,x8,y8,u.disc) then
 		u.sel=int(u.r,selbox,0)
@@ -1236,7 +1236,7 @@ function tick(u)
 			end
 		end
 	end
-	
+
 	if (u.const) return
 	if targ and targ.dead then
 		if u.st.t=="attack" then
@@ -1245,9 +1245,9 @@ function tick(u)
 			rest(u)
 		end
 	end
-	
+
 	if u.hu then
-		if typ.ant and 
+		if typ.ant and
 			u.st.rest then
 			if (u.st.idle) idle=u
 			u.st.idle=1
@@ -1255,7 +1255,7 @@ function tick(u)
 			idle_mil=u
 		end
 	end
-	
+
 	update_unit(u)
 	update_viz(u)
 
@@ -1271,7 +1271,7 @@ function tick(u)
 			c and {{x,y}},c
 		s(pos,x\4,y\4,1)
 	end
-	
+
 	if u.upd and u.st.agg and
 		typ.atk then
 		agg(u)
@@ -1306,7 +1306,7 @@ function update_viz(u)
 			end
 			vcache[i]=v
 		end
-		
+
 		foreach(v,function(t)
 			local k=k0+t
 			if k<maph8<<8 and k>=0 and
@@ -1351,17 +1351,17 @@ end
 
 function input()
 	cam()
-	
+
 	foreach(buttons,function(b)
 	if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
 	end
 	end)
-	
+
 	local cont,htile,axn=
 		action==0,
 		tile_as_unit(mx8,my8),action
-	
+
 	if lclk and hovbtn then
 		hovbtn.fn()
 		if (axn==action) action=0
@@ -1408,7 +1408,7 @@ function input()
 		end
 		return
 	end
-	
+
 	if btnp"5" and hoverunit and
 		hoverunit.typ.unit and
 		t()-selt<0.2 then
@@ -1421,7 +1421,7 @@ function input()
 		end)
 		return
 	end
-	
+
 	if rclk and sel1 and sel1.hu
 	then
 		if can_renew() then
@@ -1432,7 +1432,7 @@ function input()
 				hbld.exp=0,0
 			pay(renewcost,-1)
 			farm(sel1,hbld)
-		
+
 		elseif can_gather() then
 			sfx"0"
 			hilite(htile)
@@ -1441,22 +1441,22 @@ function input()
 			else
 				foreachsel(gather,mx8,my8)
 			end
-		
+
 		elseif can_build() then
 			sfx"0"
 			foreachsel(build,hoverunit)
 				hilite(hoverunit)
-			
+
 		elseif can_attack() then
 			sfx"4"
 			foreachsel(attack,hoverunit)
 			hilite(hoverunit)
-		
+
 		elseif can_drop() then
 			sfx"0"
 			foreachsel(drop,nil,hoverunit)
 			hilite(hoverunit)
-		
+
 		elseif sel1.typ.unit then
 			sfx"1"
 			mvg(selection,mx,my,axn==1)
@@ -1474,7 +1474,7 @@ function input()
 			cont=true
 		end
 	end
-	
+
 	if cont then
 		if btnp"5" and not selx then
 			selx,sely,selt=mx,my,t()
@@ -1541,7 +1541,7 @@ function draw_unit(u)
 	sspr(sx,sy,w,h,0,0,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
-	if not u.dead and hpi>=2 then			
+	if not u.dead and hpi>=2 then
 		if typ.fire then
 			spr(247+f/20,1,-3)
 		end
@@ -1588,7 +1588,7 @@ function update_unit(u)
 			mine_nxt_res(u,st.res)
 		end
 	end
-	
+
 	if wayp then
 	u.x,u.y,u.dir=norm(wayp[1],u,
 		st.spd or u.typ.spd)
@@ -1669,7 +1669,7 @@ function fight(u)
 	if typ.range then
 		if u.upd then
 			in_range=d<=typ.range and
-				g(viz,e.x8,e.y8)	
+				g(viz,e.x8,e.y8)
 		end
 		if in_range and
 			fps%typ.proj_freq==
@@ -2151,7 +2151,7 @@ function as(start,goal,gl)
 		sh=fr[index_of_min]
 		fr[index_of_min],sh.dead=fr[fr_len],true
 		fr_len-=1
-		
+
 		local p=sh.last
 		if p.k==goal.k then
 			return path(sh),1
@@ -2237,7 +2237,7 @@ function draw_port(
 		spr(costs.up+182,2,1)
 	end
 	pal()
-	
+
 	add(fn and buttons,{
 		r={x,y,x+10,y+8},
 		fn=fn,
@@ -2285,7 +2285,7 @@ portf=9]],24,107,nil,
 		)
 		return
 	end
-	
+
 	if sel1.typ.farm then
 		camera(-?sel1.cycles.."/"..sel_typ.cycles,unspl"45,111,4")
 		sspr(unspl"48,96,9,9,2,109")
@@ -2375,7 +2375,7 @@ function draw_menu()
 	if ai_debug then
 		?(res1.t\60)..":"..res1.t\1%60,80,122
 	end
-	
+
 	if numsel==1 then
 		sel_ports(-10)
 		if (sel1.hu) single()
@@ -2395,7 +2395,7 @@ function draw_menu()
 			end
 		})
 	end
-	
+
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
@@ -2416,9 +2416,9 @@ porto=2
 portf=13
 ]],20,108,nil,axn)
 	end
-	
+
 	camera(-mmx,-mmy)
-	
+
 	sspr(idle and 48 or 56,
 		unspl"105,8,6,11,14")
 	add(buttons,idle and {
@@ -2429,7 +2429,7 @@ portf=13
 			cam()
 		end
 	})
-	
+
 	sspr(idle_mil and 24 or 32,
 	unspl"114,8,6,0,14")
 	add(buttons,idle_mil and {
@@ -2438,7 +2438,7 @@ portf=13
 			sel_only(idle_mil)
 		end
 	})
-	
+
 	--minimap
 	pal(14,0)
 	sspr(unspl"109,72,19,12,0,0")
@@ -2457,9 +2457,9 @@ portf=13
 	)
 	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
-	
+
 	resbar()
-	
+
 	if hovbtn and hovbtn.costs and
 		res1.reqs|hovbtn.costs.breq==
 			res1.reqs then
@@ -2504,7 +2504,7 @@ function dmap_find(u,k)
 	end
 	return wayp,x,y
 end
-	
+
 function make_dmaps(r)
 	queue=split(parse[[r=r,g,b,d
 g=g,r,b,d
@@ -2560,14 +2560,14 @@ function make_dmap(k)
 		end
 		end
 	end
-	
+
 	local open={}
 	for i,t in next,dmap_st[k] do
 		if	surr(unpack(t)) then
 			add(open,t).k=i
 		end
 	end
-	
+
 	return {
 		k=k,
 		dmap={},
@@ -2591,7 +2591,7 @@ unl,ununit,unspr,
 	=
 	un(line),un(unit),un(spr),
 	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,1,0,30,1,1"
-	
+
 reskeys,f2res,resqty,
 	key2resf,rescol,
 	resoffx,resoffy,renewcost
@@ -2648,7 +2648,7 @@ function init()
 	reload()
 	music"1"
 	menuitem(3,"∧ resign",function() units[1].hp=0 end)
-		
+
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,ladys,
 		proj,bldgs,new_viz,dmap_st,
@@ -2742,7 +2742,7 @@ function ai_unit1(u)
 					move(u,280,64)
 				end
 			end
-			if u.st.res then			
+			if u.st.res then
 				add(miners,u)
 			elseif u.st.rest and
 				dmaps_ready then
@@ -2789,7 +2789,7 @@ end
 function ai_unit2(u)
 	if not u.hu then
 		if u.typ.bldg and
-			(u.hp<u.max_hp*0.75 or 
+			(u.hp<u.max_hp*0.75 or
 				u.const)
 		then
 			if not u.w then
