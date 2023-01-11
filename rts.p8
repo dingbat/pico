@@ -1260,8 +1260,7 @@ end
 
 function update_viz(u)
 	if u.hu and u.upd then
-		local k0,los=u.x8|u.y8<<8,
-			u.typ.los
+		local k0,los=u.k,u.typ.los
 		local xo,yo,l=
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
@@ -1620,7 +1619,7 @@ function agg(u)
 	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and not e.dead and
-			viz[e.x8|e.y8<<8] and
+			viz[e.k] and
 			d<=u.typ.los
 		then
 			if e.typ.bldg then
@@ -1818,6 +1817,7 @@ function u_rect(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8={x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8
+	k=x8|y8<<8
 	return _ENV
 end
 
