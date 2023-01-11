@@ -291,10 +291,6 @@ end
 -->8
 --units
 
-function unspl(...)
-	return unpack(split(...))
-end
-
 function parse(str,typ,tech,t)
 	local p1,p2={},{}
 	local obj={p1,p2,p2,
@@ -1041,37 +1037,6 @@ porty=80]],function()
 	end),
 }
 end
-
-dmg_mult=parse[[
-ant_vs_ant=1
-ant_vs_queen=0.7
-ant_vs_spd=0.8
-ant_vs_seige=1.5
-ant_vs_bld=0.5
-
-acid_vs_ant=1
-acid_vs_queen=0.6
-acid_vs_spd=1.5
-acid_vs_seige=0.7
-acid_vs_bld=0.25
-
-spd_vs_ant=1.5
-spd_vs_queen=1.1
-spd_vs_spd=1
-spd_vs_seige=1
-spd_vs_bld=0.1
-
-seige_vs_ant=0.9
-seige_vs_queen=3
-seige_vs_spd=0.7
-seige_vs_seige=1
-seige_vs_bld=12
-
-bld_vs_ant=1
-bld_vs_queen=0.75
-bld_vs_spd=1.25
-bld_vs_seige=0.9
-bld_vs_bld=0.1]]
 -->8
 --tick
 
@@ -1154,8 +1119,9 @@ function farm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
 		wayp=get_wayp(u,
-		f.x+rnd"6"-3,
-		f.y+rnd"6"-3),
+			f.x+rndspl"-3,-2,-1,0,1,2,3",
+			f.y+rndspl"-3,-2,-1,0,1,2,3"
+		),
 		farm=f
 	}
 end
@@ -1263,8 +1229,8 @@ function tick(u)
 		local x,y,c=u.x,u.y
 		while g(pos,x\4,y\4) and
 			not u.st.adj do
-			x+=rnd"4"-2
-			y+=rnd"4"-2
+			x+=rndspl"-2,-1,0,1,2"
+			y+=rndspl"-2,-1,0,1,2"
 			c=1
 		end
 		u.st.wayp,u.st.adj=
@@ -1806,14 +1772,6 @@ end
 -->8
 --utils
 
-function un(f)
-	return function(s) f(unspl(s)) end
-end
-
-function unp(s)
-	pal(split(s),false)
-end
-
 function sel_only(unit)
 	sfx"1"
 	foreachsel(function(u)
@@ -1998,8 +1956,8 @@ end
 
 function wander(u)
 	move(u,
-		u.x+rnd(split"-6,-5,-4,-3,3,4,5,6"),
-		u.y+rnd(split"-6,-5,-4,-3,3,4,5,6"),
+		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
+		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
 		true)
 end
 
@@ -2092,6 +2050,102 @@ function queue_prod(u,b)
 	end
 end
 -->8
+--pathfinding
+
+--dmaps
+
+function dmap_find(u,k)
+	local x,y,dmap,wayp,lowest=
+		u.x8,
+		u.y8,
+		dmaps[k],
+		{},9
+	while lowest>=1 do
+		local orig=max(1,g(dmap,x,y,9))
+		surr(x,y,function(t)
+			local w=(dmap[t.k] or 9)+t.d-1
+			if w<lowest then
+				lowest,x,y=w,unpack(t)
+			end
+		end,1,true)
+		if (lowest>=orig) return
+		add(wayp,{x*8+3,y*8+3})
+	end
+	return wayp,x,y
+end
+
+function make_dmaps(r)
+	queue,asc=split(parse[[r=r,g,b,d
+g=g,r,b,d
+b=b,g,r,d
+d=d,r,g,b]][r]),{}
+end
+
+function dmap()
+	local q=queue[1]
+	if q then
+		if #q==1 then
+		queue[1]=make_dmap(q)
+		else
+			dmapcc(q)
+			if q.c==9 then
+				dmaps[q.k]=
+					deli(queue,1).dmap
+			end
+		end
+	else
+		dmaps_ready=true
+	end
+end
+
+function dmapcc(q)
+	for i=1,#q.open do
+		if (i>20)	return
+		local p=deli(q.open)
+		q.dmap[p.k]=q.c
+		if q.c<8 then
+			surr(p[1],p[2],function(t)
+				if not q.closed[t.k] then
+					q.closed[t.k]=add(q.nxt,t)
+				end
+			end)
+		end
+	end
+	q.c+=1
+	q.open,q.nxt=q.nxt,{}
+end
+
+function make_dmap(k)
+	if not dmap_st[k] then
+		dmap_st[k]={}
+		for x=0,mapw8 do
+		for y=0,maph8 do
+			if
+				fget(mget(x,y),key2resf[k])
+			then
+				s(dmap_st[k],x,y,{x,y})
+			end
+		end
+		end
+	end
+
+	local open={}
+	for i,t in next,dmap_st[k] do
+		if	surr(unpack(t)) then
+			add(open,t).k=i
+		end
+	end
+
+	return {
+		k=k,
+		dmap={},
+		open=open,
+		c=0,
+		closed={},
+		nxt={},
+	}
+end
+
 --a*
 
 function nearest_acc(x,y,dx,dy)
@@ -2494,106 +2548,25 @@ function resbar()
 	pset(-3,121)
 end
 -->8
---dmaps
+--const
 
-function dmap_find(u,k)
-	local x,y,dmap,wayp,lowest=
-		u.x8,
-		u.y8,
-		dmaps[k],
-		{},9
-	while lowest>=1 do
-		local orig=max(1,g(dmap,x,y,9))
-		surr(x,y,function(t)
-			local w=(dmap[t.k] or 9)+t.d-1
-			if w<lowest then
-				lowest,x,y=w,unpack(t)
-			end
-		end,1,true)
-		if (lowest>=orig) return
-		add(wayp,{x*8+3,y*8+3})
-	end
-	return wayp,x,y
-end
-
-function make_dmaps(r)
-	queue,asc=split(parse[[r=r,g,b,d
-g=g,r,b,d
-b=b,g,r,d
-d=d,r,g,b]][r]),{}
-end
-
-function dmap()
-	local q=queue[1]
-	if q then
-		if #q==1 then
-		queue[1]=make_dmap(q)
-		else
-			dmapcc(q)
-			if q.c==9 then
-				dmaps[q.k]=
-					deli(queue,1).dmap
-			end
-		end
-	else
-		dmaps_ready=true
+function comp(f,g)
+	return function(...)
+		return f(g(...))
 	end
 end
 
-function dmapcc(q)
-	for i=1,#q.open do
-		if (i>20)	return
-		local p=deli(q.open)
-		q.dmap[p.k]=q.c
-		if q.c<8 then
-			surr(p[1],p[2],function(t)
-				if not q.closed[t.k] then
-					q.closed[t.k]=add(q.nxt,t)
-				end
-			end)
-		end
-	end
-
-	q.c+=1
-	q.open,q.nxt=q.nxt,{}
-end
-
-function make_dmap(k)
-	if not dmap_st[k] then
-		dmap_st[k]={}
-		for x=0,mapw8 do
-		for y=0,maph8 do
-			if
-				fget(mget(x,y),key2resf[k])
-			then
-				s(dmap_st[k],x,y,{x,y})
-			end
-		end
-		end
-	end
-
-	local open={}
-	for i,t in next,dmap_st[k] do
-		if	surr(unpack(t)) then
-			add(open,t).k=i
-		end
-	end
-
-	return {
-		k=k,
-		dmap={},
-		open=open,
-		c=0,
-		closed={},
-		nxt={},
-	}
-end
-
--->8
---init
+unp,rndspl,unspl=
+	comp(pal,split),
+	comp(rnd,split),
+	comp(unpack,split)
 
 unl,ununit,unspr,
---	_sfx,_music,sm,
+	reskeys,f2res,resqty,
+	key2resf,rescol,
+	resoffx,resoffy,renewcost,
+	dmg_mult,
+	
 	ai_diff,action,
 	mapw,maph,mmx,mmy,mmw,mmh,
 	mapw8,maph8,
@@ -2601,30 +2574,23 @@ unl,ununit,unspr,
 	mmwratio,
 	menu,cx,cy,cvx,cvy
 	=
-	un(line),un(unit),un(spr),
---	sfx,music,--add 3 to unspl
-	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
-
-reskeys,f2res,resqty,
-	key2resf,rescol,
-	resoffx,resoffy,renewcost
-	=
-split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t",parse[[
+	comp(line,unspl),
+	comp(unit,unspl),
+	comp(spr,unspl),
+	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t",
+parse[[
 6=r
 7=r
 11=g
-19=b
-]],parse[[
+19=b]],parse[[
 6=55
 7=45
 11=50
-19=40
-]],parse[[
+19=40]],parse[[
 r=2
 g=3
 b=4
-d=d
-]],parse[[
+d=d]],parse[[
 r=8
 g=11
 b=4
@@ -2646,17 +2612,48 @@ e33=13]],parse[[
 _=0
 r=16
 g=0
-b=16
-]],parse[[
+b=16]],parse[[
 _=0
 r=0
 g=4
-b=4
-]],parse[[
+b=4]],parse[[
 r=0
 g=0
 b=6
-breq=0]]
+breq=0]],parse[[
+ant_vs_ant=1
+ant_vs_queen=0.7
+ant_vs_spd=0.8
+ant_vs_seige=1.5
+ant_vs_bld=0.5
+
+acid_vs_ant=1
+acid_vs_queen=0.6
+acid_vs_spd=1.5
+acid_vs_seige=0.7
+acid_vs_bld=0.25
+
+spd_vs_ant=1.5
+spd_vs_queen=1.1
+spd_vs_spd=1
+spd_vs_seige=1
+spd_vs_bld=0.1
+
+seige_vs_ant=0.9
+seige_vs_queen=3
+seige_vs_spd=0.7
+seige_vs_seige=1
+seige_vs_bld=12
+
+bld_vs_ant=1
+bld_vs_queen=0.75
+bld_vs_spd=1.25
+bld_vs_seige=0.9
+bld_vs_bld=0.1]],
+	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+
+-->8
+--init
 
 function init()
 	poke(0x5f2d,3)
@@ -2874,7 +2871,7 @@ function ai_frame()
 	mvg(atksqd,unspl"48,40,1,1")
 end
 -->8
---save
+--save/load
 
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
