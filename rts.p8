@@ -51,10 +51,12 @@ function _update()
 
 	upc,pos,hbld,
 		hoverunit,idle,idle_mil=
-		fps%upcycle,{},g(bldgs,mx8,my8)
+		fps%upcycle,{},
+		g(bldgs,mx8,my8)
 
 	dmap()
 
+	--update minimap
 	if fps%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -1188,19 +1190,25 @@ function tick(u)
 		hoverunit=u
 	end
 
-	if selx and
-		g(viz,x8,y8,u.disc) then
-		u.sel=int(u.r,selbox,0)
-		if u.sel then
-			if not u.hu then
-				enemy_sel={u}
-			elseif typ.unit then
-				hu_sel=hu_sel or {}
-				add(hu_sel,u)
-			else
-				bldg_sel={u}
+	if g(viz,x8,y8,u.disc) then
+		if selx then
+			u.sel=int(u.r,selbox,0)
+			if u.sel then
+				if not u.hu then
+					enemy_sel={u}
+				elseif typ.unit then
+					hu_sel=hu_sel or {}
+					add(hu_sel,u)
+				else
+					bldg_sel={u}
+				end
 			end
 		end
+	 sset(
+	  109+u.x/mmwratio,
+	 	72+u.y/mmhratio,
+			u.sel and 9 or u.p
+		)
 	end
 
 	if (u.const) return
@@ -2506,15 +2514,6 @@ portf=13
 	--minimap
 	pal(14,0)
 	sspr(unspl"109,72,19,12,0,0")
-	foreach(units,function(u)
-		if g(viz,u.x8,u.y8,u.disc) then
-			pset(
-				u.x/mmwratio,
-				u.y/mmhratio,
-				u.sel and 9 or u.p
-			)
-		end
-	end)
 	camera(
 		-mmx-ceil(cx/mmwratio),
 		-mmy-ceil(cy/mmhratio)
