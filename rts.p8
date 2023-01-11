@@ -2589,7 +2589,7 @@ end
 --init
 
 unl,ununit,unspr,
-	_sfx,_music,sm,
+--	_sfx,_music,sm,
 	ai_diff,action,
 	mapw,maph,mmx,mmy,mmw,mmh,
 	mapw8,maph8,
@@ -2598,8 +2598,8 @@ unl,ununit,unspr,
 	menu,cx,cy,cvx,cvy
 	=
 	un(line),un(unit),un(spr),
-	sfx,music,
-	unspl"3,0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+--	sfx,music,--add 3 to unspl
+	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 reskeys,f2res,resqty,
 	key2resf,rescol,
@@ -2926,7 +2926,7 @@ menuitem(2,"◆ load pasted",function()
 	foreach(data,ununit)
 	ai_init()
 end)
---
+
 --function snd()
 --	_music"-1"
 --	sm%=3
