@@ -1210,7 +1210,7 @@ function tick(u)
 	end
 
 	if not u.fire and
-		u.hp<typ.hp and
+		u.hp<u.max_hp and
 		fps==0 then
 		u.hp+=heal[u.p].qty
 	end
@@ -2071,7 +2071,9 @@ fres=0]])
 		typ,x,y,p,hu,hp,const,
 			disc,id,prod=
 			ptyp,_x,_y,_p,_p==1,
-			_hp or max_hp,
+			--cap hp when loading game
+			--that had hp upgrades
+			min(_hp or 9999,max_hp),
 				tonum(_const),_disc==1,
 				_id,_typ.prod
 	end
@@ -2881,9 +2883,9 @@ menuitem(1,"⌂ save to clip",function()
 			x..","..
 			y..","..
 			p..","..
-			tostr(const)..","..
+			(const or "")..","..
 			max(disc)..","..
-			hp..",/"
+			hp.."/"
 	end)
 	for i=1,mapw8*maph8-1 do
 		s..=
