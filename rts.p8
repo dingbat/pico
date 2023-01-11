@@ -211,8 +211,8 @@ function _draw()
 
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
-	local i=x|y<<8
-	local brd=function(arr,col)
+		local i=x|y<<8
+		local brd=function(arr,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
 			if (arr[i-1]) unl"-1,0,-1,7"
@@ -281,7 +281,7 @@ function _draw()
 	camera(-amx,-amy)
 	spr(
 		hovbtn and pset(unspl"-1,4,5")
-		and 188 or
+			and 188 or
 		sel1 and sel1.hu and
 		((to_build or
 			can_build() or
@@ -312,7 +312,6 @@ function parse(str,typ,tech,t)
 end
 
 function init_typs()
-typs={}
 ant=parse[[
 idx=1
 spd=0.286
@@ -1299,18 +1298,17 @@ end
 
 function cam()
 	local b=btn()
-	--allow esdf
-	if (b>32) b>>=8
+	if (b>32) b>>=8 --allow esdf
 	cx,cy,amx,amy=
-	mid(0,
-		cx+(b&0x2)-(b&0x1)*2,
-		mapw-128
-	),
-	mid(0,
-		cy+(b&0x8)/4-(b&0x4)/2,
-		maph-(loser and 128 or 107)
-	),
-	mid(0,stat"32",126),
+		mid(0,
+			cx+(b&0x2)-(b&0x1)*2,
+			mapw-128
+		),
+		mid(0,
+			cy+(b&0x8)/4-(b&0x4)/2,
+			maph-(loser and 128 or 107)
+		),
+		mid(0,stat"32",126),
 		mid(-1,stat"33",126)
 
 	mx,my,hovbtn=amx+cx,amy+cy
@@ -1327,9 +1325,9 @@ function input()
 	cam()
 
 	foreach(buttons,function(b)
-	if int(b.r,{amx,amy,amx,amy},1) then
+		if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
-	end
+		end
 	end)
 
 	local cont,htile,axn=
@@ -2663,12 +2661,12 @@ function init()
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,ladys,
 		proj,bldgs,new_viz,dmap_st,
-		heal,
+		typs,heal,
 		res,loser,menu=
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		parse"qty=0",
+		{},parse"qty=0",
 		parse[[
 r=20
 g=10
@@ -2683,6 +2681,7 @@ techs=0
 t=0]]
 
 	init_typs()
+
 	ant1,res1,res2,
 	cx,cy,fps,selt,alert,
 	dmaps_ready=
