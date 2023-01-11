@@ -1401,7 +1401,7 @@ function input()
 				to_build.y+to_build.typ.h\2,
 				unspl"1,1,1")
 			foreachsel(build,b)
-			pay(to_build,-1)
+			pay(to_build,-1,res1)
 			b.cost,to_build,selx=to_build
 		end
 		return
@@ -1428,7 +1428,7 @@ function input()
 			hbld.sproff,
 				hbld.cycles,
 				hbld.exp=0,0
-			pay(renewcost,-1)
+			pay(renewcost,-1,res1)
 			farm(sel1,hbld)
 
 		elseif can_gather() then
@@ -1855,8 +1855,7 @@ function u_rect(_ENV)
 	return _ENV
 end
 
-function can_pay(costs,_p)
-	local _ENV=res[_p or 1]
+function can_pay(costs,_ENV)
 	return r>=costs.r and
 		g>=costs.g and
 		b>=costs.b and
@@ -1865,13 +1864,12 @@ function can_pay(costs,_p)
 		and reqs|costs.breq==reqs
 end
 
-function pay(costs,dir,p)
-	local r=res[p or 1]
-	foreach(split"r,g,b",function(k)
-		r[k]+=costs[k]*dir
-	end)
+function pay(costs,dir,_ENV)
+	r+=costs.r*dir
+	g+=costs.g*dir
+	b+=costs.b*dir
 	if costs.p then
-		r.p-=dir
+		p-=dir
 	end
 end
 
@@ -1899,8 +1897,8 @@ function surr(x,y,fn,n,ig_acc)
 			if fn then
 				fn{
 					xx,yy,
-				d=dx&dy!=0 and 1.4 or 1,
-				k=xx|yy<<8
+					d=dx&dy!=0 and 1.4 or 1,
+					k=xx|yy<<8
 				}
 			end
 		end
@@ -2048,7 +2046,7 @@ function can_renew(t)
 		hbld.exp then
 		print_res(renewcost,10,2)
 		rect(unspl"8,0,18,8,4")
-		return	can_pay(renewcost) or t
+		return	can_pay(renewcost,res1) or t
 	end
 end
 
@@ -2081,7 +2079,7 @@ fres=0]])
 end
 
 function queue_prod(u,b)
-	pay(b,-1,u.p)
+	pay(b,-1,res[u.p])
 	if u.q then
 		u.q.qty+=1
 	else
@@ -2212,7 +2210,7 @@ function draw_port(
 	typ,x,y,costs,fn,r,bg,fg,u)
 	camera(-x,-y)
 	local nopay,axnsel=
-		costs and not can_pay(costs),
+		costs and not can_pay(costs,res1),
 		typ.portf and action>0
 	rect(0,0,10,9,
 		u and u.p or
@@ -2277,7 +2275,7 @@ porty=72
 porto=8
 portf=9]],24,107,nil,
 			function()
-				pay(sel1.cost,1)
+				pay(sel1.cost,1,res1)
 				sel1.hp=0
 			end,sel1.const/sel_typ.const,
 			5,12
@@ -2298,7 +2296,7 @@ portf=9]],24,107,nil,
 				106+i\4*11,
 				b,
 				function()
-					if can_pay(b) and (
+					if can_pay(b,res1) and (
 						not q or
 						q.b==b and q.qty<9) then
 						if b.typ.bldg then
@@ -2324,7 +2322,7 @@ portf=9]],24,107,nil,
 				and 20,
 			107,nil,
 			function()
-				b.done=pay(b,1)
+				b.done=pay(b,1,res1)
 				if q.qty==1 then
 					sel1.q=nil
 				else
@@ -2781,7 +2779,7 @@ end
 function ai_prod(u)
 	local p=u.prod[u.lastp]
 	if not u.q and nohold(p) and
-		can_pay(p,2) then
+		can_pay(p,res2) then
 		queue_prod(u,p)
 		u.lastp%=u.typ.units
 		u.lastp+=1
@@ -2829,8 +2827,8 @@ function ai_bld(i)
 	if not g(bldgs,x,y) then
 		local b=ant.prod[pid]
 		if res2.tot>=p then
-			if can_pay(b,2) then
-				pay(b,-1,2)
+			if can_pay(b,res2) then
+				pay(b,-1,res2)
 				unit(b.typ,
 					x*8+b.typ.w/2,
 					y*8+b.typ.h/2,
