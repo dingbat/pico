@@ -4,6 +4,8 @@ __lua__
 --age of ants
 --eeooty (dan h)
 
+music(0,2000)
+
 function draw_map(o,y)
 	camera(cx%8,cy%8)
 	map(cx/8+o,cy/8,0,0,17,y)
@@ -2108,7 +2110,7 @@ end
 function get_wayp(u,x,y,tol)
 	if u.typ.unit then
 		local dest,dest_d=
-			nearest_acc(x,y,x,y)
+			nearest_acc(x,y,x,y)	
 		local wayp,exists=as(
 			nearest_acc(u.x,u.y,x,y),
 			dest)
@@ -2122,20 +2124,28 @@ function get_wayp(u,x,y,tol)
 end
 
 --based on a* by morgan3d
-function as(start,goal,gl)
+function as(start,goal)
+	local k=start.k|goal.k>>16
+	local c=asc[k] --cache
+	if c then
+		--pk/upk for new table
+		return pack(unpack(c)),c.e
+	end
+
 	local sh,best_table,f={
 		last=start,
 		cfs=0,
 		ctg=32767
 	},{},{}
 	best_table[start.k]=sh
-	function path(s)
+	function path(s,e)
 		while s.last!=start do
 			add(f,{s.last[1]*8+4,
 				s.last[2]*8+4},1)
 			s=best_table[s.prev.k]
 		end
-		return f
+		f.e,asc[k]=e,f
+		return f,e
 	end
 	local fr,fr_len,closest=
 		{sh},1,sh
@@ -2151,7 +2161,7 @@ function as(start,goal,gl)
 
 		local p=sh.last
 		if p.k==goal.k then
-			return path(sh),1
+			return path(sh,1)
 		end
 		surr(p[1],p[2],function(n)
 			local old_best,ncfs=
@@ -2503,10 +2513,10 @@ function dmap_find(u,k)
 end
 
 function make_dmaps(r)
-	queue=split(parse[[r=r,g,b,d
+	queue,asc=split(parse[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
-d=d,r,g,b]][r])
+d=d,r,g,b]][r]),{}
 end
 
 function dmap()
@@ -2916,20 +2926,20 @@ menuitem(2,"◆ load pasted",function()
 	foreach(data,ununit)
 	ai_init()
 end)
-
-function snd()
-	_music"-1"
-	sm%=3
-	sm+=1
-	sfx,music=
-		pack(_sfx,max,_sfx)[sm],
-		pack(_music,_music,max)[sm]
-	music(max(menu),1000)
-	menuitem(5,
-		split"♪ music+sfx,♪ music only,♪ sfx only"[sm],
-		snd)
-end
-snd()
+--
+--function snd()
+--	_music"-1"
+--	sm%=3
+--	sm+=1
+--	sfx,music=
+--		pack(_sfx,max,_sfx)[sm],
+--		pack(_music,_music,max)[sm]
+--	music(max(menu),1000)
+--	menuitem(5,
+--		split"♪ music+sfx,♪ music only,♪ sfx only"[sm],
+--		snd)
+--end
+--snd()
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000011000000010100000000000110001100000000000101000000000000000000
