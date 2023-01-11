@@ -18,7 +18,7 @@ function _update()
 		btn"5",btn"4"
 
 	if menu then
-		unp"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
+		pspl"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
 		cx+=cvx
 		cy+=cvy
 		if (cx%256==0) cvx*=-1
@@ -132,12 +132,12 @@ function _draw()
 		camera()
 
 		local x=64+t()\0.5%2*16
-		unp"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
+		pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
 		sspr(x,unspl"0,16,8,25,28,32,16")
 		sspr(x,unspl"0,16,8,74,28,32,16,1")
-		unp"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
+		pspl"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
 		sspr(x,unspl"0,16,8,25,27,32,16")
-		unp"2"
+		pspl"2"
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
 		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcj\-h\f0◀\-z\-p▶\^jcj\|f\f6\-h◀\-z\-p▶\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
@@ -186,7 +186,7 @@ function _draw()
 		line(
 			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
 			-2,unspl"80,88,80,9")
-		unp"1,0"
+		pspl"1,0"
 		sspr(64+
 			pack(48,fps\5%3*16)[loser],
 			unspl"0,16,8,14,90,32,16")
@@ -195,7 +195,7 @@ function _draw()
 		return
 	end
 
-	unp"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
+	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
 	draw_map(mapw8,15) --fog
 	end
@@ -234,7 +234,7 @@ function _draw()
 	fillp()
 
 	if sel1 and sel1.rx then
-		spr(64+fps\5%3,
+		spr(65+fps\5%3,
 			sel1.rx-2,sel1.ry-5)
 	end
 
@@ -259,7 +259,7 @@ function _draw()
 	if to_build then
 		camera(cx-to_build.x,
 			cy-to_build.y)
-		unp(buildable() or
+		pspl(buildable() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
@@ -2293,7 +2293,7 @@ function draw_port(
 		axnsel and 9 or
 		typ.portf or 6
 	)
-	unp(nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
+	pspl(nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,6,5")
 	pal(14,0)
 	pal(costs or 6,7)
 	sspr(typ.portx,typ.porty,
@@ -2401,13 +2401,12 @@ portf=9]],24,107,nil,
 		)
 	end
 	if sel1.typ.units then
-		unp"13"
 		draw_port(parse[[
 portx=0
 porty=32
 porto=15
 portf=15
-]],42,107,nil,axn)
+]],42,108,nil,axn)
 	end
 end
 
@@ -2425,7 +2424,7 @@ function draw_menu()
 			"17,24,61,26" or
 			"17,17,68,26") or "102,26")
 	do
-		unp(i%2!=0 and "1,2,3,15")
+		pspl(i%2!=0 and "1,2,3,15")
 		camera(x)
 		unspr"129,0,104"
 		spr(129,sec-8,104)
@@ -2556,7 +2555,7 @@ function comp(f,g)
 	end
 end
 
-unp,rndspl,unspl,spldeli=
+pspl,rndspl,unspl,spldeli=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
@@ -2672,9 +2671,9 @@ function init()
 		{},{},{},{d={}},
 		parse"qty=0",
 		parse[[
-r=120
-g=110
-b=120
+r=20
+g=10
+b=20
 p=4
 pl=10
 tot=4
@@ -2976,13 +2975,13 @@ d00001100d0000000dd000000000000000310011003100110d0000000000000000d0000000000000
 00000000000000000000000000000000000000000000000000513113113113500011311311311311050500131131131100113105050113113311311311350505
 00000000000000000000000000000000000000000000000005005050505050000050505050505050000000505050505000505000000050500050505050500000
 00000000000000000000000000000000ffffffffffffffffffffffffffffffff1dd11111dd1111dd1133311111333311ffffffffffffffffffffffffffffffff
-00488000004800800040088000000000ffff6fffffff6ffffffffffffffffdff1511151111121211133831111b333b31ffffffffffffffffffffffffffffffff
-00488880004888800048888000000000fffffffffffff5ffff2fffffffffd6df11545111115141513bfbfb1133bbbf33ffffffffffffffffffffffffffffffff
-00488880004888800048888000000000f6fffffff6f5fffff292fffffffffd3f111411111115451133bbb33333bbbb83ffffffffffffffffffffafffffffffff
-00400880004088000048800000000000ffffff6ffffff5fff32fffffffffff3f115451111111411133bbb33333bbbf33ffafffffff7fffffffffffffffffffff
-00400000004000000040000000000000ffffffffff5fff6ff3ffffffffafffff151415111115451133bbb3333b333b11ffffffffffffffffffffffffffffffff
-01410000014100000141000000000000fff6fffffff6ffffffffafffffffffff11212111115111511b333b3113333111ffffffffffffffffffffffff7fffffff
-01110000011100000111000000000000ffffffffffffffffffffffffffffffffdd1111dd11111dd11133331111333111ffffffffffffffffffffffffffffffff
+00488000004880000048008000400880ffff6fffffff6ffffffffffffffffdff1511151111121211133831111b333b31ffffffffffffffffffffffffffffffff
+00488880004888800048888000488880fffffffffffff5ffff2fffffffffd6df11545111115141513bfbfb1133bbbf33ffffffffffffffffffffffffffffffff
+00488880004888800048888000488880f6fffffff6f5fffff292fffffffffd3f111411111115451133bbb33333bbbb83ffffffffffffffffffffafffffffffff
+00400880004008800040880000488000ffffff6ffffff5fff32fffffffffff3f115451111111411133bbb33333bbbf33ffafffffff7fffffffffffffffffffff
+00400000004000000040000000400000ffffffffff5fff6ff3ffffffffafffff151415111115451133bbb3333b333b11ffffffffffffffffffffffffffffffff
+00400000014100000141000001410000fff6fffffff6ffffffffafffffffffff11212111115111511b333b3113333111ffffffffffffffffffffffff7fffffff
+00000000011100000111000001110000ffffffffffffffffffffffffffffffffdd1111dd11111dd11133331111333111ffffffffffffffffffffffffffffffff
 fff88fffffffff8fffffffffffffbbbfffffffffffffffffffffffffffffffffffffffffffffffff1111d111111d1111ffffffffffffffffffffffffffffffff
 f887888ff8fff888f33fff33fffbb3bfff444fffffff44fffffffffffffffff6776fff766fffffff1dd1111111111dd1ffffffffffffffffffffffffffffffff
 87887878888ff888f3bff3bbffbb3bbfff444ffff4f4444ffffffffffffff7666cc666cc667fffff1111111cc1111111fffffffffffffff7ffffffffffffffaf
