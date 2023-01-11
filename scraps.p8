@@ -250,13 +250,13 @@ dirty token savers
 ============
 - remove `.."_vs_"..` (2 tok)
 - organic endscreen
-- pal(14,0) => 	p"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
+- pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert 0532b54 (... hack, 2 tokens)
 - revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
 - revert bf60644 (lady wandering, 25 tok)
 - remove sfx from save (2 tok)
-- hbanner (11 tok)
+- hbanner toggle (11 tok)
 - 886adb3 msuic/sfx toggle (45 tok)
 -	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
 

@@ -1204,9 +1204,9 @@ function tick(u)
 				end
 			end
 		end
-	 sset(
-	  109+u.x/mmwratio,
-	 	72+u.y/mmhratio,
+		sset(
+			109+u.x/mmwratio,
+			72+u.y/mmhratio,
 			u.sel and 9 or u.p
 		)
 	end
@@ -2503,7 +2503,7 @@ portf=13
 	})
 
 	sspr(idle_mil and 24 or 32,
-	unspl"114,8,6,0,14")
+		unspl"114,8,6,0,14")
 	add(buttons,idle_mil and {
 		r=split"106,121,113,128",
 		fn=function()
