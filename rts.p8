@@ -49,10 +49,11 @@ function _update()
 			mx8*8,my8*8
 	end
 
-	upc,pos,hbld,
+	upc,pos,hbld,t6,
 		hoverunit,idle,idle_mil=
 		fps%upcycle,{},
-		g(bldgs,mx8,my8)
+		g(bldgs,mx8,my8),
+		t()%6<1
 
 	dmap()
 
@@ -1252,8 +1253,9 @@ function tick(u)
 	if u.st.t=="attack" then
 		fight(u)
 	end
+	
 	if typ.lady and u.st.rest and
-		t()%6<1 then
+		t6 then
 		wander(u)
 	end
 end
@@ -2853,7 +2855,8 @@ function ai_bld(i)
 end
 
 function ai_frame()
-	inv,miners,ants,uhold=0,{},0
+	if (t6) inv=0
+	miners,ants,uhold={},0
 
 	foreach(units,ai_unit1)
 	foreach(units,ai_unit2)
