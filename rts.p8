@@ -1154,8 +1154,8 @@ function farm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
 		wayp=get_wayp(u,
-		f.x-3+rnd"6",
-		f.y-3+rnd"6"),
+		f.x+rnd"6"-3,
+		f.y+rnd"6"-3),
 		farm=f
 	}
 end
@@ -1444,8 +1444,8 @@ function input()
 
 		elseif can_build() then
 			sfx"0"
-			foreachsel(build,hoverunit)
-				hilite(hoverunit)
+			foreachsel(build,hbld)
+			hilite(hbld)
 
 		elseif can_attack() then
 			sfx"4"
@@ -1998,8 +1998,9 @@ end
 
 function wander(u)
 	move(u,
-		u.x+rnd"6"*2-6,
-		u.y+rnd"6"*2-6,true)
+		u.x+rnd(split"-6,-5,-4,-3,3,4,5,6"),
+		u.y+rnd(split"-6,-5,-4,-3,3,4,5,6"),
+		true)
 end
 
 function dmg(from_typ,to)
