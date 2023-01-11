@@ -186,7 +186,7 @@ function _draw()
 		unl"86,87,125,87"
 		unl"25,108,105,108"
 		line(
-			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff+1]
+			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff]
 			-3,unspl"80,8,80,9")
 		line(
 			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
@@ -361,7 +361,7 @@ dead_y=12
 portx=0
 porty=72
 dir=1
-unit=1
+unit=2
 carry=6
 ant=1
 tmap=-1]]
@@ -1103,7 +1103,7 @@ function drop(u,nxt_res,dropu)
 	u.st={
 		t="drop",
 		wayp=wayp,
-		nxt=nxt_res,
+		res=nxt_res,
 		target=dropu or
 			tile_as_unit(x,y),
 	}
@@ -1530,7 +1530,7 @@ end
 function update_unit(u)
 	local st=u.st
 	local t,wayp,nxt,targ=
-		st.t,st.wayp,st.nxt,st.target
+		st.t,st.wayp,st.res,st.target
 	if u.q and fps%15==u.q.fps%15 then
 		produce(u)
 	end
@@ -2701,7 +2701,7 @@ end
 
 function new_game()
 	init()
-	res2.diff=ai_diff
+	res2.diff=ai_diff+1
 	foreach(split([[7,55,44,1
 7,335,188,2
 14,65,150,3
@@ -2731,28 +2731,55 @@ end
 --]]
 
 function ai_init()
-	res_alloc,
+	bmins,food,
 		defsqd,offsqd,atksqd,
-		ant[2].gr,nxt_res=
-		split"r,b,g,r,b",
+		ant[2].gr=
+		1.25,true,
 		{},{},{},
-		2-res2.diff/2,1
+		4-res2.diff
 
 	make_dmaps"d"
 end
 
+function ai_frame()
+	if (t6) inv=0
+	miners,utyps,bants,uhold,adj=
+		{},{},0
+
+	foreach(units,ai_unit1)
+	tostr[[[[]]
+	if fps==0 then
+		printh("b:"..bants..", g:"..(#miners-bants),"log")
+	end
+	--]]
+	foreach(units,ai_unit2)
+
+	if count(utyps,12)>=7 then
+		bmins=1.4
+	end
+	
+	for i=0,res2.boi,2 do
+		if inv==0 then
+			ai_bld(i)
+		end
+	end
+--	if #offsqd>=14 and inv==0 then
+--		atksqd,offsqd=offsqd,{}
+--	end
+	mvg(atksqd,unspl"48,40,1,1")
+end
+
 function ai_unit1(u)
 	if u.p==2 then
+		add(utyps,u.typ.idx)
 		if u.typ.ant then
-			ants+=1
-			if u.st.res=="r" and
+			local r=u.st.res
+			if r=="r" and
 				--41,24
 				not dmaps.r[6185] then
 				drop(u)
-				res_alloc=split"b,g,b,b,b,g"
 			end
-			if u.st.rest and
-				u.st.res=="b" then
+			if u.st.rest and r=="b" then
 				if u.y>168 and
 					--42,7
 					not dmaps.b[6954] then
@@ -2764,17 +2791,17 @@ function ai_unit1(u)
 					move(u,280,64)
 				end
 			end
-			if u.st.res then
-				add(miners,u)
+			if r then
+				if (r!="r") add(miners,u)
+				if (r=="b") bants+=1
 			elseif u.st.rest and
 				dmaps_ready then
 				mine_nxt_res(u,
-				res_alloc[nxt_res])
-				nxt_res%=#res_alloc
-					nxt_res+=1
+					food and "r" or "b")
+				food=not food
 			end
-		elseif u.typ.atk and
-			u.typ.unit then
+		--excludes ants
+		elseif u.typ.unit==1 then
 			if u.dead then
 				del(u.sqd,u)
 			elseif not u.sqd then
@@ -2784,6 +2811,52 @@ function ai_unit1(u)
 				add(u.sqd,u)
 			end
 		end
+	end
+end
+
+function ai_unit2(u)
+	if not u.hu then
+		local bal=#miners\bmins-bants
+		local r=bal>0 and "b" or
+			bal<0 and "g"
+		if u.st.res!=r and r and
+			count(miners,u)>0 and
+			not adj and not u.res then
+			adj=1
+			tostr[[[[]]
+			printh("bal="..bal.." ("..#miners.."\\"..bmins.."-"..bants.."),"..u.st.res.." to "..r,"log")
+			--]]
+			mine_nxt_res(u,r)
+		end
+		if u.typ.bldg and
+			u.hp<u.max_hp*0.75 or
+			u.const
+		then
+			if not u.w then
+				u.w=deli(miners)
+				if (u.w) build(u.w,u)
+			end
+		elseif u.typ.farm and
+			not u.const and
+			not u.farmer then
+			local w=deli(miners)
+			if (w) farm(w,u)
+		elseif u.typ.queen then
+			if count(utyps,1)<res2.diff*12 then
+				ai_prod(u)
+			end
+		elseif u.typ.units and
+			res2.p<res2.diff*26 then
+			ai_prod(u)
+		end
+		if u.w and
+			u.w.st.t!="build" then
+			u.w=nil
+		end
+	elseif u.st.t=="attack" and
+		u.st.active and u.x>232 then
+		inv=1
+		mvg(defsqd,u.x,u.y,1,1)
 	end
 end
 
@@ -2808,39 +2881,6 @@ function ai_prod(u)
 	end
 end
 
-function ai_unit2(u)
-	if not u.hu then
-		if u.typ.bldg and
-			(u.hp<u.max_hp*0.75 or
-				u.const)
-		then
-			if not u.w then
-				u.w=deli(miners)
-				if (u.w) build(u.w,u)
-			end
-		elseif u.typ.farm and
-			not u.const and
-			not u.farmer then
-			local w=deli(miners)
-			if (w) farm(w,u)
-		elseif u.typ.queen then
-			if ants<30 then
-				ai_prod(u)
-			end
-		elseif u.typ.units then
-			ai_prod(u)
-		end
-		if u.w and
-			u.w.st.t!="build" then
-			u.w=nil
-		end
-	elseif u.st.t=="attack" and
-		u.st.active and u.x>232 then
-		inv=1
-		mvg(defsqd,u.x,u.y,1,1)
-	end
-end
-
 function ai_bld(i)
 	local off=0x2060+i%32+i\32*128
 	local p,pid=peek(off,2)
@@ -2862,24 +2902,6 @@ function ai_bld(i)
 			end
 		end
 	end
-end
-
-function ai_frame()
-	if (t6) inv=0
-	miners,ants,uhold={},0
-
-	foreach(units,ai_unit1)
-	foreach(units,ai_unit2)
-
-	for i=0,res2.boi,2 do
-		if inv==0 then
-			ai_bld(i)
-		end
-	end
-	if #offsqd>=14 and inv==0 then
-		atksqd,offsqd=offsqd,{}
-	end
-	mvg(atksqd,unspl"48,40,1,1")
 end
 -->8
 --save/load
