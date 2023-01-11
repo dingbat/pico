@@ -29,7 +29,9 @@ function _update()
 		end
 		if lclk then
 			new_game()
+			tostr[[[[]]
 			if (ai_debug)_update=_update60
+			--]]
 		else
 			return
 		end
@@ -2257,7 +2259,9 @@ end
 --menu
 
 function print_res(r,x,y,zero)
+	tostr[[[[]]
 	local res1=ai_debug and res2 or res1
+	--]]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2444,10 +2448,6 @@ function draw_menu()
 	end
 	camera()
 
-	if ai_debug then
-		?(res1.t\60)..":"..res1.t\1%60,80,122
-	end
-
 	if numsel==1 then
 		sel_ports(-10)
 		if (sel1.hu) single()
@@ -2488,6 +2488,12 @@ porto=2
 portf=13
 ]],20,108,nil,axn)
 	end
+	
+	tostr[[[[]]
+	if ai_debug then
+		?(res1.t\60)..":"..res1.t\1%60,80,122
+	end
+	--]]
 
 	camera(-mmx,-mmy)
 
@@ -2510,7 +2516,7 @@ portf=13
 			sel_only(idle_mil)
 		end
 	})
-
+	
 	--minimap
 	pal(14,0)
 	sspr(unspl"109,72,19,12,0,0")
@@ -2522,7 +2528,7 @@ portf=13
 	rect(unspl"-1,-1,7,7,10")
 
 	resbar()
-
+	
 	if hovbtn and hovbtn.costs and
 		res1.reqs|hovbtn.costs.breq==
 			res1.reqs then
@@ -2539,7 +2545,9 @@ end
 
 function resbar()
 	camera()
+	tostr[[[[]]
 	local res1=ai_debug and res2 or res1
+	--]]
 	camera(-print_res(res1,
 		unspl"1,122,2"))
 	unl"-4,120,-128,120,5"
@@ -2715,10 +2723,12 @@ end
 -->8
 --ai
 
---ai_debug=true
+tostr[[[[]]
+ai_debug=true
 if ai_debug then
 	_update60=_update
 end
+--]]
 
 function ai_init()
 	res_alloc,
@@ -2928,20 +2938,6 @@ menuitem(2,"◆ load pasted",function()
 	foreach(data,ununit)
 	ai_init()
 end)
-
---function snd()
---	_music"-1"
---	sm%=3
---	sm+=1
---	sfx,music=
---		pack(_sfx,max,_sfx)[sm],
---		pack(_music,_music,max)[sm]
---	music(max(menu),1000)
---	menuitem(5,
---		split"♪ music+sfx,♪ music only,♪ sfx only"[sm],
---		snd)
---end
---snd()
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d000000000000000000000011000000010100000000000110001100000000000101000000000000000000
