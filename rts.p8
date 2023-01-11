@@ -1260,7 +1260,7 @@ end
 
 function update_viz(u)
 	if u.hu and u.upd then
-		local k0,los=u.k,u.typ.los
+		local los=u.typ.los
 		local xo,yo,l=
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
@@ -1280,7 +1280,7 @@ function update_viz(u)
 		end
 
 		foreach(v,function(t)
-			local k=k0+t
+			local k=u.k+t
 			if k<maph8<<8 and k>=0 and
 				k%256<mapw8 then
 				if bldgs[k] then
