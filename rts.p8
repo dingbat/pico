@@ -2556,10 +2556,11 @@ function comp(f,g)
 	end
 end
 
-unp,rndspl,unspl=
+unp,rndspl,unspl,spldeli=
 	comp(pal,split),
 	comp(rnd,split),
-	comp(unpack,split)
+	comp(unpack,split),
+	comp(split,deli)
 
 unl,ununit,unspr,
 	reskeys,f2res,resqty,
@@ -2905,16 +2906,16 @@ end)
 menuitem(2,"◆ load pasted",function()
 	init()
 	local data=split(stat"4","/")
-	local r=split(deli(data))
+	local r=spldeli(data)
 	for i,k in inext,reskeys do
 		i*=2
 		res1[k],res2[k]=r[i-1],r[i]
 	end
-	foreach(split(deli(data)),function(k)
+	foreach(spldeli(data),function(k)
 		--k can be "" (trlng ,)
 		exp[k]=tonum(k)
 	end)
-	for i,t in inext,split(deli(data)) do
+	for i,t in inext,spldeli(data) do
 		mset(i%mapw8,i/mapw8,t)
 	end
 	foreach(typs,function(b)

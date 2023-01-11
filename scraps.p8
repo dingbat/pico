@@ -266,6 +266,10 @@ memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
 sfx/music toggle (47) (45 if combine assignment and smd is unspl'd)
 
+--	_sfx,_music,sm,
+--	sfx,music,--add 3 to unspl
+
+
 sm,_sfx,_music=3,sfx,music
 function snd()
 	_music"-1"
