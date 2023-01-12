@@ -2696,10 +2696,10 @@ t=0]]
 	cx,cy,fps,selt,alert=
 		ant.p1,res.p1,res[2],
 		--+7,+4 -64
-		split([[-9,-20,1
+		split([[-09,-20,1
 271,124,2
 -17,140,3
-279,4,4]],"\n"),
+279,004,4]],"\n"),
 		unspl"0,0,59,0,0"
 end
 
@@ -2877,7 +2877,7 @@ function ai_bld(i)
 		res2.boi==i
 	local p,pid=peek(off,2)
 	local x,y=peek(
-		off+res2.pos[5]*640,2)
+		off+res2.pos[9]*640,2)
 
 	if pid>6 then		
 		pid=curr and 
