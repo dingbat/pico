@@ -745,7 +745,7 @@ proj_freq=15
 atk_typ=bld
 def=bld
 
-w=15.9
+w=15
 fw=16
 h=16
 fh=16
@@ -2070,6 +2070,7 @@ function dmap_find(u,k)
 		u.y8,
 		dmaps[k],
 		{},9
+	if (not dmap) return
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
 		surr(x,y,function(t)
@@ -2103,8 +2104,6 @@ function dmap()
 					deli(queue,1).dmap
 			end
 		end
-	else
-		dmaps_ready=true
 	end
 end
 
@@ -2693,8 +2692,7 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,
-	cx,cy,fps,selt,alert,
-	dmaps_ready=
+	cx,cy,fps,selt,alert=
 		ant.p1,res.p1,res[2],
 		unspl"0,0,59,0,0"
 end
@@ -2731,12 +2729,12 @@ end
 --]]
 
 function ai_init()
-	bmins,food,
+	bmins,
 		defsqd,offsqd,atksqd,
 		ant[2].gr=
-		1.25,true,
+		1.25,
 		{},{},{},
-		4-res2.diff
+		5-res2.diff
 
 	make_dmaps"d"
 end
@@ -2747,11 +2745,7 @@ function ai_frame()
 		{},{},0
 
 	foreach(units,ai_unit1)
-	tostr[[[[]]
-	if fps==0 then
-		printh("b:"..bants..", g:"..(#miners-bants),"log")
-	end
-	--]]
+	bal=#miners\bmins-bants
 	foreach(units,ai_unit2)
 
 	if count(utyps,12)>=7 then
@@ -2763,9 +2757,9 @@ function ai_frame()
 			ai_bld(i)
 		end
 	end
---	if #offsqd>=14 and inv==0 then
---		atksqd,offsqd=offsqd,{}
---	end
+	if #offsqd>=14 and inv==0 then
+		atksqd,offsqd=offsqd,{}
+	end
 	mvg(atksqd,unspl"48,40,1,1")
 end
 
@@ -2774,31 +2768,32 @@ function ai_unit1(u)
 		add(utyps,u.typ.idx)
 		if u.typ.ant then
 			local r=u.st.res
-			if r=="r" and
+			if r=="r" then
 				--41,24
-				not dmaps.r[6185] then
-				drop(u)
-			end
-			if u.st.rest and r=="b" then
-				if u.y>168 and
-					--42,7
-					not dmaps.b[6954] then
-					move(u,352,64)
+				if not dmaps.r[6185] then
+					drop(u)
 				end
-				if u.x>288 and
-					--46,8
-					not dmaps.b[2094] then
-					move(u,280,64)
-				end
-			end
-			if r then
-				if (r!="r") add(miners,u)
-				if (r=="b") bants+=1
-			elseif u.st.rest and
-				dmaps_ready then
+			elseif r then
+				add(miners,u)
+			elseif u.st.rest then
 				mine_nxt_res(u,
-					food and "r" or "b")
-				food=not food
+					bgnxt and "b" or "r")
+				bgnxt=not bgnxt
+			end
+			if r=="b" then
+				bants+=1
+				if u.st.rest then
+					if u.y>168 and
+						--42,7
+						not dmaps.b[6954] then
+						move(u,352,64)
+					end
+					if u.x>288 and
+						--46,8
+						not dmaps.b[2094] then
+						move(u,280,64)
+					end
+				end
 			end
 		--excludes ants
 		elseif u.typ.unit==1 then
@@ -2816,16 +2811,12 @@ end
 
 function ai_unit2(u)
 	if not u.hu then
-		local bal=#miners\bmins-bants
 		local r=bal>0 and "b" or
 			bal<0 and "g"
 		if u.st.res!=r and r and
 			count(miners,u)>0 and
-			not adj and not u.res then
-			adj=1
-			tostr[[[[]]
-			printh("bal="..bal.." ("..#miners.."\\"..bmins.."-"..bants.."),"..u.st.res.." to "..r,"log")
-			--]]
+		 not u.res then
+			bal=0
 			mine_nxt_res(u,r)
 		end
 		if u.typ.bldg and
