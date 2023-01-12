@@ -853,25 +853,6 @@ porty=80]],function(_ENV)
 	spd=0.357
 	gr-=0.5
 end,ant),
-	parse([[
-t=20
-r=15
-g=15
-b=0
-breq=32
-tmap=2
-idx=16]],parse[[
-portx=40
-porty=80]],function()
-	mound.p1.units=
-		add(mound.prod,parse([[
-t=8
-r=4
-g=0
-b=0
-p=
-breq=0]],ant))
-end,{}),
 }
 
 den.prod={
@@ -2737,17 +2718,23 @@ end
 --]]
 
 function ai_init()
-	bmins,defsqd,offsqd,atksqd=
-		1.25,{},{},{}
-
+	bmins,defsqd,offsqd,atksqd,
+		bspots,cx,cy=
+		1.25,{},{},{},
+		{{43,26}},unspl(res1.pos)
+	
 	make_dmaps"d"
-	cx,cy=unspl(res1.pos)
 end
 
 function ai_frame()
 	if (t6) inv=0
 	miners,ants,bants,uhold=
 		{},0,0
+
+	if dmaps.b and not g(dmaps.b,
+		unpack(bspots[1])) then
+		deli(bspots,1)
+	end
 
 	foreach(units,ai_unit1)
 	bal=#miners\bmins-bants
@@ -2771,8 +2758,7 @@ function ai_unit1(u)
 			ants+=1
 			local r=u.st.res
 			if r=="r" then
-				--41,24
-				if not dmaps.r[6185] then
+				if not dmaps.r[u.k] then
 					drop(u)
 				end
 			elseif r then
@@ -2784,18 +2770,9 @@ function ai_unit1(u)
 			end
 			if r=="b" then
 				bants+=1
---				if u.st.rest then
---					if u.y>168 and
---						--42,7
---						not dmaps.b[6954] then
---						move(u,352,64)
---					end
---					if u.x>288 and
---						--46,8
---						not dmaps.b[2094] then
---						move(u,280,64)
---					end
---				end
+				if not dmaps.b[u.k] then
+					move(u,unpack(bspots[1]))
+				end
 			end
 		--excludes ants
 		elseif u.typ.unit==1 then
@@ -2879,34 +2856,34 @@ function ai_bld(i)
 	local x,y=peek(
 		off+res2.pos[9]*640,2)
 	x*=8
-	y*=8 
+	y*=8
 	if pid>6 then
---		if pid>20 then
---			add(bspots,{x,y})
---		end
-		pid=curr and 
-			--create ladys
-			pid==10 and unit(14,x,y,3)
-			and res2.diff>=p
-			and typs[pid].tech(
-				typs[pid].techt[2])
-		
+		if curr then
+			xyz=1
+		 add(pid>20 and bspots,{x,y})
+			if (pid==10) unit(14,x,y,3)
+			if res2.diff>=p then
+				typs[pid].tech(
+					typs[pid].techt[2])
+			end
+			res2.boi+=2
+		end
 	elseif inv==g(bldgs,x,y,0) then
 		local b=ant.prod[pid]
 		if res2.tot>=p then
 			if can_pay(b,res2) then
-				pid=pay(b,-1,res2)
+				pay(b,-1,res2)
 				unit(b.typ,
 					x+b.typ.w/2,
 					y+b.typ.h/2,
 					2,0)
+				if curr then
+					res2.boi+=2
+				end
 			else
 				uhold=b
 			end
 		end
-	end
-	if curr and not pid then
-		res2.boi+=2
 	end
 end
 -->8
