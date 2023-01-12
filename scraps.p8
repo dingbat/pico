@@ -263,7 +263,6 @@ dirty token savers
 - remove sfx from save (2 tok)
 x hbanner toggle (11 tok)
 -	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
-- inv=0 in init() makes it so ladys are (1 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
