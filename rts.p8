@@ -2663,9 +2663,17 @@ bld_vs_bld=0.1]],
 
 function init()
 	poke(0x5f2d,3)
-	reload()
+	--allow chain-loading a custom
+	--map/bo (use #rts_loader)
+	if stat"6"=="custom" then
+		--0x2000,0x8000,0x1000
+		memcpy(unspl"8192,-32768,4096")
+	else
+		reload()
+	end
 	music(unspl"0,0,7")
-	menuitem(3,"∧ resign",function() units[1].hp=0 end)
+	menuitem(3,"∧ resign",
+		function() units[1].hp=0 end)
 
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,ladys,
