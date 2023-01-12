@@ -2561,7 +2561,7 @@ pspl,rndspl,unspl,spldeli=
 	comp(unpack,split),
 	comp(split,deli)
 
-unl,ununit,unspr,
+unl,unspr,
 	reskeys,f2res,resqty,
 	key2resf,rescol,
 	resoffx,resoffy,renewcost,
@@ -2575,7 +2575,6 @@ unl,ununit,unspr,
 	menu,cx,cy,cvx,cvy
 	=
 	comp(line,unspl),
-	comp(unit,unspl),
 	comp(spr,unspl),
 	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t,pos",
 parse[[
@@ -2711,7 +2710,6 @@ function new_game()
 		rnd(startpos),
 		ai_diff+1
 
---8,268,169,2
 	foreach(split([[7,64,64,1
 7,64,64,2
 1,49,60,1
@@ -2882,13 +2880,17 @@ function ai_bld(i)
 	local p,pid=peek(off,2)
 	local x,y=peek(
 		off+res2.pos[5]*640,2)
+
 	if pid==0 then
+		--create ladys
 	 pid=curr and
 	 	not unit(14,x,y,3)
+
 	elseif pid>6 then
 		pid=curr and res2.diff>=p and
 			typs[pid].tech(
 				typs[pid].techt[2])
+
 	else
 		if not g(bldgs,x,y) then
 			local b=ant.prod[pid]
@@ -2963,7 +2965,7 @@ menuitem(2,"◆ load pasted",function()
 				not b.up
 		end
 	end)
-	foreach(data,ununit)
+	foreach(data,comp(unit,unspl))
 	ai_init()
 end)
 __gfx__
