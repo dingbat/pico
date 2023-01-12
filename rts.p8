@@ -2693,14 +2693,14 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,startpos,
-	cx,cy,fps,selt,alert,inv=
+	cx,cy,fps,selt,alert=
 		ant.p1,res.p1,res[2],
 		--+7,+4 -64
 		split([[-9,-20,1
 271,124,2
 -17,140,3
 279,4,4]],"\n"),
-		unspl"0,0,59,0,0,0"
+		unspl"0,0,59,0,0"
 end
 
 function new_game()
@@ -2757,9 +2757,7 @@ function ai_frame()
 		if i>=16 then
 			bmins=1.4
 		end
-		if inv==0 then
-			ai_bld(i)
-		end
+		ai_bld(i)
 	end
 --	if #offsqd>=14 and inv==0 then
 --		atksqd,offsqd=offsqd,{}
@@ -2889,19 +2887,17 @@ function ai_bld(i)
 			and typs[pid].tech(
 				typs[pid].techt[2])
 		
-	else
-		if not g(bldgs,x,y) then
-			local b=ant.prod[pid]
-			if res2.tot>=p then
-				if can_pay(b,res2) then
-					pid=pay(b,-1,res2)
-					unit(b.typ,
-						x*8+b.typ.w/2,
-						y*8+b.typ.h/2,
-						2,0)
-				else
-					uhold=b
-				end
+	elseif inv==g(bldgs,x,y,0) then
+		local b=ant.prod[pid]
+		if res2.tot>=p then
+			if can_pay(b,res2) then
+				pid=pay(b,-1,res2)
+				unit(b.typ,
+					x*8+b.typ.w/2,
+					y*8+b.typ.h/2,
+					2,0)
+			else
+				uhold=b
 			end
 		end
 	end
