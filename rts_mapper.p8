@@ -14,8 +14,9 @@ function _init()
 
 --	printa(pos1)
 --	render(pos1)
---	write_to_rts()
+--	write_bo_to_rts()
 -- write_self()
+	write_map_to_rts()
 end
 
 function reset_to_rts()
@@ -97,12 +98,24 @@ function write_self()
 	print("wrote to own cart")
 end
 
-function write_to_rts()
+function write_bo_to_rts()
 	for y=0,31 do
 		cstore(
 			0x2060+y*128,
 			0x2060+y*128,
 			32,
+			"rts.p8")
+	end
+	
+	print("wrote bo to rts.p8 map")
+end
+
+function write_map_to_rts()
+	for y=0,31 do
+		cstore(
+			0x2000+y*128,
+			0x2000+y*128,
+			48,
 			"rts.p8")
 	end
 	
