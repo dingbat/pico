@@ -701,7 +701,7 @@ units=2
 mil=1
 tmap=-1]]
 
-local farm=parse[[
+farm=parse[[
 idx=12
 los=1
 hp=48
@@ -1119,7 +1119,7 @@ function attack(u,e)
 	end
 end
 
-function farm(u,f)
+function gofarm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
 		wayp=get_wayp(u,
@@ -1406,13 +1406,13 @@ function input()
 				hbld.cycles,
 				hbld.exp=0,0
 			pay(renewcost,-1,res1)
-			farm(sel1,hbld)
+			gofarm(sel1,hbld)
 
 		elseif can_gather() then
 			sfx"0"
 			hilite(htile)
 			if avail_farm() then
-				farm(sel1,hoverunit)
+				gofarm(sel1,hoverunit)
 			else
 				foreachsel(gather,mx8,my8)
 			end
@@ -1555,7 +1555,7 @@ function update_unit(u)
 				end
 				u.res=nil
 				if st.farm then
-					farm(u,st.farm)
+					gofarm(u,st.farm)
 				else
 					rest(u)
 					u.st.res=nxt
@@ -1693,7 +1693,7 @@ function buildrepair(u)
 			if b.typ.drop then
 				r.pl+=5
 			elseif b.typ.farm then
-				farm(u,b)
+				gofarm(u,b)
 			end
 		end
 	elseif b.hp<b.max_hp and
@@ -2741,18 +2741,17 @@ end
 
 function ai_frame()
 	if (t6) inv=0
-	miners,utyps,bants,uhold,adj=
-		{},{},0
+	miners,ants,bants,uhold,adj=
+		{},0,0
 
 	foreach(units,ai_unit1)
 	bal=#miners\bmins-bants
 	foreach(units,ai_unit2)
 
-	if count(utyps,12)>=7 then
-		bmins=1.4
-	end
-	
 	for i=0,res2.boi,2 do
+		if i>=16 then
+			bmins=1.4
+		end
 		if inv==0 then
 			ai_bld(i)
 		end
@@ -2765,8 +2764,8 @@ end
 
 function ai_unit1(u)
 	if u.p==2 then
-		add(utyps,u.typ.idx)
 		if u.typ.ant then
+			ants+=1
 			local r=u.st.res
 			if r=="r" then
 				--41,24
@@ -2831,9 +2830,9 @@ function ai_unit2(u)
 			not u.const and
 			not u.farmer then
 			local w=deli(miners)
-			if (w) farm(w,u)
+			if (w) gofarm(w,u)
 		elseif u.typ.queen then
-			if count(utyps,1)<res2.diff*12 then
+			if ants<res2.diff*12 then
 				ai_prod(u)
 			end
 		elseif u.typ.units and
@@ -3214,7 +3213,7 @@ __gff__
 000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a100a1a10000000007070b0b13130601210121210000000007070b0b13130621a12121210000000007070b0b131306012101010100000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-54545454545454555253525352525352525151545454545454555454535353525353555554546c4f4c4d4e4f475252528f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f0501080108030b010c050f021001100211021402150215011604170117021802
+54545454545454555253525352525352525151545454545454555454535353525353555554546c4f4c4d4e4f475252528f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f0501080108030b010c050f021001100210021002100215011604170117021802
 545454545554545f47525353535253524c4d545455545554545454555352525353545455546c5e5f5c5352535c5353528f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f19011a061b021d021e021f021f0120042203240127052801290229022a022a02
 5454515454546e6f6c535253535252525c5d5e55545454555455545455535352545455546c6d4c5758595350505253528f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f2b012b062d05300131033205340435013502350335053602360239013c054102
 545455547c7d7e507c5350505352537f6c6d6e6f555454545454557c7d7e7f7c7d7e7f7c7c7d576b686a5953535352548f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f4102410141069601000000000000000000000000000000000000000000000000
