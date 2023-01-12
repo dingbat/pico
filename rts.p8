@@ -284,7 +284,7 @@ function _draw()
 		sel1 and sel1.hu and
 		((to_build or
 			can_build() or
-			can_renew(1)) and 190 or
+			can_renew"1") and 190 or
 		can_gather() and 189 or
 		can_attack() and 187 or
 		can_drop() and 191) or 186)
