@@ -179,6 +179,7 @@ function printa(a)
 end
 -->8
 bo=loadbo[[
+4,bpos_50
 4,lady_10
 4,lady_10
 4,lady_10
@@ -186,16 +187,16 @@ bo=loadbo[[
 4,lady_10
 2,tech_basket_15
 3,tech_basket_15
-2,tech_archer_range_20
-3,tech_heal_23
-3,tech_warant_21
-3,tech_archer_22
-3,tech_beetle_17
-3,tech_spider_18
-2,tech_farm_19
-3,tech_farm_19
-1,tech_bldg_range_24
-3,tech_bldg_range_24
+2,tech_archer_range_19
+3,tech_heal_22
+3,tech_warant_20
+3,tech_archer_21
+3,tech_beetle_16
+3,tech_spider_17
+2,tech_farm_18
+3,tech_farm_18
+1,tech_bldg_range_23
+3,tech_bldg_range_23
 5,m
 8,m
 8,b
@@ -256,6 +257,7 @@ bo=loadbo[[
 ]]
 -->8
 pos1=loadp[[
+bpos,43,26
 lady,8,18
 lady,21,17
 lady,11,30
@@ -333,6 +335,7 @@ m,64,64
 ]]
 -->8
 pos2=loadp[[
+bpos,43,26
 lady,8,18
 lady,21,17
 lady,11,30
@@ -410,6 +413,7 @@ m,64,64
 ]]
 -->8
 pos3=loadp[[
+bpos,43,26
 lady,8,18
 lady,21,17
 lady,11,30
@@ -487,6 +491,7 @@ m,64,64
 ]]
 -->8
 pos4=loadp[[
+bpos,43,26
 lady,8,18
 lady,21,17
 lady,11,30
