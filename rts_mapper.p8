@@ -180,6 +180,8 @@ end
 -->8
 bo=loadbo[[
 4,bpos_50
+4,bpos_50
+4,bpos_50
 4,lady_10
 4,lady_10
 4,lady_10
@@ -258,6 +260,8 @@ bo=loadbo[[
 -->8
 pos1=loadp[[
 bpos,43,26
+bpos,44,8
+bpos,35,8
 lady,8,18
 lady,21,17
 lady,11,30
@@ -336,6 +340,8 @@ m,64,64
 -->8
 pos2=loadp[[
 bpos,43,26
+bpos,44,8
+bpos,35,8
 lady,8,18
 lady,21,17
 lady,11,30
@@ -414,6 +420,8 @@ m,64,64
 -->8
 pos3=loadp[[
 bpos,43,26
+bpos,44,8
+bpos,35,8
 lady,8,18
 lady,21,17
 lady,11,30
@@ -492,6 +500,8 @@ m,64,64
 -->8
 pos4=loadp[[
 bpos,43,26
+bpos,44,8
+bpos,35,8
 lady,8,18
 lady,21,17
 lady,11,30
