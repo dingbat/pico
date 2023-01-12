@@ -1048,7 +1048,7 @@ function move(u,x,y,agg)
 end
 
 function build(u,b)
-	u.st,u.res,u.rs={
+	u.st,u.res={
 		t="build",
 		target=b,
 		wayp=get_wayp(u,b.x,b.y),
@@ -1096,7 +1096,7 @@ function attack(u,e)
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res,u.rs=u,{
+	f.farmer,u.st,u.res=u,{
 		t="farm",
 		wayp=get_wayp(u,
 			f.x+rndspl"-3,-2,-1,0,1,2,3",
@@ -2748,10 +2748,8 @@ function ai_unit1(u)
 		if u.typ.ant then
 			ants+=1
 			if u.st.rest then
-				if not u.rs then
-					u.rs=bgnxt and "b" or "r"
-					bgnxt=not bgnxt
-				end
+				u.rs=bgnxt and "b" or "r"
+				bgnxt=not bgnxt
 				if not mine_nxt_res(u,u.rs) then
 					if u.rs!="b" then
 						u.rs=nil
@@ -2788,20 +2786,24 @@ function ai_unit2(u)
 		 del(miners,u) then
 			bal,u.rs=0,mine_nxt_res(u,r)
 		end
+		function assign(fn)
+			u.w=deli(miners)
+			if u.w then
+				u.w.rs=fn(u.w,u)
+			end
+		end
 		if u.typ.bldg and
 			u.hp<u.max_hp*0.75 or
 			u.const
 		then
 			if not u.w or
 				u.w.st.target!=u then
-				u.w=deli(miners)
-				if (u.w) build(u.w,u)
+				assign(build)
 			end
 		elseif u.typ.farm and
 			not u.const and
 			not u.farmer then
-			local w=deli(miners)
-			if (w) gofarm(w,u)
+			assign(gofarm)
 		elseif u.typ.queen then
 			if ants<res2.diff*12 then
 				ai_prod(u)
