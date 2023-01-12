@@ -261,8 +261,7 @@ dirty token savers
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
 - revert bf60644 (lady wandering, 25 tok)
 - remove sfx from save (2 tok)
-- hbanner toggle (11 tok)
-- 886adb3 msuic/sfx toggle (45 tok)
+x hbanner toggle (11 tok)
 -	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
 
 
