@@ -310,10 +310,7 @@ stog(2,1)
 
 ====
 res collection
-you: /3 (-2)
-you+up: /2.5 (-1)
-
-easy: /2
+easy: gr=/1.5
 med: /1.5
 hard: /1
 
