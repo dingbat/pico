@@ -302,8 +302,7 @@ function parse(str,typ,tech,t)
 		p1=p1,
 		typ=typ,
 		tech=tech,
-		techt=t or {},
-		prod={}}
+		techt=t}
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
@@ -876,7 +875,7 @@ g=0
 b=0
 p=
 breq=0]],ant))
-end),
+end,{}),
 }
 
 den.prod={
@@ -2044,7 +2043,7 @@ fres=0]])
 			--that had hp upgrades
 			min(_hp or 9999,max_hp),
 				tonum(_const),_disc==1,
-				_id,_typ.prod
+				_id,_typ.prod or {}
 	end
 	rest(u_rect(u))
 	if (_typ.bldg) reg_bldg(u)
