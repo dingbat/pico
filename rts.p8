@@ -1048,7 +1048,7 @@ function move(u,x,y,agg)
 end
 
 function build(u,b)
-	u.st,u.res={
+	u.st,u.res,u.rs={
 		t="build",
 		target=b,
 		wayp=get_wayp(u,b.x,b.y),
@@ -1096,7 +1096,7 @@ function attack(u,e)
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res=u,{
+	f.farmer,u.st,u.res,u.rs=u,{
 		t="farm",
 		wayp=get_wayp(u,
 			f.x+rndspl"-3,-2,-1,0,1,2,3",
@@ -1540,15 +1540,15 @@ function update_unit(u)
 	end
 
 	if wayp then
-	u.x,u.y,u.dir=norm(wayp[1],u,
-		st.spd or u.typ.spd)
-	local x,y=unpack(wayp[1])
-	if dist(x-u_rect(u).x,y-u.y)<0.5 then
-		deli(wayp,1)
-		if #wayp==0 then
-			st.wayp=nil
+		u.x,u.y,u.dir=norm(wayp[1],u,
+			st.spd or u.typ.spd)
+		local x,y=unpack(wayp[1])
+		if dist(x-u_rect(u).x,y-u.y)<0.5 then
+			deli(wayp,1)
+			if #wayp==0 then
+				st.wayp=nil
+			end
 		end
-	end
 	elseif t=="move" then
 		rest(u)
 	elseif t=="farm" then
@@ -1683,8 +1683,10 @@ function mine(u)
 	local t=mget(x,y)
 	local full=resqty[fget(t)]
 	local n=g(restiles,x,y,full)
-	if n==0 then
-		mine_nxt_res(u,r)
+	if not full then
+		if not mine_nxt_res(u,r) then
+			drop(u,r)
+		end
 	elseif fps==u.st.fps then
 		collect(u,r)
 		if t<112 and
@@ -1746,8 +1748,7 @@ function mine_nxt_res(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
 		gather(u,x,y,wp)
-	elseif u.res then
-		drop(u,res)
+		return res
 	end
 end
 
@@ -2671,18 +2672,16 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,startpos,
-	cx,cy,fps,selt,alert=
+	fps,selt,alert=
 		ant.p1,res.p1,res[2],
 		--+7,+4 -64
-		split([[-09,-20,1
-271,124,2
--17,140,3
-279,004,4]],"\n"),
-		unspl"0,0,59,0,0"
+		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
+		unspl"59,0,0"
 end
 
 function new_game()
 	init()
+--	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(startpos,rnd(startpos)),
 		rnd(startpos),
@@ -2699,7 +2698,7 @@ function new_game()
 1,59,52,2
 5,57,76,2]],"\n"),function(s)
 	local u,x,y,p=unspl(s)
-	local dx,dy=unspl(res[p].pos)
+	local dx,dy=unspl(res[p].pos,":")
 	unit(u,x+dx,y+dy,p)
 end)
 	ai_init()
@@ -2718,7 +2717,7 @@ function ai_init()
 	bmins,defsqd,offsqd,atksqd,
 		cx,cy=
 		1.25,{},{},{},
-		unspl(res1.pos)
+		unspl(res1.pos,":")
 	
 	make_dmaps"d"
 end
@@ -2748,24 +2747,24 @@ function ai_unit1(u)
 	if u.p==2 then
 		if u.typ.ant then
 			ants+=1
-			local r=u.st.res
-			if r=="r" then
-				if not dmaps.r[u.k] then
-					drop(u)
+			if u.st.rest then
+				if not u.rs then
+					u.rs=bgnxt and "b" or "r"
+					bgnxt=not bgnxt
 				end
-			elseif r then
-				add(miners,u)
-			elseif u.st.rest then
-				mine_nxt_res(u,
-					bgnxt and "b" or "r")
-				bgnxt=not bgnxt
+				if not mine_nxt_res(u,u.rs) then
+					if u.rs!="b" then
+						u.rs=nil
+					elseif nxt_b then
+						move(u,unpack(nxt_b))
+					end
+				end
 			end
-			if r=="b" then
+			if u.rs=="b" then
 				bants+=1
-				if not dmaps.b[u.k] then
-					move(u,unpack(nxt_b))
-				end
 			end
+			add(u.rs and u.rs!="r" and
+				miners,u)
 		--excludes ants
 		elseif u.typ.unit==1 then
 			if u.dead then
@@ -2784,11 +2783,10 @@ function ai_unit2(u)
 	if not u.hu then
 		local r=bal>0 and "b" or
 			bal<0 and "g"
-		if u.st.res!=r and r and
-			count(miners,u)>0 and
-		 not u.res then
-			bal=0
-			mine_nxt_res(u,r)
+		if u.rs!=r and r and
+			not u.res and
+		 del(miners,u) then
+			bal,u.rs=0,mine_nxt_res(u,r)
 		end
 		if u.typ.bldg and
 			u.hp<u.max_hp*0.75 or
@@ -2844,19 +2842,18 @@ function ai_bld(i)
 	local off,curr=
 		0x2060+i%32+i\32*128,
 		res2.boi==i
-	local p,pid=peek(off,2)
 	local x,y=peek(
 		off+res2.pos[9]*640,2)
-	x*=8
-	y*=8
+	local x8,y8,p,pid=x*8,y*8,
+		peek(off,2)
 	if pid>6 then
 	 if pid==50 then
 	 	nxt_b=nxt_b or
-	 		g(dmaps.b or {},x\8,y\8) and
-	 		{x,y}
+	 		g(dmaps.b or {},x,y) and
+	 		{x8,y8}
 	 end
 		if curr then
-			if (pid==10) unit(14,x,y,3)
+			if (pid==10) unit(14,x8,y8,3)
 			if res2.diff>=p then
 				typs[pid].tech(
 					typs[pid].techt[2])
@@ -2869,8 +2866,8 @@ function ai_bld(i)
 			if can_pay(b,res2) then
 				pay(b,-1,res2)
 				unit(b.typ,
-					x+b.typ.w/2,
-					y+b.typ.h/2,
+					x8+b.typ.w/2,
+					y8+b.typ.h/2,
 					2,1)
 				if curr then
 					res2.boi+=2
