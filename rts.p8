@@ -1289,7 +1289,7 @@ function update_viz(u)
 		end
 
 		foreach(v,function(t)
-			local k=u.k+t
+			local k=u.x8+u.y8*256+t
 			if k<maph<<8 and k>=0 and
 				k%256<mapw then
 				if bldgs[k] then
@@ -1849,7 +1849,6 @@ function u_rect(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8={x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8
-	k=x8|y8<<8
 	return _ENV
 end
 
