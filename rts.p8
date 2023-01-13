@@ -157,7 +157,8 @@ function _draw()
 				and u.disc
 			then
 				add(af,u)
-			elseif u.typ.bldg then
+			elseif u.typ.bldg
+				or u.dead then
 				draw_unit(u)
 			else
 				add(bf,u)
@@ -1101,8 +1102,8 @@ function gofarm(u,f)
 	f.farmer,u.st,u.res=u,{
 		t="farm",
 		wayp=get_wayp(u,
-			f.x+rndspl"-3,-2,-1,0,1,2,3",
-			f.y+rndspl"-3,-2,-1,0,1,2,3"
+			f.x+rndspl"-2,-1,0,1,2",
+			f.y+rndspl"-2,-1,0,1,2"
 		),
 		farm=f
 	}
@@ -1387,7 +1388,7 @@ function input()
 			sfx"0"
 			hilite(htile)
 			if avail_farm() then
-				gofarm(sel1,hoverunit)
+				gofarm(sel1,hbld)
 			else
 				foreachsel(gather,mx8,my8)
 			end
@@ -1855,7 +1856,7 @@ function surr(x,y,fn,n,ig_acc)
 end
 
 function avail_farm()
-	local _ENV=hoverunit
+	local _ENV=hbld
 	return _ENV and
 		typ.farm and
 		not exp and
@@ -2004,10 +2005,9 @@ function unit(t,_x,_y,_p,
 	local _typ,_id,u=
 		typs[t] or t,
 		rnd"60"\1,
-		add(units,
-		parse[[dir=1
-sproff=0
+		add(units,parse[[dir=1
 lastp=1
+sproff=0
 cycles=0
 fres=0]])
 	do
@@ -2658,9 +2658,9 @@ function init()
 		{},{},{},{d={}},
 		{},parse"qty=0.075",
 		parse[[
-r=20
-g=10
-b=20
+r=520
+g=510
+b=520
 p=4
 pl=10
 tot=4
@@ -2749,7 +2749,9 @@ function ai_frame()
 		 		{x8,y8}
 		 end
 			if curr then
-				if (pid==10) unit(14,x8,y8,3)
+				if pid==10 then
+					unit(14,x8,y8,3)
+				end
 				if res2.diff>=p then
 					typs[pid].tech(
 						typs[pid].techt[2])
