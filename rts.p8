@@ -864,6 +864,25 @@ porty=80]],function(_ENV)
 	spd*=1.12
 	gr*=0.9 --3,2.8,2.43,2.18
 end,ant),
+parse([[
+t=20
+r=10
+g=10
+b=10
+breq=4
+tmap=2
+idx=24]],parse[[
+portx=40
+porty=80]],function()
+	mound.p1.units=
+		add(mound.prod,parse([[
+t=8
+r=4
+g=0
+b=0
+p=
+breq=0]],ant))
+end,{})
 }
 
 den.prod={
