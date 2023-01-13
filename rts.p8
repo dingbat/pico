@@ -2186,28 +2186,27 @@ end
 
 --a*
 
-function nearest_acc(x,y,dx,dy)
-	for n=0,16 do
-		local best_d,best_t=32767
-		surr(x\8,y\8,function(t)
-			local d=dist(
-				t[1]*8+4-dx,
-				t[2]*8+4-dy
-			)
-			if d<best_d then
-				best_t,best_d=t,d
-			end
-		end,n)
-		if (best_t) return best_t,n
-	end
-end
-
 function get_wayp(u,x,y,tol)
+	function nearest_acc(gx,gy)
+		for n=1,16 do
+			local best_d,best_t=32767
+			surr(gx\8,gy\8,function(t)
+				local d=dist(
+					t[1]*8+4-x,
+					t[2]*8+4-y
+				)
+				if d<best_d then
+					best_t,best_d=t,d
+				end
+			end,n)
+			if (best_t) return best_t,n
+		end
+	end
 	if u.typ.unit then
 		local dest,dest_d=
-			nearest_acc(x,y,x,y)	
+			nearest_acc(x,y)	
 		local wayp,exists=as(
-			nearest_acc(u.x,u.y,x,y),
+			nearest_acc(u.x,u.y),
 			dest)
 		if exists and
 			dest_d<=(tol or 1) then
@@ -2797,10 +2796,25 @@ function ai_frame()
 			res2.boi==i,
 			x*8,y*8,
 			peek(off,2)
-		local r,b=
-			chr(pid),ant.prod[pid]
-		if not b then
-		 if pid>90 then
+		local r,b,bld=
+			chr(pid),ant.prod[pid],
+			g(bldgs,x,y)
+		if b then
+			curr=curr and bld and bld.hu
+			if not bld and
+				res2.tot>=p and safe then
+				if can_pay(b,res2) then
+					pay(b,-1,res2)
+					curr=unit(b.typ,
+						x8+b.typ.w/2,
+						y8+b.typ.h/2,
+						2,1)
+				else
+					uhold=b
+				end
+			end
+		else
+			if pid>90 then
 		 	nxtres[r]=nxtres[r] or
 		 		g(dmaps[r] or {},x,y) and
 		 		{x8,y8}
@@ -2813,23 +2827,10 @@ function ai_frame()
 					typs[pid].tech(
 						typs[pid].techt.p2)
 				end
-				res2.boi+=2
 			end
-		elseif safe==g(bldgs,x,y,true) then
-			if res2.tot>=p then
-				if can_pay(b,res2) then
-					pay(b,-1,res2)
-					unit(b.typ,
-						x8+b.typ.w/2,
-						y8+b.typ.h/2,
-						2,1)
-					if curr then
-						res2.boi+=2
-					end
-				else
-					uhold=b
-				end
-			end
+		end
+		if curr then
+			res2.boi+=2
 		end
 	end
 	
