@@ -1774,6 +1774,7 @@ function parse(str,typ,tech,t)
 	local p1,p2={},{}
 	local obj={p1,p2,p2,
 		p1=p1,
+		p2=p2,
 		typ=typ,
 		tech=tech,
 		techt=t}
@@ -2101,30 +2102,35 @@ end
 function dmap()
 	local q=queue[1]
 	if q then
-		if q.k then
-			for i=1,#q.open do
+		if q.c then
+			--typ=open
+			for i=1,#q.typ do
 				if i>20 then
 					--continue next tick
 					return
 				end
-				local p=deli(q.open)
-				q.dmap[p.k]=q.c
+				local p=deli(q.typ)
+				--p1=dmap
+				q.p1[p.k]=q.c
 				if q.c<8 then
 					surr(p[1],p[2],function(t)
-						q.closed[t.k]=
-							q.closed[t.k] or
-							add(q.nxt,t)
+						--tech=closed
+						q.tech[t.k]=
+							q.tech[t.k] or
+							add(q.p2,t)
 					end)
 				end
 			end
 			q.c+=1
-			q.open,q.nxt=q.nxt,{}
+			--typ=open,p2=nxt
+			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
-				dmaps[q.k]=
-					deli(queue,1).dmap
+				--techt=key
+				dmaps[q.techt]=
+					deli(queue,1).p1
 			end
 		else
-			--build a new dmap for the
+			--build a new dmap for
 			--key q (r,g,b,d)
 			if not dmap_st[q] then
 				dmap_st[q]={}
@@ -2144,14 +2150,14 @@ function dmap()
 					add(open,t).k=i
 				end
 			end
-			queue[1]={
-				k=q,
-				dmap={},
-				open=open,
-				c=0,
-				closed={},
-				nxt={},
-			}
+			queue[1]=parse(
+				"c=0",
+				--dmap=p1
+				--nxt=p2
+				open,--typ
+				{},--closed=tech
+				q--techt
+			)
 		end
 	end
 end
@@ -2699,7 +2705,7 @@ t=0]]
 
 	ant1,res1,res2,startpos,
 	fps,selt,alert,banner=
-		ant.p1,res.p1,res[2],
+		ant.p1,res.p1,res.p2,
 		--+7,+4 -64
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
 		unspl"59,0,0,0"
@@ -2779,7 +2785,7 @@ function ai_frame()
 				end
 				if res2.diff>=p then
 					typs[pid].tech(
-						typs[pid].techt[2])
+						typs[pid].techt.p2)
 				end
 				res2.boi+=2
 			end
