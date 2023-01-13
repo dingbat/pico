@@ -1722,7 +1722,9 @@ function produce(u)
 				done=nil
 			end
 		else
-			if (u.onscr and u.hu) sfx"19"
+			if u.onscr and u.hu then
+				sfx"19"
+			end
 			local new=unit(
 				bld.typ,u.x,u.y,u.p)
 			if new.typ.ant and
@@ -1735,11 +1737,12 @@ function produce(u)
 					u.ry or u.y+5)
 			end
 		end
-		if u.q.qty>1 then
-			u.q.qty-=1
-			u.q.t=bld.t
+		local _ENV=u
+		if q.qty>1 then
+			q.qty-=1
+			q.t=bld.t
 		else
-			u.q=nil
+			q=nil
 		end
 	end
 end
