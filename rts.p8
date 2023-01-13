@@ -1752,7 +1752,7 @@ function produce(u)
 		local _ENV=u
 		if q.qty>1 then
 			q.qty-=1
-			q.t=bld.t
+			q.tech=bld.t
 		else
 			q=nil
 		end
