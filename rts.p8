@@ -2010,9 +2010,9 @@ fres=0]])
 		max_hp=tonum(_const) and
 			ptyp.hp/ptyp.const or
 			ptyp.hp
-		typ,x,y,p,hu,hp,const,
+		typ,x,y,p,hu,ai,hp,const,
 			disc,id,prod=
-			ptyp,_x,_y,_p,_p==1,
+			ptyp,_x,_y,_p,_p==1,_p==2,
 			--cap hp when loading game
 			--that had hp upgrades
 			min(_hp or 9999,max_hp),
@@ -2750,7 +2750,7 @@ function miner(u,r)
 end
 
 function ai_unit1(u)
-	if u.p==2 then
+	if u.ai then
 		if u.typ.ant then
 			ants+=1
 			if u.st.rest then
@@ -2776,7 +2776,7 @@ function ai_unit1(u)
 end
 
 function ai_unit2(u)
-	if u.p==2 then
+	if u.ai then
 		local r=bal>0 and "b" or
 			bal<0 and "g"
 		if u.rs!=r and r and
@@ -2815,7 +2815,7 @@ function ai_unit2(u)
 end
 
 function ai_dmg(u)
-	if u.p==2 and
+	if u.ai and
 		count(u,atksqd)==0 then
 		inv=1
 		mvg(defsqd,u.x,u.y,1,1)
