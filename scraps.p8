@@ -253,6 +253,9 @@ ai_diff,
 
 ?"\^:00083e414959413e"
 
+negg/pear
+?"\^:380c12255149413e"
+
 dirty token savers
 ============
 - remove `.."_vs_"..` (2 tok)

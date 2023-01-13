@@ -864,25 +864,25 @@ porty=80]],function(_ENV)
 	spd*=1.12
 	gr*=0.9 --3,2.8,2.43,2.18
 end,ant),
-parse([[
-t=20
-r=10
-g=10
-b=10
-breq=4
-tmap=2
-idx=24]],parse[[
-portx=40
-porty=80]],function()
-	mound.p1.units=
-		add(mound.prod,parse([[
-t=12
-r=7
-g=0
-b=0
-p=
-breq=0]],ant))
-end,{})
+--parse([[
+--t=20
+--r=10
+--g=10
+--b=10
+--breq=4
+--tmap=2
+--idx=24]],parse[[
+--portx=40
+--porty=80]],function()
+--	mound.p1.units=
+--		add(mound.prod,parse([[
+--t=12
+--r=7
+--g=0
+--b=0
+--p=
+--breq=0]],ant))
+--end,{})
 }
 
 den.prod={
@@ -1067,7 +1067,7 @@ function mvg(units,x,y,agg,rest)
 		lowest=min(u.typ.spd,lowest)
 	end)
 	foreach(units,function(_ENV)
-		st.spd=lowest end)
+		st.spd,grp=lowest,agg end)
 end
 
 function move(u,x,y,agg)
@@ -2739,7 +2739,6 @@ end
 
 function new_game()
 	init()
---	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(startpos,rnd(startpos)),
 		rnd(startpos),
@@ -2768,7 +2767,8 @@ end
 --ai
 
 tostr[[[[]]
---ai_debug=true
+ai_debug=true
+srand"1"
 if ai_debug then
 	_update60=_update
 end
@@ -2776,8 +2776,9 @@ end
 
 function ai_init()
 	defsqd,offsqd,atksqd,hq,
+	last_prod,
 		cx,cy=
-		{},{},{},units[1],
+		{},{},{},units[1],0,
 		unspl(res1.pos,":")
 	
 	make_dmaps"d"
@@ -2837,10 +2838,10 @@ function ai_frame()
 	bal=#miners\1.5-bants
 	foreach(units,ai_unit2)
 
-	if #offsqd>=15 and inv==0 then
+	if #offsqd>=res2.diff*5 and inv==0 then
 		atksqd,offsqd=offsqd,{}
 	end
-	mvg(atksqd,hq.x,hq.y,1,1)
+	mvg(atksqd,hq.x,hq.y,"atk",1)
 end
 
 function miner(u,r)
@@ -2909,15 +2910,15 @@ function ai_unit2(u)
 				ai_prod(u)
 			end
 		elseif u.typ.units and
-			res2.p<res2.diff*26 then
+			res2.p<res2.diff*26
+	 then
 			ai_prod(u)
 		end
 	end
 end
 
 function ai_dmg(u)
-	if u.ai and
-		count(u,atksqd)==0 then
+	if u.ai and u.grp!="atk" then
 		inv=1
 		mvg(defsqd,u.x,u.y,1,1)
 	end
@@ -2935,11 +2936,14 @@ function ai_prod(u)
 		return true
 	end
 	if not u.q and nohold() and
-		can_pay(p,res2) then
+		can_pay(p,res2) and
+		t()-last_prod>split"10,0,0"[res2.diff]
+	then
 		queue_prod(u,p)
 		u.lastp%=u.typ.units
 		u.lastp+=1
 		res2.tot+=1
+		last_prod=t()
 	end
 end
 -->8
