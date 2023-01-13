@@ -2646,7 +2646,7 @@ function init()
 	end
 	music(unspl"0,0,7")
 	menuitem(3,"∧ resign",
-		function() units[1].hp=0 end)
+		function() hq.hp=0 end)
 
 	queue,exp,vcache,dmaps,
 	units,restiles,selection,ladys,
@@ -2715,9 +2715,9 @@ end
 --]]
 
 function ai_init()
-	defsqd,offsqd,atksqd,
+	defsqd,offsqd,atksqd,hq,
 		cx,cy=
-		{},{},{},
+		{},{},{},units[1],
 		unspl(res1.pos,":")
 	
 	make_dmaps"d"
@@ -2778,8 +2778,7 @@ function ai_frame()
 	if #offsqd>=15 and inv==0 then
 		atksqd,offsqd=offsqd,{}
 	end
-	mvg(atksqd,
-		units[1].x,units[1].y,1,1)
+	mvg(atksqd,hq.x,hq.y,1,1)
 end
 
 function miner(u,r)
