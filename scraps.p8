@@ -256,6 +256,14 @@ ai_diff,
 negg/pear
 ?"\^:380c12255149413e"
 
+function been(k,dt)
+	local x=bt[k] or 0
+	local y=t()-x>=(dt or 0)
+	if (y) bt[k]=t()
+	return y
+end
+
+
 dirty token savers
 ============
 - remove `.."_vs_"..` (2 tok)

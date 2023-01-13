@@ -1627,8 +1627,8 @@ function agg(u)
 	local targ_d,targ=9999
 	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
-		if e.p!=u.p and not e.dead and
-			viz[e.k] and
+		if e.p!=u.p and
+		 not e.dead and
 			d<=u.typ.los
 		then
 			if e.typ.bldg then
@@ -2776,17 +2776,17 @@ end
 
 function ai_init()
 	defsqd,offsqd,atksqd,hq,
-	last_prod,
+	last_prod,last_atk,
 		cx,cy=
-		{},{},{},units[1],0,
+		{},{},{},units[1],0,0,
 		unspl(res1.pos,":")
 	
 	make_dmaps"d"
 end
 
 function ai_frame()
-	if (t6) inv=0
-	miners,nxtres,ants,bants,uhold=
+	if (t6) safe=true
+	miners,nxtres,ants,gants,uhold=
 		{},{},0,0
 
 	for i=0,res2.boi,2 do
@@ -2816,7 +2816,7 @@ function ai_frame()
 				end
 				res2.boi+=2
 			end
-		elseif inv==g(bldgs,x,y,0) then
+		elseif safe==g(bldgs,x,y,true) then
 			if res2.tot>=p then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
@@ -2833,13 +2833,21 @@ function ai_frame()
 			end
 		end
 	end
-
+	
+	if res2.diff==1 then
+		res2.tot,safe=res2.p,
+			t()-last_atk>120
+	end
+	
 	foreach(units,ai_unit1)
-	bal=#miners\1.5-bants
+	bal=#miners\2.75-gants
 	foreach(units,ai_unit2)
 
-	if #offsqd>=res2.diff*5 and inv==0 then
-		atksqd,offsqd=offsqd,{}
+	if #offsqd>=res2.diff*5 and
+		safe
+	then
+		atksqd,offsqd,last_atk=
+			offsqd,{},t()
 	end
 	mvg(atksqd,hq.x,hq.y,"atk",1)
 end
@@ -2859,8 +2867,8 @@ function ai_unit1(u)
 				miner(u,bgnxt and "b" or "r")
 				bgnxt=not bgnxt
 			end
-			if u.rs=="b" then
-				bants+=1
+			if u.rs=="g" then
+				gants+=1
 			end
 			add(u.rs and u.rs!="r" and
 				miners,u)
@@ -2879,8 +2887,8 @@ end
 
 function ai_unit2(u)
 	if u.ai then
-		local r=bal>0 and "b" or
-			bal<0 and "g"
+		local r=bal>0 and "g" or
+			bal<0 and "b"
 		if u.rs!=r and r and
 			not u.res and
 		 del(miners,u) then
@@ -2919,8 +2927,7 @@ end
 
 function ai_dmg(u)
 	if u.ai and u.grp!="atk" then
-		inv=1
-		mvg(defsqd,u.x,u.y,1,1)
+		safe=mvg(defsqd,u.x,u.y,1,1)
 	end
 end
 
