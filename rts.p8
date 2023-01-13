@@ -2205,15 +2205,16 @@ function as(start,goal)
 		return {unpack(c)},c.e
 	end
 
-	local sh,best_table,f=parse([[
-cfs=0
-ctg=32767
-]],start),{},{}
+	local sh,best_table,f={
+		last=start,
+		cfs=0,
+		ctg=32767
+	},{},{}
 	best_table[start.k]=sh
 	function path(s)
-		while s.typ!=start do
-			add(f,{s.typ[1]*8+4,
-				s.typ[2]*8+4},1)
+		while s.last!=start do
+			add(f,{s.last[1]*8+4,
+				s.last[2]*8+4},1)
 			s=best_table[s.prev.k]
 		end
 		asc[k]=f
@@ -2231,7 +2232,7 @@ ctg=32767
 		fr[index_of_min],sh.dead=fr[fr_len],true
 		fr_len-=1
 
-		local p=sh.typ
+		local p=sh.last
 		if p.k==goal.k then
 			f.e=true
 			return path(sh),1
@@ -2242,7 +2243,7 @@ ctg=32767
 				sh.cfs+n.d
 			if not old_best then
 				old_best={
-					typ=n,
+					last=n,
 					cfs=32767,
 					ctg=
 					dist(n[1]-goal[1],n[2]-goal[2])
