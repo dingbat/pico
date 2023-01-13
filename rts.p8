@@ -2729,16 +2729,18 @@ function ai_frame()
 		{},{},0,0
 
 	for i=0,res2.boi,2 do
-		local off,curr=
-			0x2060+i%32+i\32*128,
-			res2.boi==i
-		local x,y=peek(
-			off+res2.pos[9]*640,2)
-		local x8,y8,p,pid=x*8,y*8,
+		local off=0x2060+
+			i%32+i\32*128
+		local x,y=
+			peek(off+res2.pos[9]*640,2)
+		local curr,x8,y8,p,pid=
+			res2.boi==i,
+			x*8,y*8,
 			peek(off,2)
-		if pid>6 then
+		local r,b=
+			chr(pid),ant.prod[pid]
+		if not b then
 		 if pid>90 then
-		 	local r=chr(pid)
 		 	nxtres[r]=nxtres[r] or
 		 		g(dmaps[r] or {},x,y) and
 		 		{x8,y8}
@@ -2752,7 +2754,6 @@ function ai_frame()
 				res2.boi+=2
 			end
 		elseif inv==g(bldgs,x,y,0) then
-			local b=ant.prod[pid]
 			if res2.tot>=p then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
@@ -2774,10 +2775,11 @@ function ai_frame()
 	bal=#miners\1.5-bants
 	foreach(units,ai_unit2)
 
-	if #offsqd>=14 and inv==0 then
+	if #offsqd-14>inv then
 		atksqd,offsqd=offsqd,{}
 	end
-	mvg(atksqd,unspl"48,40,1,1")
+	mvg(atksqd,
+		units[1].x,units[1].y,1,1)
 end
 
 function miner(u,r)
@@ -2855,7 +2857,7 @@ end
 function ai_dmg(u)
 	if u.ai and
 		count(u,atksqd)==0 then
-		inv=1
+		inv=999
 		mvg(defsqd,u.x,u.y,1,1)
 	end
 end
