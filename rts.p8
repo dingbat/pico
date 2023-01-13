@@ -98,13 +98,22 @@ function _update()
 	end
 
 	foreach(proj,function(p)
-		p.x,p.y,_,d=norm(p.to,p,.8)
+		local typ=p.from_typ
+		p.x,p.y,_,d=norm(p.to,p,
+			typ.proj_spd)
 		if d<0.5 then
-			if int(
-				del(proj,p).to_unit.r,
-				{p.x,p.y,p.x,p.y},0
-			) then
-				dmg(p.from_typ,p.to_unit)
+			del(proj,p)
+			for u in all(units) do
+				if int(
+					u.r,
+					{p.x,p.y,p.x,p.y},
+					typ.proj_aoe
+				) then
+					dmg(typ,u)
+					if typ.proj_aoe==0 then
+						break
+					end
+				end
 			end
 		end
 	end)
@@ -438,6 +447,8 @@ hp=5
 range=28
 atk=0.667
 proj_freq=30
+proj_aoe=0
+proj_spd=1
 atk_typ=acid
 def=ant
 
@@ -507,6 +518,8 @@ hp=15
 range=50
 atk=1.5
 proj_freq=60
+proj_aoe=2
+proj_spd=0.72
 def=seige
 atk_typ=seige
 seige=1
@@ -545,6 +558,8 @@ hp=400
 atk=1.5
 range=23
 proj_freq=30
+proj_aoe=0
+proj_spd=1
 atk_typ=acid
 def=queen
 
@@ -584,6 +599,8 @@ hpr=11
 range=30
 atk=1.2
 proj_freq=30
+proj_aoe=0
+proj_spd=0.9
 atk_typ=bld
 def=bld
 
@@ -741,6 +758,8 @@ hpr=8
 range=40
 atk=1.8
 proj_freq=15
+proj_aoe=1
+proj_spd=0.8
 atk_typ=bld
 def=bld
 
@@ -1236,10 +1255,10 @@ function tick(u)
 		fight(u)
 	end
 	
-	if typ.lady and u.st.rest and
-		t6 then
-		wander(u)
-	end
+--	if typ.lady and u.st.rest and
+--		t6 then
+--		wander(u)
+--	end
 end
 
 function update_viz(u)
@@ -1636,8 +1655,7 @@ function fight(u)
 				from_typ=typ,
 				x=u.x-u.dir*typ.proj_xo,
 				y=u.y+typ.proj_yo,
-				to={e.x,e.y},
-				to_unit=e,
+				to={e.x,e.y}
 			})
 		end
 	else
@@ -2685,7 +2703,7 @@ end
 
 function new_game()
 	init()
---	srand"1"
+	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(startpos,rnd(startpos)),
 		rnd(startpos),
@@ -2696,7 +2714,7 @@ function new_game()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-5,57,76,1
+6,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
@@ -2707,6 +2725,10 @@ function new_game()
 			unspl(res[p].pos,":")
 		unit(u,x+dx,y+dy,p)
 	end)
+
+for i=0,10 do
+	unit(14,80,80,3)
+end
 
 	ai_init()
 end
