@@ -269,6 +269,7 @@ x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - inline a bunch of other functions (~5-7 each)
 - remove make_dmap argument (priotize resource) (5 tok)
 - revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
+- remove aoe hilite effect (15 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 

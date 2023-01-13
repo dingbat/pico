@@ -1019,14 +1019,14 @@ breq=0
 tmap=512
 idx=23]],parse[[
 portx=85
-porty=80]],function(p)
-		foreach(typs,function(b)
-			if b.bldg then
-				b[p].los+=10
-				b[p].range=b[p].los
+porty=80]],function(ptyps)
+		foreach(ptyps,function(_ENV)
+			if bldg then
+				los+=10
+				range=los
 			end
 		end)
-	end,split"1,2"),
+	end,typs),
 }
 end
 -->8
@@ -1783,8 +1783,12 @@ function parse(str,typ,tech,t)
 		if v then
 			obj[k],p1[k],p2[k]=v,v,v
 		end
+		if k=="idx" then
+			typs[v],
+				typs.p1[v],
+				typs.p2[v]=obj,p1,p2
+		end
 	end)
-	add(obj.idx and typs,obj)
 	return obj
 end
 
@@ -2038,7 +2042,7 @@ sproff=0
 cycles=0
 fres=0]])
 	do
-		local ptyp,_ENV=_typ[_p],u
+		local _ENV,ptyp=u,_typ[_p]
 		max_hp=tonum(_const) and
 			ptyp.hp/ptyp.const or
 			ptyp.hp
@@ -2688,7 +2692,7 @@ function init()
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		{},parse"qty=0.075",
+		parse"",parse"qty=0.075",
 		parse[[
 r=520
 g=510
@@ -2743,7 +2747,7 @@ end
 --ai
 
 tostr[[[[]]
---ai_debug=true
+ai_debug=true
 if ai_debug then
 	_update60=_update
 end
