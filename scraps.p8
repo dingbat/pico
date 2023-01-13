@@ -254,8 +254,8 @@ ai_diff,
 dirty token savers
 ============
 - remove `.."_vs_"..` (2 tok)
-- organic endscreen
-- pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
+- organic endscreen (6 tok)
+x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert 0532b54 (... hack, 2 tokens)
 - revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
@@ -263,6 +263,7 @@ dirty token savers
 - remove sfx from save (2 tok)
 x hbanner toggle (11 tok)
 -	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
+- inline ai_dmg() in dmg() (7 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 

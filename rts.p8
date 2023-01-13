@@ -2729,7 +2729,45 @@ function ai_frame()
 		{},{},0,0
 
 	for i=0,res2.boi,2 do
-		ai_bld(i)
+		local off,curr=
+			0x2060+i%32+i\32*128,
+			res2.boi==i
+		local x,y=peek(
+			off+res2.pos[9]*640,2)
+		local x8,y8,p,pid=x*8,y*8,
+			peek(off,2)
+		if pid>6 then
+		 if pid>90 then
+		 	local r=chr(pid)
+		 	nxtres[r]=nxtres[r] or
+		 		g(dmaps[r] or {},x,y) and
+		 		{x8,y8}
+		 end
+			if curr then
+				if (pid==10) unit(14,x8,y8,3)
+				if res2.diff>=p then
+					typs[pid].tech(
+						typs[pid].techt[2])
+				end
+				res2.boi+=2
+			end
+		elseif inv==g(bldgs,x,y,0) then
+			local b=ant.prod[pid]
+			if res2.tot>=p then
+				if can_pay(b,res2) then
+					pay(b,-1,res2)
+					unit(b.typ,
+						x8+b.typ.w/2,
+						y8+b.typ.h/2,
+						2,1)
+					if curr then
+						res2.boi+=2
+					end
+				else
+					uhold=b
+				end
+			end
+		end
 	end
 
 	foreach(units,ai_unit1)
@@ -2822,66 +2860,23 @@ function ai_dmg(u)
 	end
 end
 
-function nohold(p)
-	for k in all(split"r,g,b") do
-		if uhold and p[k]!=0 and
-			res2[k]-p[k]<uhold[k] then
-			return
-		end
-	end
-	return true
-end
-
 function ai_prod(u)
 	local p=u.prod[u.lastp]
-	if not u.q and nohold(p) and
+	function nohold()
+		for k in all(split"r,g,b") do
+			if uhold and p[k]!=0 and
+				res2[k]-p[k]<uhold[k] then
+				return
+			end
+		end
+		return true
+	end
+	if not u.q and nohold() and
 		can_pay(p,res2) then
 		queue_prod(u,p)
 		u.lastp%=u.typ.units
 		u.lastp+=1
 		res2.tot+=1
-	end
-end
-
-function ai_bld(i)
-	local off,curr=
-		0x2060+i%32+i\32*128,
-		res2.boi==i
-	local x,y=peek(
-		off+res2.pos[9]*640,2)
-	local x8,y8,p,pid=x*8,y*8,
-		peek(off,2)
-	if pid>6 then
-	 if pid>90 then
-	 	local r=chr(pid)
-	 	nxtres[r]=nxtres[r] or
-	 		g(dmaps[r] or {},x,y) and
-	 		{x8,y8}
-	 end
-		if curr then
-			if (pid==10) unit(14,x8,y8,3)
-			if res2.diff>=p then
-				typs[pid].tech(
-					typs[pid].techt[2])
-			end
-			res2.boi+=2
-		end
-	elseif inv==g(bldgs,x,y,0) then
-		local b=ant.prod[pid]
-		if res2.tot>=p then
-			if can_pay(b,res2) then
-				pay(b,-1,res2)
-				unit(b.typ,
-					x8+b.typ.w/2,
-					y8+b.typ.h/2,
-					2,1)
-				if curr then
-					res2.boi+=2
-				end
-			else
-				uhold=b
-			end
-		end
 	end
 end
 -->8
