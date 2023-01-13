@@ -1332,9 +1332,8 @@ function input()
 				foreachsel(move,x,y,axn==1)
 				hilite{amx,amy,2,8}
 			elseif axn==0 and btn"5" then
-				cx,cy=
-					mid(0,x-64,mapw-128),
-					mid(0,y-64,maph-107)
+				cx,cy=x-64,y-64
+				cam()
 			end
 		end
 		if (lclk) to_build=nil
@@ -2697,11 +2696,14 @@ function new_game()
 1,49,60,2
 1,77,63,2
 1,59,52,2
-5,57,76,2]],"\n"),function(s)
-	local u,x,y,p=unspl(s)
-	local dx,dy=unspl(res[p].pos,":")
-	unit(u,x+dx,y+dy,p)
-end)
+5,57,76,2]],"\n"),
+	function(s)
+		local u,x,y,p=unspl(s)
+		local dx,dy=
+			unspl(res[p].pos,":")
+		unit(u,x+dx,y+dy,p)
+	end)
+
 	ai_init()
 end
 -->8
