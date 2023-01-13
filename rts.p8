@@ -89,7 +89,7 @@ function _update()
 		viz,new_viz=new_viz,{}
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
-			mset(x+mapw8,y,viz[k] and
+			mset(x+mapw,y,viz[k] and
 				0 or mget(x,y))
 		end
 	end
@@ -198,7 +198,7 @@ function _draw()
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	if not ai_debug then
-	draw_map(mapw8,15) --fog
+	draw_map(mapw,15) --fog
 	end
 
 	_pal,pal=pal,max
@@ -1259,8 +1259,8 @@ function update_viz(u)
 
 		foreach(v,function(t)
 			local k=u.k+t
-			if k<maph8<<8 and k>=0 and
-				k%256<mapw8 then
+			if k<maph<<8 and k>=0 and
+				k%256<mapw then
 				if bldgs[k] then
 					bldgs[k].disc=1
 				end
@@ -1279,11 +1279,11 @@ function cam()
 	cx,cy,amx,amy=
 		mid(0,
 			cx+(b&0x2)-(b&0x1)*2,
-			256 --mapw-128
+			256 --mapw*8-128
 		),
 		mid(0,
 			cy+(b&0x8)/4-(b&0x4)/2,
-			--maph-128 or 107
+			--maph*8-128 or 107
 			loser and 128 or 149
 		),
 		mid(0,stat"32",126),
@@ -1832,7 +1832,7 @@ function surr(x,y,fn,n,ig_acc)
 		local xx,yy=x+dx,y+dy
 		if
 			min(xx,yy)>=0 and
-			xx<mapw8 and yy<maph8 and
+			xx<mapw and yy<maph and
 			(ig_acc or acc(xx,yy))
 		then
 			if (dx|dy!=0) exist=true
@@ -2100,8 +2100,8 @@ end
 function make_dmap(k)
 	if not dmap_st[k] then
 		dmap_st[k]={}
-		for x=0,mapw8 do
-		for y=0,maph8 do
+		for x=0,mapw do
+		for y=0,maph do
 			if
 				fget(mget(x,y),key2resf[k])
 			then
@@ -2548,8 +2548,8 @@ unl,unspr,
 	dmg_mult,
 	
 	ai_diff,action,
-	mapw,maph,mmx,mmy,mmw,mmh,
-	mapw8,maph8,
+	mmx,mmy,mmw,mmh,
+	mapw,maph,
 	mmhratio,
 	mmwratio,
 	menu,cx,cy,cvx,cvy
@@ -2629,7 +2629,7 @@ bld_vs_queen=0.75
 bld_vs_spd=1.25
 bld_vs_seige=0.9
 bld_vs_bld=0.1]],
-	unspl"0,0,384,256,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
@@ -2899,9 +2899,9 @@ menuitem(1,"⌂ save to clip",function()
 			max(disc)..","..
 			hp.."/"
 	end)
-	for i=1,mapw8*maph8-1 do
+	for i=1,mapw*maph-1 do
 		s..=
-			mget(i%mapw8,i/mapw8)..","
+			mget(i%mapw,i/mapw)..","
 	end
 	s..="/"
 	for k in next,exp do
@@ -2928,7 +2928,7 @@ menuitem(2,"◆ load pasted",function()
 		exp[k]=tonum(k)
 	end)
 	for i,t in inext,spldeli(data) do
-		mset(i%mapw8,i/mapw8,t)
+		mset(i%mapw,i/mapw,t)
 	end
 	foreach(typs,function(b)
 		if res1.techs|b.tmap==res1.techs then
