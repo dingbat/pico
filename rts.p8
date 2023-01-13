@@ -113,6 +113,8 @@ function _update()
 					if typ.proj_aoe==0 then
 						break
 					end
+					hilite{
+						cx=p.x,cy=p.y,f=2,c=13}
 				end
 			end
 		end
@@ -258,7 +260,7 @@ function _draw()
 			hlv=nil
 		elseif hlv.cx then
 			circ(hlv.cx,hlv.cy,
-				min(0.5/dt,4),8)
+				min(hlv.f/dt,4),hlv.c)
 		elseif mid(dt,0.1,0.25)!=dt
 			and hlv.r then
 			local w,x,y,z=unpack(hlv.r)
@@ -1433,7 +1435,7 @@ function input()
 		elseif sel1.typ.unit then
 			sfx"1"
 			mvg(selection,mx,my,axn==1)
-			hilite{cx=mx,cy=my}
+			hilite{cx=mx,cy=my,f=0.5,c=2}
 
 		elseif sel1.typ.units then
 			if fget(mget(mx8,my8),1) then
