@@ -80,6 +80,9 @@ function _update()
 			menu,cx,cy=unspl"63,5,35"
 			music"63"
 		end
+		if rclk then
+			banner^^=0xf0
+		end
 		return
 	end
 
@@ -177,7 +180,7 @@ function _draw()
 	if loser then
 		resbar()
 		local secs=res1.t\1%60
-		camera()
+		camera(banner)
 		rectfill(unspl"0,88,128,107,9")
 		unl"6,87,44,87"
 		unl"86,87,125,87"
@@ -2673,11 +2676,11 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,startpos,
-	fps,selt,alert=
+	fps,selt,alert,banner=
 		ant.p1,res.p1,res[2],
 		--+7,+4 -64
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
-		unspl"59,0,0"
+		unspl"59,0,0,0"
 end
 
 function new_game()
