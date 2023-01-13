@@ -1279,11 +1279,12 @@ function cam()
 	cx,cy,amx,amy=
 		mid(0,
 			cx+(b&0x2)-(b&0x1)*2,
-			mapw-128
+			256 --mapw-128
 		),
 		mid(0,
 			cy+(b&0x8)/4-(b&0x4)/2,
-			maph-(loser and 128 or 107)
+			--maph-128 or 107
+			loser and 128 or 149
 		),
 		mid(0,stat"32",126),
 		mid(-1,stat"33",126)
