@@ -309,23 +309,6 @@ end
 -->8
 --unit defs
 
-function parse(str,typ,tech,t)
-	local p1,p2={},{}
-	local obj={p1,p2,p2,
-		p1=p1,
-		typ=typ,
-		tech=tech,
-		techt=t}
-	foreach(split(str,"\n"),function(l)
-		local k,v=unspl(l,"=")
-		if v then
-			obj[k],p1[k],p2[k]=v,v,v
-		end
-	end)
-	add(obj.idx and typs,obj)
-	return obj
-end
-
 function init_typs()
 ant=parse[[
 idx=1
@@ -1259,10 +1242,10 @@ function tick(u)
 		fight(u)
 	end
 	
---	if typ.lady and u.st.rest and
---		t6 then
---		wander(u)
---	end
+	if typ.lady and u.st.rest and
+		t6 then
+		wander(u)
+	end
 end
 
 function update_viz(u)
@@ -1786,6 +1769,23 @@ end
 
 -->8
 --utils
+
+function parse(str,typ,tech,t)
+	local p1,p2={},{}
+	local obj={p1,p2,p2,
+		p1=p1,
+		typ=typ,
+		tech=tech,
+		techt=t}
+	foreach(split(str,"\n"),function(l)
+		local k,v=unspl(l,"=")
+		if v then
+			obj[k],p1[k],p2[k]=v,v,v
+		end
+	end)
+	add(obj.idx and typs,obj)
+	return obj
+end
 
 function sel_only(unit)
 	sfx"1"
@@ -2708,7 +2708,7 @@ end
 
 function new_game()
 	init()
-	srand"1"
+--	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(startpos,rnd(startpos)),
 		rnd(startpos),
@@ -2730,10 +2730,6 @@ function new_game()
 			unspl(res[p].pos,":")
 		unit(u,x+dx,y+dy,p)
 	end)
-
-for i=0,10 do
-	unit(14,80,80,3)
-end
 
 	ai_init()
 end
