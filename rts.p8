@@ -2775,7 +2775,7 @@ function ai_frame()
 	bal=#miners\1.5-bants
 	foreach(units,ai_unit2)
 
-	if #offsqd-14>inv then
+	if #offsqd>=15 and inv==0 then
 		atksqd,offsqd=offsqd,{}
 	end
 	mvg(atksqd,
@@ -2857,7 +2857,7 @@ end
 function ai_dmg(u)
 	if u.ai and
 		count(u,atksqd)==0 then
-		inv=999
+		inv=1
 		mvg(defsqd,u.x,u.y,1,1)
 	end
 end
