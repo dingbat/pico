@@ -113,8 +113,10 @@ function _update()
 					if typ.proj_aoe==0 then
 						break
 					end
-					hilite(parse([[f=2
+					if not hlv then
+						hilite(parse([[f=2
 c=13]],p.x,p.y))
+					end
 				end
 			end
 		end
