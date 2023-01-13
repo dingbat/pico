@@ -1949,6 +1949,7 @@ function dmg(from_typ,to)
 		to.st.rest or to.st.res) then
 		wander(to)
 	end
+	ai_dmg(to)
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32",rnd"32")
 		sfx"10"
@@ -2775,7 +2776,7 @@ function ai_unit1(u)
 end
 
 function ai_unit2(u)
-	if not u.hu then
+	if u.p==2 then
 		local r=bal>0 and "b" or
 			bal<0 and "g"
 		if u.rs!=r and r and
@@ -2810,8 +2811,12 @@ function ai_unit2(u)
 			res2.p<res2.diff*26 then
 			ai_prod(u)
 		end
-	elseif u.st.t=="attack" and
-		u.st.active and u.x>232 then
+	end
+end
+
+function ai_dmg(u)
+	if u.p==2 and
+		count(u,atksqd)==0 then
 		inv=1
 		mvg(defsqd,u.x,u.y,1,1)
 	end
