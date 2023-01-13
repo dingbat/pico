@@ -260,7 +260,7 @@ function _draw()
 		local dt=t()-hlt
 		if dt>0.5 then
 			hlv=nil
-		elseif hlv.typ then
+		elseif hlv.tech then
 			circ(hlv.typ,hlv.tech,
 				min(hlv.f/dt,4),hlv.c)
 		elseif mid(dt,0.1,0.25)!=dt
@@ -1534,7 +1534,7 @@ function update_unit(u)
 	local st=u.st
 	local t,wayp,nxt,targ=
 		st.t,st.wayp,st.res,st.target
-	if u.q and fps%15==u.q.fps%15 then
+	if u.q and fps%15==u.q.techt%15 then
 		produce(u)
 	end
 	if (u.typ.farm) update_farm(u)
@@ -1734,9 +1734,9 @@ function mine(u)
 end
 
 function produce(u)
-	local bld=u.q.b
-	u.q.t-=0.5
-	if u.q.t<=0 then
+	local bld=u.q.typ
+	u.q.tech-=0.5
+	if u.q.tech<=0 then
 		if bld.tech then
 			res1.techs|=bld.tmap
 			bld.tech(bld.techt.p1)
@@ -2060,7 +2060,7 @@ function queue_prod(u,b)
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q={b=b,qty=1,t=b.t,fps=fps-1}
+		u.q=parse("qty=1",b,b.t,fps)
 	end
 end
 -->8
@@ -2377,7 +2377,7 @@ portf=9]],24,107,nil,
 				function()
 					if can_pay(b,res1) and (
 						not q or
-						q.b==b and q.qty<9) then
+						q.typ==b and q.qty<9) then
 						if b.typ.bldg then
 							to_build=b
 							return
@@ -2393,7 +2393,7 @@ portf=9]],24,107,nil,
 		end
 	end
 	if q then
-		local b=q.b
+		local b=q.typ
 		draw_port(
 			b.typ,
 			b.tech and 24 or
@@ -2408,7 +2408,7 @@ portf=9]],24,107,nil,
 					q.qty-=1
 				end
 				sfx"18"
-			end,q.t/b.t,5,12
+			end,q.tech/b.t,5,12
 		)
 	end
 	if sel1.typ.units then
