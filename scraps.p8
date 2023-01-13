@@ -251,6 +251,7 @@ ai_diff,
 -- more clockly clock (left)
 ?"\^:083e41495941413e"
 
+?"\^:00083e414959413e"
 
 dirty token savers
 ============
@@ -262,11 +263,12 @@ x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
 - revert bf60644 (lady wandering, 25 tok)
 - remove sfx from save (2 tok)
-x hbanner toggle (11 tok)
+- 9c01935 hbanner toggle (8 tok)
 -	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
 - inline ai_dmg() in dmg() (7 tok)
 - inline a bunch of other functions (~5-7 each)
 - remove make_dmap argument (priotize resource) (5 tok)
+- revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 

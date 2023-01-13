@@ -2246,7 +2246,7 @@ function as(start,goal)
 					last=n,
 					cfs=32767,
 					ctg=
-					dist(n[1]-goal[1],n[2]-goal[2])
+						dist(n[1]-goal[1],n[2]-goal[2])
 				}
 				fr_len+=1
 				fr[fr_len],best_table[n.k]=old_best,old_best
