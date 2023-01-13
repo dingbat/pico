@@ -876,8 +876,8 @@ portx=40
 porty=80]],function()
 	mound.p1.units=
 		add(mound.prod,parse([[
-t=8
-r=4
+t=12
+r=7
 g=0
 b=0
 p=
