@@ -201,9 +201,9 @@ function _draw()
 	draw_map(mapw8,15) --fog
 	end
 
-	_pal,pal,buttons=pal,max,{}
+	_pal,pal=pal,max
 	foreach(af,draw_unit)
-	pal=_pal
+	pal,buttons=_pal,{}
 	pal()
 
 	fillp"23130.5"--▒
@@ -356,7 +356,7 @@ dead_y=12
 portx=0
 porty=72
 dir=1
-unit=2
+unit=1
 carry=6
 ant=1
 tmap=-1]]
@@ -2714,9 +2714,9 @@ end
 --]]
 
 function ai_init()
-	bmins,defsqd,offsqd,atksqd,
+	defsqd,offsqd,atksqd,
 		cx,cy=
-		1.25,{},{},{},
+		{},{},{},
 		unspl(res1.pos,":")
 	
 	make_dmaps"d"
@@ -2728,14 +2728,11 @@ function ai_frame()
 		{},{},0,0
 
 	for i=0,res2.boi,2 do
-		if i>=16 then
-			bmins=1.4
-		end
 		ai_bld(i)
 	end
 
 	foreach(units,ai_unit1)
-	bal=#miners\bmins-bants
+	bal=#miners\1.5-bants
 	foreach(units,ai_unit2)
 
 	if #offsqd>=14 and inv==0 then
@@ -2764,13 +2761,12 @@ function ai_unit1(u)
 			end
 			add(u.rs and u.rs!="r" and
 				miners,u)
-		--excludes ants
-		elseif u.typ.unit==1 then
+		elseif u.typ.unit then
 			if u.dead then
 				del(u.sqd,u)
 			elseif not u.sqd then
 				u.sqd=(#defsqd>#offsqd or
-					u.typ.atk_typ=="seige") and
+					u.typ.seige) and
 					offsqd or defsqd
 				add(u.sqd,u)
 			end
