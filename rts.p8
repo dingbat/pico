@@ -2059,7 +2059,9 @@ function dmap_find(u,k)
 end
 
 function make_dmaps(r)
-	queue,asc=split(parse[[r=r,g,b,d
+	--reset a* cache
+	queue,asc=split(
+		parse[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
 d=d,r,g,b]][r]),{}
@@ -2068,64 +2070,59 @@ end
 function dmap()
 	local q=queue[1]
 	if q then
-		if #q==1 then
-		queue[1]=make_dmap(q)
-		else
-			dmapcc(q)
+		if q.k then
+			for i=1,#q.open do
+				if i>20 then
+					--continue next tick
+					return
+				end
+				local p=deli(q.open)
+				q.dmap[p.k]=q.c
+				if q.c<8 then
+					surr(p[1],p[2],function(t)
+						q.closed[t.k]=
+							q.closed[t.k] or
+							add(q.nxt,t)
+					end)
+				end
+			end
+			q.c+=1
+			q.open,q.nxt=q.nxt,{}
 			if q.c==9 then
 				dmaps[q.k]=
 					deli(queue,1).dmap
 			end
-		end
-	end
-end
-
-function dmapcc(q)
-	for i=1,#q.open do
-		if (i>20)	return
-		local p=deli(q.open)
-		q.dmap[p.k]=q.c
-		if q.c<8 then
-			surr(p[1],p[2],function(t)
-				if not q.closed[t.k] then
-					q.closed[t.k]=add(q.nxt,t)
+		else
+			--build a new dmap for the
+			--key q (r,g,b,d)
+			if not dmap_st[q] then
+				dmap_st[q]={}
+				for x=0,mapw do
+				for y=0,maph do
+					if fget(mget(x,y),
+						key2resf[q]) then
+						s(dmap_st[q],x,y,{x,y})
+					end
 				end
-			end)
-		end
-	end
-	q.c+=1
-	q.open,q.nxt=q.nxt,{}
-end
-
-function make_dmap(k)
-	if not dmap_st[k] then
-		dmap_st[k]={}
-		for x=0,mapw do
-		for y=0,maph do
-			if
-				fget(mget(x,y),key2resf[k])
-			then
-				s(dmap_st[k],x,y,{x,y})
+				end
 			end
-		end
+		
+			local open={}
+			for i,t in next,dmap_st[q] do
+				if	surr(unpack(t)) then
+					add(open,t).k=i
+				end
+			end
+			queue[1]={
+				k=q,
+				dmap={},
+				open=open,
+				c=0,
+				closed={},
+				nxt={},
+			}
 		end
 	end
-
-	local open={}
-	for i,t in next,dmap_st[k] do
-		if	surr(unpack(t)) then
-			add(open,t).k=i
-		end
-	end
-
-	return {
-		k=k,
-		dmap={},
-		open=open,
-		c=0,
-		closed={},
-		nxt={},
-	}
 end
 
 --a*
@@ -2167,7 +2164,7 @@ function as(start,goal)
 	local k=start.k|goal.k>>16
 	local c=asc[k] --cache
 	if c then
-		--{upk} for new table
+		--{unpack} for new table
 		return {unpack(c)},c.e
 	end
 
