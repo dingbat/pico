@@ -127,7 +127,7 @@ c=13]],p.x,p.y))
 			bldg_sel or
 			enemy_sel or {}
 	end
-	sel1,numsel,sel_typ=
+	sel1,nsel,sel_typ=
 		selection[1],#selection
 	foreachsel(function(s)
 		sel_typ=(sel_typ==nil or
@@ -1399,7 +1399,7 @@ end
 
 function cam()
 	local b=btn()
-	if (b>32) b>>=8 --esdf
+	if (b>32) b>>=8
 	cx,cy,amx,amy=
 		mid(
 			cx+(b&0x2)-(b&0x1)*2,
@@ -1812,16 +1812,16 @@ end
 function mine(u)
 	local r,x,y=u.st.res,unpack(u.st)
 	local t=mget(x,y)
-	local full=resqty[fget(t)]
-	local n=g(restiles,x,y,full)
-	if not full then
+	local f=resqty[fget(t)]
+	local n=g(restiles,x,y,f)
+	if not f then
 		if not mine_nxt_res(u,r) then
 			drop(u,r)
 		end
 	elseif fps==u.st.fps then
 		collect(u,r)
 		if t<112 and
-			(n==full\3 or n==full\1.25)
+			(n==f\3 or n==f\1.25)
 		then
 			del(units,g(ladys,x,y))
 			mset(x,y,t+16)
@@ -2299,21 +2299,21 @@ function get_wayp(u,x,y,tol)
 end
 
 --credit on bbs
-function as(start,goal)
-	local k=start.k|goal.k>>16
+function as(st,g)
+	local k=st.k|g.k>>16
 	local c=asc[k]
 	if c then
 		return {unpack(c)},c.e
 	end
 
 	local sh,best_table,f={
-		last=start,
+		last=st,
 		cfs=0,
 		ctg=32767
 	},{},{}
-	best_table[start.k]=sh
+	best_table[st.k]=sh
 	function path(s)
-		while s.last!=start do
+		while s.last!=st do
 			add(f,{s.last[1]*8+4,
 				s.last[2]*8+4},1)
 			s=best_table[s.prev.k]
@@ -2334,7 +2334,7 @@ function as(start,goal)
 		fr_len-=1
 
 		local p=sh.last
-		if p.k==goal.k then
+		if p.k==g.k then
 			f.e=true
 			return path(sh),1
 		end
@@ -2347,7 +2347,7 @@ function as(start,goal)
 					last=n,
 					cfs=32767,
 					ctg=
-						dist(n[1]-goal[1],n[2]-goal[2])
+						dist(n[1]-g[1],n[2]-g[2])
 				}
 				fr_len+=1
 				fr[fr_len],best_table[n.k]=old_best,old_best
@@ -2439,7 +2439,7 @@ function sel_ports(x)
 			?"\^jmu\|f\f1\^x2...\0"
 		else
 			draw_port(u.typ,
-				numsel>1 and function(r)
+				nsel>1 and function(r)
 					del(selection,u)
 					if r then
 						selection={u}
@@ -2554,7 +2554,7 @@ function draw_menu()
 		pal()
 	end
 
-	if numsel==1 then
+	if nsel==1 then
 		sel_ports(-10)
 		if (sel1.hu) single()
 	elseif sel_typ==ant1 then
@@ -2562,9 +2562,9 @@ function draw_menu()
 	else
 		sel_ports(24)
 	end
-	if numsel>1 then
-		camera(numsel<10 and -2)
-		?"\f1\^j1r\|j\-hX"..numsel
+	if nsel>1 then
+		camera(nsel<10 and -2)
+		?"\f1\^j1r\|j\-hX"..nsel
 		unspr"133,1,111"
 		add(buttons,{
 			r=split"0,110,14,119",
@@ -2762,7 +2762,7 @@ bld_vs_bld=0.1]],
 
 function init()
 	poke(0x5f2d,3)
-	if stat"6"=="custom" then
+	if stat"6"=="map" then
 		memcpy(unspl"8192,-32768,4096")
 	else
 		reload()
@@ -2946,7 +2946,7 @@ function ai_unit1(u)
 end
 
 function ai_unit2(u)
-	function assign(fn)
+	function go(fn)
 		u.w=deli(miners)
 		if u.w then
 			u.w.rs=fn(u.w,u)
@@ -2968,11 +2968,11 @@ function ai_unit2(u)
 			u.hp<u.max_hp*0.75 or
 			u.const
 		then
-			assign(build)
+			go(build)
 		elseif u.typ.farm and
 			not u.const and
 			not u.farmer then
-			assign(gofarm)
+			go(gofarm)
 		elseif
 			u.typ.queen and
 			ants<res2.diff*12 or
