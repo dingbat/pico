@@ -1,0 +1,23 @@
+Tokens
+
+⁃ (1) sfx"", stat"", rnd"", btnp"", fillp"" (lots of apis can be called with strings)
+⁃ (1) if statement whose body is a single function call:
+ ⁃ if function is add,del,deli, you can do: `if (x) add(arr, i)` -> `add(x and arr,i)`. in turn, these will only return true if it actually happened, so this can be used to chain other statements
+ ⁃ if function is setting camera X: `if (b) camera(x)` -> `camera(b and x)`, note that this resets the camera if not b
+ ⁃ for any other function, if there is assignment nearby: `k=v; if (x) f()` -> `k=v,x and f()`
+ ⁃ note that if you need to do "not X and", you can usually just do "X or"
+⁃ (1) use return of add(), del() and deli(): `add(a,b) b.x=y` -> `add(a,b).x=y`
+⁃ (2) `flr(a/b)` -> `a\b`
+⁃ of course _env; remember you can assign _env without `do/end` blocks if at the end of a function
+⁃ (2 per arg) if a function is only used by one other function, you can define it inside the other and remove any arguments already in scope (minor perf cost)
+⁃ (1) if you call any of your own functions with a single truthy value, can do fn"1"
+⁃ a LOT can be done with control codes, large topic but if you are printing to the screen you generally don't ever need to pass args to print since you can move the cursor with \^j, \^| and \^- and you can set color with \F
+⁃ (1) `foreach(a, function(x) end)` saves a token over `for x in all(a) do` at the cost of perf, wouldn't do this with huge arrays
+⁃ (1) extremely specific, but if you're using pal on color 1: pal(1,x) -> pal{x}
+⁃ (1) you can use max()/min() (note they have different behavior) to coerce a potentially non-number value into 0: (bool_or_num or 0) -> max(bool), saves a token because you usually need parens around the first one. There's a bunch of other more general uses of this
+⁃ Highly specific, but sometimes bit ops are useful:
+ ⁃ x!=0 and y!=0 -> x&y!=0
+ ⁃ x==0 and y==0 -> x|y==0
+ ⁃ x^^=0xf0 if x starts at 0 toggles between 0 and a high number, if passed into camera can be used to toggle showing/hiding something
+⁃ (2) check if you actually need cls() (i didn't lol, if you fill the whole screen each frame with e.g. a map you might not)
+⁃ (1) use next,tbl instead of pairs(tbl)
