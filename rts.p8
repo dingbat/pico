@@ -1529,7 +1529,9 @@ function update_unit(u)
 	if u.q and fps%15==u.q.techt%15 then
 		produce(u)
 	end
-	if (u.typ.farm) update_farm(u)
+	if u.typ.farm then
+		update_farm(u,fps)
+	end
 	if st.active then
 		if (st.farm) farmer(u)
 		if t=="build" and fps%30==0 then
@@ -1579,16 +1581,16 @@ function update_unit(u)
 	end
 end
 
-function update_farm(u)
-	local f=u.farmer
-	if not f or f.st.farm!=u
-		or u.exp then
-		u.farmer=nil
-	elseif f.st.active and
-		not u.ready and fps==59 then
-		u.fres+=u.typ.gr
-		u.sproff+=u.typ.gr*2
-		u.ready=u.fres>=9
+function update_farm(_ENV,fps)
+	if not farmer or
+		farmer.st.farm!=_ENV
+		or exp then
+		farmer=nil
+	elseif farmer.st.active and
+		not ready and fps==59 then
+		fres+=typ.gr
+		sproff+=typ.gr*2
+		ready=fres>=9
 	end
 end
 
@@ -2044,8 +2046,7 @@ function unit(t,_x,_y,_p,
 lastp=1
 sproff=0
 cycles=0
-fres=0
-exp=1]])
+fres=0]])
 	do
 		local _ENV,ptyp=u,_typ[_p]
 		max_hp=tonum(_const) and
