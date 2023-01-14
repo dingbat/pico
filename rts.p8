@@ -1584,9 +1584,7 @@ function update_farm(u)
 	if not f or f.st.farm!=u
 		or u.exp then
 		u.farmer=nil
-		return
-	end
-	if f.st.active and
+	elseif f.st.active and
 		not u.ready and fps==59 then
 		u.fres+=u.typ.gr
 		u.sproff+=u.typ.gr*2
