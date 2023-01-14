@@ -2327,7 +2327,9 @@ end
 function sel_ports(x)
 	foreach(selection,function(u)
 		x+=13
-		if x<100 then
+		if x>100 then
+			?"\^jmu\f1\^:0005050707070000\-c\^x2...\0"
+		else
 			draw_port(u.typ,
 				numsel>1 and function()
 					del(selection,u)
