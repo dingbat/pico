@@ -264,6 +264,11 @@ function been(k,dt)
 end
 
 
+startpos:
+	--x*8+7,y*8+4 -64
+	
+--7=128/mmwratio+1
+
 dirty token savers
 ============
 - remove `.."_vs_"..` (2 tok)

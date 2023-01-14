@@ -71,7 +71,7 @@ function _update()
 	end
 
 	if loser then
-		poke"24365" --no mouse
+		poke"24365"
 		if lclk then
 			menu,cx,cy=unspl"63,5,35"
 			music"63"
@@ -207,7 +207,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15) --fog
+	draw_map(mapw,15)
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -263,7 +263,7 @@ function _draw()
 
 	draw_menu()
 	camera()
-	pal() --for alert
+	pal()
 	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
@@ -1354,7 +1354,7 @@ function tick(u)
 	if u.st.t=="attack" then
 		fight(u)
 	end
-	
+
 	if typ.lady and u.st.rest and
 		t6 then
 		wander(u)
@@ -1559,7 +1559,7 @@ c=8]],mx,my))
 				min(sely,my),
 				max(selx,mx),
 				max(sely,my),
-				7 --col
+				7
 			}
 		else
 			selx=nil
@@ -1608,7 +1608,7 @@ function draw_unit(u)
 	pal(typ.farm and 5,selc or 5)
 	pal{
 		selc or u.p,
-		u.p,--qn☉
+		u.p,--☉
 		[14]=0
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -1826,7 +1826,7 @@ function mine(u)
 			del(units,g(ladys,x,y))
 			mset(x,y,t+16)
 		elseif n==1 then
-			mset(x,y,68) --░
+			mset(x,y,68)
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
 			make_dmaps(r)
@@ -1965,7 +1965,7 @@ function pay(costs,dir,_ENV)
 	end
 end
 
--- musurca/freds bbs/?tid=36059
+--credit on bbs
 function dist(dx,dy)
 	local maskx,masky=dx>>31,dy>>31
 	local a0,b0=(dx+maskx)^^maskx,
@@ -2250,7 +2250,7 @@ function dmap()
 				end
 				end
 			end
-		
+
 			local open={}
 			for i,t in next,dmap_st[q] do
 				if	surr(unpack(t)) then
@@ -2259,17 +2259,13 @@ function dmap()
 			end
 			queue[1]=parse(
 				"c=0",
-				--dmap=p1
-				--nxt=p2
-				open,--typ
-				{},--closed=tech
-				q--techt
+				open,
+				{},
+				q
 			)
 		end
 	end
 end
-
---a*
 
 function get_wayp(u,x,y,tol)
 	function nearest_acc(gx,gy)
@@ -2289,7 +2285,7 @@ function get_wayp(u,x,y,tol)
 	end
 	if u.typ.unit then
 		local dest,dest_d=
-			nearest_acc(x,y)	
+			nearest_acc(x,y)
 		local wayp,exists=as(
 			nearest_acc(u.x,u.y),
 			dest)
@@ -2302,12 +2298,11 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---based on a* by morgan3d
+--credit on bbs
 function as(start,goal)
 	local k=start.k|goal.k>>16
 	local c=asc[k]
 	if c then
-		--copy table
 		return {unpack(c)},c.e
 	end
 
@@ -2421,7 +2416,7 @@ function draw_port(
 		unspl"9,8,1,1")
 	spr(max(typ.up)+182,2,1)
 	pal()
-	
+
 	add(fn and buttons,{
 		r={x,y,x+10,y+8},
 		fn=fn,
@@ -2599,7 +2594,7 @@ porto=2
 portf=13
 ]],axn,20,108)
 	end
-	
+
 	camera(-mmx,-mmy)
 
 	sspr(
@@ -2624,18 +2619,17 @@ portf=13
 			end
 		}) and 48 or 56,
 		unspl"98,8,6,0,14")
-	
+
 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 	sspr(unspl"109,72,19,12,0,0")
 	camera(
 		-mmx-ceil(cx/mmwratio),
 		-mmy-ceil(cy/mmhratio)
 	)
-	--7=128/mmwratio+1
 	rect(unspl"-1,-1,7,7,10")
 
 	resbar()
-	
+
 	if hovbtn and hovbtn.costs and
 		res1.reqs|hovbtn.costs.breq==
 			res1.reqs then
@@ -2678,7 +2672,7 @@ unl,unspr,
 	key2resf,rescol,
 	resoffx,resoffy,renewcost,
 	dmg_mult,
-	
+
 	ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,
@@ -2768,14 +2762,12 @@ bld_vs_bld=0.1]],
 
 function init()
 	poke(0x5f2d,3)
-	--loaded from #aoa_editor
 	if stat"6"=="custom" then
-		--userdata->map
 		memcpy(unspl"8192,-32768,4096")
 	else
 		reload()
 	end
-	
+
 	music(unspl"0,0,7")
 	menuitem(3,"∧ resign",
 		function() hq.hp=0 end)
@@ -2807,8 +2799,6 @@ t=0]]
 	ant1,res1,res2,startpos,
 	fps,selt,alert,banner=
 		ant.p1,res.p1,res.p2,
-		--from qn tile,
-		-- x*8+7-64,y*8+4-64
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
 		unspl"59,0,0,0"
 end
@@ -2848,7 +2838,7 @@ function ai_init()
 		cx,cy=
 		{},{},{},units[1],0,0,
 		unspl(res1.pos,":")
-	
+
 	make_dmaps"d"
 end
 
@@ -2903,12 +2893,12 @@ function ai_frame()
 			res2.boi+=2
 		end
 	end
-	
+
 	if res2.diff==1 then
 		res2.tot,safe=res2.p,
 			t()-last_atk>180
 	end
-	
+
 	foreach(units,ai_unit1)
 	bal=#miners\2.75-gants
 	foreach(units,ai_unit2)
@@ -2962,7 +2952,7 @@ function ai_unit2(u)
 			u.w.rs=fn(u.w,u)
 		end
 	end
-	
+
 	if u.ai then
 		local r=bal>0 and "g" or
 			bal<0 and "b"
@@ -2983,7 +2973,7 @@ function ai_unit2(u)
 			not u.const and
 			not u.farmer then
 			assign(gofarm)
-		elseif 
+		elseif
 			u.typ.queen and
 			ants<res2.diff*12 or
 			u.typ.units and
@@ -3021,7 +3011,7 @@ function ai_dmg(u)
 end
 
 -->8
---save/load
+--save
 
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
