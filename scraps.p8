@@ -291,6 +291,7 @@ x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - remove make_dmap argument (priotize resource) (5 tok)
 - revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
 - remove aoe hilite effect (15 tok)
+- a8c9657 add `id=0` to cat (2 tok)
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
@@ -356,9 +357,12 @@ putting research in bo:
 	end
 
 
-
+- new unit prices, better balancing
 - praying mantis monk
 - wild ladybug, can be eaten for food
 - random start pos
 - new upgrades, some are repeatable
-- 
+- idle worker/military building
+- double click
+- click on unit pic to deselect it, right click to select only it
+- alert when being attacked offscreen

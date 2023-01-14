@@ -821,9 +821,9 @@ tmap=-1]]
 
 mon=parse[[
 idx=25
-los=1
-hp=48
-const=8
+los=25
+hp=300
+const=16
 hpr=8
 def=bld
 
@@ -850,10 +850,10 @@ tmap=-1]]
 
 monk=parse[[
 idx=26
-spd=0.21
-los=35
-hp=10
-melee=35
+spd=0.25
+los=45
+hp=6
+melee=40
 atk_freq=60
 atk=0
 atk_typ=ant
@@ -931,8 +931,8 @@ i=7]],castle)
 
 mon.prod={
 	parse([[
-t=10
-r=5
+t=20
+r=0
 g=10
 b=0
 p=
@@ -1825,8 +1825,8 @@ function buildrepair(u)
 		end
 	elseif b.hp<b.max_hp and
 		r.b>=1 then
-		b.hp+=1
-		r.b-=0.5
+		b.hp+=2
+		r.b-=0.1
 	else
 		rest(u)
 	end
