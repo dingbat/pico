@@ -29,9 +29,6 @@ function _update()
 		end
 		if lclk then
 			new_game()
-			tostr[[[[]]
-			if (ai_debug)_update=_update60
-			--]]
 		else
 			return
 		end
@@ -214,9 +211,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	if not ai_debug then
 	draw_map(mapw,15) --fog
-	end
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -864,25 +859,25 @@ porty=80]],function(_ENV)
 	spd*=1.12
 	gr*=0.9 --3,2.8,2.43,2.18
 end,ant),
---parse([[
---t=20
---r=10
---g=10
---b=10
---breq=4
---tmap=2
---idx=24]],parse[[
---portx=40
---porty=80]],function()
---	mound.p1.units=
---		add(mound.prod,parse([[
---t=12
---r=7
---g=0
---b=0
---p=
---breq=0]],ant))
---end,{})
+parse([[
+t=20
+r=10
+g=10
+b=10
+breq=4
+tmap=2
+idx=24]],parse[[
+portx=40
+porty=80]],function()
+	mound.p1.units=
+		add(mound.prod,parse([[
+t=12
+r=7
+g=0
+b=0
+p=
+breq=0]],ant))
+end,{})
 }
 
 den.prod={
@@ -2285,9 +2280,6 @@ end
 --menu
 
 function print_res(r,x,y,zero)
-	tostr[[[[]]
-	local res1=ai_debug and res2 or res1
-	--]]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2514,12 +2506,6 @@ portf=13
 ]],20,108,nil,axn)
 	end
 	
-	tostr[[[[]]
-	if ai_debug then
-		?(res1.t\60)..":"..res1.t\1%60,80,122
-	end
-	--]]
-
 	camera(-mmx,-mmy)
 
 	sspr(
@@ -2573,9 +2559,6 @@ end
 
 function resbar()
 	camera()
-	tostr[[[[]]
-	local res1=ai_debug and res2 or res1
-	--]]
 	rectfill(unspl"0,120,30,128,7")
 	camera(-print_res(res1,
 		unspl"1,122,2"))
@@ -2701,6 +2684,19 @@ function init()
 	else
 		reload()
 	end
+	
+	tostr[[[[]]
+--ai_debug=true
+srand"1"
+if ai_debug then
+	_update60=_update
+	for y=0,31 do
+		--clear fog
+		memset(0x2030+y*128,0,48)
+	end
+end
+--]]
+	
 	music(unspl"0,0,7")
 	menuitem(3,"∧ resign",
 		function() hq.hp=0 end)
@@ -2766,14 +2762,6 @@ function new_game()
 end
 -->8
 --ai
-
-tostr[[[[]]
---ai_debug=true
-srand"1"
-if ai_debug then
-	_update60=_update
-end
---]]
 
 function ai_init()
 	defsqd,offsqd,atksqd,hq,
