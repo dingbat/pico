@@ -1796,7 +1796,8 @@ function fight(u)
 	end
 	u.st.active=in_range
 	if in_range then
-		u.dir,u.st.wayp=sgn(dx)
+		u.dir=sgn(dx)
+		if (not u.st.adj) u.st.wayp=nil
 	elseif u.upd then
 		if typ.los>=d and typ.unit then
 			attack(u,e)
@@ -2818,7 +2819,7 @@ function new_game()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-6,57,76,1
+5,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
