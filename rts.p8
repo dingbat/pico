@@ -1205,7 +1205,9 @@ function gather(u,tx,ty,wp)
 	u.st={
 		tx,ty,
 		t="gather",
-		res=f2res[fget(mget(tx,ty))],
+		res=parse[[7=r
+11=g
+19=b]][fget(mget(tx,ty))],
 		wayp=wp or
 			get_wayp(u,t.x,t.y),
 		target=t,
@@ -1832,7 +1834,9 @@ end
 function mine(u)
 	local r,x,y=u.st.res,unpack(u.st)
 	local t=mget(x,y)
-	local f=resqty[fget(t)]
+	local f=parse[[7=45
+11=50
+19=40]][fget(t)]
 	local n=g(restiles,x,y,f)
 	if not f then
 		if not mine_nxt_res(u,r) then
@@ -2259,19 +2263,20 @@ function dmap()
 					deli(queue,1).p1
 			end
 		else
+			local open,f={},parse[[r=2
+g=3
+b=4]][q]
 			if not dmap_st[q] then
 				dmap_st[q]={}
 				for x=0,mapw do
 				for y=0,maph do
-					if fget(mget(x,y),
-						key2resf[q]) then
+					if fget(mget(x,y),f) then
 						s(dmap_st[q],x,y,{x,y})
 					end
 				end
 				end
 			end
 
-			local open={}
 			for i,t in next,dmap_st[q] do
 				if	surr(unpack(t)) then
 					add(open,t).k=i
@@ -2679,8 +2684,7 @@ pspl,rndspl,unspl,spldeli=
 	comp(split,deli)
 
 unl,unspr,
-	reskeys,f2res,resqty,
-	key2resf,rescol,
+	resk,rescol,
 	resoffx,resoffy,renewcost,
 	dmg_mult,
 
@@ -2695,30 +2699,16 @@ unl,unspr,
 	comp(spr,unspl),
 	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t,pos",
 parse[[
-6=r
-7=r
-11=g
-19=b]],parse[[
-6=55
-7=45
-11=50
-19=40]],parse[[
-r=2
-g=3
-b=4
-d=d]],parse[[
 r=8
 g=11
 b=4
 p=1
-
 v0=15
 v1=15
 v7=8
 v11=11
 v19=4
 v33=12
-
 e0=5
 e1=5
 e7=8
@@ -3046,7 +3036,7 @@ menuitem(1,"⌂ save to clip",function()
 		s..=k..","
 	end
 	s..="/"
-	foreach(reskeys,function(r)
+	foreach(resk,function(r)
 		s..=res1[r]..","..res2[r]..","
 	end)
 	printh(s,"@clip")
@@ -3058,7 +3048,7 @@ menuitem(2,"◆ load pasted",function()
 	local data,res1=
 		split(stat"4","/"),res1
 	local r=spldeli(data)
-	for i,k in inext,reskeys do
+	for i,k in inext,resk do
 		i*=2
 		res1[k],res2[k]=r[i-1],r[i]
 	end
