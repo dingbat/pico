@@ -1556,7 +1556,8 @@ function update_unit(u)
 				sgn(targ.x-u.x),true,fps
 			if t=="drop" then
 				if u.res then
-					res[u.p][u.res.typ]+=u.res.qty/u.typ.gr
+					res[u.p][u.res.typ]+=
+						u.res.qty/u.typ.gr
 				end
 				u.res=nil
 				if st.farm then
@@ -1632,7 +1633,9 @@ function agg(u)
 			d<=u.typ.los
 		then
 			if e.typ.bldg then
-				d+=u.typ.seige and e.typ.bldg==1 and -999 or 999
+				d+=u.typ.seige and
+					e.typ.bldg==1 and
+					-999 or 999
 			end
 			if d<targ_d then
 				targ,targ_d=e,d
@@ -1999,7 +2002,9 @@ function wander(u)
 end
 
 function dmg(from_typ,to)
-	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ.."_vs_"..to.typ.def]
+	to.hp-=from_typ.atk*
+	 dmg_mult[from_typ.atk_typ..
+	 	"_vs_"..to.typ.def]
 	if to.typ.unit and (
 		to.st.rest or to.st.res) then
 		wander(to)
@@ -2693,6 +2698,7 @@ function init()
 	--allow chain-loading a custom
 	--map/bo (use #rts_loader)
 	if stat"6"=="custom" then
+		--cpy userdata into map
 		--0x2000,0x8000,0x1000
 		memcpy(unspl"8192,-32768,4096")
 	else
@@ -2765,7 +2771,7 @@ end
 --ai
 
 tostr[[[[]]
-ai_debug=true
+--ai_debug=true
 srand"1"
 if ai_debug then
 	_update60=_update
@@ -2836,7 +2842,7 @@ function ai_frame()
 	
 	if res2.diff==1 then
 		res2.tot,safe=res2.p,
-			t()-last_atk>120
+			t()-last_atk>180
 	end
 	
 	foreach(units,ai_unit1)
@@ -2886,6 +2892,13 @@ function ai_unit1(u)
 end
 
 function ai_unit2(u)
+	function assign(fn)
+		u.w=deli(miners)
+		if u.w then
+			u.w.rs=fn(u.w,u)
+		end
+	end
+	
 	if u.ai then
 		local r=bal>0 and "g" or
 			bal<0 and "b"
@@ -2895,31 +2908,23 @@ function ai_unit2(u)
 			bal=0
 			miner(u,r)
 		end
-		function assign(fn)
-			u.w=deli(miners)
-			if u.w then
-				u.w.rs=fn(u.w,u)
-			end
-		end
-		if u.typ.bldg and
+		if (not u.w or
+			u.w.st.target!=u) and
+			u.typ.bldg and
 			u.hp<u.max_hp*0.75 or
 			u.const
 		then
-			if not u.w or
-				u.w.st.target!=u then
-				assign(build)
-			end
+			assign(build)
 		elseif u.typ.farm and
 			not u.const and
 			not u.farmer then
 			assign(gofarm)
-		elseif u.typ.queen then
-			if ants<res2.diff*12 then
-				ai_prod(u)
-			end
-		elseif u.typ.units and
+		elseif 
+			u.typ.queen and
+			ants<res2.diff*12 or
+			u.typ.units and
 			res2.p<res2.diff*26
-	 then
+		then
 			ai_prod(u)
 		end
 	end
