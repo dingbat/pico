@@ -2343,7 +2343,6 @@ function draw_port(
 		unl"10,11,0,11"
 		line(10*r,11,fg)
 	end
-	camera()
 end
 
 function sel_ports(x)
@@ -2360,7 +2359,8 @@ function sel_ports(x)
 				del(selection,u)
 			end,
 			x,107,nil,
-			max(u.hp)/u.max_hp,8,11,u)
+			max(u.hp)/u.max_hp,8,11,u
+		)
 	end
 end
 
