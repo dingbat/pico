@@ -2923,9 +2923,29 @@ function ai_unit2(u)
 			u.typ.queen and
 			ants<res2.diff*12 or
 			u.typ.units and
+			not u.typ.queen and
 			res2.p<res2.diff*26
 		then
-			ai_prod(u)
+			local p=u.prod[u.lastp]
+			function nohold()
+				for k in all(split"r,g,b") do
+					if uhold and p[k]!=0 and
+						res2[k]-p[k]<uhold[k] then
+						return
+					end
+				end
+				return true
+			end
+			if not u.q and nohold() and
+				can_pay(p,res2) and
+				t()-last_prod>split"10,0,0"[res2.diff]
+			then
+				queue_prod(u,p)
+				u.lastp%=u.typ.units
+				u.lastp+=1
+				res2.tot+=1
+				last_prod=t()
+			end
 		end
 	end
 end
@@ -2936,28 +2956,6 @@ function ai_dmg(u)
 	end
 end
 
-function ai_prod(u)
-	local p=u.prod[u.lastp]
-	function nohold()
-		for k in all(split"r,g,b") do
-			if uhold and p[k]!=0 and
-				res2[k]-p[k]<uhold[k] then
-				return
-			end
-		end
-		return true
-	end
-	if not u.q and nohold() and
-		can_pay(p,res2) and
-		t()-last_prod>split"10,0,0"[res2.diff]
-	then
-		queue_prod(u,p)
-		u.lastp%=u.typ.units
-		u.lastp+=1
-		res2.tot+=1
-		last_prod=t()
-	end
-end
 -->8
 --save/load
 
