@@ -1814,12 +1814,6 @@ function parse(str,typ,tech,t)
 	return obj
 end
 
-function sel_only(unit)
-	sfx"1"
-	hilite(unit)
-	selection={unit}
-end
-
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
@@ -2528,25 +2522,28 @@ portf=13
 
 	camera(-mmx,-mmy)
 
-	sspr(idle and 48 or 56,
+	sspr(
+		add(buttons,idle and {
+			r=split"116,121,125,128",
+			fn=function()
+				sfx"1"
+				hilite(idle)
+				selection={idle}
+				cx,cy=idle.x-64,idle.y-64
+				cam()
+			end
+		}) and 48 or 56,
 		unspl"105,8,6,11,14")
-	add(buttons,idle and {
-		r=split"116,121,125,128",
-		fn=function()
-			sel_only(idle)
-			cx,cy=idle.x-64,idle.y-64
-			cam()
-		end
-	})
 
-	sspr(idle_mil and 24 or 32,
+	sspr(
+		add(buttons,idle_mil and {
+			r=split"106,121,113,128",
+			fn=function()
+				hilite(idle_mil)
+				selection={idle_mil}
+			end
+		}) and 24 or 32,
 		unspl"114,8,6,0,14")
-	add(buttons,idle_mil and {
-		r=split"106,121,113,128",
-		fn=function()
-			sel_only(idle_mil)
-		end
-	})
 	
 	--minimap
 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
