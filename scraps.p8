@@ -264,6 +264,11 @@ function been(k,dt)
 end
 
 
+
+
+				88-i%5*12,
+				106+i\5*11,
+
 startpos:
 	--x*8+7,y*8+4 -64
 	

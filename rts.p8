@@ -1134,7 +1134,7 @@ t=40
 r=20
 g=0
 b=0
-breq=0
+breq=64
 i=6
 tmap=256
 idx=22]],parse[[
@@ -2288,7 +2288,7 @@ function dmap()
 end
 
 function get_wayp(u,x,y,tol)
-	function nearest_acc(gx,gy)
+	function near(gx,gy)
 		for n=0,16 do
 			local best_d,best_t=32767
 			surr(gx\8,gy\8,function(t)
@@ -2304,11 +2304,9 @@ function get_wayp(u,x,y,tol)
 		end
 	end
 	if u.typ.unit then
-		local dest,dest_d=
-			nearest_acc(x,y)
+		local dest,dest_d=near(x,y)
 		local wayp,exists=as(
-			nearest_acc(u.x,u.y),
-			dest)
+			near(u.x,u.y),dest)
 		if exists and
 			dest_d<=(tol or 1) then
 			deli(wayp)
@@ -2326,32 +2324,29 @@ function as(st,g)
 		return {unpack(c)},c.e
 	end
 
-	local sh,best_table,f={
-		last=st,
-		cfs=0,
-		ctg=32767
+	local sh,t,f={
+		last=st,cfs=0,ctg=32767
 	},{},{}
-	best_table[st.k]=sh
+	t[st.k]=sh
 	function path(s)
 		while s.last!=st do
 			add(f,{s.last[1]*8+4,
 				s.last[2]*8+4},1)
-			s=best_table[s.prev.k]
+			s=t[s.prev.k]
 		end
 		asc[k]=f
 		return f
 	end
-	local fr,fr_len,closest=
-		{sh},1,sh
-	while fr_len>0 do
-		local cost,index_of_min=32767
-		for i=1,fr_len do
+	local fr,frl,cl={sh},1,sh
+	while frl>0 do
+		local cost,iom=32767
+		for i=1,frl do
 			local temp=fr[i].cfs+fr[i].ctg
-			if (temp<=cost) index_of_min,cost=i,temp
+			if (temp<=cost) iom,cost=i,temp
 		end
-		sh=fr[index_of_min]
-		fr[index_of_min],sh.dead=fr[fr_len],true
-		fr_len-=1
+		sh=fr[iom]
+		fr[iom],sh.dead=fr[frl],true
+		frl-=1
 
 		local p=sh.last
 		if p.k==g.k then
@@ -2359,28 +2354,25 @@ function as(st,g)
 			return path(sh),1
 		end
 		surr(p[1],p[2],function(n)
-			local old_best,ncfs=
-				best_table[n.k],
-				sh.cfs+n.d
-			if not old_best then
-				old_best={
+			local ob,ncfs=t[n.k],sh.cfs+n.d
+			if not ob then
+				ob={
 					last=n,
 					cfs=32767,
-					ctg=
-						dist(n[1]-g[1],n[2]-g[2])
+					ctg=dist(n[1]-g[1],n[2]-g[2])
 				}
-				fr_len+=1
-				fr[fr_len],best_table[n.k]=old_best,old_best
+				frl+=1
+				fr[frl],t[n.k]=ob,ob
 			end
-			if not old_best.dead and old_best.cfs>ncfs then
-				old_best.cfs,old_best.prev=ncfs,p
+			if not ob.dead and ob.cfs>ncfs then
+				ob.cfs,ob.prev=ncfs,p
 			end
-			if old_best.ctg<closest.ctg then
-				closest=old_best
+			if ob.ctg<cl.ctg then
+				cl=ob
 			end
 		end)
 	end
-	return path(closest)
+	return path(cl)
 end
 -->8
 --menu
