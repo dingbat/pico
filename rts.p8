@@ -2325,8 +2325,7 @@ function draw_port(
 	)
 	pspl(
 		nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,0,5"
-		or "1,2,3,4,5,6,7,8,9,10,11,12,13,0")
-	pal(costs or 6,7)
+		or "1,2,3,4,5,7,7,8,9,10,11,12,13,0")
 	sspr(typ.portx,typ.porty,
 		unspl"9,8,1,1")
 	spr(max(typ.up)+182,2,1)
@@ -2343,25 +2342,22 @@ function draw_port(
 		unl"10,11,0,11"
 		line(10*r,11,fg)
 	end
+	camera()
 end
 
 function sel_ports(x)
-	for i,u in inext,selection do
+	foreach(selection,function(u)
 		x+=13
-		if i>5 then
-			if (numsel>14) x-=4
-			camera(-?"\f1+"..numsel-5,x-15,121)
-			unspr"133,1,121"
-			return
+		if x<100 then
+			draw_port(u.typ,
+				numsel>1 and function()
+					del(selection,u)
+				end,
+				x,107,nil,
+				max(u.hp)/u.max_hp,8,11,u
+			)
 		end
-		draw_port(u.typ,
-			numsel>1 and function()
-				del(selection,u)
-			end,
-			x,107,nil,
-			max(u.hp)/u.max_hp,8,11,u
-		)
-	end
+	end)
 end
 
 function single()
@@ -2383,8 +2379,7 @@ portf=9]],
 	end
 
 	if sel1.typ.farm then
-		camera(-?sel1.cycles.."/"..sel_typ.cycles,unspl"45,111,4")
-		sspr(unspl"48,96,9,9,2,109")
+		?"\f4\^jbr\|i"..sel1.cycles.."/"..sel_typ.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2426,7 +2421,7 @@ portf=9]],
 				sfx"18"
 			end,
 			b.tech and 24 or
-				?"X"..q.qty,unspl"32,110,7"
+				?"\f7\^j8r\|iX"..q.qty
 				and 20,
 			107,nil,
 			q.tech/b.t,5,12
@@ -2466,7 +2461,6 @@ function draw_menu()
 		x-=sec
 		pal()
 	end
-	camera()
 
 	if numsel==1 then
 		sel_ports(-10)
