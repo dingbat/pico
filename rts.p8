@@ -2305,7 +2305,7 @@ function print_res(r,x,y,zero)
 end
 
 function draw_port(
-	typ,x,y,costs,fn,r,bg,fg,u)
+	typ,fn,x,y,costs,r,bg,fg,u)
 	camera(-x,-y)
 	local nopay,axnsel=
 		costs and not can_pay(costs,res1),
@@ -2355,10 +2355,11 @@ function sel_ports(x)
 			unspr"133,1,121"
 			return
 		end
-		draw_port(u.typ,x,107,nil,
+		draw_port(u.typ,
 			numsel>1 and function()
 				del(selection,u)
 			end,
+			x,107,nil,
 			max(u.hp)/u.max_hp,8,11,u)
 	end
 end
@@ -2370,11 +2371,12 @@ function single()
 portx=72
 porty=72
 porto=8
-portf=9]],24,107,nil,
+portf=9]],
 			function()
 				pay(sel1.cost,1,res1)
 				sel1.hp=0
-			end,sel1.const/sel_typ.const,
+			end,24,107,nil,
+			sel1.const/sel_typ.const,
 			5,12
 		)
 		return
@@ -2389,9 +2391,6 @@ portf=9]],24,107,nil,
 			i-=1
 			draw_port(
 				b.typ,
-				88-i%4*13,
-				106+i\4*11,
-				b,
 				function()
 					if can_pay(b,res1) and (
 						not q or
@@ -2406,7 +2405,10 @@ portf=9]],24,107,nil,
 					else
 						sfx"16"
 					end
-				end
+				end,
+				88-i%4*13,
+				106+i\4*11,
+				b
 			)
 		end
 	end
@@ -2414,10 +2416,6 @@ portf=9]],24,107,nil,
 		local b=q.typ
 		draw_port(
 			b.typ,
-			b.tech and 24 or
-				?"X"..q.qty,unspl"32,110,7"
-				and 20,
-			107,nil,
 			function()
 				b.done=pay(b,1,res1)
 				if q.qty==1 then
@@ -2426,7 +2424,12 @@ portf=9]],24,107,nil,
 					q.qty-=1
 				end
 				sfx"18"
-			end,q.tech/b.t,5,12
+			end,
+			b.tech and 24 or
+				?"X"..q.qty,unspl"32,110,7"
+				and 20,
+			107,nil,
+			q.tech/b.t,5,12
 		)
 	end
 	if sel1.typ.units then
@@ -2435,7 +2438,7 @@ portx=120
 porty=64
 porto=15
 portf=15
-]],42,108,nil,axn)
+]],axn,42,108)
 	end
 end
 
@@ -2488,7 +2491,7 @@ function draw_menu()
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
-		action==2 and parse[[
+			action==2 and parse[[
 portx=99
 porty=72
 porto=2
@@ -2503,7 +2506,7 @@ portx=90
 porty=72
 porto=2
 portf=13
-]],20,108,nil,axn)
+]],axn,20,108)
 	end
 	
 	camera(-mmx,-mmy)
