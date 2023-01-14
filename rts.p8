@@ -1334,8 +1334,8 @@ function input()
 		action==0,
 		tile_as_unit(mx8,my8),action
 
-	if lclk and hovbtn then
-		hovbtn.fn()
+	if (lclk or rclk) and hovbtn then
+		hovbtn.fn(rclk)
 		if (axn==action) action=0
 		return
 	end
@@ -2332,8 +2332,11 @@ function sel_ports(x)
 			?"\^jmu\|f\f1\^x2...\0"
 		else
 			draw_port(u.typ,
-				numsel>1 and function()
+				numsel>1 and function(r)
 					del(selection,u)
+					if r then
+						selection={u}
+					end
 				end,
 				x,107,nil,
 				max(u.hp)/u.max_hp,8,11,u
