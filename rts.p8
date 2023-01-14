@@ -77,7 +77,7 @@ function _update()
 			music"63"
 		end
 		if rclk then
-			banner^^=0xf0
+			ban^^=0xf0
 		end
 		return
 	end
@@ -186,7 +186,7 @@ function _draw()
 	if loser then
 		resbar()
 		local secs=res1.t\1%60
-		camera(banner)
+		camera(ban)
 		rectfill(unspl"0,88,128,107,9")
 		unl"6,87,44,87"
 		unl"86,87,125,87"
@@ -207,7 +207,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15)
+	draw_map(mapw,15) --f
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -219,18 +219,18 @@ function _draw()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
-		local brd=function(arr,col)
+		local b=function(a,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
-			if (arr[i-1]) unl"-1,0,-1,7"
-			if (arr[i-256]) unl"0,-1,7,-1"
-			if (arr[i+256]) unl"0,8,7,8"
-			if (arr[i+1]) unl"8,0,8,7"
+			if (a[i-1]) unl"-1,0,-1,7"
+			if (a[i-256]) unl"0,-1,7,-1"
+			if (a[i+256]) unl"0,8,7,8"
+			if (a[i+1]) unl"8,0,8,7"
 		end
 		if not exp[i] then
-			brd(exp)
+			b(exp)
 		elseif not viz[i] then
-			brd(viz,
+			b(viz,
 				fget(mget(x,y),7) or 5)
 		end
 	end
@@ -1281,12 +1281,13 @@ function tick(u)
 				{x8,y8})
 			make_dmaps"r"
 			u.dead=61
-		end
-		local _ENV=res[u.p]
-		if typ.drop and not u.const then
-			pl-=typ.drop
-		elseif typ.unit then
-			p-=1
+		else
+			local _ENV=res[u.p]
+			if typ.drop and not u.const then
+				pl-=typ.drop
+			elseif typ.unit then
+				p-=1
+			end
 		end
 	end
 
@@ -1683,7 +1684,7 @@ function update_unit(u)
 				end
 			end
 		elseif st.res and not wayp then
-			mine_nxt_res(u,st.res)
+			mine_nxt(u,st.res)
 		end
 	end
 
@@ -1841,7 +1842,7 @@ function mine(u)
 71=60]][fget(t)]
 	local n=g(restiles,x,y,f)
 	if not f then
-		if not mine_nxt_res(u,r) then
+		if not mine_nxt(u,r) then
 			drop(u,r)
 		end
 	elseif fps==u.st.fps then
@@ -1904,7 +1905,7 @@ function produce(u)
 	end
 end
 
-function mine_nxt_res(u,res)
+function mine_nxt(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
 		gather(u,x,y,wp)
@@ -2800,7 +2801,7 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,startpos,
-	fps,selt,alert,banner=
+	fps,selt,alert,ban=
 		ant.p1,res.p1,res.p2,
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
 		unspl"59,0,0,0"
@@ -2837,7 +2838,7 @@ end
 
 function ai_init()
 	defsqd,offsqd,atksqd,hq,
-	last_prod,last_atk,
+	prodt,atkt,
 		cx,cy=
 		{},{},{},units[1],0,0,
 		unspl(res1.pos,":")
@@ -2899,7 +2900,7 @@ function ai_frame()
 
 	if res2.diff==1 then
 		res2.tot,safe=res2.p,
-			t()-last_atk>180
+			t()-atkt>180
 	end
 
 	foreach(units,ai_unit1)
@@ -2909,14 +2910,14 @@ function ai_frame()
 	if #offsqd>=res2.diff*5 and
 		safe
 	then
-		atksqd,offsqd,last_atk=
+		atksqd,offsqd,atkt=
 			offsqd,{},t()
 	end
 	mvg(atksqd,hq.x,hq.y,"atk",1)
 end
 
 function miner(u,r)
-	u.rs=mine_nxt_res(u,r)
+	u.rs=mine_nxt(u,r)
 	if not u.rs and nxtres[r] then
 		move(u,unpack(nxtres[r]))
 	end
@@ -2995,13 +2996,13 @@ function ai_unit2(u)
 			end
 			if not u.q and nohold() and
 				can_pay(p,res2) and
-				t()-last_prod>split"10,0,0"[res2.diff]
+				t()-prodt>split"10,0,0"[res2.diff]
 			then
 				queue_prod(u,p)
 				u.lastp%=u.typ.units
 				u.lastp+=1
 				res2.tot+=1
-				last_prod=t()
+				prodt=t()
 			end
 		end
 	end
