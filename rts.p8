@@ -56,7 +56,6 @@ function _update()
 
 	dmap()
 
-	--update minimap
 	if fps%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -133,7 +132,6 @@ c=13]],p.x,p.y))
 	sel1,numsel,sel_typ=
 		selection[1],#selection
 	foreachsel(function(s)
-		--check nil, can be false
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
 	end)
@@ -267,7 +265,7 @@ function _draw()
 
 	draw_menu()
 	camera()
-	pal() --allow pink for alert
+	pal() --for alert
 	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
@@ -302,7 +300,7 @@ function _draw()
 		can_drop() and 191) or 186)
 end
 -->8
---unit defs
+--unit stats
 
 function init_typs()
 ant=parse[[
@@ -855,9 +853,9 @@ up=0
 idx=15]],parse[[
 portx=31
 porty=80]],function(_ENV)
-	carry\=0.72 --6,8,11,15
+	carry\=0.72
 	spd*=1.12
-	gr*=0.9 --3,2.8,2.43,2.18
+	gr*=0.9
 end,ant),
 parse([[
 t=20
@@ -938,8 +936,8 @@ up=0
 idx=18]],parse[[
 portx=76
 porty=80]],function(_ENV)
-		gr*=1.15 --.5,.575,.66,.76
-		cycles\=0.65 --5,7,10,15
+		gr*=1.15
+		cycles\=0.65
 	end,farm),
 }
 
@@ -1290,7 +1288,6 @@ function update_viz(u)
 				if bldgs[k] then
 					bldgs[k].disc=1
 				end
-				--"v" to index into rescol
 				exp[k],new_viz[k]=1,"v"
 			end
 		end)
@@ -1301,15 +1298,14 @@ end
 
 function cam()
 	local b=btn()
-	if (b>32) b>>=8 --allow esdf
+	if (b>32) b>>=8 --esdf
 	cx,cy,amx,amy=
 		mid(0,
 			cx+(b&0x2)-(b&0x1)*2,
-			256 --mapw*8-128
+			256
 		),
 		mid(0,
 			cy+(b&0x8)/4-(b&0x4)/2,
-			--maph*8-128 or 107
 			loser and 128 or 149
 		),
 		mid(0,stat"32",126),
@@ -1503,7 +1499,6 @@ function draw_unit(u)
 		local p=u.const/typ.const
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
-		--switch spr after 0.5
 		sx-=fw*ceil(p*2)
 		if (p<=0.15) return
 	elseif ufps then
@@ -1624,7 +1619,7 @@ function agg(u)
 	for e in all(units) do
 		local d=dist(e.x-u.x,e.y-u.y)
 		if e.p!=u.p and
-		 not e.dead and
+			not e.dead and
 			d<=u.typ.los
 		then
 			if e.typ.bldg then
@@ -1724,7 +1719,7 @@ function mine(u)
 			del(units,g(ladys,x,y))
 			mset(x,y,t+16)
 		elseif n==1 then
-			mset(x,y,68) --exhaust
+			mset(x,y,68) --░
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
 			make_dmaps(r)
@@ -1937,7 +1932,6 @@ function norm(it,nt,f)
 		d
 end
 
---strict incl farms+const
 function acc(x,y,strict)
 	local b=g(bldgs,x,y)
 	return not fget(mget(x,y),0)
@@ -1992,8 +1986,8 @@ end
 
 function dmg(from_typ,to)
 	to.hp-=from_typ.atk*
-	 dmg_mult[from_typ.atk_typ..
-	 	"_vs_"..to.typ.def]
+		dmg_mult[from_typ.atk_typ..
+			"_vs_"..to.typ.def]
 	if to.typ.unit and
 		to.st.rest or to.st.res then
 		wander(to)
@@ -2062,8 +2056,6 @@ exp=1]])
 		typ,x,y,p,hu,ai,hp,const,
 			disc,id,prod=
 			ptyp,_x,_y,_p,_p==1,_p==2,
-			--cap hp when loading game
-			--that had hp upgrades
 			min(_hp or 9999,max_hp),
 				tonum(_const),_disc==1,
 				_id,_typ.prod or {}
@@ -2082,9 +2074,7 @@ function queue_prod(u,b)
 	end
 end
 -->8
---pathfinding
-
---dmaps
+--paths
 
 function dmap_find(u,k)
 	local x,y,dmap,wayp,lowest=
@@ -2108,7 +2098,6 @@ function dmap_find(u,k)
 end
 
 function make_dmaps(r)
-	--reset a* cache
 	queue,asc=split(
 		parse[[r=r,g,b,d
 g=g,r,b,d
@@ -2120,18 +2109,12 @@ function dmap()
 	local q=queue[1]
 	if q then
 		if q.c then
-			--typ=open
 			for i=1,#q.typ do
-				if i>20 then
-					--continue next tick
-					return
-				end
+				if (i>20) return
 				local p=deli(q.typ)
-				--p1=dmap
 				q.p1[p.k]=q.c
 				if q.c<8 then
 					surr(p[1],p[2],function(t)
-						--tech=closed
 						q.tech[t.k]=
 							q.tech[t.k] or
 							add(q.p2,t)
@@ -2139,16 +2122,12 @@ function dmap()
 				end
 			end
 			q.c+=1
-			--typ=open,p2=nxt
 			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
-				--techt=key
 				dmaps[q.techt]=
 					deli(queue,1).p1
 			end
 		else
-			--build a new dmap for
-			--key q (r,g,b,d)
 			if not dmap_st[q] then
 				dmap_st[q]={}
 				for x=0,mapw do
@@ -2215,9 +2194,9 @@ end
 --based on a* by morgan3d
 function as(start,goal)
 	local k=start.k|goal.k>>16
-	local c=asc[k] --cache
+	local c=asc[k]
 	if c then
-		--{unpack} for new table
+		--copy table
 		return {unpack(c)},c.e
 	end
 
@@ -2529,7 +2508,6 @@ portf=13
 		}) and 24 or 32,
 		unspl"114,8,6,0,14")
 	
-	--minimap
 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 	sspr(unspl"109,72,19,12,0,0")
 	camera(
@@ -2673,16 +2651,15 @@ bld_vs_bld=0.1]],
 
 function init()
 	poke(0x5f2d,3)
-	--allow chain-loading a custom
-	--map/bo (use #rts_loader)
+	--loaded from #aoa_editor
 	if stat"6"=="custom" then
-		--cpy userdata into map
-		--0x2000,0x8000,0x1000
+		--userdata->map
 		memcpy(unspl"8192,-32768,4096")
 	else
 		reload()
 	end
 	
+	--0.55
 	tostr[[[[]]
 ai_debug=true
 srand"1"
@@ -2804,10 +2781,10 @@ function ai_frame()
 			end
 		else
 			if pid>90 then
-		 	nxtres[r]=nxtres[r] or
-		 		g(dmaps[r] or {},x,y) and
-		 		{x8,y8}
-		 end
+				nxtres[r]=nxtres[r] or
+					g(dmaps[r] or {},x,y) and
+					{x8,y8}
+			end
 			if curr then
 				if pid==10 then
 					unit(14,x8,y8,3)
@@ -2887,7 +2864,7 @@ function ai_unit2(u)
 			bal<0 and "b"
 		if u.rs!=r and r and
 			not u.res and
-		 del(miners,u) then
+			del(miners,u) then
 			bal=0
 			miner(u,r)
 		end
@@ -2981,7 +2958,6 @@ menuitem(2,"◆ load pasted",function()
 		res1[k],res2[k]=r[i-1],r[i]
 	end
 	foreach(spldeli(data),function(k)
-		--k can be "" (trlng ,)
 		exp[k]=tonum(k)
 	end)
 	for i,t in inext,spldeli(data) do
