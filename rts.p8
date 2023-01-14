@@ -106,9 +106,6 @@ function _update()
 					typ.proj_aoe
 				) then
 					dmg(typ,u)
-					if u.conv>=u.hp then
-						u.p=p[1]
-					end
 					if typ.proj_aoe==0 then
 						break
 					end
@@ -311,6 +308,8 @@ idx=1
 spd=0.286
 los=20
 hp=6
+melee=0
+atk_freq=30
 atk=0.2
 def=ant
 atk_typ=ant
@@ -353,6 +352,7 @@ portx=0
 porty=72
 dir=1
 unit=1
+atksfx=10
 carry=6
 ant=1
 tmap=-1]]
@@ -362,6 +362,8 @@ idx=2
 spd=0.19
 los=20
 hp=20
+melee=0
+atk_freq=30
 atk=0.75
 def=seige
 atk_typ=seige
@@ -387,6 +389,7 @@ dead_y=0
 portx=27
 porty=72
 unit=1
+atksfx=10
 dir=1
 tmap=-1]]
 
@@ -395,6 +398,8 @@ idx=3
 spd=0.482
 los=30
 hp=15
+melee=0
+atk_freq=30
 atk=1.667
 def=spd
 atk_typ=spd
@@ -419,6 +424,7 @@ dead_y=16
 portx=18
 porty=72
 unit=1
+atksfx=10
 dir=1
 tmap=-1]]
 
@@ -429,7 +435,7 @@ los=33
 hp=5
 range=28
 atk=0.667
-proj_freq=30
+atk_freq=30
 proj_aoe=0
 proj_spd=1
 atk_typ=acid
@@ -455,6 +461,7 @@ dead_y=25
 portx=45
 porty=72
 unit=1
+atksfx=10
 dir=1
 proj_xo=-2
 proj_yo=0
@@ -466,6 +473,8 @@ idx=5
 spd=0.33
 los=25
 hp=10
+melee=0
+atk_freq=30
 atk=1
 def=ant
 atk_typ=ant
@@ -490,17 +499,19 @@ dead_y=64
 portx=36
 porty=72
 unit=1
+atksfx=10
 dir=1
 tmap=-1]]
 
 cat=parse[[
+id=0
 idx=6
 spd=0.2
 los=50
 hp=15
 range=50
 atk=1.5
-proj_freq=60
+atk_freq=60
 proj_aoe=2
 proj_spd=0.72
 def=seige
@@ -527,6 +538,7 @@ dead_y=16
 portx=54
 porty=72
 unit=1
+atksfx=10
 dir=1
 proj_xo=1
 proj_yo=-4
@@ -538,9 +550,9 @@ queen=parse[[
 idx=7
 los=25
 hp=400
-atk=1.5
 range=23
-proj_freq=30
+atk=1.5
+atk_freq=30
 proj_aoe=0
 proj_spd=1
 atk_typ=acid
@@ -565,6 +577,7 @@ portx=9
 porty=72
 drop=0
 bldg=1
+atksfx=10
 proj_xo=-4
 proj_yo=2
 proj_s=52
@@ -581,7 +594,7 @@ const=32
 hpr=11
 range=30
 atk=1.2
-proj_freq=30
+atk_freq=30
 proj_aoe=0
 proj_spd=0.9
 atk_typ=bld
@@ -604,6 +617,7 @@ dead_fps=7.5
 portx=-1
 porty=80
 bldg=1
+atksfx=10
 dir=-1
 proj_yo=-2
 proj_xo=-1
@@ -739,7 +753,7 @@ const=80
 hpr=8
 range=40
 atk=1.8
-proj_freq=15
+atk_freq=15
 proj_aoe=1
 proj_spd=0.8
 atk_typ=bld
@@ -761,6 +775,7 @@ dead_fps=15
 portx=50
 porty=80
 bldg=1
+atksfx=10
 dir=-1
 proj_yo=0
 proj_xo=0
@@ -774,6 +789,8 @@ idx=14
 spd=0.21
 los=18
 hp=8
+melee=0
+atk_freq=30
 atk=0.47
 lady=1
 def=ant
@@ -799,6 +816,7 @@ dead_y=8
 portx=63
 porty=72
 unit=1
+atksfx=10
 dir=-1
 tmap=-1]]
 
@@ -836,11 +854,9 @@ idx=26
 spd=0.21
 los=35
 hp=10
-range=35
+melee=35
+atk_freq=60
 atk=0
-proj_freq=30
-proj_aoe=0
-proj_spd=1.2
 atk_typ=ant
 def=ant
 monk=1
@@ -865,10 +881,8 @@ dead_y=112
 portx=86
 porty=80
 unit=1
+atksfx=63
 dir=-1
-proj_xo=0
-proj_yo=0
-proj_s=24
 tmap=-1]]
 
 ant.prod={
@@ -1731,19 +1745,17 @@ function fight(u)
 		rest(u)
 		return
 	end
-	local d=u.upd and dist(dx,e.y-u.y)
+	local d,atk=
+		u.upd and dist(dx,e.y-u.y),
+		fps%typ.atk_freq==
+			u.id%typ.atk_freq
 	if typ.range then
 		if u.upd then
 			in_range=d<=typ.range and
 				g(viz,e.x8,e.y8)
 		end
-		if in_range and
-			fps%typ.proj_freq==
-			max(typ.cat or
-				u.id%typ.proj_freq)
-		then
+		if in_range and atk	then
 			add(proj,{
-				u.p,
 				from_typ=typ,
 				x=u.x-u.dir*typ.proj_xo,
 				y=u.y+typ.proj_yo,
@@ -1751,9 +1763,12 @@ function fight(u)
 			})
 		end
 	else
-		in_range=int(u.r,e.r,0)
-		if in_range and fps%30==u.id%30 then
+		in_range=int(u.r,e.r,typ.melee)
+		if in_range and atk then
 			dmg(typ,e)
+			if e.conv>=e.hp then
+				e.p=u.p
+			end
 		end
 	end
 	u.st.active=in_range
@@ -2091,7 +2106,7 @@ function dmg(from_typ,to)
 	ai_dmg(to)
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32")
-		sfx"10"
+		sfx(from_typ.atksfx)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
@@ -2154,7 +2169,7 @@ conv=0]])
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 				tonum(_const),_disc==1,
-				_id,_typ.prod or {}
+				_typ.id or _id,_typ.prod or {}
 	end
 	rest(u_rect(u))
 	if (_typ.bldg) reg_bldg(u)
@@ -2761,19 +2776,6 @@ function init()
 		reload()
 	end
 	
-	--0.55
-	tostr[[[[]]
---ai_debug=true
-srand"1"
-if ai_debug then
-	_update60=_update
-	for y=0,31 do
-		--clear fog
-		memset(0x2030+y*128,0,48)
-	end
-end
---]]
-	
 	music(unspl"0,0,7")
 	menuitem(3,"∧ resign",
 		function() hq.hp=0 end)
@@ -2823,7 +2825,7 @@ function new_game()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-5,57,76,1
+6,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
@@ -3434,6 +3436,7 @@ c5170000021650216500100051501600418031180221802202165021653952300501001500415521
 a91900000e244102400e247102420e232102300e2200e210152341523015232152321523215220152250020013244132301523217221172221722013220132250c2300c2300e2301323113232132321522015220
 a91900000e244102400e240102420e232102300e2200e2101524415230152321522217217172101721515200132441323015232182201d2211d2221d2221d2100c2300c2300e2301a23017231172301723217235
 05060000230531d0510e1710e073003000e0730e07300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+a90600001f7401f740007001f7401f740007001c7401c7401c7421c7421c7421c7401c7401c7401c7401c74500700007000070000700007000070000700007000070000700007000070000700007000000000000
 __music__
 00 05084c44
 01 05080b44
