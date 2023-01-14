@@ -2052,7 +2052,8 @@ function unit(t,_x,_y,_p,
 lastp=1
 sproff=0
 cycles=0
-fres=0]])
+fres=0
+exp=1]])
 	do
 		local _ENV,ptyp=u,_typ[_p]
 		max_hp=tonum(_const) and
@@ -2291,17 +2292,16 @@ function print_res(r,x,y,zero)
 			newx=-2
 			v..="\-g \-c\^t\|f\f5\^-#|"
 		end
+		pspl(
+			(i==4 and oop or
+			res1[k]<flr(v))
+			and "1,2,3,4,5,6,10")
 		if v!=0 or zero then
-			pspl(
-				(i==4 and oop or
-				res1[k]<flr(v))
-				and "1,2,3,4,5,6,10")
 			newx+=? "\#7 "..v,x,y,rescol[k]
 			spr(129+i,x,y)
 			x=newx+(zero or 1)
 		end
 	end
-	pal()
 	return x-1
 end
 
