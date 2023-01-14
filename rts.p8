@@ -504,7 +504,6 @@ dir=1
 tmap=-1]]
 
 cat=parse[[
-id=0
 idx=6
 spd=0.2
 los=50
@@ -1771,7 +1770,7 @@ function fight(u)
 	local d,atk=
 		u.upd and dist(dx,e.y-u.y),
 		fps%typ.atk_freq==
-			u.id%typ.atk_freq
+			max(typ.cat or u.id)%typ.atk_freq
 	if typ.range then
 		if u.upd then
 			in_range=d<=typ.range and
@@ -2196,7 +2195,7 @@ conv=0]])
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 				tonum(_const),_disc==1,
-				_typ.id or _id,_typ.prod or {}
+				_id,_typ.prod or {}
 	end
 	rest(u_rect(u))
 	if (_typ.bldg) reg_bldg(u)

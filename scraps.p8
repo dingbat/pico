@@ -355,3 +355,10 @@ putting research in bo:
 		b.tech(b.techt[2])
 	end
 
+
+
+- praying mantis monk
+- wild ladybug, can be eaten for food
+- random start pos
+- new upgrades, some are repeatable
+- 
