@@ -1300,16 +1300,16 @@ function cam()
 	local b=btn()
 	if (b>32) b>>=8 --esdf
 	cx,cy,amx,amy=
-		mid(0,
+		mid(
 			cx+(b&0x2)-(b&0x1)*2,
 			256
 		),
-		mid(0,
+		mid(
 			cy+(b&0x8)/4-(b&0x4)/2,
 			loser and 128 or 149
 		),
-		mid(0,stat"32",126),
-		mid(-1,stat"33",126)
+		mid(stat"32",126),
+		mid(stat"33",126)
 
 	mx,my,hovbtn=amx+cx,amy+cy
 	mx8,my8=mx\8,my\8
@@ -2328,7 +2328,8 @@ function sel_ports(x)
 	foreach(selection,function(u)
 		x+=13
 		if x>100 then
-			?"\^jmu\f1\^:0005050707070000\-c\^x2...\0"
+			unspr"133,84,121"
+			?"\^jmu\|f\f1\^x2...\0"
 		else
 			draw_port(u.typ,
 				numsel>1 and function()
@@ -2453,7 +2454,7 @@ function draw_menu()
 	end
 	if numsel>1 then
 		camera(numsel<10 and -2)
-		?"X"..numsel,unspl"5,111,1"
+		?"\f1\^j1r\|j\-hX"..numsel
 		unspr"133,1,111"
 		add(buttons,{
 			r=split"0,110,14,119",
