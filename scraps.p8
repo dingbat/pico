@@ -357,6 +357,7 @@ putting research in bo:
 	end
 
 
+- larger map
 - new unit prices, better balancing
 - praying mantis monk
 - wild ladybug, can be eaten for food
