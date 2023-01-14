@@ -1866,7 +1866,7 @@ end
 function dist(dx,dy)
 	local maskx,masky=dx>>31,dy>>31
 	local a0,b0=(dx+maskx)^^maskx,
-	(dy+masky)^^masky
+		(dy+masky)^^masky
 	return a0>b0 and
 		a0*0.9609+b0*0.3984 or
 			b0*0.9609+a0*0.3984
@@ -1994,13 +1994,13 @@ function dmg(from_typ,to)
 	to.hp-=from_typ.atk*
 	 dmg_mult[from_typ.atk_typ..
 	 	"_vs_"..to.typ.def]
-	if to.typ.unit and (
-		to.st.rest or to.st.res) then
+	if to.typ.unit and
+		to.st.rest or to.st.res then
 		wander(to)
 	end
 	ai_dmg(to)
 	if to.onscr then
-		poke(0x34a8,rnd"32",rnd"32",rnd"32")
+		poke(0x34a8,rnd"32",rnd"32")
 		sfx"10"
 		alert=t()
 	elseif to.hu and t()-alert>10 then
