@@ -1334,11 +1334,7 @@ function tick(u)
 
 	if (u.const) return
 	if targ and targ.dead then
-		if u.st.t=="attack" then
-			move(u,targ.x,targ.y,true)
-		else
-			rest(u)
-		end
+		rest(u)
 	end
 
 	if u.hu then
