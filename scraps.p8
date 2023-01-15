@@ -292,6 +292,7 @@ x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
 - remove aoe hilite effect (15 tok)
 - a8c9657 add `id=0` to cat (2 tok)
+- (3 tok) remove "typ.range and", give melee units range=0. slight perf cost bc dist() called more
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 

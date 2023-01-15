@@ -308,7 +308,6 @@ idx=1
 spd=0.286
 los=20
 hp=6
-melee=0
 atk_freq=30
 atk=0.2
 def=ant
@@ -362,7 +361,6 @@ idx=2
 spd=0.19
 los=20
 hp=20
-melee=0
 atk_freq=30
 atk=0.75
 def=seige
@@ -398,7 +396,6 @@ idx=3
 spd=0.482
 los=30
 hp=15
-melee=0
 atk_freq=30
 atk=1.667
 def=spd
@@ -473,7 +470,6 @@ idx=5
 spd=0.33
 los=25
 hp=10
-melee=0
 atk_freq=30
 atk=1
 def=ant
@@ -788,7 +784,6 @@ idx=14
 spd=0.21
 los=18
 hp=8
-melee=0
 atk_freq=30
 atk=0.47
 lady=1
@@ -853,7 +848,7 @@ idx=26
 spd=0.25
 los=45
 hp=6
-melee=40
+range=40
 atk_freq=60
 atk=0
 atk_typ=ant
@@ -1406,7 +1401,7 @@ function update_viz(u)
 		end
 
 		foreach(v,function(t)
-			local k=u.x8+u.y8*256+t
+			local k=u.k+t
 			if k<maph<<8 and k>=0 and
 				k%256<mapw then
 				if bldgs[k] then
@@ -1760,50 +1755,41 @@ function agg(u)
 end
 
 function fight(u)
-	local typ,e,in_range=
-		u.typ,u.st.target,
-		u.st.active
+	local typ,e=u.typ,u.st.target
 	local dx=e.x-u.x
-	if e.p==u.p then
+	if e.p!=u.p then
 		rest(u)
 		return
 	end
-	local d,atk=
-		u.upd and dist(dx,e.y-u.y),
-		fps%typ.atk_freq==
-			max(typ.cat or u.id)%typ.atk_freq
-	if typ.range then
-		if u.upd then
-			in_range=d<=typ.range and
-				g(viz,e.x8,e.y8)
-		end
-		if in_range and atk	then
-			add(proj,{
-				from_typ=typ,
-				x=u.x-u.dir*typ.proj_xo,
-				y=u.y+typ.proj_yo,
-				to={e.x,e.y}
-			})
-		end
-	else
-		in_range=int(u.r,e.r,typ.melee)
-		if in_range and atk then
+	if fps%typ.atk_freq==
+		max(typ.cat or u.id)%
+			typ.atk_freq
+ then
+		if typ.range and
+			typ.range>=dist(dx,e.y-u.y)
+			or int(u.r,e.r,0)
+		then
+			if not u.st.adj then
+				u.st.wayp=nil
+			end
+			u.dir=sgn(dx),
+				add(typ.proj_s and proj,{
+					from_typ=typ,
+					x=u.x-u.dir*typ.proj_xo,
+					y=u.y+typ.proj_yo,
+					to={e.x,e.y}
+				}) or dmg(typ,e)
 			if e.conv>=e.hp then
 				e.p=u.p
+				u_rect(e)
 			end
-			dmg(typ,u_rect(e))
-		end
-	end
-	u.st.active=in_range
-	if in_range then
-		u.dir=sgn(dx)
-		if (not u.st.adj) u.st.wayp=nil
-	elseif u.upd then
-		if typ.los>=d and typ.unit then
-			attack(u,e)
-		end
-		if not u.st.wayp then
-			rest(u)
+		else
+			if viz[e.k] then
+				attack(u,e)
+			end
+			if not u.st.wayp then
+				rest(u)
+			end
 		end
 	end
 end
@@ -1971,6 +1957,7 @@ function u_rect(_ENV)
 	r,x8,y8,hu,ai=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,p==1,p==2
+	k=x8|y8<<8
 	return _ENV
 end
 
