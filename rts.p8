@@ -2897,7 +2897,7 @@ function ai_frame()
 				if pid==10 then
 					unit(p,x8,y8,3)
 				elseif pid==11 then
-					bgrat=split"2.75,3"[p]
+					bgrat=split"2.75,2"[p]
 				elseif res2.diff>=p then
 					typs[pid].tech(
 						typs[pid].techt.p2)
