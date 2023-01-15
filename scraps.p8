@@ -359,8 +359,9 @@ putting research in bo:
 
 
 - larger map
-- new unit prices, better balancing
+- new unit prices, better stat balancing
 - praying mantis monk
+- ants can attack
 - wild ladybug, can be eaten for food
 - random start pos
 - new upgrades, some are repeatable

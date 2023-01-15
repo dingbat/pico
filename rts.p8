@@ -209,7 +209,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
---	draw_map(mapw,15) --f
+	draw_map(mapw,15) --f
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
