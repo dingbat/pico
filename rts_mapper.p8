@@ -21,7 +21,7 @@ pid_codes={
 	
 	--%: percentage of workers on
 	--   wood. must be first order
-	--   val:1=64%,2=50%
+	--   val:1=64%,2=58%,3=50%
 	["%"]=11,
 	
 	-->b/g: position (at x,y) of

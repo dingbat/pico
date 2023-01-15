@@ -2387,6 +2387,7 @@ end
 
 tostr[[[[]]
 ai_debug=true
+srand"1"
 if ai_debug then
 	_update60=_update
 end
@@ -2859,8 +2860,9 @@ end
 
 function ai_frame()
 	if (t6) safe=true
-	miners,nxtres,ants,gants,uhold=
-		{},{},0,0
+	miners,nxtres,bgers,
+		ants,uhold=
+		{},{},{},0
 
 	for i=0,res2.boi,2 do
 		local off=0x2060+
@@ -2897,7 +2899,7 @@ function ai_frame()
 				if pid==10 then
 					unit(p,x8,y8,3)
 				elseif pid==11 then
-					bgrat=split"2.75,2"[p]
+					bgrat=split"2.75,2.35,2"[p]
 				elseif res2.diff>=p then
 					typs[pid].tech(
 						typs[pid].techt.p2)
@@ -2915,7 +2917,8 @@ function ai_frame()
 	end
 
 	foreach(units,ai_unit1)
-	bal=#miners\bgrat-gants
+	bal=(#bgers-count(bgers,"r"))
+		\bgrat-count(bgers,"g")
 	foreach(units,ai_unit2)
 
 	if #offsqd>=res2.diff*5 and
@@ -2942,10 +2945,7 @@ function ai_unit1(u)
 				miner(u,bgnxt and "b" or "r")
 				bgnxt=not bgnxt
 			end
-			if u.rs=="g" then
-				gants+=1
-			end
-			add(u.rs and u.rs!="r" and
+			add(add(bgers,u.rs) and
 				not u.res and miners,u)
 		elseif u.typ.unit then
 			if u.dead then
