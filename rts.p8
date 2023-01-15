@@ -207,7 +207,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15) --f
+--	draw_map(mapw,15) --f
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -2128,7 +2128,7 @@ function dmg(from_typ,to)
 		wander(to)
 	end
 	if from_typ.monk then
-		to.conv+=0.5
+		to.conv+=1
 	end
 	ai_dmg(to)
 	if to.onscr then
@@ -2385,7 +2385,17 @@ end
 -->8
 --menu
 
+a=tostr[[[[]]
+ai_debug=true
+if ai_debug then
+	_update60=_update
+end
+--]]
+
 function print_res(r,x,y,zero)
+	a=tostr[[[[]]
+	local res1=ai_debug and res2 or res1
+	--]]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2665,6 +2675,9 @@ end
 
 function resbar()
 	camera()
+	a=tostr[[[[]]
+	local res1=ai_debug and res2 or res1
+	--]]
 	rectfill(unspl"0,120,30,128,7")
 	camera(-print_res(res1,
 		unspl"1,122,2"))
@@ -2935,7 +2948,7 @@ function ai_unit1(u)
 				gants+=1
 			end
 			add(u.rs and u.rs!="r" and
-				miners,u)
+				not u.res and miners,u)
 		elseif u.typ.unit then
 			if u.dead then
 				del(u.sqd,u)
@@ -2951,9 +2964,12 @@ end
 
 function ai_unit2(u)
 	function go(fn)
-		u.w=deli(miners)
-		if u.w then
-			u.w.rs=fn(u.w,u)
+		if not u.w or
+			u.w.st.target!=u then
+			u.w=deli(miners)
+			if u.w then
+				u.w.rs=fn(u.w,u)
+			end
 		end
 	end
 
@@ -2961,14 +2977,11 @@ function ai_unit2(u)
 		local r=bal>0 and "g" or
 			bal<0 and "b"
 		if u.rs!=r and r and
-			not u.res and
 			del(miners,u) then
 			bal=0
 			miner(u,r)
 		end
-		if (not u.w or
-			u.w.st.target!=u) and
-			u.typ.bldg and
+		if u.typ.bldg and
 			u.hp<u.max_hp*0.75 or
 			u.const
 		then
