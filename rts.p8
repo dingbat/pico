@@ -2197,12 +2197,12 @@ conv=0]])
 	return u
 end
 
-function queue_prod(u,b)
+function queue_prod(u,b,m)
 	pay(b,-1,res[u.p])
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q=parse("qty=1",b,b.t,fps)
+		u.q=parse("qty=1",b,b.t*m,fps)
 	end
 end
 -->8
@@ -2501,7 +2501,7 @@ portf=9]],
 							return
 						end
 						sfx"2"
-						queue_prod(sel1,b)
+						queue_prod(sel1,b,1)
 						b.done=b.tech
 					else
 						sfx"16"
@@ -2800,7 +2800,7 @@ t=0]]
 	ant1,res1,res2,startpos,
 	fps,selt,alert,ban,
 	--ai
-	prodt,atkt=
+	atkt=
 		ant.p1,res.p1,res.p2,
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
 		unspl"59,0,0,0,0,0"
@@ -2997,14 +2997,12 @@ function ai_unit2(u)
 					res2[k]-p[k]<uhold[k]
 			end)
 			if not u.q and not hold and
-				can_pay(p,res2) and
-				t()-prodt>split"10,0,0"[res2.diff]
-			then
-				queue_prod(u,p)
+				can_pay(p,res2) then
+				queue_prod(u,p,
+					split"3,1,1"[res2.diff])
 				u.lastp%=typ.units
 				u.lastp+=1
 				res2.tot+=1
-				prodt=t()
 			end
 		end
 	end
