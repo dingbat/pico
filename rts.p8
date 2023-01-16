@@ -2850,7 +2850,7 @@ end
 
 function ai_frame()
 	if (t6) safe=true
-	miners,nxtres,bgers,
+	avail,nxtres,miners,
 		ants,uhold=
 		{},{},{},0
 
@@ -2907,8 +2907,8 @@ function ai_frame()
 	end
 
 	foreach(units,ai_unit1)
-	bal=(#bgers-count(bgers,"r"))
-		\bgrat-count(bgers,"g")
+	bal=(#miners-count(miners,"r"))
+		\bgrat-count(miners,"g")
 	foreach(units,ai_unit2)
 
 	if #offsqd>=res2.diff*5 and
@@ -2935,8 +2935,8 @@ function ai_unit1(u)
 				miner(u,bgnxt and "b" or "r")
 				bgnxt=not bgnxt
 			end
-			add(add(bgers,u.rs) and
-				not u.res and miners,u)
+			add(add(miners,u.rs) and
+				not u.res and avail,u)
 		elseif u.typ.unit then
 			if u.dead then
 				del(u.sqd,u)
@@ -2954,7 +2954,7 @@ function ai_unit2(u)
 	function go(fn)
 		if not u.w or
 			u.w.st.target!=u then
-			u.w=deli(miners)
+			u.w=deli(avail)
 			if u.w then
 				u.w.rs=fn(u.w,u)
 			end
@@ -2965,7 +2965,7 @@ function ai_unit2(u)
 		local r=bal>0 and "g" or
 			bal<0 and "b"
 		if u.rs!=r and r and
-			del(miners,u) then
+			del(avail,u) then
 			bal=0
 			miner(u,r)
 		end
