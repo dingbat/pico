@@ -2985,17 +2985,15 @@ function ai_unit2(u)
 			not u.typ.queen and
 			res2.p<res2.diff*26
 		then
-			local p=u.prod[u.lastp]
-			function nohold()
-				for k in all(split"r,g,b") do
-					if uhold and p[k]!=0 and
-						res2[k]-p[k]<uhold[k] then
-						return
-					end
+			local p,nohold=
+				u.prod[u.lastp],true
+			foreach(split"r,g,b",function(k)
+				if uhold and p[k]!=0 and
+					res2[k]-p[k]<uhold[k] then
+					nohold=nil
 				end
-				return true
-			end
-			if not u.q and nohold() and
+			end)
+			if not u.q and nohold and
 				can_pay(p,res2) and
 				t()-prodt>split"10,0,0"[res2.diff]
 			then
