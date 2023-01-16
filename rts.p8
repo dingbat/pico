@@ -2964,7 +2964,7 @@ function ai_unit2(u)
 			end
 		end
 	end
-
+	local typ=u.typ
 	if u.ai then
 		local r=bal>0 and "g" or
 			bal<0 and "b"
@@ -2973,19 +2973,19 @@ function ai_unit2(u)
 			bal=0
 			miner(u,r)
 		end
-		if u.typ.bldg and
+		if typ.bldg and
 			u.hp<u.max_hp*0.75 or
 			u.const
 		then
 			go(build)
-		elseif u.typ.farm and
+		elseif typ.farm and
 			not u.const and
 			not u.farmer then
 			go(gofarm)
 		elseif
-			u.typ.queen and
+			typ.queen and
 			ants<res2.diff*12 or
-			u.typ.mil and
+			typ.mil and
 			res2.p<res2.diff*26
 		then
 			local p,hold=u.prod[u.lastp]
@@ -2999,7 +2999,7 @@ function ai_unit2(u)
 				t()-prodt>split"10,0,0"[res2.diff]
 			then
 				queue_prod(u,p)
-				u.lastp%=u.typ.units
+				u.lastp%=typ.units
 				u.lastp+=1
 				res2.tot+=1
 				prodt=t()
