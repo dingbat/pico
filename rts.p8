@@ -569,7 +569,6 @@ attack_fr=2
 attack_fps=15
 dead_x=112
 dead_y=0
-dir=-1
 portx=9
 porty=72
 drop=0
@@ -581,6 +580,7 @@ proj_s=52
 breq=0
 units=1
 queen=1
+dir=-1
 tmap=-1]]
 
 tower=parse[[
@@ -615,11 +615,11 @@ portx=-1
 porty=80
 bldg=1
 atksfx=10
-dir=-1
 proj_yo=-2
 proj_xo=-1
 proj_s=48
 breq=1
+dir=-1
 tmap=-1]]
 
 mound=parse[[
@@ -646,9 +646,9 @@ dead_y=104
 dead_fr=8
 dead_fps=7.5
 bldg=1
-dir=-1
 drop=5
 breq=2
+dir=-1
 tmap=-1]]
 
 den=parse[[
@@ -675,10 +675,11 @@ dead_fps=7.5
 portx=96
 porty=80
 bldg=1
-dir=-1
 breq=4
 units=2
+idle=1
 mil=1
+dir=-1
 tmap=-1]]
 
 barracks=parse[[
@@ -705,10 +706,11 @@ dead_fps=7.5
 portx=15
 porty=112
 bldg=1
-dir=-1
 breq=8
 units=2
+idle=1
 mil=1
+dir=-1
 tmap=-1]]
 
 farm=parse[[
@@ -738,8 +740,8 @@ portx=0
 porty=88
 farm=1
 bldg=farm
-dir=-1
 breq=16
+dir=-1
 tmap=-1]]
 
 castle=parse[[
@@ -773,12 +775,13 @@ portx=50
 porty=80
 bldg=1
 atksfx=10
-dir=-1
 proj_yo=0
 proj_xo=0
 proj_s=48
 breq=32
 units=1
+mil=1
+dir=-1
 tmap=-1]]
 
 parse[[
@@ -841,8 +844,9 @@ portx=39
 porty=111
 bldg=1
 units=1
-dir=-1
 breq=64
+mil=1
+dir=-1
 tmap=-1]]
 
 monk=parse[[
@@ -1342,7 +1346,7 @@ function tick(u)
 			u.st.rest then
 			if (u.st.idle) idle=u
 			u.st.idle=1
-		elseif typ.mil and not u.q then
+		elseif typ.idle and not u.q then
 			idle_mil=u
 		end
 	end
@@ -2981,12 +2985,10 @@ function ai_unit2(u)
 		elseif
 			u.typ.queen and
 			ants<res2.diff*12 or
-			u.typ.units and
-			not u.typ.queen and
+			u.typ.mil and
 			res2.p<res2.diff*26
 		then
-			local p,hold=
-				u.prod[u.lastp]
+			local p,hold=u.prod[u.lastp]
 			foreach(split"r,g,b",function(k)
 				hold=hold or uhold and
 					p[k]!=0 and
