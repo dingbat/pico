@@ -1549,8 +1549,8 @@ function input()
 
 		elseif can_drop() then
 			sfx"0"
-			foreachsel(drop,nil,hoverunit)
-			hilite(hoverunit)
+			foreachsel(drop,nil,hbld)
+			hilite(hbld)
 
 		elseif sel1.typ.unit then
 			sfx"1"
@@ -2049,6 +2049,7 @@ end
 
 function can_build()
 	return hbld and
+		hbld.hu and
 		hbld.hp<hbld.typ.hp and
 		sel_typ==ant1
 end
@@ -2155,8 +2156,9 @@ end
 function can_drop()
 	for u in all(selection) do
 		if u.res then
-			return hoverunit and
-				hoverunit.typ.drop
+			return hbld and
+				hbld.hu and
+				hbld.typ.drop
 		end
 	end
 end
@@ -2839,9 +2841,9 @@ ai_debug=true
 srand"1"
 if ai_debug then
 	_update60=_update
-	_draw_map,_dr,_pr,_res_bar=
+	_draw_map,_dr,_pr,_resbar=
 		draw_map,_draw,print_res,
-		res_bar
+		resbar
 	function draw_map(o,y)
 		if not ai_debug or o==0 then
 			_draw_map(o,y)
@@ -2852,7 +2854,9 @@ if ai_debug then
 		camera()
 		if res1 and ai_debug then
 		local secs=res1.t\1%60
-		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,122,1
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
+		?bgrat,80,114,3
+		?":\-e#\-e:"..(res2.boi/2),80,107,2
 		end
 	end
 	function print_res(...)
@@ -2861,9 +2865,9 @@ if ai_debug then
 		res1=res[1]
 		return x
 	end
-	function res_bar(...)
+	function resbar(...)
 		res1=ai_debug and res2 or res1
-		_res_bar(...)
+		_resbar(...)
 		res1=res[1]
 	end
 end
