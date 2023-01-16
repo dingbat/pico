@@ -51,7 +51,7 @@ function _init()
 --	render(1)
 --	derender()
 
---	write_bo_to_rts()
+	write_bo_to_rts()
 --	write_map_to_rts()
 end
 
@@ -303,6 +303,7 @@ bo=loadbo[[
 36,h
 39,t
 40,h
+3,b_50_%
 41,f
 41,f
 42,f
@@ -312,7 +313,6 @@ bo=loadbo[[
 2,med_tech_heal_23
 2,med_tech_beetle_17
 2,med_tech_spider_18
-3,b_50_%
 45,t
 48,h
 49,b
@@ -389,6 +389,7 @@ b,40,16
 h,45,9
 t,40,7
 h,47,22
+b%
 f,45,24
 f,46,24
 f,44,25
@@ -398,7 +399,6 @@ c,34,11
 med_tech_heal_23
 med_tech_beetle_17
 med_tech_spider_18
-b%
 t,37,20
 h,33,28
 b,41,8
@@ -475,6 +475,7 @@ b,40,16
 h,45,9
 t,40,7
 h,47,22
+b%
 f,45,24
 f,46,24
 f,44,25
@@ -484,7 +485,6 @@ c,34,11
 med_tech_heal_23
 med_tech_beetle_17
 med_tech_spider_18
-b%
 t,37,20
 h,33,28
 b,41,8
@@ -561,6 +561,7 @@ b,40,16
 h,45,9
 t,40,7
 h,47,22
+b%
 f,45,24
 f,46,24
 f,44,25
@@ -570,7 +571,6 @@ c,34,11
 med_tech_heal_23
 med_tech_beetle_17
 med_tech_spider_18
-b%
 t,37,20
 h,33,28
 b,41,8
@@ -647,6 +647,7 @@ b,40,16
 h,45,9
 t,40,7
 h,47,22
+b%
 f,45,24
 f,46,24
 f,44,25
@@ -656,7 +657,6 @@ c,34,11
 med_tech_heal_23
 med_tech_beetle_17
 med_tech_spider_18
-b%
 t,37,20
 h,33,28
 b,41,8
