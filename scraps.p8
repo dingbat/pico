@@ -368,3 +368,46 @@ putting research in bo:
 - double click
 - click on unit pic to deselect it, right click to select only it
 - alert when being attacked offscreen
+
+
+
+esdf mouse mode (58 tok):
+
+function cam()
+	local b,m=btn()
+	if b>32 then
+		b>>=8
+		m=mm==2
+	end
+	local dx,dy=(b&0x2)-(b&0x1)*2,
+		(b&0x8)/4-(b&0x4)/2
+	if m then
+		amx+=dx
+		amy+=dy
+	else
+		cx,cy=
+			mid(cx+dx,256),
+			mid(cy+dy,
+				loser and 128 or 149)
+		if mm==1 then
+			amx,amy=stat"32",stat"33"
+		end
+	end
+	amx,amy=mid(amx,126),
+		mid(amy,126)
+
+	mx,my,hovbtn=amx+cx,amy+cy
+	mx8,my8=mx\8,my\8
+end
+
+mm=2
+function mouse_mode()
+	mm%=2
+	mm+=1
+	menuitem(
+		4,
+		split"● mouse on,● mouse off"[mm],
+		mouse_mode
+	)
+end
+mouse_mode()
