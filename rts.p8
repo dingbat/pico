@@ -2382,9 +2382,6 @@ end
 --menu
 
 function print_res(r,x,y,zero)
-	tostr[[[[]]
-	local res1=ai_debug and res2 or res1
-	--]]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2664,9 +2661,6 @@ end
 
 function resbar()
 	camera()
-	tostr[[[[]]
-	local res1=ai_debug and res2 or res1
-	--]]
 	rectfill(unspl"0,120,30,128,7")
 	camera(-print_res(res1,
 		unspl"1,122,2"))
@@ -2845,11 +2839,32 @@ ai_debug=true
 srand"1"
 if ai_debug then
 	_update60=_update
-	_draw_map=draw_map
+	_draw_map,_dr,_pr,_res_bar=
+		draw_map,_draw,print_res,
+		res_bar
 	function draw_map(o,y)
 		if not ai_debug or o==0 then
 			_draw_map(o,y)
 		end
+	end
+	function _draw()
+		_dr()
+		camera()
+		if res1 and ai_debug then
+		local secs=res1.t\1%60
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,122,1
+		end
+	end
+	function print_res(...)
+		res1=ai_debug and res2 or res1
+		local x=_pr(...)
+		res1=res[1]
+		return x
+	end
+	function res_bar(...)
+		res1=ai_debug and res2 or res1
+		_res_bar(...)
+		res1=res[1]
 	end
 end
 --]]
