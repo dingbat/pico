@@ -310,6 +310,7 @@ idx=1
 spd=0.286
 los=20
 hp=6
+range=0
 atk_freq=30
 atk=0.2
 def=ant
@@ -363,6 +364,7 @@ idx=2
 spd=0.19
 los=20
 hp=20
+range=0
 atk_freq=30
 atk=0.75
 def=seige
@@ -398,6 +400,7 @@ idx=3
 spd=0.482
 los=30
 hp=15
+range=0
 atk_freq=30
 atk=1.667
 def=spd
@@ -472,6 +475,7 @@ idx=5
 spd=0.33
 los=25
 hp=10
+range=0
 atk_freq=30
 atk=1
 def=ant
@@ -540,7 +544,7 @@ dir=1
 proj_xo=1
 proj_yo=-4
 proj_s=56
-cat=1
+cat=0
 tmap=-1]]
 
 queen=parse[[
@@ -789,6 +793,7 @@ idx=14
 spd=0.21
 los=18
 hp=8
+range=0
 atk_freq=30
 atk=0.47
 lady=1
@@ -1765,15 +1770,14 @@ function fight(u)
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
-		if typ.range and
-			typ.range>=d
+		if typ.range>=d 
 			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
 				u.st.wayp=nil
 			end
 			if fps%typ.atk_freq==
-				max(typ.cat or u.id)%
+				(typ.cat or u.id)%
 					typ.atk_freq
 			then
 				u.dir=sgn(dx),
@@ -2380,6 +2384,9 @@ end
 --menu
 
 function print_res(r,x,y,zero)
+	tostr[[[[]]
+	local res1=ai_debug and res2 or res1
+	--]]
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2818,7 +2825,7 @@ function new()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-5,57,76,1
+6,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
