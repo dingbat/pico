@@ -4,7 +4,7 @@ __lua__
 --age of ants
 --eeooty (dan h)
 
-music(0,2000)
+music(63,2000)
 
 function draw_map(o,y)
 	camera(cx%8,cy%8)
@@ -1422,19 +1422,27 @@ end
 --input
 
 function cam()
-	local b=btn()
-	if (b>32) b>>=8
-	cx,cy,amx,amy=
-		mid(
-			cx+(b&0x2)-(b&0x1)*2,
-			256
-		),
-		mid(
-			cy+(b&0x8)/4-(b&0x4)/2,
-			loser and 128 or 149
-		),
-		mid(stat"32",126),
-		mid(stat"33",126)
+	local b,m=btn()
+	if b>32 then
+		b>>=8
+		m=mm==2
+	end
+	local dx,dy=(b&0x2)-(b&0x1)*2,
+		(b&0x8)/4-(b&0x4)/2
+	if m then
+		amx+=dx
+		amy+=dy
+	else
+		cx,cy=
+			mid(cx+dx,256),
+			mid(cy+dy,
+				loser and 128 or 149)
+		if mm==1 then
+			amx,amy=stat"32",stat"33"
+		end
+	end
+	amx,amy=mid(amx,126),
+		mid(amy,126)
 
 	mx,my,hovbtn=amx+cx,amy+cy
 	mx8,my8=mx\8,my\8
@@ -2837,7 +2845,7 @@ end
 --ai
 
 tostr[[[[]]
-ai_debug=true
+--ai_debug=true
 srand"1"
 if ai_debug then
 	_update60=_update
@@ -3097,6 +3105,18 @@ menuitem(2,"◆ load pasted",function()
 	foreach(data,comp(unit,unspl))
 	ai_init()
 end)
+
+mm=2
+function mouse_mode()
+	mm%=2
+	mm+=1
+	menuitem(
+		4,
+		split"● mouse on,● mouse off"[mm],
+		mouse_mode
+	)
+end
+mouse_mode()
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
