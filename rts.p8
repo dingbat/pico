@@ -2563,14 +2563,11 @@ portx=120
 porty=64
 porto=15
 portf=15
-]],axn,42,108)
-	end
-end
-
-function axn()
+]],function()
 	action+=1
-	action%=sel_typ and
-		sel_typ.units and 2 or 3
+	action%=2
+end,42,108)
+	end
 end
 
 function draw_menu()
@@ -2630,7 +2627,10 @@ portx=90
 porty=72
 porto=2
 portf=13
-]],axn,20,108)
+]],function()
+	action+=1
+	action%=3
+end,20,108)
 	end
 
 	camera(-mmx,-mmy)
