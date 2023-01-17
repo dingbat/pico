@@ -12,6 +12,7 @@ function draw_map(o,y)
 end
 
 function _update()
+--	if (dat) return
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
 		lrclk and not btn"4",
@@ -134,6 +135,15 @@ c=13]],p.x,p.y))
 end
 
 function _draw()
+--	if dat then
+--		camera()
+--		pal()
+--		draw_dat(dat)
+--		extcmd("screen",1)
+--		dat=nil
+--		return
+--	end
+	
 	draw_map(0,17)
 	if menu then
 		camera()
@@ -2714,7 +2724,7 @@ unl,unspr,
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
-	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t,pos",
+	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t",
 parse[[
 r=8
 g=11
@@ -3059,33 +3069,35 @@ end
 -->8
 --save
 
-menuitem(1,"⌂ save to clip",function()
+menuitem(1,"⌂ save",function()
 	if (menu) return
-	local s=""
-	local function join(v,...)
+	local p,b=0,1
+	camera()
+	pal()
+	local function draw(v,...)
 		if v then
-			s..=v..","
-			join(...)
+			for i=0,b do
+				pset(p%128,p\128,v>>i*4&0xf)
+				p+=1
+			end
+			draw(...)
 		end
 	end
-	foreach(units,function(_ENV)
-		join(typ.idx,x,y,p,
-			const or "",max(disc),hp)
-		s..="/"
-	end)
-	for i=1,mapw*maph-1 do
-		join(mget(i%mapw,i/mapw))
+	for i=0,mapw*maph-1 do
+		local x,y=i%mapw,i/mapw
+		local e=g(exp,x,y) and 128 or 0
+		draw(mget(x,y)|e)
 	end
-	s..="/"
-	for k in next,exp do
-		join(k)
-	end
-	s..="/"
+	b=2
 	foreach(resk,function(k)
-		join(res1[k],res2[k])
+		draw(res1[k],res2[k])
 	end)
-	printh(s,"@clip")
-	sfx"33"
+	draw(#units)
+	foreach(units,function(_ENV)
+		draw(typ.idx,x,y,p,
+			const or 0,max(disc),hp)
+	end)
+	extcmd("screen",1)
 end)
 
 menuitem(2,"◆ load pasted",function()
