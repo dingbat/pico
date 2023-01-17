@@ -2061,8 +2061,8 @@ function can_gather()
 end
 
 function can_attack()
-	return (not sel_typ or
-		sel_typ.atk) and hoverunit
+	return sel1.typ.atk
+		and hoverunit
 		and not hoverunit.dead
 		and not hoverunit.hu and
 		g(viz,mx8,my8,hoverunit.disc)
