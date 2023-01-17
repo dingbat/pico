@@ -1196,11 +1196,10 @@ rest=1
 agg=1]]
 end
 
-function mvg(units,x,y,agg,rest)
+function mvg(units,x,y,agg,frc)
 	local lowest=999
 	foreach(units,function(u)
-		if not rest or
-			u.st.rest then
+		if frc or u.st.rest then
 			move(u,x,y,agg)
 		end
 		lowest=min(u.typ.spd,lowest)
@@ -1297,7 +1296,7 @@ function tick(u)
 			parse"t=dead",
 			typ.bldg and reg_bldg(u),
 			u.onscr and
-			sfx(typ.bldg and 17 or 62)
+				sfx(typ.bldg and 17 or 62)
 		if typ.lady then
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
@@ -1364,11 +1363,12 @@ function tick(u)
 	end
 
 	if u.hu then
-		if typ.ant and
-			u.st.rest then
+		if typ.ant and u.st.rest
+		then
 			if (u.st.idle) idle=u
 			u.st.idle=1
-		elseif typ.idle and not u.q then
+		elseif typ.idle and not u.q 
+		then
 			idle_mil=u
 		end
 	end
@@ -1570,7 +1570,7 @@ function input()
 
 		elseif sel1.typ.unit then
 			sfx"1"
-			mvg(sel,mx,my,axn==1)
+			mvg(sel,mx,my,axn==1,1)
 			hilite(parse([[f=0.5
 c=8]],mx,my))
 
@@ -2965,7 +2965,7 @@ function ai_frame()
 		atksqd,offsqd,atkt=
 			offsqd,{},t()
 	end
-	mvg(atksqd,hq.x,hq.y,"atk",1)
+	mvg(atksqd,hq.x,hq.y,"atk")
 end
 
 function miner(u,r)
@@ -3052,7 +3052,7 @@ end
 
 function ai_dmg(u)
 	if u.ai and u.grp!="atk" then
-		safe=mvg(defsqd,u.x,u.y,1,1)
+		safe=mvg(defsqd,u.x,u.y,1)
 	end
 end
 
