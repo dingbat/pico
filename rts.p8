@@ -1996,7 +1996,7 @@ function dist(dx,dy)
 			b0*0.9609+a0*0.3984
 end
 
-function surr(x,y,fn,n,ig_acc)
+function surr(fn,x,y,n,ig_acc)
 	local n,exist=n or 1
 	for dx=-n,n do
 	for dy=-n,n do
@@ -2034,7 +2034,7 @@ function can_gather()
 		or avail_farm()) and
 		sel_typ==ant1 and
 		g(exp,mx8,my8) and
-		surr(mx8,my8)
+		surr(nil,mx8,my8)
 end
 
 function can_attack()
@@ -2219,12 +2219,12 @@ function dmap_find(u,k)
 	if (not dmap) return
 	while lowest>=1 do
 		local orig=max(1,g(dmap,x,y,9))
-		surr(x,y,function(t)
+		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<lowest then
 				lowest,x,y=w,unpack(t)
 			end
-		end,1,true)
+		end,x,y,1,true)
 		if (lowest>=orig) return
 		add(wayp,{x*8+3,y*8+3})
 	end
@@ -2248,11 +2248,11 @@ function dmap()
 				local p=deli(q.typ)
 				q.p1[p.k]=q.c
 				if q.c<8 then
-					surr(p[1],p[2],function(t)
+					surr(function(t)
 						q.tech[t.k]=
 							q.tech[t.k] or
 							add(q.p2,t)
-					end)
+					end,unpack(p))
 				end
 			end
 			q.c+=1
@@ -2277,25 +2277,27 @@ b=4]][q]
 			end
 
 			for i,t in next,dmap_st[q] do
-				if	surr(unpack(t)) then
+				if	surr(nil,unpack(t)) then
 					add(open,t).k=i
 				end
 			end
 			queue[1]=parse(
 				"c=0",
-				open,
-				{},
-				q
+				--p1=dmap
+				--p2=nxt
+				open,--typ
+				{},--tech=closed
+				q--techt
 			)
 		end
 	end
 end
 
 function get_wayp(u,x,y,tol)
-	function near(gx,gy)
+	function nearest(gx,gy)
 		for n=0,16 do
 			local best_d,best_t=32767
-			surr(gx\8,gy\8,function(t)
+			surr(function(t)
 				local d=dist(
 					t[1]*8+4-x,
 					t[2]*8+4-y
@@ -2303,14 +2305,14 @@ function get_wayp(u,x,y,tol)
 				if d<best_d then
 					best_t,best_d=t,d
 				end
-			end,n)
+			end,gx\8,gy\8,n)
 			if (best_t) return best_t,n
 		end
 	end
 	if u.typ.unit then
-		local dest,dest_d=near(x,y)
+		local dest,dest_d=nearest(x,y)
 		local wayp,exists=as(
-			near(u.x,u.y),dest)
+			nearest(u.x,u.y),dest)
 		if exists and
 			dest_d<=(tol or 1) then
 			deli(wayp)
@@ -2357,7 +2359,7 @@ function as(st,g)
 			f.e=true
 			return path(sh),1
 		end
-		surr(p[1],p[2],function(n)
+		surr(function(n)
 			local ob,ncfs=t[n.k],sh.cfs+n.d
 			if not ob then
 				ob={
@@ -2374,7 +2376,7 @@ function as(st,g)
 			if ob.ctg<cl.ctg then
 				cl=ob
 			end
-		end)
+		end,unpack(p))
 	end
 	return path(cl)
 end
