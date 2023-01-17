@@ -34,19 +34,34 @@ function _update()
 		end
 	end
 
-	local total=res1.p+res2.p
-	upcycle=total>=100 and 30 or
-		total>=75 and 15 or
-		total>=40 and 10 or 5
-
 	cf+=1
 	cf%=60
 
 	input()
+
+	if loser then
+		poke"24365"
+		if lclk then
+			menu,cx,cy=unspl"63,5,35"
+			music"63"
+		end
+		if rclk then
+			ban^^=0xf0
+		end
+		return
+	end
+	
 	if to_build then
 		to_build.x,to_build.y=
 			mx8*8,my8*8
 	end
+
+	dmap()
+	
+	local total=res1.p+res2.p
+	upcycle=total>=100 and 30 or
+		total>=75 and 15 or
+		total>=40 and 10 or 5
 
 	upc,pos,hbld,t6,
 		hoverunit,idle,idle_mil=
@@ -54,8 +69,8 @@ function _update()
 		g(bldgs,mx8,my8),
 		t()%6<1
 
-	dmap()
-
+	res1.t+=0x.0888
+	
 	if cf%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -69,20 +84,6 @@ function _update()
 		end
 		end
 	end
-
-	if loser then
-		poke"24365"
-		if lclk then
-			menu,cx,cy=unspl"63,5,35"
-			music"63"
-		end
-		if rclk then
-			ban^^=0xf0
-		end
-		return
-	end
-
-	res1.t+=0x.0888
 
 	if upc==0 then
 		viz,new_viz=new_viz,{}
@@ -106,9 +107,7 @@ function _update()
 					typ.proj_aoe
 				) then
 					dmg(typ,u)
-					if typ.proj_aoe==0 then
-						break
-					end
+					if (typ.proj_aoe==0) break
 					if not hlv then
 						hilite(parse([[f=2
 c=13]],p.x,p.y))
@@ -298,8 +297,8 @@ function _draw()
 		can_gather() and 189 or
 		can_drop() and 191 or
 		can_attack() and
-			(sel_typ==monk[1] and 185
-			or 187)) or 186)
+			(sel_typ and sel_typ.monk
+			and 185 or 187)) or 186)
 end
 -->8
 --unit stats
