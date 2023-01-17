@@ -96,7 +96,7 @@ function _update()
 
 	foreach(proj,function(p)
 		local typ=p.from_typ
-		p.x,p.y,_,d=norm(p.to,p,
+		p.x,p.y,_,d=norm(p,p,
 			typ.proj_spd)
 		if d<1 then
 			del(proj,p)
@@ -1776,13 +1776,13 @@ function fight(u)
 			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
 			then
-				u.dir=sgn(dx),
-					add(proj,typ.proj_s and {
-						from_typ=typ,
-						x=u.x-u.dir*typ.proj_xo,
-						y=u.y+typ.proj_yo,
-						to={e.x,e.y}
-					}) or dmg(typ,e)
+				u.dir=sgn(dx)
+				add(proj,typ.proj_s and {
+					e.x,e.y,
+					from_typ=typ,
+					x=u.x-u.dir*typ.proj_xo,
+					y=u.y+typ.proj_yo,
+				} or dmg(typ,e))
 				if e.conv>=e.max_hp then
 					e.p,e.conv=u.p,0
 					sfx"38"
