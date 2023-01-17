@@ -1245,17 +1245,15 @@ function gather(u,tx,ty,wp)
 end
 
 function drop(u,nxt_res,dropu)
+	local wayp
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
 		dropu=not wayp and units[u.p]
 	end
-	if dropu then
-		wayp=get_wayp(u,dropu.x,
-			dropu.y)
-	end
 	u.st={
 		t="drop",
-		wayp=wayp,
+		wayp=wayp or
+			get_wayp(u,dropu.x,dropu.y),
 		res=nxt_res,
 		target=dropu or
 			tile_as_unit(x,y),
