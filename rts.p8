@@ -3046,27 +3046,33 @@ end
 menuitem(1,"⌂ save to clip",function()
 	if (menu) return
 	local s=""
+	local function join(v,...)
+		if v then
+			s..=v..","
+			join(...)
+		end
+	end
 	foreach(units,function(_ENV)
-		s..=
-			typ.idx..","..
-			x..","..
-			y..","..
-			p..","..
-			(const or "")..","..
-			max(disc)..","..
-			hp.."/"
+		join(
+			typ.idx,
+			x,
+			y,
+			p,
+			const or "",
+			max(disc),
+			hp)
+		s..="/"
 	end)
 	for i=1,mapw*maph-1 do
-		s..=
-			mget(i%mapw,i/mapw)..","
+		join(mget(i%mapw,i/mapw))
 	end
 	s..="/"
 	for k in next,exp do
-		s..=k..","
+		join(k)
 	end
 	s..="/"
-	foreach(resk,function(r)
-		s..=res1[r]..","..res2[r]..","
+	foreach(resk,function(k)
+		join(res1[k],res2[k])
 	end)
 	printh(s,"@clip")
 	sfx"33"
