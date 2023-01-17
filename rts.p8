@@ -64,10 +64,11 @@ function _update()
 		total>=40 and 10 or 5
 
 	upc,pos,hbld,t6,
+		sele,selh,selb,
 		hoverunit,idle,idle_mil=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8),
-		t()%6<1
+		t()%6<1,{}
 
 	res1.t+=0x.0888
 	
@@ -117,21 +118,15 @@ c=13]],p.x,p.y))
 		end
 	end)
 
-	if selx then
-		bldg_sel,hu_sel,enemy_sel=nil
-	end
-
 	foreach(units,tick)
 
 	if selx then
-		sel=hu_sel or
-			bldg_sel or
-			enemy_sel or {}
+		sel=selh or selb or sele
 	end
-	sel1,nsel,sel_typ=sel[1],#sel
+	sel1,nsel,seltyp=sel[1],#sel
 	foreachsel(function(s)
-		sel_typ=(not sel_typ or
-			s.typ==sel_typ) and s.typ
+		seltyp=(not seltyp or
+			s.typ==seltyp) and s.typ
 			or {}
 	end)
 
@@ -297,7 +292,7 @@ function _draw()
 		can_gather() and 189 or
 		can_drop() and 191 or
 		can_attack() and
-			(sel_typ.monk
+			(seltyp.monk
 			and 185 or 187)) or 186)
 end
 -->8
@@ -1348,12 +1343,12 @@ function tick(u)
 		if selx then
 			if int(u.r,selbox,0) then
 				if not u.hu then
-					enemy_sel={u}
+					sele={u}
 				elseif typ.unit then
-					hu_sel=hu_sel or {}
-					add(hu_sel,u)
+					selh=selh or {}
+					add(selh,u)
 				else
-					bldg_sel={u}
+					selb={u}
 				end
 			end
 		end
@@ -2056,7 +2051,7 @@ end
 function can_gather()
 	return (fget(mget(mx8,my8),1)
 		or avail_farm()) and
-		sel_typ.ant and
+		seltyp.ant and
 		g(exp,mx8,my8) and
 		surr(nil,mx8,my8)
 end
@@ -2073,7 +2068,7 @@ function can_build()
 	return hbld and
 		hbld.hu and
 		hbld.hp<hbld.typ.hp and
-		sel_typ.ant
+		seltyp.ant
 end
 
 function norm(it,nt,f)
@@ -2185,7 +2180,7 @@ end
 
 function can_renew(t)
 	if hbld and
-		sel_typ.ant and
+		seltyp.ant and
 		hbld.exp then
 		print_res(renewcost,10,2)
 		rect(unspl"8,0,18,8,4")
@@ -2504,14 +2499,14 @@ portf=9]],
 				pay(sel1.cost,1,res1)
 				sel1.hp=0
 			end,24,107,nil,
-			sel1.const/sel_typ.const,
+			sel1.const/seltyp.const,
 			5,12
 		)
 		return
 	end
 
 	if sel1.typ.farm then
-		?"\f4\^jbr\|i"..sel1.cycles.."/"..sel_typ.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
+		?"\f4\^jbr\|i"..sel1.cycles.."/"..seltyp.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2593,7 +2588,7 @@ function draw_menu()
 	if nsel==1 then
 		sel_ports(-10)
 		if (sel1.hu) single()
-	elseif sel_typ and sel_typ.ant then
+	elseif seltyp and seltyp.ant then
 		single()
 	else
 		sel_ports(24)
@@ -2618,7 +2613,7 @@ portx=99
 porty=72
 porto=2
 portf=13
-]] or sel_typ.ant and parse[[
+]] or seltyp.ant and parse[[
 portx=81
 porty=72
 porto=2

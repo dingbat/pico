@@ -410,3 +410,26 @@ function mouse_mode()
 	)
 end
 mouse_mode()
+
+
+crazy idea to copy in savefile:
+	join(chr(peek(0x2000,0x1000)))
+
+monk upgrade (15 tok)
+
+
+parse([[
+t=30
+r=10
+g=20
+b=0
+breq=0
+i=6
+tmap=1024
+up=-1
+idx=27]],parse[[
+portx=62
+porty=88]],function(_𝘦𝘯𝘷)
+	spd*=1.25
+	hp*=1.2
+end,monk),
