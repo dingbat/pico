@@ -1390,21 +1390,19 @@ function update_viz(u)
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
 		local i=xo|yo*16|los*256
-		local v=vcache[i]
-		if not v then
-			v={}
+		if not vcache[i] then
+			vcache[i]={}
 			for dx=-l,l do
 			for dy=-l,l do
-				if dist(xo*2-dx*8-4,
-					yo*2-dy*8-4)<los then
-					add(v,dx+dy*256)
-				end
+				add(
+					dist(xo*2-dx*8-4,
+						yo*2-dy*8-4)<los
+					and vcache[i],dx+dy*256)
 			end
 			end
-			vcache[i]=v
 		end
 
-		foreach(v,function(t)
+		foreach(vcache[i],function(t)
 			local k=u.k+t
 			if k<maph<<8 and k>=0 and
 				k%256<mapw then
