@@ -285,7 +285,6 @@ x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert bf60644 (lady wandering, 25 tok)
 - remove sfx from save (2 tok)
 - 9c01935 hbanner toggle (8 tok)
--	(const or "")..",".. to tostr(const) (1tok, ugly [nil]s in save)
 - inline ai_dmg() in dmg() (7 tok)
 - inline a bunch of other functions (~5-7 each)
 - remove make_dmap argument (priotize resource) (5 tok)

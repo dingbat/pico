@@ -3053,14 +3053,8 @@ menuitem(1,"⌂ save to clip",function()
 		end
 	end
 	foreach(units,function(_ENV)
-		join(
-			typ.idx,
-			x,
-			y,
-			p,
-			const or "",
-			max(disc),
-			hp)
+		join(typ.idx,x,y,p,
+			const or "",max(disc),hp)
 		s..="/"
 	end)
 	for i=1,mapw*maph-1 do
