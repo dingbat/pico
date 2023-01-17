@@ -39,8 +39,8 @@ function _update()
 		total>=75 and 15 or
 		total>=40 and 10 or 5
 
-	fps+=1
-	fps%=60
+	cf+=1
+	cf%=60
 
 	input()
 	if to_build then
@@ -50,13 +50,13 @@ function _update()
 
 	upc,pos,hbld,t6,
 		hoverunit,idle,idle_mil=
-		fps%upcycle,{},
+		cf%upcycle,{},
 		g(bldgs,mx8,my8),
 		t()%6<1
 
 	dmap()
 
-	if fps%30==19 then
+	if cf%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
 			local x,y=tx*mmwratio\8,
@@ -159,7 +159,7 @@ function _draw()
 	end
 
 	local bf,af,proj_so={},{},
-		fps\5%2*2
+		cf\5%2*2
 	foreach(units,function(u)
 		if u.onscr or loser then
 			if
@@ -201,7 +201,7 @@ function _draw()
 			-2,unspl"80,88,80,9")
 		pspl"1,0"
 		sspr(64+
-			pack(48,fps\5%3*16)[loser],
+			pack(48,cf\5%3*16)[loser],
 			unspl"0,16,8,14,90,32,16")
 		?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jen\|h\0"
 		?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
@@ -245,7 +245,7 @@ function _draw()
 	fillp()
 
 	if sel1 and sel1.rx then
-		spr(64+fps\5%3,
+		spr(64+cf\5%3,
 			sel1.rx-2,sel1.ry-5)
 	end
 
@@ -1309,7 +1309,7 @@ function tick(u)
 
 	if not u.fire and
 		u.hp<u.max_hp and
-		fps==0 then
+		cf==0 then
 		u.hp+=heal[u.p].qty
 	end
 
@@ -1611,7 +1611,7 @@ function draw_unit(u)
 			resoffy[res_typ],
 		typ[stt.."_fps"],
 		typ[stt.."_fr"],
-		u.dead or (fps-u.id)%60,
+		u.dead or (cf-u.id)%60,
 		count(selection,u)==1 and 9
 
 	camera(cx-ux,cy-uy)
@@ -1651,15 +1651,15 @@ function update_unit(u)
 	local st=u.st
 	local t,wayp,nxt,targ=
 		st.t,st.wayp,st.res,st.target
-	if u.q and fps%15==u.q.techt%15 then
+	if u.q and cf%15==u.q.techt%15 then
 		produce(u)
 	end
 	if u.typ.farm then
-		update_farm(u,fps)
+		update_farm(u,cf)
 	end
 	if st.active then
 		if (st.farm) farmer(u)
-		if t=="build" and fps%30==0 then
+		if t=="build" and cf%30==0 then
 			buildrepair(u)
 		end
 		if (t=="gather") mine(u)
@@ -1668,9 +1668,9 @@ function update_unit(u)
 			targ and
 			int(targ.r,u.r,st.res and -3 or 0)
 		then
-			u.dir,st.active,st.fps,
+			u.dir,st.active,st.frame,
 				st.wayp=
-				sgn(targ.x-u.x),true,fps
+				sgn(targ.x-u.x),true,cf
 			if t=="drop" then
 				if u.res then
 					res[u.p][u.res.typ]+=
@@ -1706,13 +1706,13 @@ function update_unit(u)
 	end
 end
 
-function update_farm(_ENV,fps)
+function update_farm(_ENV,cf)
 	if not farmer or
 		farmer.st.farm!=_ENV
 		or exp then
 		farmer=nil
 	elseif farmer.st.active and
-		not ready and fps==59 then
+		not ready and cf==59 then
 		fres+=typ.gr
 		sproff+=typ.gr*2
 		ready=fres>=9
@@ -1723,7 +1723,7 @@ function farmer(u)
 	local f=u.st.farm
 	if not f.farmer then
 		rest(u)
-	elseif f.ready and fps==0 then
+	elseif f.ready and cf==0 then
 		f.fres-=1
 		f.sproff+=1
 		collect(u,"r")
@@ -1775,7 +1775,7 @@ function fight(u)
 			if not u.st.adj then
 				u.st.wayp=nil
 			end
-			if fps%typ.atk_freq==
+			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
 			then
 				u.dir=sgn(dx),
@@ -1840,7 +1840,7 @@ function mine(u)
 		if not mine_nxt(u,r) then
 			drop(u,r)
 		end
-	elseif fps==u.st.fps then
+	elseif cf==u.st.frame then
 		collect(u,r)
 		if t<112 and
 			(n==f\3 or n==f\1.25)
@@ -2206,7 +2206,7 @@ function queue_prod(u,b,m)
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q=parse("qty=1",b,b.t*m,fps)
+		u.q=parse("qty=1",b,b.t*m,cf)
 	end
 end
 -->8
@@ -2799,7 +2799,7 @@ t=0]]
 	init_typs()
 
 	ant1,res1,res2,startpos,
-	fps,selt,alert,ban,
+	cf,selt,alert,ban,
 	--ai
 	atkt=
 		ant.p1,res.p1,res.p2,
