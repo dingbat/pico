@@ -2398,7 +2398,7 @@ function print_res(r,x,y,zero)
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
 		if v!=0 or zero then
-			newx+=? "\#7 "..v,x,y,rescol[k]
+			newx+=?"\#7 "..v,x,y,rescol[k]
 			spr(129+i,x,y)
 			x=newx+(zero or 1)
 		end
