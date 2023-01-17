@@ -124,12 +124,11 @@ c=13]],p.x,p.y))
 	foreach(units,tick)
 
 	if selx then
-		selection=hu_sel or
+		sel=hu_sel or
 			bldg_sel or
 			enemy_sel or {}
 	end
-	sel1,nsel,sel_typ=
-		selection[1],#selection
+	sel1,nsel,sel_typ=sel[1],#sel
 	foreachsel(function(s)
 		sel_typ=(sel_typ==nil or
 			s.typ==sel_typ) and s.typ
@@ -1271,7 +1270,7 @@ function tick(u)
 		u.x8,u.y8
 
 	if u.hp<=0 and not u.dead then
-		del(selection,u)
+		del(sel,u)
 		u.dead,u.farmer=0
 		u.st=
 			parse"t=dead",
@@ -1297,7 +1296,7 @@ function tick(u)
 
 	if u.dead then
 		if typ.queen then
-			loser,selection=u.p,{}
+			loser,sel=u.p,{}
 			music"56"
 		end
 		u.dead+=1
@@ -1440,7 +1439,7 @@ function cam()
 end
 
 function foreachsel(func,...)
-	for u in all(selection) do
+	for u in all(sel) do
 		func(u,...)
 	end
 end
@@ -1507,11 +1506,11 @@ function input()
 	if btnp"5" and hoverunit and
 		hoverunit.typ.unit and
 		t()-selt<0.2 then
-		selection,selx={}
+		sel,selx={}
 		foreach(units,function(u)
 			add(u.onscr and
 				u.typ==hoverunit.typ and
-				selection,u)
+				sel,u)
 		end)
 		return
 	end
@@ -1553,7 +1552,7 @@ function input()
 
 		elseif sel1.typ.unit then
 			sfx"1"
-			mvg(selection,mx,my,axn==1)
+			mvg(sel,mx,my,axn==1)
 			hilite(parse([[f=0.5
 c=8]],mx,my))
 
@@ -1611,7 +1610,7 @@ function draw_unit(u)
 		typ[stt.."_fps"],
 		typ[stt.."_fr"],
 		u.dead or (cf-u.id)%60,
-		count(selection,u)==1 and 9
+		count(sel,u)==1 and 9
 
 	camera(cx-ux,cy-uy)
 
@@ -2153,7 +2152,7 @@ function collect(u,res)
 end
 
 function can_drop()
-	for u in all(selection) do
+	for u in all(sel) do
 		if u.res then
 			return hbld and
 				hbld.hu and
@@ -2449,7 +2448,7 @@ function draw_port(
 end
 
 function sel_ports(x)
-	foreach(selection,function(u)
+	foreach(sel,function(u)
 		x+=13
 		if x>100 then
 			unspr"133,84,121"
@@ -2457,9 +2456,9 @@ function sel_ports(x)
 		else
 			draw_port(u.typ,
 				nsel>1 and function(r)
-					del(selection,u)
+					del(sel,u)
 					if r then
-						selection={u}
+						sel={u}
 					end
 				end,
 				x,107,nil,
@@ -2585,7 +2584,7 @@ function draw_menu()
 		add(buttons,{
 			r=split"0,110,14,119",
 			fn=function()
-				deli(selection)
+				deli(sel)
 			end
 		})
 	end
@@ -2619,7 +2618,7 @@ portf=13
 			fn=function()
 				sfx"1"
 				hilite(idle)
-				selection={idle}
+				sel={idle}
 				cx,cy=idle.x-64,idle.y-64
 				cam()
 			end
@@ -2631,7 +2630,7 @@ portf=13
 			r=split"106,121,113,128",
 			fn=function()
 				hilite(idle_mil)
-				selection={idle_mil}
+				sel={idle_mil}
 			end
 		}) and 48 or 56,
 		unspl"98,8,6,0,14")
@@ -2774,7 +2773,7 @@ function init()
 		function() hq.hp=0 end)
 
 	queue,exp,vcache,dmaps,
-	units,restiles,selection,ladys,
+	units,restiles,sel,ladys,
 		proj,bldgs,new_viz,dmap_st,
 		typs,heal,
 		res,loser,menu=
