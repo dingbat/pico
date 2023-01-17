@@ -219,7 +219,7 @@ function _draw()
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
-		local b=function(a,col)
+		local function b(a,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
 			if (a[i-1]) unl"-1,0,-1,7"
@@ -2083,7 +2083,7 @@ end
 
 function reg_bldg(b)
 	local typ,x,y=b.typ,b.x8,b.y8
-	function reg(xx,yy)
+	local function reg(xx,yy)
 		s(bldgs,xx,yy,
 			not b.dead and b)
 		if b.dead then
@@ -2294,7 +2294,7 @@ b=4]][q]
 end
 
 function get_wayp(u,x,y,tol)
-	function nearest(gx,gy)
+	local function nearest(gx,gy)
 		for n=0,16 do
 			local best_d,best_t=32767
 			surr(function(t)
@@ -2334,7 +2334,7 @@ function as(st,g)
 		last=st,cfs=0,ctg=32767
 	},{},{}
 	t[st.k]=sh
-	function path(s)
+	local function path(s)
 		while s.last!=st do
 			add(f,{s.last[1]*8+4,
 				s.last[2]*8+4},1)
@@ -2983,7 +2983,7 @@ function ai_unit1(u)
 end
 
 function ai_unit2(u)
-	function go(fn)
+	local function go(fn)
 		if not u.w or
 			u.w.st.target!=u then
 			u.w=deli(avail)

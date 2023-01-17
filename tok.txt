@@ -9,7 +9,7 @@ Tokens
 ⁃ (1) use return of add(), del() and deli(): `add(a,b) b.x=y` -> `add(a,b).x=y`
 ⁃ (2) `flr(a/b)` -> `a\b`
 ⁃ of course _env; remember you can assign _env without `do/end` blocks if at the end of a function
-⁃ (2 per arg) if a function is only used by one other function, you can define it inside the other and remove any arguments already in scope (minor perf cost)
+⁃ (2 per arg) if a function is only used by one other function, you can define it inside the other (locally) and remove any arguments already in scope
 ⁃ (1) if you call any of your own functions with a single truthy value, can do fn"1"
 ⁃ a LOT can be done with control codes, large topic but if you are printing to the screen you generally don't ever need to pass args to print since you can move the cursor with \^j, \^| and \^- and you can set color with \F
 ⁃ (1) `foreach(a, function(x) end)` saves a token over `for x in all(a) do` at the cost of perf, wouldn't do this with huge arrays
