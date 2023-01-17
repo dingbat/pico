@@ -130,8 +130,9 @@ c=13]],p.x,p.y))
 	end
 	sel1,nsel,sel_typ=sel[1],#sel
 	foreachsel(function(s)
-		sel_typ=(sel_typ==nil or
+		sel_typ=(not sel_typ or
 			s.typ==sel_typ) and s.typ
+			or {}
 	end)
 
 	if (upc==0) ai_frame()
@@ -296,7 +297,7 @@ function _draw()
 		can_gather() and 189 or
 		can_drop() and 191 or
 		can_attack() and
-			(sel_typ and sel_typ.monk
+			(sel_typ.monk
 			and 185 or 187)) or 186)
 end
 -->8
@@ -2055,7 +2056,7 @@ end
 function can_gather()
 	return (fget(mget(mx8,my8),1)
 		or avail_farm()) and
-		sel_typ==ant1 and
+		sel_typ.ant and
 		g(exp,mx8,my8) and
 		surr(nil,mx8,my8)
 end
@@ -2072,7 +2073,7 @@ function can_build()
 	return hbld and
 		hbld.hu and
 		hbld.hp<hbld.typ.hp and
-		sel_typ==ant1
+		sel_typ.ant
 end
 
 function norm(it,nt,f)
@@ -2184,7 +2185,7 @@ end
 
 function can_renew(t)
 	if hbld and
-		sel_typ==ant1 and
+		sel_typ.ant and
 		hbld.exp then
 		print_res(renewcost,10,2)
 		rect(unspl"8,0,18,8,4")
@@ -2592,7 +2593,7 @@ function draw_menu()
 	if nsel==1 then
 		sel_ports(-10)
 		if (sel1.hu) single()
-	elseif sel_typ==ant1 then
+	elseif sel_typ and sel_typ.ant then
 		single()
 	else
 		sel_ports(24)
@@ -2617,7 +2618,7 @@ portx=99
 porty=72
 porto=2
 portf=13
-]] or sel_typ==ant1 and parse[[
+]] or sel_typ.ant and parse[[
 portx=81
 porty=72
 porto=2
@@ -2819,11 +2820,11 @@ t=0]]
 
 	init_typs()
 
-	ant1,res1,res2,startpos,
+	res1,res2,startpos,
 	cf,selt,alert,ban,
 	--ai
 	atkt=
-		ant.p1,res.p1,res.p2,
+		res.p1,res.p2,
 		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
 		unspl"59,0,0,0,0,0"
 end
