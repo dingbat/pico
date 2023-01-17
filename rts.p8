@@ -1340,16 +1340,15 @@ function tick(u)
 	end
 
 	if g(viz,x8,y8,u.disc) then
-		if selx then
-			if int(u.r,selbox,0) then
-				if not u.hu then
-					sele={u}
-				elseif typ.unit then
-					selh=selh or {}
-					add(selh,u)
-				else
-					selb={u}
-				end
+		if selx and int(u.r,selbox,0)
+		then
+			if not u.hu then
+				sele={u}
+			elseif typ.unit then
+				selh=selh or {}
+				add(selh,u)
+			else
+				selb={u}
 			end
 		end
 		sset(
