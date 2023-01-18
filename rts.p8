@@ -2079,10 +2079,10 @@ function norm(it,nt,f)
 end
 
 function acc(x,y,strict)
-	local b=g(bldgs,x,y)
+	local _ENV=g(bldgs,x,y)
 	return not fget(mget(x,y),0)
-		and (not b or not strict and
-			(b.const or b.typ.farm))
+		and (not _ENV or not strict
+			and (const or typ.farm))
 end
 
 function buildable()
