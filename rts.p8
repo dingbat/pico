@@ -11,13 +11,12 @@ function draw_map(o,y)
 	map(cx/8+o,cy/8,0,0,17,y)
 end
 
-function _update()
-	loadgame()
-	
+function _update()	
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
 		lrclk and not btn"4",
-		btn"5",btn"4"
+		btn"5",btn"4",
+		stat"121" and loadgame()
 
 	if menu then
 		pspl"1,5,3,13,13,13,6,2,6,5,13,13,13,0,5"
@@ -3018,7 +3017,6 @@ menuitem(1,"⌂ save",function()
 	if (menu) return
 	local ptr=0
 	camera()
-	pal()
 	local function draw(v,...)
 		if v then
 			for i=0,2 do
@@ -3046,39 +3044,38 @@ menuitem(1,"⌂ save",function()
 end)
 
 function loadgame()
-	if stat"121" then
-		init()
-		serial(unspl"2050,-32768,16384")
-		local ptr=0x8004
-		function p(n)
-			local v1,v2,v3=peek(ptr,3)
-			if n>0 then
-				ptr+=3
-				return v1|v2<<4|v3<<8,p(n-1)
-			end
+	init()
+	serial(unspl"2050,-32768,16384")
+	local ptr=0x8004
+	function p(n)
+		local v1,v2,v3=peek(ptr,3)
+		if n>0 then
+			ptr+=3
+			return v1|v2<<4|v3<<8,p(n-1)
 		end
-		for x=0,31 do
-			for y=0,47 do
-				local v=p"1"
-				if (v>127) s(exp,x,y,128)
-				mset(x,y,v&0x7f)
-			end
-		end
-		foreach(resk,function(k)
-			res1[k],res2[k]=p"2"
-		end)
-		for i=1,p"1" do
-			unit(p"7")
-		end
-		foreach(typs,function(_ENV)
-			if res1.techs|tmap==res1.techs then
-				tech(techt.p1)
-				up,done=up and 0,not up
-				typ.up=up
-			end
-		end)
-		ai_init()
 	end
+	for x=0,31 do
+		for y=0,47 do
+			local v=p"1"
+			if (v>127) s(exp,x,y,128)
+			mset(x,y,v&0x7f)
+		end
+	end
+	foreach(resk,function(k)
+		res1[k],res2[k]=p"2"
+	end)
+	for i=1,p"1" do
+		unit(p"7")
+	end
+	local techs=res2.techs
+	foreach(typs,function(_ENV)
+		if techs|tmap==techs then
+			tech(techt.p1)
+			up,done=up and 0,not up
+			typ.up=up
+		end
+	end)
+	ai_init()
 end
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
