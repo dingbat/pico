@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 39
 __lua__
 --age of ants
---eeooty (dan h)
+--eeooty
 
 music(63,2000)
 
@@ -148,9 +148,9 @@ function banner(a,t,subt)
 	pspl"1,0"
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
-		unspl"0,16,8,14,90,32,16")
-	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..subt.." \|f\^x1 \^jen\|h\0"
-	?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!,\^w\^t\fasavefile\-0\-0\-0\-0\|f\f1savefile"[t]
+		unspl"0,16,8,12,90,32,16")
+	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..subt
+	?"\^jdn\|h\^w\^t\fa"..t.."\-0\-0\-0\-0\|f\f1"..t
 end
 
 function _draw()
@@ -202,21 +202,21 @@ function _draw()
 	if loser then
 		resbar()
 		camera(ban)
-		banner(loser,loser,
-			"press ❎ for menu")
+		banner(loser,split"defeat\^x2....\^x4,victory!"[loser],
+			"press ❎ for menu \|f\^x1 ")
 		return
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15) --f
+	draw_map(mapw,15)
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
 	pal,buttons=_pal,{}
 	pal()
 
-	fillp"23130.5"--▒
-
+	fillp"23130.5"
+	
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
@@ -275,7 +275,7 @@ function _draw()
 		if amy>=104 then
 			camera(4-amx,4-amy)
 		else
-			fillp"23130.5"--▒
+			fillp"23130.5"
 			rect(to_build.typ.fw,
 				to_build.typ.fh,
 				unspl"-1,-1,3")
@@ -301,7 +301,7 @@ function _draw()
 			and 185 or 187)) or 186)
 end
 -->8
---unit stats
+--units
 
 function init_typs()
 ant=parse[[
@@ -1631,7 +1631,7 @@ function draw_unit(u)
 	camera(cx-ux,cy-uy)
 
 	if u.const and not u.dead then
-		fillp"23130.5"--▒
+		fillp"23130.5"
 		rect(-1,-1,w,h,
 			u==sel1 and 9 or 12)
 		fillp()
@@ -1646,7 +1646,7 @@ function draw_unit(u)
 	pal(typ.farm and 5,selc or 5)
 	pal{
 		selc or u.p,
-		u.p,--☉
+		u.p,
 		[14]=0
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -2001,7 +2001,7 @@ function pay(costs,dir,_ENV)
 	end
 end
 
---credit on bbs
+--☉ bbs
 function dist(dx,dy)
 	local maskx,masky=dx>>31,dy>>31
 	local a0,b0=(dx+maskx)^^maskx,
@@ -2332,7 +2332,7 @@ function get_wayp(u,x,y,tol)
 	end
 end
 
---credit on bbs
+--☉ bbs
 function as(st,g)
 	local k=st.k|g.k>>16
 	local c=asc[k]
@@ -2782,7 +2782,7 @@ function init()
 	end
 
 	music(unspl"0,0,7")
-	menuitem(3,"∧ resign",
+	menuitem(2,"∧ resign",
 		function() hq.hp=0 end)
 
 	queue,exp,vcache,dmaps,
@@ -2810,7 +2810,6 @@ t=0]]
 
 	res1,res2,posidx,
 	cf,selt,alert,ban,
-	--ai
 	atkt,boi=
 		res.p1,res.p2,
 		split"1,2,3,4",
@@ -3021,6 +3020,7 @@ menuitem(1,"⌂ save",function()
 	if (menu) return
 	local ptr=0
 	camera()
+	pal()
 	local function draw(v,...)
 		if v then
 			for i=0,8,4 do
@@ -3040,41 +3040,40 @@ menuitem(1,"⌂ save",function()
 		draw(res1[k],res2[k])
 	end)
 	draw(#units)
-	for i=0,14 do
 	foreach(units,function(_ENV)
 		draw(typ.idx,x,y,p,
 			max(const),max(disc),hp)
 	end)
-	end
-	banner(2,3,"drag+drop to load")
+	banner(2,"savefile","drag+drop to load \|f\^x1 ")
 	extcmd("screen",1)
 end)
 
 function loadgame()
 	init()
+	pal()
 	serial(unspl"2050,-32768,16384")
 	ptr,loaded=0x8004,1
-	function p(n)
+	local function px(n)
 		n-=1
 		if n>=0 then
 			local v1,v2,v3=peek(ptr,3)
 			ptr+=3
-			return v1|v2<<4|v3<<8,p(n)
+			return v1|v2<<4|v3<<8,px(n)
 		end
 	end
 	for x=0,47 do
 		for y=0,31 do
-			local v=p"1"
+			local v=px"1"
 			if (v>127) s(exp,x,y,128)
 			mset(x,y,v&0x7f)
 		end
 	end
 	foreach(resk,function(k)
-		res1[k],res2[k]=p"2"
+		res1[k],res2[k]=px"2"
 	end)
 
-	for i=1,p"1" do
-		unit(p"7")
+	for i=1,px"1" do
+		unit(px"7")
 	end
 	local techs=res2.techs
 	foreach(typs,function(_ENV)
