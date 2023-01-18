@@ -76,8 +76,7 @@ function _update()
 	if cf%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
-			local x,y=tx*mmwratio\8,
-				ty*mmhratio\8
+			local x,y=tx*mmwr\8,ty*mmhr\8
 			sset(109+tx,72+ty,
 				g(exp,x,y) and rescol[
 					g(viz,x,y,"e")..
@@ -1348,8 +1347,8 @@ function tick(u)
 			end
 		end
 		sset(
-			109+u.x/mmwratio,
-			72+u.y/mmhratio,
+			109+u.x/mmwr,
+			72+u.y/mmhr,
 			u.p
 		)
 	end
@@ -1494,8 +1493,7 @@ function input()
 		local dx,dy=amx-mmx,amy-mmy
 		if min(dx,dy)>=0 and
 			dx<mmw and dy<mmh+1	then
-			local x,y=
-				mmwratio*dx,mmhratio*dy
+			local x,y=mmwr*dx,mmhr*dy
 			if rclk and sel1 then
 				sfx"0"
 				foreachsel(move,x,y,axn==1)
@@ -1546,7 +1544,7 @@ function input()
 			hbld.sproff,
 				hbld.cycles,
 				hbld.exp=0,0
-			pay(renewcost,-1,res1)
+			pay(renew,-1,res1)
 			gofarm(sel1,hbld)
 
 		elseif can_gather() then
@@ -2154,8 +2152,8 @@ function dmg(from_typ,to)
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
 		hilite{
-			mmx+to.x/mmwratio,
-			mmy+to.y/mmhratio,3,14}
+			mmx+to.x/mmwr,
+			mmy+to.y/mmhr,3,14}
 		alert=hlt
 		hlt+=2.5
 	end
@@ -2186,9 +2184,9 @@ function can_renew(t)
 	if hbld and
 		seltyp.ant and
 		hbld.exp then
-		print_res(renewcost,10,2)
+		print_res(renew,10,2)
 		rect(unspl"8,0,18,8,4")
-		return	can_pay(renewcost,res1) or t
+		return	can_pay(renew,res1) or t
 	end
 end
 
@@ -2653,8 +2651,8 @@ end,20,108)
 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 	sspr(unspl"109,72,19,12,0,0")
 	camera(
-		-mmx-ceil(cx/mmwratio),
-		-mmy-ceil(cy/mmhratio)
+		-mmx-ceil(cx/mmwr),
+		-mmy-ceil(cy/mmhr)
 	)
 	rect(unspl"-1,-1,7,7,10")
 
@@ -2700,14 +2698,12 @@ pspl,rndspl,unspl,spldeli,campal=
 
 unl,unspr,stp,
 	resk,rescol,
-	resoffx,resoffy,renewcost,
+	resoffx,resoffy,renew,
 	dmg_mult,
 
 	mm,ai_diff,action,
 	mmx,mmy,mmw,mmh,
-	mapw,maph,
-	mmhratio,
-	mmwratio,
+	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
 	=
 	comp(line,unspl),
