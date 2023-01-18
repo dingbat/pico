@@ -134,6 +134,25 @@ c=13]],p.x,p.y))
 	if (upc==0) ai_frame()
 end
 
+function banner(a,t,subt)
+	local secs=res1.t\1%60
+	rectfill(unspl"0,88,128,107,9")
+	unl"6,87,44,87"
+	unl"86,87,125,87"
+	unl"25,108,105,108"
+	line(
+		?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff]
+		-3,unspl"80,8,80,9")
+	?"\^jml\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	unl"123,80,88,80,9"
+	pspl"1,0"
+	sspr(64+
+		pack(48,cf\5%3*16)[a],
+		unspl"0,16,8,14,90,32,16")
+	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..subt.." \|f\^x1 \^jen\|h\0"
+	?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!,\^w\^t\fasavefile\-0\-0\-0\-0\|f\f1savefile"[t]
+end
+
 function _draw()
 	draw_map(0,17)
 	if menu then
@@ -182,24 +201,9 @@ function _draw()
 	end)
 	if loser then
 		resbar()
-		local secs=res1.t\1%60
 		camera(ban)
-		rectfill(unspl"0,88,128,107,9")
-		unl"6,87,44,87"
-		unl"86,87,125,87"
-		unl"25,108,105,108"
-		line(
-			?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff]
-			-3,unspl"80,8,80,9")
-		line(
-			?"\^jml\#9\|c\|i \|e\f5\^:000e040e1915110e\-h\|i"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-			-2,unspl"80,88,80,9")
-		pspl"1,0"
-		sspr(64+
-			pack(48,cf\5%3*16)[loser],
-			unspl"0,16,8,14,90,32,16")
-		?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 press ❎ for menu \|f\^x1 \^jen\|h\0"
-		?split"\^w\^t\fadefeat\-d\^x2...\^x4\-0\-0\-0\-7\|f\f1defeat\-d\^x2...,\^w\^t\favictory!\-0\-0\-0\-0\|f\f1victory!"[loser]
+		banner(loser,loser,
+			"press ❎ for menu")
 		return
 	end
 
@@ -3036,10 +3040,13 @@ menuitem(1,"⌂ save",function()
 		draw(res1[k],res2[k])
 	end)
 	draw(#units)
+	for i=0,14 do
 	foreach(units,function(_ENV)
 		draw(typ.idx,x,y,p,
 			max(const),max(disc),hp)
 	end)
+	end
+	banner(2,3,"drag+drop to load")
 	extcmd("screen",1)
 end)
 
