@@ -2198,7 +2198,7 @@ conv=0]])
 			disc,id,prod=
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
-			_const>0 and _const,
+			max(_const)>0 and _const,
 			_disc==1,
 			_id,_typ.prod or {}
 	end
@@ -2291,11 +2291,9 @@ b=4]][q]
 			end
 			queue[1]=parse(
 				"c=0",
-				--p1=dmap
-				--p2=nxt
-				open,--typ
-				{},--tech=closed
-				q--techt
+				open,
+				{},
+				q
 			)
 		end
 	end
@@ -2692,7 +2690,7 @@ pspl,rndspl,unspl,spldeli=
 	comp(unpack,split),
 	comp(split,deli)
 
-unl,unspr,startpos,
+unl,unspr,stp,
 	resk,rescol,
 	resoffx,resoffy,renewcost,
 	dmg_mult,
@@ -2836,7 +2834,7 @@ function new()
 	function(s)
 		local u,x,y,p=unspl(s)
 		local dx,dy=unspl(
-			startpos[res[p].pos],":")
+			stp[res[p].pos],":")
 		unit(u,x+dx,y+dy,p)
 	end)
 
@@ -2849,7 +2847,7 @@ function ai_init()
 	defsqd,offsqd,atksqd,hq,
 		cx,cy=
 		{},{},{},units[1],
-		unspl(startpos[res1.pos],":")
+		unspl(stp[res1.pos],":")
 
 	make_dmaps"d"
 end
@@ -2896,7 +2894,9 @@ function ai_frame()
 				bgrat=split"2.75,2.35,2"[p]
 			elseif curr then
 				if pid==10 then
-					unit(p,x8,y8,3)
+					if not loaded then
+						unit(p,x8,y8,3)
+					end
 				elseif res2.diff>=p then
 					typs[pid].tech(
 						typs[pid].techt.p2)
@@ -3019,16 +3019,16 @@ menuitem(1,"⌂ save",function()
 	camera()
 	local function draw(v,...)
 		if v then
-			for i=0,2 do
+			for i=0,8,4 do
 				pset(ptr%128,ptr\128,
-					v>>i*4&0xf)
+					v>>i&0xf)
 				ptr+=1
 			end
 			draw(...)
 		end
 	end
-	for x=0,31 do
-		for y=0,47 do
+	for x=0,47 do
+		for y=0,31 do
 			draw(mget(x,y)|g(exp,x,y,0))
 		end
 	end
@@ -3046,16 +3046,17 @@ end)
 function loadgame()
 	init()
 	serial(unspl"2050,-32768,16384")
-	local ptr=0x8004
+	ptr,loaded=0x8004,1
 	function p(n)
-		local v1,v2,v3=peek(ptr,3)
-		if n>0 then
+		n-=1
+		if n>=0 then
+			local v1,v2,v3=peek(ptr,3)
 			ptr+=3
-			return v1|v2<<4|v3<<8,p(n-1)
+			return v1|v2<<4|v3<<8,p(n)
 		end
 	end
-	for x=0,31 do
-		for y=0,47 do
+	for x=0,47 do
+		for y=0,31 do
 			local v=p"1"
 			if (v>127) s(exp,x,y,128)
 			mset(x,y,v&0x7f)
@@ -3064,6 +3065,7 @@ function loadgame()
 	foreach(resk,function(k)
 		res1[k],res2[k]=p"2"
 	end)
+
 	for i=1,p"1" do
 		unit(p"7")
 	end
