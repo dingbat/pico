@@ -2184,7 +2184,7 @@ function can_renew(t)
 	if hbld and
 		seltyp.ant and
 		hbld.exp then
-		print_res(renew,10,2)
+		pres(renew,10,2)
 		rect(unspl"8,0,18,8,4")
 		return	can_pay(renew,res1) or t
 	end
@@ -2395,7 +2395,7 @@ end
 -->8
 --menu
 
-function print_res(r,x,y,z)
+function pres(r,x,y,z)
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
@@ -2661,13 +2661,13 @@ end,20,108)
 	if hovbtn and hovbtn.costs and
 		res1.reqs|hovbtn.costs.breq==
 			res1.reqs then
-		local len=print_res(
+		local len=pres(
 			hovbtn.costs,0,150)
 		camera(
 			len/2-4-hovbtn.r[1],
 			8-hovbtn.r[2]
 		)
-		print_res(hovbtn.costs,2,2)
+		pres(hovbtn.costs,2,2)
 		rect(len+2,unspl"0,0,8,1")
 	end
 end
@@ -2675,7 +2675,7 @@ end
 function resbar()
 	camera()
 	rectfill(unspl"0,120,30,128,7")
-	camera(-print_res(res1,
+	camera(-pres(res1,
 		unspl"1,122,2"))
 	unl"-4,120,-128,120,5"
 	pset(-3,121)
