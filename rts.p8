@@ -1734,22 +1734,22 @@ function update_farm(_ENV,cf)
 end
 
 function farmer(u)
-	local f=u.st.farm
-	if not f.farmer then
+	local _ENV,g=u.st.farm,_ENV
+	if not farmer then
 		rest(u)
-	elseif f.ready and cf==0 then
-		f.fres-=1
-		f.sproff+=1
-		collect(u,"r")
-		if f.fres<=0 then
-			drop(u)
-			f.cycles+=1
-			f.exp,f.ready=f.hu and
-				f.cycles>=f.typ.cycles
-			f.sproff=f.exp and
-				(sfx"20" or 32) or 0
+	elseif ready and g.cf==0 then
+		fres-=1
+		sproff+=1
+		g.collect(u,"r")
+		if fres<=0 then
+			g.drop(u)
+			cycles+=1
+			exp,ready=hu and
+				cycles>=typ.cycles
+			sproff=exp and
+				(g.sfx"20" or 32) or 0
 		end
-		u.st.farm=f
+		u.st.farm=_ENV
 	end
 end
 
