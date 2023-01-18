@@ -137,13 +137,13 @@ function banner(a,t,subt)
 	local secs=res1.t\1%60
 	rectfill(unspl"0,88,128,107,9")
 	unl"6,87,44,87"
-	unl"86,87,125,87"
+	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
 		?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff]
 		-3,unspl"80,8,80,9")
-	?"\^jml\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
-	unl"123,80,88,80,9"
+	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	unl"119,80,84,80,9"
 	pspl"1,0"
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
@@ -1289,8 +1289,9 @@ function gofarm(u,f)
 end
 
 function tick(u)
-	local typ,targ=u.typ,
-		u.st.target
+	local typ,targ,agg_d,agg_u=
+		u.typ,u.st.target,9999
+
 	if not u.const then
 		u.hp+=typ.hp-u.max_hp
 		u.max_hp=typ.hp
@@ -1374,15 +1375,40 @@ function tick(u)
 		rest(u)
 	end
 
-	if u.hu then
-		if typ.ant and u.st.rest
-		then
-			if (u.st.idle) idle=u
-			u.st.idle=1
-		elseif typ.idle and not u.q
-		then
-			idle_mil=u
+	if u.st.rest then
+		if typ.lady and t6 then
+			wander(u)
 		end
+		if u.hu then
+			if typ.ant then
+				if (u.st.idle) idle=u
+				u.st.idle=1
+			elseif typ.idle and not u.q
+			then
+				idle_mil=u
+			end
+		end
+	end
+
+	if u.upd and u.st.agg and
+	 typ.atk then
+		for e in all(units) do
+			local d=dist(e.x-u.x,e.y-u.y)
+			if e.p!=u.p and
+				not e.dead and
+				d<=typ.los
+			then
+				if e.typ.bldg then
+					d+=typ.seige and
+						e.typ.bldg==1 and
+						-999 or 999
+				end
+				if d<agg_d then
+					agg_u,agg_d=e,d
+				end
+			end
+		end
+		atk(u,agg_u)
 	end
 
 	update_unit(u)
@@ -1399,19 +1425,6 @@ function tick(u)
 		u.st.wayp,u.st.adj=
 			c and {{x,y}},c
 		s(pos,x\4,y\4,1)
-	end
-
-	if u.upd and u.st.agg and
-		typ.atk then
-		agg(u)
-	end
-	if u.st.t=="atk" then
-		fight(u)
-	end
-
-	if typ.lady and u.st.rest and
-		t6 then
-		wander(u)
 	end
 end
 
@@ -1692,36 +1705,34 @@ function update_unit(u)
 	if u.typ.farm then
 		update_farm(u,cf)
 	end
-	if st.active then
+	if t=="atk" then
+		fight(u)
+	elseif st.active then
 		if (st.farm) farmer(u)
 		if t=="build" and cf%30==0 then
 			buildrepair(u)
 		end
 		if (t=="gather") mine(u)
-	else
-		if
-			targ and
-			int(targ.r,u.r,st.res and -3 or 0)
-		then
-			u.dir,st.active,st.frame,
-				st.wayp=
-				sgn(targ.x-u.x),1,cf
-			if t=="drop" then
-				if u.res then
-					res[u.p][u.res.typ]+=
-						u.res.qty/u.typ.gr
-				end
-				u.res=nil
-				if st.farm then
-					gofarm(u,st.farm)
-				else
-					rest(u)
-					u.st.res=nxt
-				end
+	elseif targ and
+		int(targ.r,u.r,-2) then
+		u.dir,st.active,st.frame,
+			st.wayp=
+			sgn(targ.x-u.x),1,cf
+		if t=="drop" then
+			if u.res then
+				res[u.p][u.res.typ]+=
+					u.res.qty/u.typ.gr
 			end
-		elseif st.res and not wayp then
-			mine_nxt(u,st.res)
+			u.res=nil
+			if st.farm then
+				gofarm(u,st.farm)
+			else
+				rest(u)
+				u.st.res=nxt
+			end
 		end
+	elseif st.res and not wayp then
+		mine_nxt(u,st.res)
 	end
 
 	if wayp then
@@ -1774,27 +1785,6 @@ function farmer(u)
 	end
 end
 
-function agg(u)
-	local targ_d,targ=9999
-	for e in all(units) do
-		local d=dist(e.x-u.x,e.y-u.y)
-		if e.p!=u.p and
-			not e.dead and
-			d<=u.typ.los
-		then
-			if e.typ.bldg then
-				d+=u.typ.seige and
-					e.typ.bldg==1 and
-					-999 or 999
-			end
-			if d<targ_d then
-				targ,targ_d=e,d
-			end
-		end
-	end
-	atk(u,targ)
-end
-
 function fight(u)
 	local typ,e=u.typ,u.st.target
 	if e.p==u.p then
@@ -1805,7 +1795,7 @@ function fight(u)
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
 		if typ.range>=d
-			or int(u.r,e.r,0)
+			or int(u.r,e.r,-1)
 		then
 			if not u.st.adj then
 				u.st.wayp=nil
@@ -3068,7 +3058,6 @@ function loadgame()
 	loaded,ptr=
 		serial(unspl"0x802,0x9000,0x4000"),
 		0x9004
-	assert(loaded)
 	local function px(n)
 		n-=1
 		if n>=0 then
