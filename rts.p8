@@ -1818,27 +1818,28 @@ function fight(u)
 end
 
 function buildrepair(u)
-	local b,r=u.st.target,res[u.p]
-	if b.const then
-		b.const+=1
-		b.max_hp+=b.typ.hpr
-		b.hp+=b.typ.hpr
-		if b.const>=b.typ.const then
-			b.const,b.cost=
-				u.hu and sfx"26"
-			reg_bldg(b)
-			if b.typ.drop then
+	local _ENV,r,g=
+		u.st.target,res[u.p],_ENV
+	if const then
+		const+=1
+		max_hp+=typ.hpr
+		hp+=typ.hpr
+		if const>=typ.const then
+			const,cost=
+				u.hu and g.sfx"26"
+			g.reg_bldg(_ENV)
+			if typ.drop then
 				r.pl+=5
-			elseif b.typ.farm then
-				gofarm(u,b)
+			elseif typ.farm then
+				g.gofarm(u,_ENV)
 			end
 		end
-	elseif b.hp<b.max_hp and
+	elseif hp<max_hp and
 		r.b>=1 then
-		b.hp+=2
+		hp+=2
 		r.b-=0.1
 	else
-		rest(u)
+		g.rest(u)
 	end
 end
 
