@@ -433,3 +433,61 @@ porty=88]],function(_𝘦𝘯𝘷)
 	spd*=1.25
 	hp*=1.2
 end,monk),
+
+
+
+
+
+tostr[[[[]]
+ai_debug=true
+srand"1"
+if ai_debug then
+	_update60=_update
+	_draw_map,_dr,_pr,_resbar=
+		draw_map,_draw,print_res,
+		resbar
+	function draw_map(o,y)
+		if not ai_debug or o==0 then
+			_draw_map(o,y)
+		end
+	end
+	function _draw()
+		_dr()
+		if ai_debug and res1 then
+		camera()
+		local secs=res1.t\1%60
+		?res2.diff,60,107,9
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
+		?bgrat,80,114,3
+		?":\-e#\-e:"..(res2.boi/2),80,107,2
+		camera()
+		end
+	end
+	function print_res(...)
+		if (ai_debug) res1=res2
+		local x=_pr(...)
+		res1=res[1]
+		return x
+	end
+	function resbar(...)
+		if (ai_debug) res1=res2
+		_resbar(...)
+		res1=res[1]
+	end
+end
+--]]
+
+
+--	for i,k in inext,resk do
+--		i*=2
+--		res1[k],res2[k]=r[i-1],r[i]
+--	end
+--	foreach(typs,function(_𝘦𝘯𝘷)
+--		if res1.techs|tmap==res1.techs then
+--			tech(techt.p1)
+--			up,done=up and 0,not up
+--			typ.up=up
+--		end
+--	end)
+--	foreach(data,comp(unit,unspl))
+

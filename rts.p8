@@ -4,7 +4,7 @@ __lua__
 --age of ants
 --eeooty (dan h)
 
-music(0,2000)
+music(63,2000)
 
 function draw_map(o,y)
 	camera(cx%8,cy%8)
@@ -12,7 +12,8 @@ function draw_map(o,y)
 end
 
 function _update()
---	if (dat) return
+	loadgame()
+	
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
 		lrclk and not btn"4",
@@ -135,15 +136,6 @@ c=13]],p.x,p.y))
 end
 
 function _draw()
---	if dat then
---		camera()
---		pal()
---		draw_dat(dat)
---		extcmd("screen",1)
---		dat=nil
---		return
---	end
-	
 	draw_map(0,17)
 	if menu then
 		camera()
@@ -2862,45 +2854,6 @@ end
 -->8
 --ai
 
-tostr[[[[]]
-ai_debug=true
-srand"1"
-if ai_debug then
-	_update60=_update
-	_draw_map,_dr,_pr,_resbar=
-		draw_map,_draw,print_res,
-		resbar
-	function draw_map(o,y)
-		if not ai_debug or o==0 then
-			_draw_map(o,y)
-		end
-	end
-	function _draw()
-		_dr()
-		if ai_debug and res1 then
-		camera()
-		local secs=res1.t\1%60
-		?res2.diff,60,107,9
-		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
-		?bgrat,80,114,3
-		?":\-e#\-e:"..(res2.boi/2),80,107,2
-		camera()
-		end
-	end
-	function print_res(...)
-		if (ai_debug) res1=res2
-		local x=_pr(...)
-		res1=res[1]
-		return x
-	end
-	function resbar(...)
-		if (ai_debug) res1=res2
-		_resbar(...)
-		res1=res[1]
-	end
-end
---]]
-
 function ai_init()
 	defsqd,offsqd,atksqd,hq,
 		cx,cy=
@@ -3100,31 +3053,29 @@ menuitem(1,"⌂ save",function()
 	extcmd("screen",1)
 end)
 
-menuitem(2,"◆ load pasted",function()
-	init()
-	local data,res1=
-		split(stat"4","/"),res1
-	local r=spldeli(data)
-	for i,k in inext,resk do
-		i*=2
-		res1[k],res2[k]=r[i-1],r[i]
-	end
-	foreach(spldeli(data),function(k)
-		exp[k]=tonum(k)
-	end)
-	for i,t in inext,spldeli(data) do
-		mset(i%mapw,i/mapw,t)
-	end
-	foreach(typs,function(_ENV)
-		if res1.techs|tmap==res1.techs then
-			tech(techt.p1)
-			up,done=up and 0,not up
-			typ.up=up
+function loadgame()
+	if stat"121" then
+		assert(false,"ugh")
+		init()
+		serial(0x802,0x8000,16384)
+		local ptr,b=0x8004,2
+		function p()
+			local bs,v=
+				pack(peek(ptr,b)),0
+			ptr+=b
+			for i,by in inext,bs do
+				v|=by<<i-1
+			end
+			return v
 		end
-	end)
-	foreach(data,comp(unit,unspl))
-	ai_init()
-end)
+		for i=0,mapw*maph-1 do
+			local x,y=i%mapw,i/mapw
+			s(exp,x,y,p()&0x80==1)
+			mset(x,y,v&0x7f)
+		end
+		ai_init()
+	end
+end
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
