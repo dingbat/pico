@@ -1300,7 +1300,7 @@ function tick(u)
 			mset(x8,y8,86)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
-			make_dmaps"r"
+			make_dmaps()
 			u.dead=61
 		else
 			local _ENV=res[u.p]
@@ -1865,7 +1865,7 @@ function mine(u)
 			mset(x,y,68)
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
-			make_dmaps(r)
+			make_dmaps()
 		end
 		s(restiles,x,y,n-1)
 	end
@@ -2117,7 +2117,7 @@ function reg_bldg(b)
 			typ.h8 or reg(x+1,y-1))
 	end
 	if not b.const and not typ.farm then
-		make_dmaps"d"
+		make_dmaps()
 		res[b.p].reqs|=typ.breq
 	end
 end
@@ -2243,12 +2243,8 @@ function dmap_find(u,k)
 	return wayp,x,y
 end
 
-function make_dmaps(r)
-	queue,asc=split(
-		parse[[r=r,g,b,d
-g=g,r,b,d
-b=b,g,r,d
-d=d,r,g,b]][r]),{}
+function make_dmaps()
+	queue,asc=split"d,r,g,b",{}
 end
 
 function dmap()
@@ -2393,15 +2389,15 @@ end
 -->8
 --menu
 
-function print_res(r,x,y,zero)
+function print_res(r,x,y,z)
 	local oop=res1.p>=res1.pl
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
-			min(r[k]\1,99) or zero and
+			min(r[k]\1,99) or z and
 			"\-b \-i"..res1.p..
 				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..min(res1.pl,99) or
 			oop and r[k] or 0
-		if zero and i==3 then
+		if z and i==3 then
 			newx=-2
 			v..="\-g \-c\^t\|f\f5\^-#|"
 		end
@@ -2409,10 +2405,10 @@ function print_res(r,x,y,zero)
 			(i==4 and oop or
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
-		if v!=0 or zero then
+		if v!=0 or z then
 			newx+=?"\#7 "..v,x,y,rescol[k]
 			spr(129+i,x,y)
-			x=newx+(zero or 1)
+			x=newx+(z or 1)
 		end
 	end
 	return x-1
@@ -2852,7 +2848,7 @@ function ai_init()
 		{},{},{},units[1],
 		unspl(stp[res1.pos],":")
 
-	make_dmaps"d"
+	make_dmaps()
 end
 
 function ai_frame()
