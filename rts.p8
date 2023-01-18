@@ -314,8 +314,8 @@ conv=0
 def=ant
 atk_typ=ant
 gr=3
+cap=6
 
-const=1
 w=4
 fw=4
 h=4
@@ -353,9 +353,9 @@ portx=0
 porty=72
 dir=1
 unit=1
-atksfx=10
-carry=6
 ant=1
+atksfx=10
+const=1
 tmap=-1]]
 
 beetle=parse[[
@@ -960,6 +960,22 @@ b=0
 p=
 breq=0
 i=1]],monk),
+parse([[
+t=30
+r=10
+g=20
+b=0
+breq=0
+i=6
+tmap=1024
+up=-1
+idx=27]],parse[[
+portx=62
+porty=88]],function(_ENV)
+	spd=0.286
+	hp*=1.25
+	conv*=1.2
+end,monk),
 }
 
 queen.prod={
@@ -983,7 +999,7 @@ up=-1
 idx=15]],parse[[
 portx=32
 porty=80]],function(_ENV)
-	carry\=0.72
+	cap\=0.72
 	spd*=1.12
 	gr*=0.9
 end,ant),
@@ -2165,7 +2181,7 @@ function collect(u,res)
 	else
 		u.res=parse("qty=1",res)
 	end
-	if u.res.qty>=u.typ.carry then
+	if u.res.qty>=u.typ.cap then
 		drop(u,res)
 	end
 end
