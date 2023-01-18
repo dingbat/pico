@@ -494,26 +494,6 @@ end
 
 
 
-	parse([[
-t=10
-r=0
-g=10
-b=20
-breq=0
-i=7
-tmap=512
-idx=23]],parse[[
-portx=77
-porty=80]],function(ptyps)
-		foreach(ptyps,function(_𝘦𝘯𝘷)
-			if bldg then
-				los+=10
-				range=los
-			end
-		end)
-	end,typs),
-
-
 
 
 

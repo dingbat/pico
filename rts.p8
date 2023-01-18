@@ -294,7 +294,7 @@ function _draw()
 			can_renew"1") and 190 or
 		can_gather() and 189 or
 		can_drop() and 191 or
-		can_attack() and
+		can_atk() and
 			(seltyp.monk
 			and 185 or 187)) or 186)
 end
@@ -343,10 +343,10 @@ farm_x=32
 farm_y=8
 farm_fr=2
 farm_fps=15
-attack_x=40
-attack_y=12
-attack_fr=4
-attack_fps=3.75
+atk_x=40
+atk_y=12
+atk_fr=4
+atk_fps=3.75
 dead_x=32
 dead_y=12
 portx=0
@@ -383,10 +383,10 @@ move_x=16
 move_y=0
 move_fr=2
 move_fps=10
-attack_x=40
-attack_y=0
-attack_fr=3
-attack_fps=10
+atk_x=40
+atk_y=0
+atk_fr=3
+atk_fps=10
 dead_x=32
 dead_y=0
 portx=27
@@ -416,10 +416,10 @@ rest_x=0
 rest_y=16
 rest_fr=2
 rest_fps=30
-attack_x=64
-attack_y=16
-attack_fr=3
-attack_fps=10
+atk_x=64
+atk_y=16
+atk_fr=3
+atk_fps=10
 move_x=8
 move_y=16
 move_fr=6
@@ -459,10 +459,10 @@ move_x=8
 move_y=24
 move_fr=2
 move_fps=10
-attack_x=32
-attack_y=24
-attack_fr=2
-attack_fps=10
+atk_x=32
+atk_y=24
+atk_fr=2
+atk_fps=10
 dead_x=24
 dead_y=25
 portx=45
@@ -499,10 +499,10 @@ move_x=56
 move_y=64
 move_fr=2
 move_fps=10
-attack_x=80
-attack_y=64
-attack_fr=2
-attack_fps=10
+atk_x=80
+atk_y=64
+atk_fr=2
+atk_fps=10
 dead_x=72
 dead_y=64
 portx=36
@@ -539,10 +539,10 @@ move_x=64
 move_y=24
 move_fr=4
 move_fps=7.5
-attack_x=64
-attack_y=8
-attack_fr=4
-attack_fps=15
+atk_x=64
+atk_y=8
+atk_fr=4
+atk_fps=15
 dead_x=112
 dead_y=16
 portx=54
@@ -577,10 +577,10 @@ rest_x=64
 rest_y=-1
 rest_fr=2
 rest_fps=30
-attack_x=80
-attack_y=-1
-attack_fr=2
-attack_fps=15
+atk_x=80
+atk_y=-1
+atk_fr=2
+atk_fps=15
 dead_x=112
 dead_y=0
 portx=9
@@ -619,8 +619,8 @@ h=16
 fh=16
 rest_x=40
 rest_y=96
-attack_x=40
-attack_y=96
+atk_x=40
+atk_y=96
 fire=1
 dead_x=64
 dead_y=96
@@ -780,8 +780,8 @@ h=16
 fh=16
 rest_x=112
 rest_y=113
-attack_x=112
-attack_y=113
+atk_x=112
+atk_y=113
 fire=1
 dead_x=64
 dead_y=97
@@ -825,10 +825,10 @@ move_x=96
 move_y=16
 move_fr=2
 move_fps=10
-attack_x=96
-attack_y=64
-attack_fr=3
-attack_fps=10
+atk_x=96
+atk_y=64
+atk_fr=3
+atk_fps=10
 dead_x=56
 dead_y=8
 portx=63
@@ -893,10 +893,10 @@ move_x=56
 move_y=112
 move_fr=2
 move_fps=15
-attack_x=8
-attack_y=80
-attack_fr=2
-attack_fps=15
+atk_x=8
+atk_y=80
+atk_fr=2
+atk_fps=15
 dead_x=72
 dead_y=112
 portx=86
@@ -1267,10 +1267,10 @@ function drop(u,nxt_res,dropu)
 	}
 end
 
-function attack(u,e)
+function atk(u,e)
 	if u.typ.atk and e then
 		u.st,u.disc,u.res={
-			t="attack",
+			t="atk",
 			target=e,
 			wayp=get_wayp(u,e.x,e.y),
 		},e.hu and u.typ.bldg
@@ -1405,7 +1405,7 @@ function tick(u)
 		typ.atk then
 		agg(u)
 	end
-	if u.st.t=="attack" then
+	if u.st.t=="atk" then
 		fight(u)
 	end
 
@@ -1577,9 +1577,9 @@ function input()
 			foreachsel(build,hbld)
 			hilite(hbld)
 
-		elseif can_attack() then
+		elseif can_atk() then
 			sfx"4"
-			foreachsel(attack,hoverunit)
+			foreachsel(atk,hoverunit)
 			hilite(hoverunit)
 
 		elseif can_drop() then
@@ -1792,7 +1792,7 @@ function agg(u)
 			end
 		end
 	end
-	attack(u,targ)
+	atk(u,targ)
 end
 
 function fight(u)
@@ -1829,7 +1829,7 @@ function fight(u)
 		else
 			if u.hu and viz[e.k] or
 				typ.los>=d then
-				attack(u,e)
+				atk(u,e)
 			end
 			if not u.st.wayp then
 				rest(u)
@@ -2074,7 +2074,7 @@ function can_gather()
 		surr(nil,mx8,my8)
 end
 
-function can_attack()
+function can_atk()
 	return sel1.typ.atk
 		and hoverunit
 		and not hoverunit.dead
@@ -3068,6 +3068,7 @@ function loadgame()
 	loaded,ptr=
 		serial(unspl"0x802,0x9000,0x4000"),
 		0x9004
+	assert(loaded)
 	local function px(n)
 		n-=1
 		if n>=0 then
