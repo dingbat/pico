@@ -960,7 +960,7 @@ b=0
 p=
 breq=0
 i=1]],monk),
-parse([[
+	parse([[
 t=30
 r=10
 g=20
@@ -1003,7 +1003,7 @@ porty=80]],function(_ENV)
 	spd*=1.12
 	gr*=0.9
 end,ant),
-parse([[
+	parse([[
 t=20
 r=10
 g=10
@@ -1237,7 +1237,7 @@ function build(u,b)
 end
 
 function gather(u,tx,ty,wp)
-	local t=tile_as_unit(tx,ty)
+	local t=tile_unit(tx,ty)
 	u.st={
 		tx,ty,
 		t="gather",
@@ -1263,7 +1263,7 @@ function drop(u,nxt_res,dropu)
 			get_wayp(u,dropu.x,dropu.y),
 		res=nxt_res,
 		target=dropu or
-			tile_as_unit(x,y),
+			tile_unit(x,y),
 	}
 end
 
@@ -1493,7 +1493,7 @@ function input()
 
 	local cont,htile,axn=
 		action==0,
-		tile_as_unit(mx8,my8),action
+		tile_unit(mx8,my8),action
 
 	if (lclk or rclk) and hovbtn then
 		hovbtn.fn(rclk)
@@ -1728,7 +1728,7 @@ function update_unit(u)
 		u.x,u.y,u.dir=norm(wayp[1],u,
 			st.spd or u.typ.spd)
 		local x,y=unpack(wayp[1])
-		if dist(x-u_rect(u).x,y-u.y)<0.5 then
+		if dist(x-box(u).x,y-u.y)<0.5 then
 			deli(wayp,1)
 			if #wayp==0 then
 				st.wayp=nil
@@ -1823,7 +1823,7 @@ function fight(u)
 				if e.conv>=e.max_hp then
 					e.p,e.conv=u.p,0
 					sfx"38"
-					u_rect(e)
+					box(e)
 				end
 			end
 		else
@@ -1987,8 +1987,8 @@ function int(r1,r2,e)
 		r1[4]+e>r2[2]
 end
 
-function tile_as_unit(tx,ty)
-	return u_rect{
+function tile_unit(tx,ty)
+	return box{
 		x=tx*8+4,
 		y=ty*8+4,
 		typ=parse[[w=8
@@ -1996,7 +1996,7 @@ h=8]],
 	}
 end
 
-function u_rect(_ENV)
+function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8,hu,ai=
 		{x-w2,y-h2,x+w2,y+h2},
@@ -2228,7 +2228,7 @@ conv=0]])
 			_disc==1,
 			_id,_typ.prod or {}
 	end
-	rest(u_rect(u))
+	rest(box(u))
 	if (_typ.bldg) reg_bldg(u)
 	return u
 end
