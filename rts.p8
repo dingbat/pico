@@ -1436,19 +1436,27 @@ end
 --input
 
 function cam()
-	local b=btn()
-	if (b>32) b>>=8
-	cx,cy,amx,amy=
-		mid(
-			cx+(b&0x2)-(b&0x1)*2,
-			256
-		),
-		mid(
-			cy+(b&0x8)/4-(b&0x4)/2,
-			loser and 128 or 149
-		),
-		mid(stat"32",126),
-		mid(stat"33",126)
+	local b,j=btn()
+	if b>32 then
+		b>>=8
+		j=mm==2
+	end
+	local dx,dy=(b&0x2)-(b&0x1)*2,
+		(b&0x8)/4-(b&0x4)/2
+	if j then
+		amx+=dx
+		amy+=dy
+	else
+		cx,cy=
+			mid(cx+dx,256),
+			mid(cy+dy,
+				loser and 128 or 149)
+		if mm==1 then
+			amx,amy=stat"32",stat"33"
+		end
+	end
+	amx,amy=mid(amx,126),
+		mid(amy,126)
 
 	mx,my,hovbtn=amx+cx,amy+cy
 	mx8,my8=mx\8,my\8
@@ -2440,7 +2448,6 @@ function draw_port(
 	sspr(typ.portx,typ.porty,
 		unspl"9,8,1,1")
 	sspr((typ.up or -1)*8,unspl"88,8,8,2,1")
-	pal()
 
 	add(fn and buttons,{
 		r={x,y,x+10,y+8},
@@ -2454,6 +2461,7 @@ function draw_port(
 		line(10*r,11,fg)
 	end
 	camera()
+	pal()
 end
 
 function sel_ports(x)
@@ -2696,7 +2704,7 @@ unl,unspr,stp,
 	resoffx,resoffy,renewcost,
 	dmg_mult,
 
-	ai_diff,action,
+	mm,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,
 	mmhratio,
@@ -2765,7 +2773,7 @@ bldqueen=0.75
 bldspider=1.25
 bldseige=0.9
 bldbld=0.1]],
-	unspl"0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
@@ -2779,7 +2787,7 @@ function init()
 	end
 
 	music(unspl"0,0,7")
-	menuitem(2,"∧ resign",
+	menuitem(3,"∧ resign",
 		function() hq.hp=0 end)
 
 	queue,exp,vcache,dmaps,
@@ -3082,6 +3090,17 @@ function loadgame()
 	end)
 	ai_init()
 end
+-->8
+function mouse_mode()
+	mm%=2
+	mm+=1
+	menuitem(
+		2,
+		split"● mouse on,● mouse off"[mm],
+		mouse_mode
+	)
+end
+mouse_mode()
 __gfx__
 00000000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 000000000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
