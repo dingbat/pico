@@ -2708,7 +2708,7 @@ unl,unspr,startpos,
 	comp(line,unspl),
 	comp(spr,unspl),
 	split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
-	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t,pos",
+	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
 parse[[
 r=8
 g=11
@@ -2800,7 +2800,6 @@ b=20
 p=4
 pl=10
 tot=4
-boi=0
 reqs=0
 diff=0
 techs=0
@@ -2811,10 +2810,10 @@ t=0]]
 	res1,res2,posidx,
 	cf,selt,alert,ban,
 	--ai
-	atkt=
+	atkt,boi=
 		res.p1,res.p2,
 		split"1,2,3,4",
-		unspl"59,0,0,0,0,0"
+		unspl"59,0,0,0,0,0,0"
 end
 
 function new()
@@ -2862,13 +2861,13 @@ function ai_frame()
 		ants,uhold=
 		{},{},{},0
 
-	for i=0,res2.boi,2 do
+	for i=0,boi,2 do
 		local off=0x2060+
 			i%32+i\32*128
 		local x,y=
 			peek(off+res2.pos*768,2)
 		local curr,x8,y8,p,pid=
-			res2.boi==i,
+			boi==i,
 			x*8,y*8,
 			peek(off,2)
 		local r,b,bld=
@@ -2906,7 +2905,7 @@ function ai_frame()
 			end
 		end
 		if curr then
-			res2.boi+=2
+			boi+=2
 		end
 	end
 
