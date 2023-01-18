@@ -407,8 +407,8 @@ range=0
 atk_freq=30
 atk=1.667
 conv=0
-def=spd
-atk_typ=spd
+def=spider
+atk_typ=spider
 
 const=1
 w=8
@@ -2132,7 +2132,7 @@ end
 function dmg(from_typ,to)
 	to.hp-=from_typ.atk*
 		dmg_mult[from_typ.atk_typ..
-			"_vs_"..to.typ.def]
+			to.typ.def]
 	if to.typ.unit and
 		to.st.rest or to.st.res then
 		wander(to)
@@ -2739,35 +2739,35 @@ r=0
 g=0
 b=6
 breq=0]],parse[[
-ant_vs_ant=1
-ant_vs_queen=0.7
-ant_vs_spd=0.8
-ant_vs_seige=1.5
-ant_vs_bld=0.5
+antant=1
+antqueen=0.7
+antspider=0.8
+antseige=1.5
+antbld=0.5
 
-acid_vs_ant=1
-acid_vs_queen=0.6
-acid_vs_spd=1.5
-acid_vs_seige=0.7
-acid_vs_bld=0.25
+acidant=1
+acidqueen=0.6
+acidspider=1.5
+acidseige=0.7
+acidbld=0.25
 
-spd_vs_ant=1.5
-spd_vs_queen=1.1
-spd_vs_spd=1
-spd_vs_seige=1
-spd_vs_bld=0.1
+spiderant=1.5
+spiderqueen=1.1
+spiderspider=1
+spiderseige=1
+spiderbld=0.1
 
-seige_vs_ant=0.9
-seige_vs_queen=3
-seige_vs_spd=0.7
-seige_vs_seige=1
-seige_vs_bld=12
+seigeant=0.9
+seigequeen=3
+seigespider=0.7
+seigeseige=1
+seigebld=12
 
-bld_vs_ant=1
-bld_vs_queen=0.75
-bld_vs_spd=1.25
-bld_vs_seige=0.9
-bld_vs_bld=0.1]],
+bldant=1
+bldqueen=0.75
+bldspider=1.25
+bldseige=0.9
+bldbld=0.1]],
 	unspl"0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
