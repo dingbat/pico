@@ -1707,7 +1707,8 @@ function update_unit(u)
 	end
 	if t=="atk" then
 		fight(u)
-	elseif st.active then
+	end
+	if st.active then
 		if (st.farm) farmer(u)
 		if t=="build" and cf%30==0 then
 			buildrepair(u)
@@ -1768,7 +1769,7 @@ end
 function farmer(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not farmer then
-		rest(u)
+		g.rest(u)
 	elseif ready and g.cf==0 then
 		fres-=1
 		sproff+=1
@@ -1795,7 +1796,7 @@ function fight(u)
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
 		if typ.range>=d
-			or int(u.r,e.r,-1)
+			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
 				u.st.wayp=nil
