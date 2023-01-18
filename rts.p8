@@ -314,6 +314,7 @@ def=ant
 atk_typ=ant
 gr=3
 
+const=1
 w=4
 fw=4
 h=4
@@ -369,6 +370,7 @@ def=seige
 atk_typ=seige
 seige=1
 
+const=1
 w=8
 fw=8
 h=6
@@ -405,6 +407,7 @@ conv=0
 def=spd
 atk_typ=spd
 
+const=1
 w=8
 fw=8
 h=5
@@ -443,6 +446,7 @@ proj_spd=1
 atk_typ=acid
 def=ant
 
+const=1
 w=7
 fw=8
 h=6
@@ -482,6 +486,7 @@ conv=0
 def=ant
 atk_typ=ant
 
+const=1
 w=8
 fw=8
 h=6
@@ -521,6 +526,7 @@ def=seige
 atk_typ=seige
 seige=1
 
+const=1
 w=16
 fw=16
 h=8
@@ -561,6 +567,7 @@ proj_spd=1
 atk_typ=acid
 def=queen
 
+const=1
 w=16
 h=8
 h8=1
@@ -805,6 +812,7 @@ lady=1
 def=ant
 atk_typ=ant
 
+const=1
 w=8
 fw=8
 h=6
@@ -872,6 +880,7 @@ atk_typ=ant
 def=ant
 monk=1
 
+const=1
 w=8
 fw=8
 h=8
@@ -1415,7 +1424,7 @@ function update_viz(u)
 				if bldgs[k] then
 					bldgs[k].disc=1
 				end
-				exp[k],new_viz[k]=1,"v"
+				exp[k],new_viz[k]=128,"v"
 			end
 		end)
 	end
@@ -1877,11 +1886,10 @@ function produce(u)
 				typ.up,done=up
 			end
 		else
-			if u.onscr and u.hu then
-				sfx"19"
-			end
 			local new=unit(
-				bld.typ,u.x,u.y,u.p)
+				bld.typ,u.x,u.y,u.p),
+				u.onscr and u.hu and
+					sfx"19"				
 			if new.typ.ant and
 				u.rtx and
 				fget(mget(u.rtx,u.rty),1)
@@ -2175,7 +2183,6 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	_const=max(_const)>0 and _const
 	local _typ,_id,u=
 		typs[t] or t,
 		rnd"60"\1,
@@ -2185,18 +2192,16 @@ sproff=0
 cycles=0
 fres=0
 conv=0]])
-			assert(_typ[_p],"p=".._p)
 	do
 		local _ENV,ptyp=u,_typ[_p]
-		max_hp=_const and
-			ptyp.hp/ptyp.const or
-			ptyp.hp
+		max_hp=ptyp.hp/ptyp.const
 		typ,x,y,p,hp,const,
 			disc,id,prod=
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
-				_const,_disc==1,
-				_id,_typ.prod or {}
+			_const>0 and _const,
+			_disc==1,
+			_id,_typ.prod or {}
 	end
 	rest(u_rect(u))
 	if (_typ.bldg) reg_bldg(u)
@@ -3012,12 +3017,12 @@ end
 
 menuitem(1,"⌂ save",function()
 	if (menu) return
-	local ptr,b=0,1
+	local ptr=0
 	camera()
 	pal()
 	local function draw(v,...)
 		if v then
-			for i=0,b do
+			for i=0,2 do
 				pset(ptr%128,ptr\128,
 					v>>i*4&0xf)
 				ptr+=1
@@ -3025,19 +3030,18 @@ menuitem(1,"⌂ save",function()
 			draw(...)
 		end
 	end
-	for i=0,mapw*maph-1 do
-		local x,y=i%mapw,i/mapw
-		local e=g(exp,x,y) and 128 or 0
-		draw(mget(x,y)|e)
+	for x=0,31 do
+		for y=0,47 do
+			draw(mget(x,y)|g(exp,x,y,0))
+		end
 	end
-	b=2
 	foreach(resk,function(k)
 		draw(res1[k],res2[k])
 	end)
 	draw(#units)
 	foreach(units,function(_ENV)
 		draw(typ.idx,x,y,p,
-			const or 0,max(disc),hp)
+			max(const),max(disc),hp)
 	end)
 	extcmd("screen",1)
 end)
@@ -3045,32 +3049,35 @@ end)
 function loadgame()
 	if stat"121" then
 		init()
-		pal()
-		serial(0x802,0x8000,16384)
-		local ptr,b=0x8004,2
+		serial(unspl"2050,-32768,16384")
+		local ptr=0x8004
 		function p(n)
-			local bs,v,n=
-				pack(peek(ptr,b)),0,n or 1
+			local v1,v2,v3=peek(ptr,3)
 			if n>0 then
-				ptr+=b
-				for i,by in inext,bs do
-					v|=by<<(i-1)*4
-				end
-				return v,p(n-1)
+				ptr+=3
+				return v1|v2<<4|v3<<8,p(n-1)
 			end
 		end
-		for i=0,mapw*maph-1 do
-			local x,y,v=i%mapw,i/mapw,p()
-			s(exp,x,y,v&0x80>0)
-			mset(x,y,v&0x7f)
+		for x=0,31 do
+			for y=0,47 do
+				local v=p"1"
+				if (v>127) s(exp,x,y,128)
+				mset(x,y,v&0x7f)
+			end
 		end
-		b=3
 		foreach(resk,function(k)
-			res1[k],res2[k]=p(),p()
+			res1[k],res2[k]=p"2"
 		end)
-		for i=1,p() do
-			unit(p(7))
+		for i=1,p"1" do
+			unit(p"7")
 		end
+		foreach(typs,function(_ENV)
+			if res1.techs|tmap==res1.techs then
+				tech(techt.p1)
+				up,done=up and 0,not up
+				typ.up=up
+			end
+		end)
 		ai_init()
 	end
 end
