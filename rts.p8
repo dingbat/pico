@@ -974,7 +974,7 @@ p=
 breq=0
 i=1]],ant),
 	parse([[
-t=30
+t=25
 r=20
 g=0
 b=20
@@ -1873,14 +1873,15 @@ function mine(u)
 end
 
 function produce(u)
-	local bld=u.q.typ
-	u.q.tech-=0.5
-	if u.q.tech<=0 then
+	local _ENV,gl=u,_ENV
+	local bld=q.typ
+	q.tech-=0.5
+	if q.tech<=0 then
 		if bld.tech then
-			res1.techs|=bld.tmap
-			bld.tech(bld.techt.p1)
-			sfx"33"
 			local _ENV=bld
+			gl.res1.techs|=tmap
+			tech(techt.p1)
+			gl.sfx"33"
 			if up and up<1 then
 				up+=1
 				r*=1.75
@@ -1890,21 +1891,20 @@ function produce(u)
 				typ.up,done=up
 			end
 		else
-			local new=unit(
-				bld.typ,u.x,u.y,u.p),
-				u.onscr and u.hu and
-					sfx"19"				
+			local new=gl.unit(
+				bld.typ,x,y,p),
+				onscr and hu and
+					gl.sfx"19"
 			if new.typ.ant and
-				u.rtx and
-				fget(mget(u.rtx,u.rty),1)
+				rtx and
+				fget(mget(rtx,rty),1)
 			then
-				gather(new,u.rtx,u.rty)
+				gl.gather(new,rtx,rty)
 			else
-				move(new,u.rx or u.x+5,
-					u.ry or u.y+5)
+				gl.move(new,rx or x+5,
+					ry or y+5)
 			end
 		end
-		local _ENV=u
 		if q.qty>1 then
 			q.qty-=1
 			q.tech=bld.t
