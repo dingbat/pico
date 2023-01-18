@@ -2792,7 +2792,7 @@ bldbld=0.1]],
 function init()
 	poke(0x5f2d,3)
 	if stat"6"=="map" then
-		memcpy(unspl"8192,-32768,4096")
+		memcpy(unspl"0x2000,0x8000,0x1000")
 	else
 		reload()
 	end
@@ -2878,8 +2878,7 @@ function ai_frame()
 		{},{},{},0
 
 	for i=0,boi,2 do
-		local off=0x2060+
-			i%32+i\32*128
+		local off=8288+i%32+i\32*128
 		local x,y=
 			peek(off+res2.pos*768,2)
 		local curr,x8,y8,p,pid=
@@ -3066,8 +3065,9 @@ end)
 function loadgame()
 	init()
 	pal()
-	serial(unspl"2050,-32768,16384")
-	ptr,loaded=0x8004,1
+	loaded,ptr=
+		serial(unspl"0x802,0x9000,0x4000"),
+		0x9004
 	local function px(n)
 		n-=1
 		if n>=0 then
