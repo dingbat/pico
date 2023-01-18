@@ -950,22 +950,6 @@ b=0
 p=
 breq=0
 i=1]],monk),
-parse([[
-t=30
-r=10
-g=20
-b=0
-breq=0
-i=6
-tmap=1024
-up=-1
-idx=27]],parse[[
-portx=62
-porty=88]],function(_ENV)
-	spd=0.286
-	hp*=1.25
-	conv*=1.2
-end,monk),
 }
 
 queen.prod={
@@ -2191,6 +2175,7 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
+	_const=max(_const)>0 and _const
 	local _typ,_id,u=
 		typs[t] or t,
 		rnd"60"\1,
@@ -2200,16 +2185,17 @@ sproff=0
 cycles=0
 fres=0
 conv=0]])
+			assert(_typ[_p],"p=".._p)
 	do
 		local _ENV,ptyp=u,_typ[_p]
-		max_hp=tonum(_const) and
+		max_hp=_const and
 			ptyp.hp/ptyp.const or
 			ptyp.hp
 		typ,x,y,p,hp,const,
 			disc,id,prod=
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
-				tonum(_const),_disc==1,
+				_const,_disc==1,
 				_id,_typ.prod or {}
 	end
 	rest(u_rect(u))
@@ -2702,7 +2688,7 @@ pspl,rndspl,unspl,spldeli=
 	comp(unpack,split),
 	comp(split,deli)
 
-unl,unspr,
+unl,unspr,startpos,
 	resk,rescol,
 	resoffx,resoffy,renewcost,
 	dmg_mult,
@@ -2716,7 +2702,8 @@ unl,unspr,
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
-	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t",
+	split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
+	split"r,g,b,p,pl,reqs,tot,boi,diff,techs,t,pos",
 parse[[
 r=8
 g=11
@@ -2816,20 +2803,21 @@ t=0]]
 
 	init_typs()
 
-	res1,res2,startpos,
+	res1,res2,posidx,
 	cf,selt,alert,ban,
 	--ai
 	atkt=
 		res.p1,res.p2,
-		split"-09:-20:1,271:124:2,-17:140:3,279:004:4",
+		split"1,2,3,4",
 		unspl"59,0,0,0,0,0"
 end
 
 function new()
 	init()
+
 	res1.pos,res2.pos,res2.diff=
-		del(startpos,rnd(startpos)),
-		rnd(startpos),
+		del(posidx,rnd(posidx)),
+		rnd(posidx),
 		ai_diff+1
 
 	foreach(split([[7,64,64,1
@@ -2844,8 +2832,8 @@ function new()
 5,57,76,2]],"\n"),
 	function(s)
 		local u,x,y,p=unspl(s)
-		local dx,dy=
-			unspl(res[p].pos,":")
+		local dx,dy=unspl(
+			startpos[res[p].pos],":")
 		unit(u,x+dx,y+dy,p)
 	end)
 
@@ -2858,7 +2846,7 @@ function ai_init()
 	defsqd,offsqd,atksqd,hq,
 		cx,cy=
 		{},{},{},units[1],
-		unspl(res1.pos,":")
+		unspl(startpos[res1.pos],":")
 
 	make_dmaps"d"
 end
@@ -2873,7 +2861,7 @@ function ai_frame()
 		local off=0x2060+
 			i%32+i\32*128
 		local x,y=
-			peek(off+res2.pos[9]*768,2)
+			peek(off+res2.pos*768,2)
 		local curr,x8,y8,p,pid=
 			res2.boi==i,
 			x*8,y*8,
@@ -2901,11 +2889,11 @@ function ai_frame()
 				nxtres[r]=nxtres[r] or
 					g(dmaps[r] or {},x,y) and
 					{x8,y8}
+			elseif pid==11 then
+				bgrat=split"2.75,2.35,2"[p]
 			elseif curr then
 				if pid==10 then
 					unit(p,x8,y8,3)
-				elseif pid==11 then
-					bgrat=split"2.75,2.35,2"[p]
 				elseif res2.diff>=p then
 					typs[pid].tech(
 						typs[pid].techt.p2)
@@ -3024,14 +3012,15 @@ end
 
 menuitem(1,"⌂ save",function()
 	if (menu) return
-	local p,b=0,1
+	local ptr,b=0,1
 	camera()
 	pal()
 	local function draw(v,...)
 		if v then
 			for i=0,b do
-				pset(p%128,p\128,v>>i*4&0xf)
-				p+=1
+				pset(ptr%128,ptr\128,
+					v>>i*4&0xf)
+				ptr+=1
 			end
 			draw(...)
 		end
@@ -3055,23 +3044,32 @@ end)
 
 function loadgame()
 	if stat"121" then
-		assert(false,"ugh")
 		init()
+		pal()
 		serial(0x802,0x8000,16384)
 		local ptr,b=0x8004,2
-		function p()
-			local bs,v=
-				pack(peek(ptr,b)),0
-			ptr+=b
-			for i,by in inext,bs do
-				v|=by<<i-1
+		function p(n)
+			local bs,v,n=
+				pack(peek(ptr,b)),0,n or 1
+			if n>0 then
+				ptr+=b
+				for i,by in inext,bs do
+					v|=by<<(i-1)*4
+				end
+				return v,p(n-1)
 			end
-			return v
 		end
 		for i=0,mapw*maph-1 do
-			local x,y=i%mapw,i/mapw
-			s(exp,x,y,p()&0x80==1)
+			local x,y,v=i%mapw,i/mapw,p()
+			s(exp,x,y,v&0x80>0)
 			mset(x,y,v&0x7f)
+		end
+		b=3
+		foreach(resk,function(k)
+			res1[k],res2[k]=p(),p()
+		end)
+		for i=1,p() do
+			unit(p(7))
 		end
 		ai_init()
 	end

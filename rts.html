@@ -2,9 +2,9 @@
 <title>PICO-8 Cartridge</title>
 <meta name="viewport" content="width=device-width, user-scalable=no">
 <script type="text/javascript">
-window.onbeforeunload = function() {
-  return "are you sure you want to quit?";
-};
+// window.onbeforeunload = function() {
+//   return "are you sure you want to quit?";
+// };
 
 	// Default shell for PICO-8 0.2.2 (includes @weeble's gamepad mod 1.0)
 	// This file is available under a CC0 license https://creativecommons.org/share-your-work/public-domain/cc0/
@@ -90,20 +90,21 @@ window.onbeforeunload = function() {
 
 		if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0])
 		{
+			file=e.dataTransfer.files[0]
 			// read from file
 			reader = new FileReader();
 			reader.onload = function (event)
 			{
 				p8_dropped_cart_name = 'untitled.p8';
-				if (typeof e.dataTransfer.files[0].name !== 'undefined') p8_dropped_cart_name = e.dataTransfer.files[0].name;
-				if (typeof e.dataTransfer.files[0].fileName !== 'undefined') p8_dropped_cart_name = e.dataTransfer.files[0].fileName;
+				if (typeof file.name !== 'undefined') p8_dropped_cart_name = file.name;
+				if (typeof file.fileName !== 'undefined') p8_dropped_cart_name = file.fileName;
 				p8_dropped_cart = reader.result;
 				// data:image/png;base64
 				e.stopPropagation();
 				e.preventDefault();
 				codo_command = 9; // read directly from p8_dropped_cart with libb64 decoder
 			};
-			reader.readAsDataURL(e.dataTransfer.files[0]);
+			reader.readAsDataURL(file);
 			
 		}
 		else

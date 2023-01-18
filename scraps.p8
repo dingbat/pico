@@ -415,7 +415,7 @@ mouse_mode()
 crazy idea to copy in savefile:
 	join(chr(peek(0x2000,0x1000)))
 
-monk upgrade (15 tok)
+monk upgrade (18 tok)
 
 
 parse([[
@@ -430,8 +430,9 @@ up=-1
 idx=27]],parse[[
 portx=62
 porty=88]],function(_𝘦𝘯𝘷)
-	spd*=1.25
-	hp*=1.2
+	spd=0.286
+	hp*=1.25
+	conv*=1.2
 end,monk),
 
 
@@ -491,3 +492,23 @@ end
 --	end)
 --	foreach(data,comp(unit,unspl))
 
+
+
+	parse([[
+t=10
+r=0
+g=10
+b=20
+breq=0
+i=7
+tmap=512
+idx=23]],parse[[
+portx=77
+porty=80]],function(ptyps)
+		foreach(ptyps,function(_𝘦𝘯𝘷)
+			if bldg then
+				los+=10
+				range=los
+			end
+		end)
+	end,typs),
