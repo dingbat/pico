@@ -263,8 +263,7 @@ function _draw()
 	end
 
 	draw_menu()
-	camera()
-	pal()
+	campal()
 	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
@@ -2460,8 +2459,7 @@ function draw_port(
 		unl"10,11,0,11"
 		line(10*r,11,fg)
 	end
-	camera()
-	pal()
+	campal()
 end
 
 function sel_ports(x)
@@ -2693,11 +2691,12 @@ function comp(f,g)
 	end
 end
 
-pspl,rndspl,unspl,spldeli=
+pspl,rndspl,unspl,spldeli,campal=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
-	comp(split,deli)
+	comp(split,deli),
+	comp(camera,pal)
 
 unl,unspr,stp,
 	resk,rescol,
@@ -3024,8 +3023,7 @@ end
 menuitem(1,"⌂ save",function()
 	if (menu) return
 	local ptr=0
-	camera()
-	pal()
+	campal()
 	local function draw(v,...)
 		if v then
 			for i=0,8,4 do
