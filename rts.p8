@@ -11,7 +11,7 @@ function draw_map(o,y)
 	map(cx/8+o,cy/8,0,0,17,y)
 end
 
-function _update()	
+function _update()
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
 		lrclk and not btn"4",
@@ -51,18 +51,18 @@ function _update()
 		end
 		return
 	end
-	
+
 	if to_build then
 		to_build.x,to_build.y=
 			mx8*8,my8*8
 	end
 
 	dmap()
-	
-	local total=res1.p+res2.p
-	upcycle=total>=100 and 30 or
-		total>=75 and 15 or
-		total>=40 and 10 or 5
+
+	local to=res1.p+res2.p
+	upcycle=to>=100 and 30 or
+		to>=75 and 15 or
+		to>=40 and 10 or 5
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
@@ -72,7 +72,7 @@ function _update()
 		t()%6<1,{}
 
 	res1.t+=0x.0888
-	
+
 	if cf%30==19 then
 		for tx=0,mmw do
 		for ty=0,mmh do
@@ -216,7 +216,7 @@ function _draw()
 	pal()
 
 	fillp"23130.5"
-	
+
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
@@ -1364,7 +1364,7 @@ function tick(u)
 		then
 			if (u.st.idle) idle=u
 			u.st.idle=1
-		elseif typ.idle and not u.q 
+		elseif typ.idle and not u.q
 		then
 			idle_mil=u
 		end
@@ -1590,7 +1590,7 @@ c=8]],mx,my))
 				sel1.rtx,sel1.rty=
 				mx,my,mx8,my8
 		else
-			cont=true
+			cont=1
 		end
 	end
 
@@ -1691,7 +1691,7 @@ function update_unit(u)
 		then
 			u.dir,st.active,st.frame,
 				st.wayp=
-				sgn(targ.x-u.x),true,cf
+				sgn(targ.x-u.x),1,cf
 			if t=="drop" then
 				if u.res then
 					res[u.p][u.res.typ]+=
@@ -1723,7 +1723,7 @@ function update_unit(u)
 	elseif t=="move" then
 		rest(u)
 	elseif t=="farm" then
-		st.active=true
+		st.active=1
 	end
 end
 
@@ -1790,7 +1790,7 @@ function fight(u)
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
-		if typ.range>=d 
+		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
@@ -2029,7 +2029,7 @@ function surr(fn,x,y,n,ig_acc)
 			xx<mapw and yy<maph and
 			(ig_acc or acc(xx,yy))
 		then
-			if (dx|dy!=0) exist=true
+			if (dx|dy!=0) exist=1
 			if fn then
 				fn{
 					xx,yy,
@@ -2098,10 +2098,10 @@ function buildable()
 		to_build.y/8,
 		to_build.typ.w8,
 		to_build.typ.h8
-	return	acc(x,y,true) and
-		(w8 or acc(x+1,y,true)) and
-		(h8 or acc(x,y+1,true)) and
-		(h8 or w8 or acc(x+1,y+1,true))
+	return	acc(x,y,1) and
+		(w8 or acc(x+1,y,1)) and
+		(h8 or acc(x,y+1,1)) and
+		(h8 or w8 or acc(x+1,y+1,1))
 end
 
 function reg_bldg(b)
@@ -2134,7 +2134,7 @@ function wander(u)
 	move(u,
 		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
 		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
-		true)
+		1)
 end
 
 function dmg(from_typ,to)
@@ -2244,7 +2244,7 @@ function dmap_find(u,k)
 			if w<lowest then
 				lowest,x,y=w,unpack(t)
 			end
-		end,x,y,1,true)
+		end,x,y,1,1)
 		if (lowest>=orig) return
 		add(wayp,{x*8+3,y*8+3})
 	end
@@ -2365,12 +2365,12 @@ function as(st,g)
 			if (temp<=cost) iom,cost=i,temp
 		end
 		sh=fr[iom]
-		fr[iom],sh.dead=fr[frl],true
+		fr[iom],sh.dead=fr[frl],1
 		frl-=1
 
 		local p=sh.last
 		if p.k==g.k then
-			f.e=true
+			f.e=1
 			return path(sh),1
 		end
 		surr(function(n)
@@ -2860,7 +2860,7 @@ function ai_init()
 end
 
 function ai_frame()
-	if (t6) safe=true
+	if (t6) safe=1
 	avail,nxtres,miners,
 		ants,uhold=
 		{},{},{},0

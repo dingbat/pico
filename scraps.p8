@@ -276,18 +276,18 @@ startpos:
 
 dirty token savers
 ============
-- remove `.."_vs_"..` (2 tok)
+x remove `.."_vs_"..` (2 tok)
 - organic endscreen (6 tok)
 x pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
 - revert 0532b54 (... hack, 2 tokens)
 - revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
   (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
 - revert bf60644 (lady wandering, 25 tok)
-- remove sfx from save (2 tok)
-- 9c01935 hbanner toggle (8 tok)
+x remove sfx from save (2 tok)
+x 9c01935 hbanner toggle (8 tok)
 - inline ai_dmg() in dmg() (7 tok)
 - inline a bunch of other functions (~5-7 each)
-- remove make_dmap argument (priotize resource) (5 tok)
+x remove make_dmap argument (priotize resource) (5 tok)
 - revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
 - remove aoe hilite effect (15 tok)
 - a8c9657 add `id=0` to cat (2 tok)
@@ -512,3 +512,18 @@ porty=80]],function(ptyps)
 			end
 		end)
 	end,typs),
+
+
+
+
+
+	things to carry over:
+	- mapw*maph-1 => 1535
+	- add const=1, then max_hp=ptyp.hp/ptyp.const || _const>0 and _const
+	- local new=unit(
+				bld.typ,u.x,u.y,u.p),
+				u.onscr and u.hu and
+					sfx"19"
+	- elseif pid==11 then
+				bgrat=split"2.75,2.35,2"[p]
+	- boi should not be stored in res
