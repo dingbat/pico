@@ -210,7 +210,7 @@ function _draw()
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
-	pal,buttons=_pal,{}
+	pal,btns=_pal,{}
 	pal()
 
 	fillp"23130.5"
@@ -1501,7 +1501,7 @@ end
 function input()
 	cam()
 
-	foreach(buttons,function(b)
+	foreach(btns,function(b)
 		if int(b.r,{amx,amy,amx,amy},1) then
 			hovbtn=b
 		end
@@ -2466,7 +2466,7 @@ function draw_port(
 		unspl"9,8,1,1")
 	sspr((typ.up or -1)*8,unspl"88,8,8,2,1")
 
-	add(fn and buttons,{
+	add(fn and btns,{
 		r={x,y,x+10,y+8},
 		fn=fn,
 		costs=costs,
@@ -2611,7 +2611,7 @@ function draw_menu()
 		camera(nsel<10 and -2)
 		?"\f1\^j1r\|j\-hX"..nsel
 		unspr"133,1,111"
-		add(buttons,{
+		add(btns,{
 			r=split"0,110,14,119",
 			fn=function()
 				deli(sel)
@@ -2646,7 +2646,7 @@ end,20,108)
 	camera(-mmx,-mmy)
 
 	sspr(
-		add(buttons,idle and {
+		add(btns,idle and {
 			r=split"116,121,125,128",
 			fn=function()
 				sfx"1"
@@ -2659,7 +2659,7 @@ end,20,108)
 		unspl"105,8,6,11,14")
 
 	sspr(
-		add(buttons,idle_mil and {
+		add(btns,idle_mil and {
 			r=split"106,121,113,128",
 			fn=function()
 				hilite(idle_mil)
