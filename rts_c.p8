@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 38
 __lua__
 --age of ants
 --eeooty
@@ -97,7 +97,7 @@ function _update()
 
 	foreach(proj,function(p)
 		local typ=p.from_typ
-		p.x,p.y,d=norm(p,p,
+		p.x,p.y,_,d=norm(p,p,
 			typ.proj_spd)
 		if d<1 then
 			del(proj,p)
@@ -109,7 +109,7 @@ function _update()
 				) then
 					dmg(typ,u)
 					if (typ.proj_aoe==0) break
-					if hlv.nil then
+					if not hlv then
 						hilite(parse([[f=2
 c=13]],p.x,p.y))
 					end
@@ -247,23 +247,23 @@ function _draw()
 			sel1.rx-2,sel1.ry-5)
 	end
 
-	local dt=t()-hlt
-	if dt>0.5 then
-		hlv=parse"nil=1"
-	elseif hlv.tech then
-		circ(hlv.typ,hlv.tech,
-			min(hlv.f/dt,4),hlv.c)
-	elseif mid(dt,0.1,0.25)!=dt
-		and hlv.r then
-		local w,x,y,z=unpack(hlv.r)
-		rect(w-1,x-1,y,z,8)
+	if hlv then
+		local dt=t()-hlt
+		if dt>0.5 then
+			hlv=nil
+		elseif hlv.tech then
+			circ(hlv.typ,hlv.tech,
+				min(hlv.f/dt,4),hlv.c)
+		elseif mid(dt,0.1,0.25)!=dt
+			and hlv.r then
+			local w,x,y,z=unpack(hlv.r)
+			rect(w-1,x-1,y,z,8)
+		end
 	end
 
 	draw_menu()
 	campal()
-	if hlv[4] then
-		circ(unpack(hlv))
-	end
+	if (hlv) circ(unpack(hlv))
 	if to_build then
 		camera(cx-to_build.x,
 			cy-to_build.y)
@@ -1412,9 +1412,7 @@ function tick(u)
 				d<=typ.los
 			then
 				if e.typ.bldg then
-					d+=typ.seige and
-						e.typ.bldg==1 and
-						-999 or 999
+					d+=typ.seige and e.typ.bldg==1 and -999 or 999
 				end
 				if d<agg_d then
 					agg_u,agg_d=e,d
@@ -1476,22 +1474,26 @@ end
 --input
 
 function cam()
-	local b=btn()
-	if (b>255) b>>=8
+	local b,j=btn()
+	if b>32 then
+		b>>=8
+		j=mm==2
+	end
 	local dx,dy=(b&0x2)-(b&0x1)*2,
 		(b&0x8)/4-(b&0x4)/2
-	if mm==2 then
+	if j then
 		amx+=dx
 		amy+=dy
-		dx,dy=amx\128*2,amy\128*2
 	else
-		amx,amy=stat"32",stat"33"
+		cx,cy=
+			mid(cx+dx,256),
+			mid(cy+dy,
+				loser and 128 or 149)
+		if mm==1 then
+			amx,amy=stat"32",stat"33"
+		end
 	end
-	cx,cy,amx,amy=
-		mid(cx+dx,256),
-		mid(cy+dy,
-			loser and 128 or 149),
-		mid(amx,126),
+	amx,amy=mid(amx,126),
 		mid(amy,126)
 
 	mx,my,hovbtn=amx+cx,amy+cy
@@ -1730,8 +1732,7 @@ function update_unit(u)
 			sgn(targ.x-u.x),1,cf
 		if t=="drop" then
 			if u.res then
-				res[u.p][u.res.typ]+=
-					u.res.qty/u.typ.gr
+				res[u.p][u.res.typ]+=u.res.qty/u.typ.gr
 			end
 			u.res=nil
 			if st.farm then
@@ -1746,13 +1747,14 @@ function update_unit(u)
 	end
 
 	if wayp then
-		u.x,u.y,d,u.dir=
-			norm(wayp[1],u,
-				st.spd or u.typ.spd)
-		box(u)
-		if d<0.5 then
+		u.x,u.y,u.dir=norm(wayp[1],u,
+			st.spd or u.typ.spd)
+		local x,y=unpack(wayp[1])
+		if dist(x-box(u).x,y-u.y)<0.5 then
 			deli(wayp,1)
-			st.wayp=#wayp>0 and wayp
+			if #wayp==0 then
+				st.wayp=nil
+			end
 		end
 	elseif t=="move" then
 		rest(u)
@@ -2094,8 +2096,8 @@ function norm(it,nt,f)
 	local d=dist(xv,yv)+0.0001
 	return nt.x+xv*f/d,
 		nt.y+yv*f/d,
-		d,
-		sgn(xv)
+		sgn(xv),
+		d
 end
 
 function acc(x,y,strict)
@@ -2151,9 +2153,7 @@ function wander(u)
 end
 
 function dmg(from_typ,to)
-	to.hp-=from_typ.atk*
-		dmg_mult[from_typ.atk_typ..
-			to.typ.def]
+	to.hp-=from_typ.atk*dmg_mult[from_typ.atk_typ..to.typ.def]
 	if to.typ.unit and
 		to.st.rest or to.st.res then
 		wander(to)
@@ -2271,7 +2271,7 @@ end
 function dmap()
 	local q=queue[1]
 	if q then
-		if q.c then
+		if type(q)!="string" then
 			for i=1,#q.typ do
 				if (i>20) return
 				local p=deli(q.typ)
@@ -2716,7 +2716,7 @@ unl,unspr,stp,
 	resoffx,resoffy,renew,
 	dmg_mult,
 
-	amx,amy,hlt,mm,ai_diff,action,
+	mm,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2783,7 +2783,7 @@ bldqueen=0.75
 bldspider=1.25
 bldseige=0.9
 bldbld=0.1]],
-	unspl"64,64,-10,2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
