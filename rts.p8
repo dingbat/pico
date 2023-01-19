@@ -109,7 +109,7 @@ function _update()
 				) then
 					dmg(typ,u)
 					if (typ.proj_aoe==0) break
-					if hlv.nil then
+					if hlv.null then
 						hilite(parse([[f=2
 c=13]],p.x,p.y))
 					end
@@ -249,7 +249,7 @@ function _draw()
 
 	local dt=t()-hlt
 	if dt>0.5 then
-		hlv=parse"nil=1"
+		hlv=parse"null=1"
 	elseif hlv.tech then
 		circ(hlv.typ,hlv.tech,
 			min(hlv.f/dt,4),hlv.c)
@@ -1480,12 +1480,12 @@ function cam()
 	if (b>255) b>>=8
 	local dx,dy=(b&0x2)-(b&0x1)*2,
 		(b&0x8)/4-(b&0x4)/2
-	if mm==2 then
+	if mm==1 or loser then
+		amx,amy=stat"32",stat"33"
+	else
 		amx+=dx
 		amy+=dy
 		dx,dy=amx\128*2,amy\128*2
-	else
-		amx,amy=stat"32",stat"33"
 	end
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
@@ -2716,7 +2716,7 @@ unl,unspr,stp,
 	resoffx,resoffy,renew,
 	dmg_mult,
 
-	amx,amy,hlt,mm,ai_diff,action,
+	hlt,mm,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2783,7 +2783,7 @@ bldqueen=0.75
 bldspider=1.25
 bldseige=0.9
 bldbld=0.1]],
-	unspl"64,64,-10,2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"-10,2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
@@ -2825,15 +2825,17 @@ t=0]]
 
 	res1,res2,posidx,
 	cf,selt,alert,ban,
+	amx,amy,
 	atkt,boi=
 		res.p1,res.p2,
 		split"1,2,3,4",
-		unspl"59,0,0,0,0,0,0"
+		unspl"59,0,0,0,64,64,0,0"
 end
 
 function new()
 	init()
 
+	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(posidx,rnd(posidx)),
 		rnd(posidx),
