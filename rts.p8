@@ -180,7 +180,7 @@ function _draw()
 				and u.disc
 			then
 				add(af,u)
-			elseif u.typ.bldg
+			elseif u.bldg
 				or u.dead then
 				draw_unit(u)
 			else
@@ -1284,7 +1284,7 @@ function atk(u,e)
 			t="atk",
 			target=e,
 			wayp=get_wayp(u,e.x,e.y),
-		},e.hu and u.typ.bldg
+		},e.hu and u.bldg
 	end
 end
 
@@ -1401,13 +1401,13 @@ function tick(u)
 			local d=dist(e.x-u.x,e.y-u.y)
 			if (e.p!=u.p or
 				typ.monk and e.dmgd and
-				not e.typ.bldg) and
+				not e.bldg) and
 				not e.dead and
 				d<=typ.los
 			then
-				if e.typ.bldg then
+				if e.bldg then
 					d+=typ.seige and
-						e.typ.bldg==1 and
+						e.bldg==1 and
 						-999 or 999
 				end
 				if d<agg_d then
@@ -2081,7 +2081,7 @@ function can_atk()
 		and (not hoverunit.hu or
 			seltyp.monk and	
 			hoverunit.dmgd and not
-			hoverunit.typ.bldg)
+			hoverunit.bldg)
 		and
 		g(viz,mx8,my8,hoverunit.disc)
 end
@@ -2225,12 +2225,12 @@ conv=0]])
 		local _ENV,ptyp=u,_typ[_p]
 		max_hp=ptyp.hp/ptyp.const
 		typ,x,y,p,hp,const,
-			disc,id,prod=
+			disc,id,prod,bldg=
 			ptyp,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,
-			_id,_typ.prod or {}
+			_id,_typ.prod or {},_typ.bldg
 	end
 	rest(box(u))
 	if (_typ.bldg) reg_bldg(u)
@@ -2584,7 +2584,7 @@ function draw_menu()
 	local x=0
 	for i,sec in inext,split(
 		sel1 and sel1.hu and
-		(sel1.typ.bldg and
+		(sel1.bldg and
 			"17,24,61,26" or
 			"17,17,68,26") or "102,26")
 	do
@@ -2721,7 +2721,7 @@ unl,unspr,stp,
 	resoffx,resoffy,renew,
 	dmg_mult,
 
-	hlt,mm,ai_diff,action,
+	hlt,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2788,7 +2788,7 @@ bldqueen=.75
 bldspider=1.25
 bldseige=.9
 bldbld=.1]],
-	unspl"-10,2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
@@ -2813,7 +2813,7 @@ function init()
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		parse"",parse"qty=.075",
+		parse"",parse"qty=.05",
 		parse[[
 r=20
 g=10
@@ -2996,9 +2996,7 @@ function ai_unit2(u)
 			bal=0
 			miner(u,r)
 		end
-		if typ.bldg and
-			u.dmgd or
-			u.const
+		if bldg and u.dmgd or u.const
 		then
 			go(build)
 		elseif typ.farm and
