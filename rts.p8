@@ -97,9 +97,8 @@ function _update()
 
 	foreach(proj,function(p)
 		local typ=p.from_typ
-		p.x,p.y,d=norm(p,p,
-			typ.proj_spd)
-		if d<1 then
+		if norm(p,p,typ.proj_spd)<1
+		then
 			del(proj,p)
 			for u in all(units) do
 				if int(
@@ -1745,14 +1744,13 @@ function update_unit(u)
 	end
 
 	if wayp then
-		u.x,u.y,d,u.dir=
-			norm(wayp[1],u,
-				st.spd or u.typ.spd)
-		box(u)
-		if d<0.5 then
+		if norm(wayp[1],u,
+			st.spd or u.typ.spd)<0.5
+		then
 			deli(wayp,1)
 			st.wayp=#wayp>0 and wayp
 		end
+		box(u)
 	elseif t=="move" then
 		rest(u)
 	elseif t=="farm" then
@@ -2088,13 +2086,13 @@ function can_build()
 end
 
 function norm(it,nt,f)
-	local xv,yv=
+	local dx,dy=
 		it[1]-nt.x,it[2]-nt.y
-	local d=dist(xv,yv)+0.0001
-	return nt.x+xv*f/d,
-		nt.y+yv*f/d,
-		d,
-		sgn(xv)
+	d,nt.dir=dist(dx,dy)+0.0001,
+		sgn(dx)
+	nt.x+=dx*f/d
+	nt.y+=dy*f/d
+	return	d
 end
 
 function acc(x,y,strict)
