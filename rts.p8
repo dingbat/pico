@@ -877,7 +877,7 @@ atk=0
 conv=2
 atk_typ=ant
 def=ant
-monk=1
+monk=65
 
 const=1
 w=8
@@ -2075,12 +2075,10 @@ function avail_farm()
 end
 
 function can_gather()
-	local t=mget(mx8,my8)
-	return (
-		seltyp.ant and
-		(fget(t,1) or avail_farm())
-	) or
-		(seltyp.monk and fget(t,6))
+	local f=fget(mget(mx8,my8))
+	return (seltyp.ant and
+		(f&2==2 or avail_farm())
+ 	or seltyp.monk==f)
 		and g(exp,mx8,my8)
 		and surr(nil,mx8,my8)
 end
@@ -3115,7 +3113,7 @@ function loadgame()
 	ai_init()
 end
 -->8
-cartdata"eeooty_ants_v1"
+cartdata"eaoa1"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
