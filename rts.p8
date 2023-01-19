@@ -249,8 +249,8 @@ function _draw()
 	local dt=t()-hlt
 	if dt>.5 then
 		hlv=parse"null=1"
-	elseif hlv.tech then
-		circ(hlv.typ,hlv.tech,
+	elseif hlv.x then
+		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
 	elseif mid(dt,.1,.25)!=dt
 		and hlv.r then
@@ -1303,12 +1303,7 @@ function tick(u)
 	local typ,targ,agg_d,agg_u=
 		u.typ,u.st.target,9999
 
-	if not u.const then
-		u.hp+=typ.hp-u.max_hp
-		u.max_hp=typ.hp
-	end
-
-	u.onscr,u.upd,x8,y8=
+	box(u).onscr,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
 		u.x8,u.y8
@@ -1349,8 +1344,7 @@ function tick(u)
 		return
 	end
 
-	if not u.fire and
-		u.dmgd and
+	if not u.fire and u.dmgd and
 		cf==0 then
 		u.hp+=heal[u.p].qty
 	end
@@ -1705,7 +1699,7 @@ function update_unit(u)
 	local st=u.st
 	local t,wayp,nxt,targ=
 		st.t,st.wayp,st.res,st.target
-	if u.q and cf%15==u.q.techt%15 then
+	if u.q and cf%15==u.q.y%15 then
 		produce(u)
 	end
 	if u.typ.farm then
@@ -1749,7 +1743,6 @@ function update_unit(u)
 			deli(wayp,1)
 			st.wayp=#wayp>0 and wayp
 		end
-		box(u)
 	elseif t=="move" then
 		rest(u)
 	elseif t=="farm" then
@@ -1821,7 +1814,7 @@ function fight(u)
 					} or dmg(typ,e))
 					if e.conv>=e.max_hp then
 						e.p,e.conv=u.p,0
-						del(e.sqd,box(e))
+						del(e.sqd,e)
 						sfx"38"
 					end
 				end
@@ -1896,12 +1889,12 @@ end
 function produce(u)
 	local _ENV,gl=u,_ENV
 	local bld=q.typ
-	q.tech-=.5
-	if q.tech<=0 then
-		if bld.tech then
+	q.x-=.5
+	if q.x<=0 then
+		if bld.x then
 			local _ENV=bld
 			gl.res1.techs|=tmap
-			tech(techt.p1)
+			x(y.p1)
 			gl.sfx"33"
 			if up and up<1 then
 				up+=1
@@ -1928,7 +1921,7 @@ function produce(u)
 		end
 		if q.qty>1 then
 			q.qty-=1
-			q.tech=bld.t
+			q.x=bld.t
 		else
 			q=nil
 		end
@@ -1946,14 +1939,14 @@ end
 -->8
 --utils
 
-function parse(str,typ,tech,t)
+function parse(str,typ,x,y)
 	local p1,p2={},{}
 	local obj={p1,p2,p2,
 		p1=p1,
 		p2=p2,
 		typ=typ,
-		tech=tech,
-		techt=t}
+		x=x,
+		y=y}
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
@@ -1988,20 +1981,25 @@ function int(r1,r2,e)
 end
 
 function tile_unit(tx,ty)
-	return box{
-		x=tx*8+4,
-		y=ty*8+4,
-		typ=parse[[w=8
-h=8]],
-	}
+	return box(parse([[
+hp=0
+max_hp=0
+const=1]],parse[[w=8
+h=8]],tx*8+4,ty*8+4
+	))
 end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,hu,ai=
+	r,x8,y8,hu,ai,dmgd=
 		{x-w2,y-h2,x+w2,y+h2},
-		x\8,y\8,p==1,p==2
+		x\8,y\8,p==1,p==2,
+		hp<max_hp
 	k=x8|y8<<8
+	if not const then
+		hp+=typ.hp-max_hp
+		max_hp=typ.hp
+	end
 	return _ENV
 end
 
@@ -2282,8 +2280,8 @@ function dmap()
 				q.p1[p.k]=q.c
 				if q.c<8 then
 					surr(function(t)
-						q.tech[t.k]=
-							q.tech[t.k] or
+						q.x[t.k]=
+							q.x[t.k] or
 							add(q.p2,t)
 					end,unpack(p))
 				end
@@ -2291,7 +2289,7 @@ function dmap()
 			q.c+=1
 			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
-				dmaps[q.techt]=
+				dmaps[q.y]=
 					deli(queue,1).p1
 			end
 		else
@@ -2454,7 +2452,7 @@ function draw_port(
 	)
 	rectfill(1,1,9,8,
 		nopay and 7 or costs and
-		costs.tech and 10 or
+		costs.x and 10 or
 		axnsel and 9 or
 		typ.portf or 6
 	)
@@ -2536,7 +2534,7 @@ portf=9]],
 						end
 						sfx"2"
 						queue_prod(sel1,b,1)
-						b.done=b.tech
+						b.done=b.x
 					else
 						sfx"16"
 					end
@@ -2559,11 +2557,11 @@ portf=9]],
 				end
 				sfx"18"
 			end,
-			b.tech and 24 or
+			b.x and 24 or
 				?"\f7\^j8r\|iX"..q.qty
 				and 20,
 			107,nil,
-			q.tech/b.t,5,12
+			q.x/b.t,5,12
 		)
 	end
 	if sel1.typ.units then
@@ -2850,7 +2848,7 @@ function new()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-1,57,76,1
+5,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
@@ -2922,8 +2920,8 @@ function ai_frame()
 				elseif pid==11 then
 					bgrat=split"2.75,2.35,2"[p]
 				elseif res2.diff>=p then
-					typs[pid].tech(
-						typs[pid].techt.p2)
+					typs[pid].x(
+						typs[pid].y.p2)
 				end
 			end
 		end
@@ -3099,7 +3097,7 @@ function loadgame()
 	local techs=res2.techs
 	foreach(typs,function(_ENV)
 		if techs|tmap==techs then
-			tech(techt.p1)
+			x(y.p1)
 			up,done=up and 0,not up
 			typ.up=up
 		end
