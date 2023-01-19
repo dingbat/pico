@@ -1350,7 +1350,7 @@ function tick(u)
 	end
 
 	if not u.fire and
-		u.hp<u.max_hp and
+		u.dmgd and
 		cf==0 then
 		u.hp+=heal[u.p].qty
 	end
@@ -1405,7 +1405,7 @@ function tick(u)
 	 typ.atk then
 		for e in all(units) do
 			local d=dist(e.x-u.x,e.y-u.y)
-			if e.p!=u.p and
+			if (e.p!=u.p or typ.monk and e.dmgd) and
 				not e.dead and
 				d<=typ.los
 			then
@@ -1805,7 +1805,7 @@ function fight(u)
 				u.id%typ.atk_freq
 			then
 				if e.p==u.p then
-					if u.typ.monk and e.hp<e.max_hp then
+					if typ.monk and e.dmgd then
 						e.hp+=1
 						sfx"63"
 					else
@@ -1855,7 +1855,7 @@ function buildrepair(u)
 				g.gofarm(u,_ENV)
 			end
 		end
-	elseif hp<max_hp and
+	elseif dmgd and
 		r.b>=1 then
 		hp+=2
 		r.b-=.1
@@ -2080,7 +2080,7 @@ function can_atk()
 		and not hoverunit.dead
 		and (not hoverunit.hu or
 			seltyp.monk and	
-		hoverunit.hp<hoverunit.max_hp)
+		hoverunit.dmgd)
 		and
 		g(viz,mx8,my8,hoverunit.disc)
 end
@@ -2996,7 +2996,7 @@ function ai_unit2(u)
 			miner(u,r)
 		end
 		if typ.bldg and
-			u.hp<u.max_hp*.75 or
+			u.dmgd or
 			u.const
 		then
 			go(build)
