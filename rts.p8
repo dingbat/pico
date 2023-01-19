@@ -66,7 +66,7 @@ function _update()
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
-		hoverunit,idle,idle_mil=
+		hunit,idle,idle_mil=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8),
 		t()%6<1,{}
@@ -1350,10 +1350,10 @@ function tick(u)
 	end
 
 	if int(u.r,{mx,my,mx,my},1)
-		and (not hoverunit or
-			hoverunit.hu
+		and (not hunit or
+			hunit.hu
 	) then
-		hoverunit=u
+		hunit=u
 	end
 
 	if g(viz,x8,y8,u.disc) then
@@ -1555,13 +1555,13 @@ function input()
 		return
 	end
 
-	if btnp"5" and hoverunit and
-		hoverunit.typ.unit and
+	if btnp"5" and hunit and
+		hunit.typ.unit and
 		t()-selt<.2 then
 		sel,selx={}
 		foreach(units,function(u)
 			add(u.onscr and
-				u.typ==hoverunit.typ and
+				u.typ==hunit.typ and
 				sel,u)
 		end)
 		return
@@ -1594,8 +1594,8 @@ function input()
 
 		elseif can_atk() then
 			sfx"4"
-			foreachsel(atk,hoverunit)
-			hilite(hoverunit)
+			foreachsel(atk,hunit)
+			hilite(hunit)
 
 		elseif can_drop() then
 			sfx"0"
@@ -2076,14 +2076,14 @@ end
 
 function can_atk()
 	return sel1.typ.atk
-		and hoverunit
-		and not hoverunit.dead
-		and (not hoverunit.hu or
+		and hunit
+		and not hunit.dead
+		and (not hunit.hu or
 			seltyp.monk and	
-			hoverunit.dmgd and not
-			hoverunit.bldg)
+			hunit.dmgd and not
+			hunit.bldg)
 		and
-		g(viz,mx8,my8,hoverunit.disc)
+		g(viz,mx8,my8,hunit.disc)
 end
 
 function can_build()
@@ -2803,7 +2803,7 @@ function init()
 
 	music(unspl"0,0,7")
 	menuitem(3,"∧ resign",
-		function() hq.hp=0 end)
+		function()hq.hp=0 end)
 
 	queue,exp,vcache,dmaps,
 	units,restiles,sel,ladys,

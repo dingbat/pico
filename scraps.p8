@@ -292,6 +292,7 @@ x remove make_dmap argument (priotize resource) (5 tok)
 - remove aoe hilite effect (15 tok)
 - a8c9657 add `id=0` to cat (2 tok)
 - (2 tok) put d<0.5 in norm
+- (5 tok) inline new() in init()
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
