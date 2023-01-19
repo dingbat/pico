@@ -1513,11 +1513,12 @@ function input()
 		end
 	end)
 
-	local cont,htile,axn=
+	local cont,htile,axn,clk=
 		action==0,
-		tile_unit(mx8,my8),action
+		tile_unit(mx8,my8),action,
+		lclk or rclk
 
-	if (lclk or rclk) and hovbtn then
+	if clk and hovbtn then
 		hovbtn.fn(rclk)
 		if (axn==action) action=0
 		return
@@ -1541,14 +1542,12 @@ function input()
 				cam()
 			end
 		end
-		if (lclk) to_build=nil
+		if (clk) to_build=nil
 		return
 	end
 
 	if to_build then
-		if rclk then
-			to_build=nil
-		elseif lclk and buildable() then
+		if clk and buildable() then
 			sfx"1"
 			local b=unit(
 				to_build.typ,
@@ -2527,7 +2526,7 @@ portf=9]],
 						not q or
 						q.typ==b and q.qty<9) then
 						if b.typ.bldg then
-							to_build=b
+							to_build=b!=to_build and b
 							return
 						end
 						sfx"2"
