@@ -2728,7 +2728,7 @@ unl,unspr,stp,
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
-	split"-9:-20,271:124,-17:140,279:4",
+	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
 p[[
 r=8
@@ -2840,7 +2840,7 @@ end
 function new()
 	init()
 
-	srand"1"
+--	srand"1"
 	res1.pos,res2.pos,res2.diff=
 		del(posidx,rnd(posidx)),
 		rnd(posidx),
@@ -2851,7 +2851,7 @@ function new()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-26,57,76,1
+5,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
