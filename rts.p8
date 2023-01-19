@@ -2120,15 +2120,15 @@ function acc(x,y,strict)
 end
 
 function buildable()
-	local x,y,w8,h8=
-		to_build.x/8,
-		to_build.y/8,
-		to_build.typ.w8,
-		to_build.typ.h8
+	local x,y=to_build.x/8,
+		to_build.y/8
+
 	return	acc(x,y,1) and
-		(w8 or acc(x+1,y,1)) and
-		(h8 or acc(x,y+1,1)) and
-		(h8 or w8 or acc(x+1,y+1,1))
+		(to_build.typ.h8 or
+			acc(x,y+1,1)) and
+		(to_build.typ.w8 or
+			acc(x+1,y,1) and
+			acc(x+1,y+1,1))
 end
 
 function reg_bldg(b)
