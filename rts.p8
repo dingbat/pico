@@ -1399,7 +1399,9 @@ function tick(u)
 	 typ.atk then
 		for e in all(units) do
 			local d=dist(e.x-u.x,e.y-u.y)
-			if (e.p!=u.p or typ.monk and e.dmgd) and
+			if (e.p!=u.p or
+				typ.monk and e.dmgd and
+				not e.typ.bldg) and
 				not e.dead and
 				d<=typ.los
 			then
@@ -2078,7 +2080,8 @@ function can_atk()
 		and not hoverunit.dead
 		and (not hoverunit.hu or
 			seltyp.monk and	
-		hoverunit.dmgd)
+			hoverunit.dmgd and not
+			hoverunit.typ.bldg)
 		and
 		g(viz,mx8,my8,hoverunit.disc)
 end
@@ -2848,7 +2851,7 @@ function new()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-5,57,76,1
+26,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
