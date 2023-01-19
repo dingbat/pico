@@ -293,8 +293,7 @@ function _draw()
 			can_renew"1") and 190 or
 		can_gather() and 189 or
 		can_drop() and 191 or
-		can_atk() and
-			(seltyp.monk
+		can_atk() and (seltyp.monk
 			and 185 or 187)) or 186)
 end
 -->8
