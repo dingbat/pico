@@ -1474,7 +1474,7 @@ function cam()
 	if (b>255) b>>=8
 	local dx,dy=(b&0x2)-(b&0x1)*2,
 		(b&0x8)/4-(b&0x4)/2
-	if mm==1 or loser then
+	if dget"0"==0 or loser then
 		amx,amy=stat"32",stat"33"
 	else
 		amx+=dx
@@ -3091,7 +3091,6 @@ function loadgame()
 	foreach(resk,function(k)
 		res1[k],res2[k]=px"2"
 	end)
-
 	for i=1,px"1" do
 		unit(px"7")
 	end
@@ -3106,14 +3105,11 @@ function loadgame()
 	ai_init()
 end
 -->8
-function mouse()
-	mm%=2
-	mm+=1
-	menuitem(2,
-		split"● mouse on,● mouse off"[mm],
-		mouse)
-end
-mouse()
+cartdata"eaoa"
+
+menuitem(2,"● toggle mouse",
+	function()dset(0,~dget"0")end)
+
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b350000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
