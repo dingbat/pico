@@ -3105,7 +3105,7 @@ function loadgame()
 	ai_init()
 end
 -->8
-cartdata"eaoa"
+cartdata"eeooty_ants_v1"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
