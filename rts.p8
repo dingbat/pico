@@ -1792,10 +1792,6 @@ end
 
 function fight(u)
 	local typ,e=u.typ,u.st.target
-	if e.p==u.p then
-		rest(u)
-		return
-	end
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
@@ -1808,17 +1804,26 @@ function fight(u)
 			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
 			then
-				u.dir=sgn(dx)
-				add(proj,typ.proj_s and {
-					e.x,e.y,
-					from_typ=typ,
-					x=u.x-u.dir*typ.proj_xo,
-					y=u.y+typ.proj_yo,
-				} or dmg(typ,e))
-				if e.conv>=e.max_hp then
-					e.p,e.conv=u.p,0
-					del(e.sqd,box(e))
-					sfx"38"
+				if e.p==u.p then
+					if u.typ.monk and e.hp<e.max_hp then
+						e.hp+=1
+						sfx"63"
+					else
+						rest(u)
+					end
+				else
+					u.dir=sgn(dx)
+					add(proj,typ.proj_s and {
+						e.x,e.y,
+						from_typ=typ,
+						x=u.x-u.dir*typ.proj_xo,
+						y=u.y+typ.proj_yo,
+					} or dmg(typ,e))
+					if e.conv>=e.max_hp then
+						e.p,e.conv=u.p,0
+						del(e.sqd,box(e))
+						sfx"38"
+					end
 				end
 			end
 		else
@@ -2073,7 +2078,10 @@ function can_atk()
 	return sel1.typ.atk
 		and hoverunit
 		and not hoverunit.dead
-		and not hoverunit.hu and
+		and (not hoverunit.hu or
+			seltyp.monk and	
+		hoverunit.hp<hoverunit.max_hp)
+		and
 		g(viz,mx8,my8,hoverunit.disc)
 end
 
@@ -2842,7 +2850,7 @@ function new()
 1,49,60,1
 1,77,63,1
 1,59,52,1
-5,57,76,1
+1,57,76,1
 1,49,60,2
 1,77,63,2
 1,59,52,2
