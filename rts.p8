@@ -109,7 +109,7 @@ function _update()
 					dmg(typ,u)
 					if (typ.proj_aoe==0) break
 					if hlv.null then
-						hilite(parse([[f=2
+						hilite(p([[f=2
 c=13]],p.x,p.y))
 					end
 				end
@@ -248,7 +248,7 @@ function _draw()
 
 	local dt=t()-hlt
 	if dt>.5 then
-		hlv=parse"null=1"
+		hlv=p"null=1"
 	elseif hlv.x then
 		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
@@ -300,7 +300,7 @@ end
 --units
 
 function init_typs()
-ant=parse[[
+ant=p[[
 idx=1
 spd=.286
 los=20
@@ -356,7 +356,7 @@ atksfx=10
 const=1
 tmap=-1]]
 
-beetle=parse[[
+beetle=p[[
 idx=2
 spd=.19
 los=20
@@ -394,7 +394,7 @@ atksfx=10
 dir=1
 tmap=-1]]
 
-spider=parse[[
+spider=p[[
 idx=3
 spd=.482
 los=30
@@ -431,7 +431,7 @@ atksfx=10
 dir=1
 tmap=-1]]
 
-archer=parse[[
+archer=p[[
 idx=4
 spd=.343
 los=33
@@ -473,7 +473,7 @@ proj_yo=0
 proj_s=52
 tmap=-1]]
 
-warant=parse[[
+warant=p[[
 idx=5
 spd=.33
 los=25
@@ -510,7 +510,7 @@ atksfx=10
 dir=1
 tmap=-1]]
 
-cat=parse[[
+cat=p[[
 idx=6
 spd=.2
 los=50
@@ -553,7 +553,7 @@ proj_yo=-4
 proj_s=56
 tmap=-1]]
 
-queen=parse[[
+queen=p[[
 idx=7
 los=25
 hp=400
@@ -595,7 +595,7 @@ queen=1
 dir=-1
 tmap=-1]]
 
-tower=parse[[
+tower=p[[
 idx=8
 los=30
 hp=352
@@ -635,7 +635,7 @@ breq=1
 dir=-1
 tmap=-1]]
 
-mound=parse[[
+mound=p[[
 idx=9
 los=5
 hp=100
@@ -664,7 +664,7 @@ breq=2
 dir=-1
 tmap=-1]]
 
-den=parse[[
+den=p[[
 idx=10
 los=10
 hp=250
@@ -695,7 +695,7 @@ mil=1
 dir=-1
 tmap=-1]]
 
-barracks=parse[[
+barracks=p[[
 idx=11
 los=10
 hp=200
@@ -726,7 +726,7 @@ mil=1
 dir=-1
 tmap=-1]]
 
-farm=parse[[
+farm=p[[
 idx=12
 los=1
 hp=48
@@ -757,7 +757,7 @@ breq=16
 dir=-1
 tmap=-1]]
 
-castle=parse[[
+castle=p[[
 idx=13
 los=45
 hp=640
@@ -798,7 +798,7 @@ mil=1
 dir=-1
 tmap=-1]]
 
-parse[[
+p[[
 idx=14
 spd=.21
 los=18
@@ -836,7 +836,7 @@ atksfx=10
 dir=-1
 tmap=-1]]
 
-mon=parse[[
+mon=p[[
 idx=25
 los=25
 hp=300
@@ -866,7 +866,7 @@ mil=1
 dir=-1
 tmap=-1]]
 
-monk=parse[[
+monk=p[[
 idx=26
 spd=.25
 los=45
@@ -905,43 +905,43 @@ dir=-1
 tmap=-1]]
 
 ant.prod={
-	parse([[
+	p([[
 r=0
 g=0
 b=6
 breq=0
 i=1]],mound),
-	parse([[
+	p([[
 r=0
 g=3
 b=3
 breq=2
 i=2]],farm),
-	parse([[
+	p([[
 r=0
 g=4
 b=15
 breq=0
 i=3]],barracks),
-	parse([[
+	p([[
 r=0
 g=4
 b=20
 breq=8
 i=4]],den),
-	parse([[
+	p([[
 r=0
 g=10
 b=15
 breq=4
 i=5]],mon),
-	parse([[
+	p([[
 r=0
 g=5
 b=15
 breq=0
 i=6]],tower),
-	parse([[
+	p([[
 r=0
 g=25
 b=60
@@ -950,7 +950,7 @@ i=7]],castle)
 }
 
 mon.prod={
-	parse([[
+	p([[
 t=20
 r=0
 g=10
@@ -958,7 +958,7 @@ b=0
 p=
 breq=0
 i=1]],monk),
-	parse([[
+	p([[
 t=30
 r=10
 g=20
@@ -967,7 +967,7 @@ breq=0
 i=6
 tmap=1024
 up=-1
-idx=27]],parse[[
+idx=27]],p[[
 portx=62
 porty=88]],function(_ENV)
 	spd=.286
@@ -977,7 +977,7 @@ end,monk),
 }
 
 queen.prod={
-	parse([[
+	p([[
 t=10
 r=5
 g=0
@@ -985,7 +985,7 @@ b=0
 p=
 breq=0
 i=1]],ant),
-	parse([[
+	p([[
 t=25
 r=20
 g=0
@@ -994,14 +994,14 @@ breq=0
 i=6
 tmap=1
 up=-1
-idx=15]],parse[[
+idx=15]],p[[
 portx=24
 porty=80]],function(_ENV)
 	cap\=.72
 	spd*=1.12
 	gr*=.9
 end,ant),
-	parse([[
+	p([[
 t=20
 r=10
 g=10
@@ -1009,11 +1009,11 @@ b=10
 breq=4
 i=7
 tmap=2
-idx=24]],parse[[
+idx=24]],p[[
 portx=33
 porty=80]],function()
 	mound.p1.units=
-		add(mound.prod,parse([[
+		add(mound.prod,p([[
 t=12
 r=7
 g=0
@@ -1025,7 +1025,7 @@ end,{})
 }
 
 den.prod={
-	parse([[
+	p([[
 t=13
 r=0
 g=10
@@ -1033,7 +1033,7 @@ b=10
 p=
 breq=0
 i=1]],beetle),
-	parse([[
+	p([[
 t=13
 r=8
 g=8
@@ -1041,7 +1041,7 @@ b=0
 p=
 breq=0
 i=2]],spider),
-	parse([[
+	p([[
 t=20
 r=0
 g=20
@@ -1050,13 +1050,13 @@ breq=0
 i=6
 tmap=4
 up=-1
-idx=16]],parse[[
+idx=16]],p[[
 portx=25
 porty=88]],function(_ENV)
 	atk*=1.15
 	hp*=1.15
 end,beetle),
-	parse([[
+	p([[
 t=30
 r=10
 g=10
@@ -1065,7 +1065,7 @@ breq=0
 i=7
 tmap=8
 up=-1
-idx=17]],parse[[
+idx=17]],p[[
 portx=16
 porty=88]],function(_ENV)
 	atk*=1.2
@@ -1074,7 +1074,7 @@ end,spider),
 }
 
 mound.prod={
-	parse([[
+	p([[
 t=12
 r=15
 g=15
@@ -1083,7 +1083,7 @@ breq=0
 i=1
 tmap=16
 up=-1
-idx=18]],parse[[
+idx=18]],p[[
 portx=60
 porty=80]],function(_ENV)
 		gr*=1.15
@@ -1092,7 +1092,7 @@ porty=80]],function(_ENV)
 }
 
 barracks.prod={
-	parse([[
+	p([[
 t=8
 r=6
 g=2
@@ -1100,7 +1100,7 @@ b=0
 p=
 breq=0
 i=1]],warant),
-	parse([[
+	p([[
 t=14
 r=3
 g=0
@@ -1108,7 +1108,7 @@ b=5
 p=
 breq=0
 i=2]],archer),
-	parse([[
+	p([[
 t=10
 r=9
 g=6
@@ -1116,13 +1116,13 @@ b=0
 breq=0
 i=3
 tmap=32
-idx=19]],parse[[
+idx=19]],p[[
 portx=51
 porty=80]],function(_ENV)
 	range+=7
 	los+=7
 end,archer),
-	parse([[
+	p([[
 t=18
 r=15
 g=7
@@ -1131,14 +1131,14 @@ breq=0
 i=6
 tmap=64
 up=-1
-idx=20]],parse[[
+idx=20]],p[[
 portx=43
 porty=88]],function(_ENV)
 	atk*=1.333
 	los=30
 	hp*=1.333
 end,warant),
-	parse([[
+	p([[
 t=10
 r=15
 g=0
@@ -1147,7 +1147,7 @@ breq=0
 i=7
 tmap=128
 up=-1
-idx=21]],parse[[
+idx=21]],p[[
 portx=34
 porty=88]],function(_ENV)
 	atk*=1.25
@@ -1156,7 +1156,7 @@ end,archer),
 }
 
 castle.prod={
-	parse([[
+	p([[
 t=18
 r=2
 g=14
@@ -1164,7 +1164,7 @@ b=14
 p=
 breq=0
 i=1]],cat),
-	parse([[
+	p([[
 t=40
 r=20
 g=0
@@ -1172,12 +1172,12 @@ b=0
 breq=64
 i=6
 tmap=256
-idx=22]],parse[[
+idx=22]],p[[
 portx=16
 porty=80]],function(_ENV)
 	qty+=.5
 end,heal),
-	parse([[
+	p([[
 t=10
 r=0
 g=10
@@ -1185,7 +1185,7 @@ b=20
 breq=0
 i=7
 tmap=512
-idx=23]],parse[[
+idx=23]],p[[
 portx=69
 porty=80]],function(ptyps)
 		foreach(ptyps,function(_ENV)
@@ -1195,7 +1195,7 @@ porty=80]],function(ptyps)
 			end
 		end)
 	end,typs),
-	parse([[
+	p([[
 t=40
 r=0
 g=20
@@ -1203,7 +1203,7 @@ b=30
 breq=0
 i=2
 tmap=2048
-idx=28]],parse[[
+idx=28]],p[[
 portx=78
 porty=80]],function(_ENV)
 	proj_aoe=1
@@ -1214,7 +1214,7 @@ end
 --tick
 
 function rest(u)
-	u.st=parse[[t=rest
+	u.st=p[[t=rest
 rest=1
 agg=1]]
 end
@@ -1252,7 +1252,7 @@ function gather(u,tx,ty,wp)
 	u.st={
 		tx,ty,
 		t="gather",
-		res=parse[[7=r
+		res=p[[7=r
 11=g
 19=b
 71=r]][fget(mget(tx,ty))],
@@ -1312,7 +1312,7 @@ function tick(u)
 		del(sel,u)
 		u.dead,u.farmer=0
 		u.st=
-			parse"t=dead",
+			p"t=dead",
 			typ.bldg and reg_bldg(u),
 			u.onscr and
 				sfx(typ.bldg and 17 or 62)
@@ -1605,7 +1605,7 @@ function input()
 		elseif sel1.typ.unit then
 			sfx"1"
 			mvg(sel,mx,my,axn==1,1)
-			hilite(parse([[f=.5
+			hilite(p([[f=.5
 c=8]],mx,my))
 
 		elseif sel1.typ.units then
@@ -1862,7 +1862,7 @@ end
 function mine(u)
 	local r,x,y=u.st.res,unpack(u.st)
 	local t=mget(x,y)
-	local f=parse[[7=45
+	local f=p[[7=45
 11=50
 19=40
 71=60]][fget(t)]
@@ -1941,7 +1941,7 @@ end
 -->8
 --utils
 
-function parse(str,typ,x,y)
+function p(str,typ,x,y)
 	local p1,p2={},{}
 	local obj={p1,p2,p2,
 		p1=p1,
@@ -1983,10 +1983,10 @@ function int(r1,r2,e)
 end
 
 function tile_unit(tx,ty)
-	return box(parse([[
+	return box(p([[
 hp=0
 max_hp=0
-const=1]],parse[[w=8
+const=1]],p[[w=8
 h=8]],tx*8+4,ty*8+4
 	))
 end
@@ -2183,7 +2183,7 @@ function collect(u,res)
 	if u.res and u.res.typ==res then
 		u.res.qty+=1
 	else
-		u.res=parse("qty=1",res)
+		u.res=p("qty=1",res)
 	end
 	if u.res.qty>=u.typ.cap then
 		drop(u,res)
@@ -2215,7 +2215,7 @@ function unit(t,_x,_y,_p,
 	local _typ,_id,u=
 		typs[t] or t,
 		rnd"60"\1,
-		add(units,parse[[dir=1
+		add(units,p[[dir=1
 lastp=1
 sproff=0
 cycles=0
@@ -2242,7 +2242,7 @@ function queue_prod(u,b,m)
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q=parse("qty=1",b,b.t*m,cf)
+		u.q=p("qty=1",b,b.t*m,cf)
 	end
 end
 -->8
@@ -2279,14 +2279,14 @@ function dmap()
 		if q.c then
 			for i=1,#q.typ do
 				if (i>20) return
-				local p=deli(q.typ)
-				q.p1[p.k]=q.c
+				local pt=deli(q.typ)
+				q.p1[pt.k]=q.c
 				if q.c<8 then
 					surr(function(t)
 						q.x[t.k]=
 							q.x[t.k] or
 							add(q.p2,t)
-					end,unpack(p))
+					end,unpack(pt))
 				end
 			end
 			q.c+=1
@@ -2296,7 +2296,7 @@ function dmap()
 					deli(queue,1).p1
 			end
 		else
-			local open,f={},parse[[r=2
+			local open,f={},p[[r=2
 g=3
 b=4]][q]
 			if not dmap_st[q] then
@@ -2315,7 +2315,7 @@ b=4]][q]
 					add(open,t).k=i
 				end
 			end
-			queue[1]=parse(
+			queue[1]=p(
 				"c=0",
 				open,
 				{},
@@ -2504,7 +2504,7 @@ end
 function single()
 	local q=sel1.q
 	if sel1.cost then
-		draw_port(parse[[
+		draw_port(p[[
 portx=72
 porty=72
 porto=8
@@ -2568,7 +2568,7 @@ portf=9]],
 		)
 	end
 	if sel1.typ.units then
-		draw_port(parse[[
+		draw_port(p[[
 portx=120
 porty=64
 porto=15
@@ -2622,17 +2622,17 @@ function draw_menu()
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
-			action==2 and parse[[
+			action==2 and p[[
 portx=99
 porty=72
 porto=2
 portf=13
-]] or seltyp.ant and parse[[
+]] or seltyp.ant and p[[
 portx=81
 porty=72
 porto=2
 portf=13
-]] or parse[[
+]] or p[[
 portx=90
 porty=72
 porto=2
@@ -2730,7 +2730,7 @@ unl,unspr,stp,
 	comp(spr,unspl),
 	split"-9:-20,271:124,-17:140,279:4",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
-parse[[
+p[[
 r=8
 g=3
 b=4
@@ -2746,19 +2746,19 @@ e1=5
 e7=8
 e11=3
 e19=4
-e33=13]],parse[[
+e33=13]],p[[
 _=0
 r=16
 g=0
-b=16]],parse[[
+b=16]],p[[
 _=0
 r=0
 g=4
-b=4]],parse[[
+b=4]],p[[
 r=0
 g=0
 b=6
-breq=0]],parse[[
+breq=0]],p[[
 antant=1
 antqueen=.7
 antspider=.8
@@ -2813,8 +2813,8 @@ function init()
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		parse"",parse"qty=.05",
-		parse[[
+		p"",p"qty=.05",
+		p[[
 r=20
 g=10
 b=20
@@ -3009,15 +3009,15 @@ function ai_unit2(u)
 			typ.mil and
 			res2.p<res2.diff*26
 		then
-			local p,hold=u.prod[u.lastp]
+			local b,hold=u.prod[u.lastp]
 			foreach(split"r,g,b",function(k)
 				hold=hold or uhold and
-					p[k]!=0 and
-					res2[k]-p[k]<uhold[k]
+					b[k]!=0 and
+					res2[k]-b[k]<uhold[k]
 			end)
 			if not u.q and not hold and
-				can_pay(p,res2) then
-				queue_prod(u,p,
+				can_pay(b,res2) then
+				queue_prod(u,b,
 					split"3,1,1"[res2.diff])
 				u.lastp%=typ.units
 				u.lastp+=1
