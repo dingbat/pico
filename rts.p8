@@ -156,7 +156,7 @@ function _draw()
 	if menu then
 		camera()
 
-		local x=64+t()\0.5%2*16
+		local x=64+t()\.5%2*16
 		pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,0,0"
 		sspr(x,unspl"0,16,8,25,28,32,16")
 		sspr(x,unspl"0,16,8,74,28,32,16,1")
@@ -247,12 +247,12 @@ function _draw()
 	end
 
 	local dt=t()-hlt
-	if dt>0.5 then
+	if dt>.5 then
 		hlv=parse"null=1"
 	elseif hlv.tech then
 		circ(hlv.typ,hlv.tech,
 			min(hlv.f/dt,4),hlv.c)
-	elseif mid(dt,0.1,0.25)!=dt
+	elseif mid(dt,.1,.25)!=dt
 		and hlv.r then
 		local w,x,y,z=unpack(hlv.r)
 		rect(w-1,x-1,y,z,8)
@@ -302,12 +302,12 @@ end
 function init_typs()
 ant=parse[[
 idx=1
-spd=0.286
+spd=.286
 los=20
 hp=6
 range=0
 atk_freq=30
-atk=0.2
+atk=.2
 conv=0
 def=ant
 atk_typ=ant
@@ -358,12 +358,12 @@ tmap=-1]]
 
 beetle=parse[[
 idx=2
-spd=0.19
+spd=.19
 los=20
 hp=20
 range=0
 atk_freq=30
-atk=0.75
+atk=.75
 conv=0
 def=seige
 atk_typ=seige
@@ -396,7 +396,7 @@ tmap=-1]]
 
 spider=parse[[
 idx=3
-spd=0.482
+spd=.482
 los=30
 hp=15
 range=0
@@ -433,11 +433,11 @@ tmap=-1]]
 
 archer=parse[[
 idx=4
-spd=0.343
+spd=.343
 los=33
 hp=5
 range=28
-atk=0.667
+atk=.667
 conv=0
 atk_freq=30
 proj_aoe=0
@@ -475,7 +475,7 @@ tmap=-1]]
 
 warant=parse[[
 idx=5
-spd=0.33
+spd=.33
 los=25
 hp=10
 range=0
@@ -512,7 +512,7 @@ tmap=-1]]
 
 cat=parse[[
 idx=6
-spd=0.2
+spd=.2
 los=50
 hp=15
 range=50
@@ -520,7 +520,7 @@ atk=1.5
 conv=0
 atk_freq=60
 proj_aoe=2
-proj_spd=0.72
+proj_spd=.72
 def=seige
 atk_typ=seige
 seige=1
@@ -606,7 +606,7 @@ atk=1.2
 conv=0
 atk_freq=30
 proj_aoe=0
-proj_spd=0.9
+proj_spd=.9
 atk_typ=bld
 def=bld
 
@@ -734,7 +734,7 @@ const=8
 hpr=8
 def=bld
 cycles=5
-gr=0.5
+gr=.5
 
 w=8
 fw=8
@@ -768,7 +768,7 @@ atk=1.8
 conv=0
 atk_freq=15
 proj_aoe=0
-proj_spd=0.8
+proj_spd=.8
 atk_typ=bld
 def=bld
 
@@ -800,12 +800,12 @@ tmap=-1]]
 
 parse[[
 idx=14
-spd=0.21
+spd=.21
 los=18
 hp=8
 range=0
 atk_freq=30
-atk=0.47
+atk=.47
 conv=0
 lady=1
 def=ant
@@ -868,7 +868,7 @@ tmap=-1]]
 
 monk=parse[[
 idx=26
-spd=0.25
+spd=.25
 los=45
 hp=6
 range=42
@@ -970,7 +970,7 @@ up=-1
 idx=27]],parse[[
 portx=62
 porty=88]],function(_ENV)
-	spd=0.286
+	spd=.286
 	hp*=1.25
 	conv*=1.2
 end,monk),
@@ -997,9 +997,9 @@ up=-1
 idx=15]],parse[[
 portx=24
 porty=80]],function(_ENV)
-	cap\=0.72
+	cap\=.72
 	spd*=1.12
-	gr*=0.9
+	gr*=.9
 end,ant),
 	parse([[
 t=20
@@ -1087,7 +1087,7 @@ idx=18]],parse[[
 portx=60
 porty=80]],function(_ENV)
 		gr*=1.15
-		cycles\=0.65
+		cycles\=.65
 	end,farm),
 }
 
@@ -1175,7 +1175,7 @@ tmap=256
 idx=22]],parse[[
 portx=16
 porty=80]],function(_ENV)
-	qty+=0.5
+	qty+=.5
 end,heal),
 	parse([[
 t=10
@@ -1429,8 +1429,8 @@ function tick(u)
 		local x,y,c=u.x,u.y
 		while g(pos,x\4,y\4) and
 			not u.st.adj do
-			x+=rndspl"-1,-0.5,0,0,0.5,1"
-			y+=rndspl"-1,-0.5,0,0,0.5,1"
+			x+=rndspl"-1,-.5,0,0,.5,1"
+			y+=rndspl"-1,-.5,0,0,.5,1"
 			c=1
 		end
 		u.st.wayp,u.st.adj=
@@ -1561,7 +1561,7 @@ function input()
 
 	if btnp"5" and hoverunit and
 		hoverunit.typ.unit and
-		t()-selt<0.2 then
+		t()-selt<.2 then
 		sel,selx={}
 		foreach(units,function(u)
 			add(u.onscr and
@@ -1609,7 +1609,7 @@ function input()
 		elseif sel1.typ.unit then
 			sfx"1"
 			mvg(sel,mx,my,axn==1,1)
-			hilite(parse([[f=0.5
+			hilite(parse([[f=.5
 c=8]],mx,my))
 
 		elseif sel1.typ.units then
@@ -1679,7 +1679,7 @@ function draw_unit(u)
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
 		sx-=fw*ceil(p*2)
-		if (p<=0.15) return
+		if (p<=.15) return
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
@@ -1744,7 +1744,7 @@ function update_unit(u)
 
 	if wayp then
 		if norm(wayp[1],u,
-			st.spd or u.typ.spd)<0.5
+			st.spd or u.typ.spd)<.5
 		then
 			deli(wayp,1)
 			st.wayp=#wayp>0 and wayp
@@ -1858,7 +1858,7 @@ function buildrepair(u)
 	elseif hp<max_hp and
 		r.b>=1 then
 		hp+=2
-		r.b-=0.1
+		r.b-=.1
 	else
 		g.rest(u)
 	end
@@ -1896,7 +1896,7 @@ end
 function produce(u)
 	local _ENV,gl=u,_ENV
 	local bld=q.typ
-	q.tech-=0.5
+	q.tech-=.5
 	if q.tech<=0 then
 		if bld.tech then
 			local _ENV=bld
@@ -2029,8 +2029,8 @@ function dist(dx,dy)
 	local a0,b0=(dx+maskx)^^maskx,
 		(dy+masky)^^masky
 	return a0>b0 and
-		a0*0.9609+b0*0.3984 or
-			b0*0.9609+a0*0.3984
+		a0*.9609+b0*.3984 or
+			b0*.9609+a0*.3984
 end
 
 function surr(fn,x,y,n,ig_acc)
@@ -2095,7 +2095,7 @@ end
 function norm(it,nt,f)
 	local dx,dy=
 		it[1]-nt.x,it[2]-nt.y
-	d,nt.dir=dist(dx,dy)+0.0001,
+	d,nt.dir=dist(dx,dy)+.0001,
 		sgn(dx)
 	nt.x+=dx*f/d
 	nt.y+=dy*f/d
@@ -2759,34 +2759,34 @@ g=0
 b=6
 breq=0]],parse[[
 antant=1
-antqueen=0.7
-antspider=0.8
+antqueen=.7
+antspider=.8
 antseige=1.5
-antbld=0.5
+antbld=.5
 
 acidant=1
-acidqueen=0.6
+acidqueen=.6
 acidspider=1.5
-acidseige=0.7
-acidbld=0.25
+acidseige=.7
+acidbld=.25
 
 spiderant=1.5
 spiderqueen=1.1
 spiderspider=1
 spiderseige=1
-spiderbld=0.1
+spiderbld=.1
 
-seigeant=0.9
+seigeant=.9
 seigequeen=3
-seigespider=0.7
+seigespider=.7
 seigeseige=1
 seigebld=12
 
 bldant=1
-bldqueen=0.75
+bldqueen=.75
 bldspider=1.25
-bldseige=0.9
-bldbld=0.1]],
+bldseige=.9
+bldbld=.1]],
 	unspl"-10,2,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
@@ -2812,7 +2812,7 @@ function init()
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		parse"",parse"qty=0.075",
+		parse"",parse"qty=.075",
 		parse[[
 r=20
 g=10
@@ -2996,7 +2996,7 @@ function ai_unit2(u)
 			miner(u,r)
 		end
 		if typ.bldg and
-			u.hp<u.max_hp*0.75 or
+			u.hp<u.max_hp*.75 or
 			u.const
 		then
 			go(build)
