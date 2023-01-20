@@ -2317,7 +2317,7 @@ conv=0]],_typ[_p],rnd"60"\1,ais))
 	return u
 end
 
-function dq_prod(u,b,m)
+function prod(u,b,m)
 	pay(b,-1,res[u.p])
 	if u.q then
 		u.q.qty+=1
@@ -2611,7 +2611,7 @@ portf=9]],
 							return
 						end
 						sfx"2"
-						dq_prod(sel1,b,1)
+						prod(sel1,b,1)
 						b.done=b.x
 					else
 						sfx"16"
@@ -3091,7 +3091,7 @@ function ai_frame(ai)
 				end)
 				if not u.q and not hold and
 					can_pay(b,res2) then
-					dq_prod(u,b,
+					prod(u,b,
 						split"5,1,1"[res2.diff])
 					u.lastp%=typ.units
 					u.lastp+=1
