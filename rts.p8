@@ -329,16 +329,7 @@ function init()
 	menuitem(3,"∧ resign",
 		function()hq.hp=0 end)
 
-	queue,exp,vcache,dmaps,
-	units,restiles,sel,ladys,
-		proj,bldgs,new_viz,dmap_st,
-		typs,heal,
-		res,loser,menu=
-		{},{},{},{},
-		{},{},{},{},
-		{},{},{},{d={}},
-		{},p"qty=.05",
-		p[[
+	p[[var=res
 r=20
 g=10
 b=20
@@ -350,13 +341,22 @@ diff=0
 techs=0
 t=0]]
 
-	res1,ais,posidx,
-	cf,selt,alert,ban,
-	amx,amy,tot=
-		res.p1,{},
+	res1,queue,exp,vcache,dmaps,
+	units,restiles,sel,ladys,
+		proj,bldgs,new_viz,dmap_st,
+		typs,heal,
+		ais,posidx,
+		cf,selt,alert,ban,
+		amx,amy,tot,
+		loser,menu=
+		res.p1,
+		{},{},{},{},
+		{},{},{},{},
+		{},{},{},{d={}},
+		{},p"qty=.05",{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,35"
-
+		
 p[[var=ant
 idx=1
 spd=.286
@@ -2036,8 +2036,8 @@ function p(str,typ,x,y)
 				obj[k],o[k]=v,v end)
 		end
 	end)
-	_ENV[tostr(obj.var)]=
-		add(obj.idx and typs,obj)
+	_ENV[tostr(obj.var)]=obj
+	add(obj.idx and typs,obj)
 	return obj
 end
 
@@ -2791,11 +2791,7 @@ pspl,rndspl,unspl,spldeli,campal=
 	comp(split,deli),
 	comp(camera,pal)
 
-unl,unspr,stp,
-	resk,rescol,
-	resoffx,resoffy,renew,
-	dmg_mult,
-
+unl,unspr,stp,resk,
 	npl,hlt,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
@@ -2805,7 +2801,10 @@ unl,unspr,stp,
 	comp(spr,unspl),
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
+	unspl"2,-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+
 p[[
+var=rescol
 r=8
 g=3
 b=4
@@ -2821,19 +2820,31 @@ e1=5
 e7=8
 e11=3
 e19=4
-e33=13]],p[[
+e33=13]]
+
+p[[
+var=resoffx
 _=0
 r=16
 g=0
-b=16]],p[[
+b=16]]
+
+p[[
+var=resoffy
 _=0
 r=0
 g=4
-b=4]],p[[
+b=4]]
+
+p[[
+var=renew
 r=0
 g=0
 b=6
-breq=0]],p[[
+breq=0]]
+
+p[[
+var=dmg_mult
 antant=1
 antqueen=.7
 antspider=.8
@@ -2862,9 +2873,7 @@ bldant=1
 bldqueen=.75
 bldspider=1.25
 bldseige=.9
-bldbld=.1]],
-	unspl"2,-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
-
+bldbld=.1]]
 -->8
 --save
 
