@@ -76,10 +76,8 @@ function _update()
 	end
 
 	dmap()
-
-	upcycle=tot>=100 and 30 or
-		tot>=75 and 15 or
-		tot>=40 and 10 or 5
+	upcycle=
+		split"5,10,15,30,60,60,60"[tot\35]
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
@@ -107,8 +105,8 @@ function _update()
 		viz,new_viz=new_viz,{}
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
-			mset(x+mapw,y,viz[k] and
-				0 or mget(x,y))
+			mset(x+mapw,y,viz[k] or
+				mget(x,y))
 		end
 	end
 
@@ -2852,10 +2850,10 @@ t=0]]
 
 	res1,ais,posidx,
 	cf,selt,alert,ban,
-	amx,amy=
+	amx,amy,tot=
 		res.p1,{},
 		split"1,2,3,4",
-		unspl"59,0,0,0,64,64"
+		unspl"59,0,0,0,64,64,35"
 end
 -->8
 --ai
