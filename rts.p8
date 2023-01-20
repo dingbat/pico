@@ -123,7 +123,7 @@ function _update()
 				) then
 					dmg(typ,u)
 					if (typ.proj_aoe==0) break
-					if hlv.null then
+					if hlv.var then
 						hilite(p([[f=2
 c=13]],p.x,p.y))
 					end
@@ -158,7 +158,7 @@ function banner(a,t,subt)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-		?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res.p2.diff]
+		?split",\^j2l\|e\#9\f5 ,\^j2l\|e\#9\f0 2X "[res1.npl]..split"easy ai ,normal ai \|m\^x1 ,hard ai "[res.p2.diff]
 		-3,unspl"80,8,80,9")
 	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
 	unl"119,80,84,80,9"
@@ -267,7 +267,7 @@ function _draw()
 
 	local dt=t()-hlt
 	if dt>.5 then
-		hlv=p"null=1"
+		p"var=hlv"
 	elseif hlv.f then
 		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
@@ -318,6 +318,17 @@ end
 -->8
 --init
 
+function start()
+	hq,res1.npl,cx,cy=units[1],npl,
+		unspl(stp[res1.pos],":")
+
+	for i=2,npl do
+		ais[i]=p("boi=0",i)
+	end
+
+	make_dmaps()
+end
+
 function init()
 	poke(0x5f2d,3)
 	if stat"6"=="map" then
@@ -340,7 +351,8 @@ tot=4
 reqs=0
 diff=0
 techs=0
-t=0]]
+t=0
+npl=0]]
 
 	res1,npl,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
@@ -350,7 +362,7 @@ t=0]]
 		cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
-		res.p1,ai_diff\3+2,
+		res.p1,2+ai_diff\3,
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
@@ -1757,11 +1769,10 @@ function draw_unit(u)
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
-	pal(typ.farm and 5,selc or 5)
 	pal{
 		selc or u.p,
 		u.p,
-		[14]=0
+		[14]=pal(typ.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
 		not typ.fire and u.dir==typ.dir)
@@ -2797,7 +2808,7 @@ unl,unspr,stp,resk,
 	comp(line,unspl),
 	comp(spr,unspl),
 	split"-9:-20,263:-20,263:148,-9:148",
-	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
+	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl",
 	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 p[[
@@ -2935,7 +2946,7 @@ function loadgame()
 	for i=1,px"1" do
 		unit(px"7")
 	end
-	local techs=res1.techs
+	npl,techs=res1.npl,res1.techs
 	foreach(typs,function(_ENV)
 		if techs|tmap==techs then
 			x(y.p1)
@@ -2943,22 +2954,10 @@ function loadgame()
 			typ.up=up
 		end
 	end)
-	npl+=res.p3.diff\1
 	start()
 end
 -->8
 --ai
-
-function start()
-	hq,cx,cy=units[1],
-		unspl(stp[res1.pos],":")
-
-	for i=2,npl do
-		ais[i]=p("boi=0",i)
-	end
-
-	make_dmaps()
-end
 
 function miner(u,r)
 	u.rs=mine_nxt(u,r)
@@ -3110,8 +3109,6 @@ cartdata"eaoa1"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
-
--->8
 
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
