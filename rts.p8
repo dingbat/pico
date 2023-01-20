@@ -226,7 +226,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
---	draw_map(mapw,15) --f
+	draw_map(mapw,15) --f
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -1239,15 +1239,15 @@ agg=1]]
 end
 
 function mvg(units,x,y,agg,frc)
-	local lowest=999
+	local lspd=999
 	foreach(units,function(u)
 		if frc or u.st.rest then
 			move(u,x,y,agg)
 		end
-		lowest=min(u.typ.spd,lowest)
+		lspd=min(u.typ.spd,lspd)
 	end)
 	foreach(units,function(_ENV)
-		st.spd,grp=lowest,agg end)
+		st.spd,grp=lspd,agg end)
 end
 
 function move(u,x,y,agg)
@@ -2742,7 +2742,7 @@ unl,unspr,stp,
 	resoffx,resoffy,renew,
 	dmg_mult,
 
-	hlt,ai_diff,action,
+	npl,hlt,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2809,7 +2809,7 @@ bldqueen=.75
 bldspider=1.25
 bldseige=.9
 bldbld=.1]],
-	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"2,-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
 --init
@@ -2855,8 +2855,6 @@ t=0]]
 		res.p1,{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64"
-
-	npl=2
 end
 -->8
 --ai
