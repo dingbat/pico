@@ -1309,9 +1309,8 @@ function tick(u)
 	local typ,targ,agg_d,agg_u=
 		u.typ,u.st.target,9999
 	
-	box(u).onscr,u.ai,u.upd,x8,y8=
+	box(u).onscr,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
-		typ.lady or ais[u.p],
 		u.id%upcycle==upc,
 		u.x8,u.y8
 
@@ -1998,6 +1997,8 @@ end
 
 function tile_unit(tx,ty)
 	return box(p([[
+ais=
+p=1
 hp=0
 max_hp=0
 const=1]],p[[w=8
@@ -2007,9 +2008,10 @@ end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,hu,dmgd=
+	r,x8,y8,hu,ai,dmgd=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,p==1,
+		typ.lady or ais[p],
 		hp<max_hp
 	k=x8|y8<<8
 	if not const then
@@ -2227,25 +2229,24 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local _typ,_id,u=
-		typs[t] or t,
-		rnd"60"\1,
-		add(units,p[[dir=1
+	local _typ=typs[t] or t
+	local u=add(units,
+		p([[dir=1
 lastp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]])
+conv=0]],_typ[_p],rnd"60"\1,ais))
 	do
-		local _ENV,ptyp=u,_typ[_p]
-		max_hp=ptyp.hp/ptyp.const
-		typ,x,y,p,hp,const,
-			disc,id,prod,bldg=
-			ptyp,_x,_y,_p,
+		local _ENV=u
+		max_hp=typ.hp/typ.const
+		id,ais,x,y,p,hp,const,
+			disc,prod,bldg=
+			x,y,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,
-			_id,_typ.prod or {},_typ.bldg
+			_typ.prod or {},_typ.bldg
 	end
 	rest(box(u))
 	if (_typ.bldg) reg_bldg(u)
@@ -2850,7 +2851,7 @@ t=0]]
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64"
 
-	npl=3
+	npl=2
 end
 
 function new()
@@ -3041,82 +3042,88 @@ function miner(u,r)
 end
 
 function ai_dmg(u)
-	if u.ai and u.grp!="atk" then
+	if ais[u.p] and u.grp!="atk" then
 		u.ai.safe=mvg(u.ai.p1,u.x,u.y,1)
 	end
 end
 
 -->8
-----save
---
---menuitem(1,"⌂ save",function()
---	if (menu) return
---	local ptr=0
---	campal()
---	local function draw(v,...)
---		if v then
---			for i=0,8,4 do
---				pset(ptr%128,ptr\128,
---					v>>i&0xf)
---				ptr+=1
---			end
---			draw(...)
---		end
---	end
---	for x=0,47 do
---		for y=0,31 do
---			draw(mget(x,y)|g(exp,x,y,0))
---		end
---	end
---	foreach(resk,function(k)
---		draw(res1[k],res.p2[k],res.p3[k])
---	end)
---	draw(#units)
---	foreach(units,function(_ENV)
---		draw(typ.idx,x,y,p,
---			max(const),max(disc),hp)
---	end)
---	banner(2,"savefile","drag+drop to load \|f\^x1 ")
---	extcmd("screen",1)
---end)
---
---function loadgame()
---	init()
---	pal()
---	loaded,ptr=
---		serial(unspl"0x802,0x9000,0x4000"),
---		0x9004
---	local function px(n)
---		n-=1
---		if n>=0 then
---			local v1,v2,v3=peek(ptr,3)
---			ptr+=3
---			return v1|v2<<4|v3<<8,px(n)
---		end
---	end
---	for x=0,47 do
---		for y=0,31 do
---			local v=px"1"
---			if (v>127) s(exp,x,y,128)
---			mset(x,y,v&0x7f)
---		end
---	end
---	foreach(resk,function(k)
---		res1[k],res.p2[k],res.p3[k]=px"2"
---	end)
---	for i=1,px"1" do
---		unit(px"7")
---	end
---	local techs=res1.techs
---	foreach(typs,function(_ENV)
---		if techs|tmap==techs then
---			x(y.p1)
---			up,done=up and 0,not up
---			typ.up=up
---		end
---	end)
---	ai_init()
---end
+--save
+
+menuitem(1,"⌂ save",function()
+	if (menu) return
+	local ptr=0
+	campal()
+	banner(2,"savefile","drag+drop to load \|f\^x1 ")
+	local function draw(v,...)
+		if v then
+			for i=0,8,4 do
+				pset(ptr%128,ptr\128,
+					v>>i&0xf)
+				ptr+=1
+			end
+			draw(...)
+		end
+	end
+	for x=0,47 do
+		for y=0,31 do
+			draw(mget(x,y)|g(exp,x,y,0))
+		end
+	end
+	foreach(resk,function(k)
+		foreach(res,function(r)
+			draw(r[k])
+		end)
+	end)
+	draw(#units)
+	for i=0,30 do
+	foreach(units,function(_ENV)
+		draw(typ.idx,x,y,p,
+			max(const),max(disc),hp)
+	end)
+	extcmd("screen",1)
+end)
+
+function loadgame()
+	init()
+	pal()
+	loaded,ptr=
+		serial(unspl"0x802,0x9000,0x4000"),
+		0x9004
+	local function px(n)
+		n-=1
+		if n>=0 then
+			local v1,v2,v3=peek(ptr,3)
+			ptr+=3
+			return v1|v2<<4|v3<<8,px(n)
+		end
+	end
+	for x=0,47 do
+		for y=0,31 do
+			local v=px"1"
+			if (v>127) s(exp,x,y,128)
+			mset(x,y,v&0x7f)
+		end
+	end
+	foreach(resk,function(k)
+		foreach(res,function(r)
+			r[k]=px"1"
+		end)
+	end)
+	for i=1,px"1" do
+		unit(px"7")
+	end
+	local techs=res1.techs
+	foreach(typs,function(_ENV)
+		if techs|tmap==techs then
+			x(y.p1)
+			up,done=up and 0,not up
+			typ.up=up
+		end
+	end)
+	if (res.p3.diff>0) npl+=1
+	ai_init()
+end
 -->8
 cartdata"eeooty_aoa1"
 
@@ -3125,8 +3132,8 @@ menuitem(2,"● toggle mouse",
 
 -->8
 tostr[[[[]]
---ai_debug=true
-srand"4"
+ai_debug=true
+srand"12"
 if ai_debug then
 	_update60=_update
 	_draw_map,_dr,_pr,_resbar=
