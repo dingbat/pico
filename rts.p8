@@ -3025,8 +3025,7 @@ end
 
 menuitem(1,"⌂ save",function()
 	if (menu) return
-	local ptr=0
-	campal()
+	local ptr=campal()
 	banner(2,"savefile","drag+drop to load \|f\^x1 ")
 	local function draw(v,...)
 		if v then
@@ -3049,7 +3048,6 @@ menuitem(1,"⌂ save",function()
 		end)
 	end)
 	draw(#units)
-	for i=0,30 do
 	foreach(units,function(_ENV)
 		draw(typ.idx,x,y,p,
 			max(const),max(disc),hp)
