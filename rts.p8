@@ -59,7 +59,7 @@ function _update()
 
 	dmap()
 
-	local to=res1.p+res2.p
+	local to=res1.p
 	upcycle=to>=100 and 30 or
 		to>=75 and 15 or
 		to>=40 and 10 or 5
@@ -208,7 +208,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15)
+--	draw_map(mapw,15) --f
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -1308,9 +1308,10 @@ end
 function tick(u)
 	local typ,targ,agg_d,agg_u=
 		u.typ,u.st.target,9999
-
-	box(u).onscr,u.upd,x8,y8=
+	
+	box(u).onscr,u.ai,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
+		typ.lady or ais[u.p],
 		u.id%upcycle==upc,
 		u.x8,u.y8
 
@@ -1405,7 +1406,7 @@ function tick(u)
 	 typ.atk then
 		for e in all(units) do
 			local d=dist(e.x-u.x,e.y-u.y)
-			if (e.p!=u.p or
+			if (e.ai!=u.ai or
 				typ.monk and e.dmgd and
 				not e.bldg) and
 				not e.dead and
@@ -1805,7 +1806,7 @@ function fight(u)
 			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
 			then
-				if e.p==u.p then
+				if e.ai==u.ai then
 					if typ.monk and e.dmgd then
 						e.hp+=1
 						sfx"63"
@@ -1951,7 +1952,7 @@ end
 -->8
 --utils
 
-function p(str,typ,x,y,z)
+function p(str,typ,x,y)
 	local p1,p2,p3={},{},{}
 	local obj={p1,p2,p3,p2,
 		p1=p1,
@@ -1959,8 +1960,7 @@ function p(str,typ,x,y,z)
 		p3=p3,
 		typ=typ,
 		x=x,
-		y=y,
-		z=z}
+		y=y}
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
@@ -2007,9 +2007,9 @@ end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,hu,ai,dmgd=
+	r,x8,y8,hu,dmgd=
 		{x-w2,y-h2,x+w2,y+h2},
-		x\8,y\8,p==1,ais[p],
+		x\8,y\8,p==1,
 		hp<max_hp
 	k=x8|y8<<8
 	if not const then
@@ -2849,11 +2849,12 @@ t=0]]
 		res.p1,{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64"
+
+	npl=3
 end
 
 function new()
 	init()
-	npl=3
 	for k,r in inext,res do
 		r.pos,r.diff=
 			del(posidx,rnd(posidx)),
@@ -2880,14 +2881,14 @@ end
 --ai
 
 function ai_init()	
-	ais,hq,cx,cy={},units[1],
+	hq,cx,cy=units[1],
 		unspl(stp[res1.pos],":")
-
+	
 	for i=2,npl do
-		ais[i]=parse([[
+		ais[i]=p([[
 atkt=0
 boi=0
-]],i,{},{},{})
+]],i)
 	end
 	
 	make_dmaps()
@@ -2896,9 +2897,9 @@ end
 function ai_frame(ai)
 	if (t6) ai.safe=1
 	avail,nxtres,miners,
-		ants,uhold,res2=
+		ants,res2,uhold=
 		{},{},{},0,res[ai.typ]
-
+	
 	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
 		local x,y=
@@ -2948,17 +2949,88 @@ function ai_frame(ai)
 		end
 	end
 
-	foreach(units,ai_unit1)
+	foreach(units,function(u)
+		if u.ai==ai then
+			if u.typ.ant then
+				ants+=1
+				if u.st.rest then
+					miner(u,bgnxt and "b" or "r")
+					bgnxt=not bgnxt
+				end
+				add(add(miners,u.rs) and
+					not u.res and avail,u)
+			elseif u.typ.unit then
+				if u.dead then
+					del(u.sqd,u)
+				elseif not u.sqd then
+					u.sqd=(#ai.p1>#ai.p2 or
+						u.typ.seige) and
+						ai.p2 or ai.p1
+					add(u.sqd,u)
+				end
+			end
+		end
+	end)
+	
 	bal=(#miners-count(miners,"r"))
 		\bgrat-count(miners,"g")
-	foreach(units,ai_unit2)
+		
+	foreach(units,function(u)
+		local function go(fn)
+			if not u.w or
+				u.w.st.target!=u then
+				u.w=deli(avail)
+				if u.w then
+					u.w.rs=fn(u.w,u)
+				end
+			end
+		end
+		local typ=u.typ
+		if u.ai==ai then
+			local r=bal>0 and "g" or
+				bal<0 and "b"
+			if u.rs!=r and r and
+				del(avail,u) then
+				bal=0
+				miner(u,r)
+			end
+			if bldg and u.dmgd or u.const
+			then
+				go(build)
+			elseif typ.farm and
+				not u.const and
+				not u.farmer then
+				go(gofarm)
+			elseif
+				typ.queen and
+				ants<res2.diff*12 or
+				typ.mil and
+				res2.p<res2.diff*26
+			then
+				local b,hold=u.prod[u.lastp]
+				foreach(split"r,g,b",function(k)
+					hold=hold or uhold and
+						b[k]!=0 and
+						res2[k]-b[k]<uhold[k]
+				end)
+				if not u.q and not hold and
+					can_pay(b,res2) then
+					queue_prod(u,b,
+						split"3,1,1"[res2.diff])
+					u.lastp%=typ.units
+					u.lastp+=1
+					res2.tot+=1
+				end
+			end
+		end
+	end)
 
-	if #ai.y>=res2.diff*5 and
+	if #ai.p2>=res2.diff*5 and
 		ai.safe and t()-ai.atkt>split"180,0,0"[res2.diff]
 	then
-		ai.z,ai.y,atkt=ai.y,{},t()
+		ai.p3,ai.p2,atkt=ai.p2,{},t()
 	end
-	mvg(ai.z,hq.x,hq.y,"atk")
+	mvg(ai.p3,hq.x,hq.y,"atk")
 end
 
 function miner(u,r)
@@ -2968,82 +3040,9 @@ function miner(u,r)
 	end
 end
 
-function ai_unit1(u)
-	if u.ai then
-		if u.typ.ant then
-			ants+=1
-			if u.st.rest then
-				miner(u,bgnxt and "b" or "r")
-				bgnxt=not bgnxt
-			end
-			add(add(miners,u.rs) and
-				not u.res and avail,u)
-		elseif u.typ.unit then
-			if u.dead then
-				del(u.sqd,u)
-			elseif not u.sqd then
-				u.sqd=(#ai.x>#ai.y or
-					u.typ.seige) and
-					ai.y or ai.x
-				add(u.sqd,u)
-			end
-		end
-	end
-end
-
-function ai_unit2(u)
-	local function go(fn)
-		if not u.w or
-			u.w.st.target!=u then
-			u.w=deli(avail)
-			if u.w then
-				u.w.rs=fn(u.w,u)
-			end
-		end
-	end
-	local typ=u.typ
-	if u.ai then
-		local r=bal>0 and "g" or
-			bal<0 and "b"
-		if u.rs!=r and r and
-			del(avail,u) then
-			bal=0
-			miner(u,r)
-		end
-		if bldg and u.dmgd or u.const
-		then
-			go(build)
-		elseif typ.farm and
-			not u.const and
-			not u.farmer then
-			go(gofarm)
-		elseif
-			typ.queen and
-			ants<res2.diff*12 or
-			typ.mil and
-			res2.p<res2.diff*26
-		then
-			local b,hold=u.prod[u.lastp]
-			foreach(split"r,g,b",function(k)
-				hold=hold or uhold and
-					b[k]!=0 and
-					res2[k]-b[k]<uhold[k]
-			end)
-			if not u.q and not hold and
-				can_pay(b,res2) then
-				queue_prod(u,b,
-					split"3,1,1"[res2.diff])
-				u.lastp%=typ.units
-				u.lastp+=1
-				res2.tot+=1
-			end
-		end
-	end
-end
-
 function ai_dmg(u)
 	if u.ai and u.grp!="atk" then
-		u.ai.safe=mvg(x,u.x,u.y,1)
+		u.ai.safe=mvg(u.ai.p1,u.x,u.y,1)
 	end
 end
 
@@ -3126,7 +3125,7 @@ menuitem(2,"● toggle mouse",
 
 -->8
 tostr[[[[]]
-ai_debug=true
+--ai_debug=true
 srand"4"
 if ai_debug then
 	_update60=_update
@@ -3143,21 +3142,21 @@ if ai_debug then
 		if ai_debug and res1 then
 		camera()
 		local secs=res1.t\1%60
-		?res2.diff,60,107,9
+		?res.p2.diff,60,107,9
 		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
 		?bgrat,80,114,3
-		?":\-e#\-e:"..(boi/2),80,107,2
+		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
 		camera()
 		end
 	end
 	function print_res(...)
-		if (ai_debug) res1=res2
+		if (ai_debug) res1=res.p2
 		local x=_pr(...)
 		res1=res[1]
 		return x
 	end
 	function resbar(...)
-		if (ai_debug) res1=res2
+		if (ai_debug) res1=res.p2
 		_resbar(...)
 		res1=res[1]
 	end
