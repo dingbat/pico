@@ -322,10 +322,6 @@ function start()
 	hq,res1.npl,cx,cy=units[1],npl,
 		unspl(stp[res1.pos],":")
 
-	for i=2,4 do
-		ais[i]=p("boi=0",i)
-	end
-
 	make_dmaps()
 end
 
@@ -369,6 +365,10 @@ npl=0]]
 		{},{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,35"
+
+	for i=2,4 do
+		ais[i]=p("boi=0",i)
+	end
 
 p[[var=heal
 qty=.05
@@ -3111,6 +3111,45 @@ cartdata"eaoa1"
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
+-->8
+tostr[[[[]]
+--ai_debug=true
+srand"12"
+if ai_debug then
+	_update60=_update
+	_draw_map,_dr,_pr,_resbar=
+		draw_map,_draw,print_res,
+		resbar
+	function draw_map(o,y)
+		if not ai_debug or o==0 then
+			_draw_map(o,y)
+		end
+	end
+	function _draw()
+		_dr()
+		if ai_debug and res1 then
+		camera()
+		local secs=res1.t\1%60
+		?res.p2.diff,60,107,9
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
+		?bgrat,80,114,3
+		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
+		camera()
+		end
+	end
+	function print_res(...)
+		if (ai_debug) res1=res.p2
+		local x=_pr(...)
+		res1=res[1]
+		return x
+	end
+	function resbar(...)
+		if (ai_debug) res1=res.p2
+		_resbar(...)
+		res1=res[1]
+	end
+end
+--]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b350000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
