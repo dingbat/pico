@@ -29,7 +29,25 @@ function _update()
 			ai_diff%=3
 		end
 		if lclk then
-			new()
+			init()
+			for k,r in inext,res do
+				r.pos,r.diff=
+					del(posidx,rnd(posidx)),
+					ai_diff+1
+			end
+			foreach(split([[7,64,64
+1,49,64
+1,77,59
+1,59,52
+5,61,76]],"\n"),function(s)
+				for p=1,npl do
+					local u,x,y=unspl(s)
+					local dx,dy=unspl(
+						stp[res[p].pos],":")
+					unit(u,x+dx,y+dy,p)
+				end
+			end)
+			ai_init()
 		else
 			return
 		end
@@ -68,7 +86,7 @@ function _update()
 		sele,selh,selb,
 		hunit,idle,idle_mil=
 		cf%upcycle,{},
-		g(bldgs,mx8,my8),
+		g(bldgs,mx8,my8,{}),
 		t()%6<1,{}
 
 	res1.t+=0x.0888
@@ -1193,14 +1211,9 @@ i=7
 tmap=512
 idx=23]],p[[
 portx=69
-porty=80]],function(ptyps)
-		foreach(ptyps,function(_ENV)
-			if bldg then
-				los+=10
-				range=los
-			end
-		end)
-	end,typs),
+porty=80]],function(_ENV)
+	qty+=10
+end,exviz),
 	p([[
 t=40
 r=0
@@ -1963,16 +1976,11 @@ function p(str,typ,x,y)
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
-			obj[k],p1[k],p2[k],p3[k]=
-				v,v,v,v
-		end
-		if k=="idx" then
-			typs[v],
-				typs.p1[v],
-				typs.p2[v],
-				typs.p3[v]=obj,p1,p2,p3
+			foreach(obj,function(o)
+				obj[k],o[k]=v,v end)
 		end
 	end)
+	add(obj.idx and typs,obj)
 	return obj
 end
 
@@ -2075,7 +2083,7 @@ end
 
 function avail_farm()
 	local _ENV=hbld
-	return _ENV and
+	return typ and
 		typ.farm and
 		not exp and
 		not farmer and
@@ -2104,8 +2112,7 @@ function can_atk()
 end
 
 function can_build()
-	return hbld and
-		hbld.hu and
+	return hbld.hu and
 		hbld.hp<hbld.typ.hp and
 		seltyp.ant
 end
@@ -2181,7 +2188,10 @@ function dmg(from_typ,to)
 		wander(to)
 	end
 	to.conv+=from_typ.conv
-	ai_dmg(to)
+	if ais[to.p] and to.grp!="atk" then
+		to.ai.safe=
+			mvg(to.ai.p1,to.x,to.y,1)
+	end
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32")
 		sfx(from_typ.atksfx)
@@ -2210,17 +2220,14 @@ end
 function can_drop()
 	for u in all(sel) do
 		if u.res then
-			return hbld and
-				hbld.hu and
+			return hbld.hu and
 				hbld.typ.drop
 		end
 	end
 end
 
 function can_renew(t)
-	if hbld and
-		seltyp.ant and
-		hbld.exp then
+	if hbld.exp and seltyp.ant then
 		pres(renew,10,2)
 		rect(unspl"8,0,18,8,4")
 		return	can_pay(renew,res1) or t
@@ -2299,8 +2306,8 @@ function dmap()
 				q.p1[pt.k]=q.c
 				if q.c<8 then
 					surr(function(t)
-						q.x[t.k]=
-							q.x[t.k] or
+						q.p3[t.k]=
+							q.p3[t.k] or
 							add(q.p2,t)
 					end,unpack(pt))
 				end
@@ -2308,7 +2315,7 @@ function dmap()
 			q.c+=1
 			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
-				dmaps[q.y]=
+				dmaps[q.x]=
 					deli(queue,1).p1
 			end
 		else
@@ -2334,7 +2341,6 @@ b=4]][q]
 			queue[1]=p(
 				"c=0",
 				open,
-				{},
 				q
 			)
 		end
@@ -2538,9 +2544,8 @@ portf=9]],
 	if sel1.typ.farm then
 		?"\f4\^jbr\|i"..sel1.cycles.."/"..seltyp.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
 	end
-	for i,b in next,sel1.prod do
+	foreach(sel1.prod,function(b)
 		if not b.done then
-			i-=1
 			draw_port(
 				b.typ,
 				function()
@@ -2562,7 +2567,7 @@ portf=9]],
 				split"106,106,106,106,106,117,117,117"[b.i],b
 			)
 		end
-	end
+	end)
 	if q then
 		local b=q.typ
 		draw_port(
@@ -2829,7 +2834,7 @@ function init()
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		p"",p"qty=.05",
+		{},p"qty=.05",
 		p[[
 r=20
 g=10
@@ -2852,31 +2857,6 @@ t=0]]
 		unspl"59,0,0,0,64,64"
 
 	npl=2
-end
-
-function new()
-	init()
-	for k,r in inext,res do
-		r.pos,r.diff=
-			del(posidx,rnd(posidx)),
-			ai_diff+1
-	end	
-
-	foreach(split([[7,64,64
-1,49,64
-1,77,59
-1,59,52
-5,61,76]],"\n"),
-	function(s)
-		for p=1,npl do
-			local u,x,y=unspl(s)
-			local dx,dy=unspl(
-				stp[res[p].pos],":")
-			unit(u,x+dx,y+dy,p)
-		end
-	end)
-
-	ai_init()
 end
 -->8
 --ai
@@ -3040,13 +3020,6 @@ function miner(u,r)
 		move(u,unpack(nxtres[r]))
 	end
 end
-
-function ai_dmg(u)
-	if ais[u.p] and u.grp!="atk" then
-		u.ai.safe=mvg(u.ai.p1,u.x,u.y,1)
-	end
-end
-
 -->8
 --save
 
