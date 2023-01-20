@@ -139,7 +139,7 @@ function banner(a,t,subt)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-		?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res2.diff]
+		?split"\^j2l\|e\#9\f5 easy ai ,\^j2l\|e\#9\f2 normal ai \|m\^x1 ,\^j2l\|e\#9\f0 hard ai "[res.p2.diff]
 		-3,unspl"80,8,80,9")
 	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
 	unl"119,80,84,80,9"
@@ -1950,8 +1950,8 @@ end
 --utils
 
 function p(str,typ,x,y)
-	local p1,p2={},{}
-	local obj={p1,p2,p2,
+	local p1,p2,p3={},{},{}
+	local obj={p1,p2,p3,p2,
 		p1=p1,
 		p2=p2,
 		typ=typ,
@@ -1960,12 +1960,14 @@ function p(str,typ,x,y)
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
-			obj[k],p1[k],p2[k]=v,v,v
+			obj[k],p1[k],p2[k],p3[k]=
+				v,v,v,v
 		end
 		if k=="idx" then
 			typs[v],
 				typs.p1[v],
-				typs.p2[v]=obj,p1,p2
+				typs.p2[v],
+				typs.p3[v]=obj,p1,p2,p3
 		end
 	end)
 	return obj
@@ -2837,22 +2839,23 @@ t=0]]
 
 	init_typs()
 
-	res1,res2,posidx,
+	res1,posidx,
 	cf,selt,alert,ban,
 	amx,amy,
-	atkt,boi=
-		res.p1,res.p2,
+		res.p1,
 		split"1,2,3,4",
-		unspl"59,0,0,0,64,64,0,0"
+		unspl"59,0,0,0,64,64"
 end
 
 function new()
 	init()
-
-	res1.pos,res2.pos,res2.diff=
+	
+	res1.pos,res.p2.pos,res[3].pos,
+	res.p2.diff,res[3].diff=
+		del(posidx,rnd(posidx)),
 		del(posidx,rnd(posidx)),
 		rnd(posidx),
-		ai_diff+1
+		ai_diff+1,ai_diff+1	
 
 	foreach(split([[7,64,64,1
 7,64,64,2
@@ -2876,17 +2879,32 @@ end
 -->8
 --ai
 
-function ai_init()
-	defsqd,offsqd,atksqd,hq,
-		cx,cy=
-		{},{},{},units[1],
+function ai_init()	
+	ais,hq,cx,cy={},units[1],
 		unspl(stp[res1.pos],":")
 
+	for i=2,nai+1 do
+		add(ais,parse(i,[[
+atkt=0
+boi=0
+]]).rz=res[i]
+	end
+	
 	make_dmaps()
 end
 
+function merge(o1,o2,keys)
+	foreach(keys,function(k)
+		o2[k]=o1[k]
+	end)
+end
 
-function ai_frame()
+ai_keys=
+	split"x,y,z,atkt,boi,safe,rz"
+
+function ai_frame(ai)
+	merge(ai,_ENV,ai_keys)
+
 	if (t6) safe=1
 	avail,nxtres,miners,
 		ants,uhold=
@@ -2895,7 +2913,7 @@ function ai_frame()
 	for i=0,boi,2 do
 		local off=8288+i%32+i\32*128
 		local x,y=
-			peek(off+res2.pos*768,2)
+			peek(off+rz.pos*768,2)
 		local curr,x8,y8,p,pid=
 			boi==i,
 			x*8,y*8,
@@ -2906,9 +2924,9 @@ function ai_frame()
 		if b then
 			curr=curr and bld and bld.hu
 			if not bld and
-				res2.tot>=p and safe then
-				if can_pay(b,res2) then
-					pay(b,-1,res2)
+				rz.tot>=p and safe then
+				if can_pay(b,rz) then
+					pay(b,-1,ez)
 					curr=unit(b.typ,
 						x8+b.typ.w/2,
 						y8+b.typ.h/2,
@@ -2919,20 +2937,20 @@ function ai_frame()
 			end
 		else
 			if pid>90 then
-				if (res2.diff<=p) break
+				if (rz.diff<=p) break
 				nxtres[r]=nxtres[r] or
 					g(dmaps[r] or {},x,y) and
 					{x8,y8}
 			elseif curr then
 				if pid==10 then
 					if not loaded then
-						unit(p,x8,y8,3)
+						unit(p,x8,y8,4)
 					end
 				elseif pid==11 then
 					bgrat=split"2.75,2.35,2"[p]
-				elseif res2.diff>=p then
+				elseif rz.diff>=p then
 					typs[pid].x(
-						typs[pid].y.p2)
+						typs[pid].y[ai.typ])
 				end
 			end
 		end
@@ -2946,13 +2964,14 @@ function ai_frame()
 		\bgrat-count(miners,"g")
 	foreach(units,ai_unit2)
 
-	if #offsqd>=res2.diff*5 and
-		safe and t()-atkt>split"180,0,0"[res2.diff]
+	if #y>=rz.diff*5 and
+		safe and t()-atkt>split"180,0,0"[rz.diff]
 	then
-		atksqd,offsqd,atkt=
-			offsqd,{},t()
+		z,y,atkt=y,{},t()
 	end
-	mvg(atksqd,hq.x,hq.y,"atk")
+	mvg(z,hq.x,hq.y,"atk")
+	
+	merge(_ENV,ai,ai_keys)
 end
 
 function miner(u,r)
@@ -2976,9 +2995,9 @@ function ai_unit1(u)
 			if u.dead then
 				del(u.sqd,u)
 			elseif not u.sqd then
-				u.sqd=(#defsqd>#offsqd or
+				u.sqd=(#x>#y or
 					u.typ.seige) and
-					offsqd or defsqd
+					y or x
 				add(u.sqd,u)
 			end
 		end
@@ -3013,23 +3032,23 @@ function ai_unit2(u)
 			go(gofarm)
 		elseif
 			typ.queen and
-			ants<res2.diff*12 or
+			ants<rz.diff*12 or
 			typ.mil and
-			res2.p<res2.diff*26
+			rz.p<rz.diff*26
 		then
 			local b,hold=u.prod[u.lastp]
 			foreach(split"r,g,b",function(k)
 				hold=hold or uhold and
 					b[k]!=0 and
-					res2[k]-b[k]<uhold[k]
+					rz[k]-b[k]<uhold[k]
 			end)
 			if not u.q and not hold and
-				can_pay(b,res2) then
+				can_pay(b,rz) then
 				queue_prod(u,b,
-					split"3,1,1"[res2.diff])
+					split"3,1,1"[rz.diff])
 				u.lastp%=typ.units
 				u.lastp+=1
-				res2.tot+=1
+				rz.tot+=1
 			end
 		end
 	end
@@ -3037,7 +3056,7 @@ end
 
 function ai_dmg(u)
 	if u.ai and u.grp!="atk" then
-		safe=mvg(defsqd,u.x,u.y,1)
+		safe=mvg(x,u.x,u.y,1)
 	end
 end
 
@@ -3064,7 +3083,7 @@ menuitem(1,"⌂ save",function()
 		end
 	end
 	foreach(resk,function(k)
-		draw(res1[k],res2[k])
+		draw(res1[k],res.p2[k],res[3][k])
 	end)
 	draw(#units)
 	foreach(units,function(_ENV)
@@ -3097,12 +3116,12 @@ function loadgame()
 		end
 	end
 	foreach(resk,function(k)
-		res1[k],res2[k]=px"2"
+		res1[k],res.p2[k],res[3][k]=px"2"
 	end)
 	for i=1,px"1" do
 		unit(px"7")
 	end
-	local techs=res2.techs
+	local techs=res1.techs
 	foreach(typs,function(_ENV)
 		if techs|tmap==techs then
 			x(y.p1)
