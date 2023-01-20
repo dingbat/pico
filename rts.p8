@@ -341,7 +341,7 @@ diff=0
 techs=0
 t=0]]
 
-	res1,queue,exp,vcache,dmaps,
+	res1,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
 		proj,bldgs,new_viz,dmap_st,
 		typs,heal,
@@ -2317,7 +2317,7 @@ conv=0]],_typ[_p],rnd"60"\1,ais))
 	return u
 end
 
-function queue_prod(u,b,m)
+function dq_prod(u,b,m)
 	pay(b,-1,res[u.p])
 	if u.q then
 		u.q.qty+=1
@@ -2350,11 +2350,11 @@ function dmap_find(u,k)
 end
 
 function make_dmaps()
-	queue,asc=split"d,r,g,b",{}
+	dq,asc=split"d,r,g,b",{}
 end
 
 function dmap()
-	local q=queue[1]
+	local q=dq[1]
 	if q then
 		if q.c then
 			for i=1,#q.typ do
@@ -2373,7 +2373,7 @@ function dmap()
 			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
 				dmaps[q.x]=
-					deli(queue,1).p1
+					deli(dq,1).p1
 			end
 		else
 			local open,f={},p[[r=2
@@ -2395,7 +2395,7 @@ b=4]][q]
 					add(open,t).k=i
 				end
 			end
-			queue[1]=p(
+			dq[1]=p(
 				"c=0",
 				open,
 				q
@@ -2611,7 +2611,7 @@ portf=9]],
 							return
 						end
 						sfx"2"
-						queue_prod(sel1,b,1)
+						dq_prod(sel1,b,1)
 						b.done=b.x
 					else
 						sfx"16"
@@ -3091,7 +3091,7 @@ function ai_frame(ai)
 				end)
 				if not u.q and not hold and
 					can_pay(b,res2) then
-					queue_prod(u,b,
+					dq_prod(u,b,
 						split"5,1,1"[res2.diff])
 					u.lastp%=typ.units
 					u.lastp+=1
