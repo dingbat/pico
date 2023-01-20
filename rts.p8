@@ -2866,13 +2866,17 @@ function ai_init()
 		unspl(stp[res1.pos],":")
 	
 	for i=2,npl do
-		ais[i]=p([[
-atkt=0
-boi=0
-]],i)
+		ais[i]=p("boi=0",i)
 	end
 	
 	make_dmaps()
+end
+
+function miner(u,r)
+	u.rs=mine_nxt(u,r)
+	if not u.rs and nxtres[r] then
+		move(u,unpack(nxtres[r]))
+	end
 end
 
 function ai_frame(ai)
@@ -2997,7 +3001,7 @@ function ai_frame(ai)
 				if not u.q and not hold and
 					can_pay(b,res2) then
 					queue_prod(u,b,
-						split"3,1,1"[res2.diff])
+						split"5,1,1"[res2.diff])
 					u.lastp%=typ.units
 					u.lastp+=1
 					res2.tot+=1
@@ -3007,18 +3011,11 @@ function ai_frame(ai)
 	end)
 
 	if #ai.p2>=res2.diff*5 and
-		ai.safe and t()-ai.atkt>split"180,0,0"[res2.diff]
+		ai.safe
 	then
-		ai.p3,ai.p2,atkt=ai.p2,{},t()
+		ai.p3,ai.p2=ai.p2,{}
 	end
 	mvg(ai.p3,hq.x,hq.y,"atk")
-end
-
-function miner(u,r)
-	u.rs=mine_nxt(u,r)
-	if not u.rs and nxtres[r] then
-		move(u,unpack(nxtres[r]))
-	end
 end
 -->8
 --save
