@@ -145,7 +145,9 @@ c=13]],p.x,p.y))
 	end)
 
 	for k,v in next,ais do
-		if (upc==k) ai_frame(v)
+		if upc==k and not units[k].dead then
+			ai_frame(v)
+		end
 	end
 end
 
@@ -371,7 +373,8 @@ unit=1
 ant=1
 atksfx=10
 const=1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 beetle=p[[
 idx=2
@@ -409,7 +412,8 @@ porty=72
 unit=1
 atksfx=10
 dir=1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 spider=p[[
 idx=3
@@ -446,7 +450,8 @@ porty=72
 unit=1
 atksfx=10
 dir=1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 archer=p[[
 idx=4
@@ -488,7 +493,8 @@ dir=1
 proj_xo=-2
 proj_yo=0
 proj_s=52
-tmap=-1]]
+tmap=-1
+do=0]]
 
 warant=p[[
 idx=5
@@ -525,7 +531,8 @@ porty=72
 unit=1
 atksfx=10
 dir=1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 cat=p[[
 idx=6
@@ -568,7 +575,8 @@ dir=1
 proj_xo=1
 proj_yo=-4
 proj_s=56
-tmap=-1]]
+tmap=-1
+do=0]]
 
 queen=p[[
 idx=7
@@ -610,7 +618,8 @@ breq=0
 units=1
 queen=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=61]]
 
 tower=p[[
 idx=8
@@ -650,7 +659,8 @@ proj_xo=-1
 proj_s=48
 breq=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 mound=p[[
 idx=9
@@ -679,7 +689,8 @@ bldg=1
 drop=5
 breq=2
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 den=p[[
 idx=10
@@ -710,7 +721,8 @@ units=2
 idle=1
 mil=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 barracks=p[[
 idx=11
@@ -741,7 +753,8 @@ units=2
 idle=1
 mil=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 farm=p[[
 idx=12
@@ -772,7 +785,8 @@ farm=1
 bldg=farm
 breq=16
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 castle=p[[
 idx=13
@@ -813,7 +827,8 @@ breq=32
 units=1
 mil=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 p[[
 idx=14
@@ -851,7 +866,8 @@ porty=72
 unit=1
 atksfx=10
 dir=-1
-tmap=-1]]
+tmap=-1
+do=61]]
 
 mon=p[[
 idx=25
@@ -881,7 +897,8 @@ units=1
 breq=64
 mil=1
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 monk=p[[
 idx=26
@@ -923,7 +940,8 @@ porty=80
 unit=1
 atksfx=63
 dir=-1
-tmap=-1]]
+tmap=-1
+do=0]]
 
 ant.prod={
 	p([[
@@ -1327,7 +1345,7 @@ function tick(u)
 	if u.hp<=0 and not u.dead then
 		del(sel,u)
 		tot-=1
-		u.dead,u.farmer=0
+		u.dead,u.farmer=typ.do
 		u.st=
 			p"t=dead",
 			typ.bldg and reg_bldg(u),
@@ -1339,7 +1357,6 @@ function tick(u)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
 			make_dmaps()
-			u.dead=61
 		else
 			local _ENV=res[u.p]
 			if typ.drop and not u.const then
