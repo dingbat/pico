@@ -2384,14 +2384,13 @@ function as(st,g)
 		return {unpack(c)},c.e
 	end
 
-	local sh,t,f={
-		last=st,cfs=0,ctg=32767
-	},{},{}
+	local sh,t,f=p([[
+cfs=0]],st,32767),{},{}
 	t[st.k]=sh
 	local function path(s)
-		while s.last!=st do
-			add(f,{s.last[1]*8+4,
-				s.last[2]*8+4},1)
+		while s.typ!=st do
+			add(f,{s.typ[1]*8+4,
+				s.typ[2]*8+4},1)
 			s=t[s.prev.k]
 		end
 		asc[k]=f
@@ -2401,14 +2400,14 @@ function as(st,g)
 	while frl>0 do
 		local cost,iom=32767
 		for i=1,frl do
-			local temp=fr[i].cfs+fr[i].ctg
+			local temp=fr[i].cfs+fr[i].x
 			if (temp<=cost) iom,cost=i,temp
 		end
 		sh=fr[iom]
 		fr[iom],sh.dead=fr[frl],1
 		frl-=1
 
-		local p=sh.last
+		local p=sh.typ
 		if p.k==g.k then
 			f.e=1
 			return path(sh),1
@@ -2416,18 +2415,16 @@ function as(st,g)
 		surr(function(n)
 			local ob,ncfs=t[n.k],sh.cfs+n.d
 			if not ob then
-				ob={
-					last=n,
-					cfs=32767,
-					ctg=dist(n[1]-g[1],n[2]-g[2])
-				}
+				ob=parse("cfs=32767",n,
+					dist(n[1]-g[1],n[2]-g[2])
+				)
 				frl+=1
 				fr[frl],t[n.k]=ob,ob
 			end
 			if not ob.dead and ob.cfs>ncfs then
 				ob.cfs,ob.prev=ncfs,p
 			end
-			if ob.ctg<cl.ctg then
+			if ob.x<cl.x then
 				cl=ob
 			end
 		end,unpack(p))
