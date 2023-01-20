@@ -145,7 +145,7 @@ c=13]],p.x,p.y))
 	end)
 
 	for k,v in next,ais do
-		if upc==k and not units[k].dead then
+		if upc==k and units[k].alive then
 			ai_frame(v)
 		end
 	end
@@ -199,8 +199,7 @@ function _draw()
 				and u.disc
 			then
 				add(af,u)
-			elseif u.bldg
-				or u.dead then
+			elseif u.bldg or u.dead then
 				draw_unit(u)
 			else
 				add(bf,u)
@@ -1342,10 +1341,11 @@ function tick(u)
 		u.id%upcycle==upc,
 		u.x8,u.y8
 
-	if u.hp<=0 and not u.dead then
+	if u.hp<=0 and u.alive then
 		del(sel,u)
 		tot-=1
-		u.dead,u.farmer=typ.do
+		u.dead,u.farmer,u.alive=
+			typ.do
 		u.st=
 			p"t=dead",
 			typ.bldg and reg_bldg(u),
@@ -1439,7 +1439,7 @@ function tick(u)
 			if (e.ai!=u.ai or
 				typ.monk and e.dmgd and
 				not e.bldg) and
-				not e.dead and
+				e.alive and
 				d<=typ.los
 			then
 				if e.bldg then
@@ -1703,7 +1703,7 @@ function draw_unit(u)
 
 	camera(cx-ux,cy-uy)
 
-	if u.const and not u.dead then
+	if u.const and u.alive then
 		fillp"23130.5"
 		rect(-1,-1,w,h,
 			u==sel1 and 9 or 12)
@@ -1725,7 +1725,7 @@ function draw_unit(u)
 	sspr(sx,sy,w,h,0,0,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
-	if not u.dead and hpi>=2 then
+	if u.alive and hpi>=2 then
 		if typ.fire then
 			spr(247+f/20,w\3)
 		end
@@ -2120,7 +2120,7 @@ end
 function can_atk()
 	return sel1.typ.atk
 		and hunit
-		and not hunit.dead
+		and hunit.alive
 		and (not hunit.hu or
 			seltyp.monk and	
 			hunit.dmgd and not
@@ -2168,7 +2168,7 @@ function reg_bldg(b)
 	local typ,x,y=b.typ,b.x8,b.y8
 	local function reg(xx,yy)
 		s(bldgs,xx,yy,
-			not b.dead and b)
+			b.alive and b)
 		if b.dead then
 			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
@@ -2266,11 +2266,11 @@ conv=0]],_typ[_p],rnd"60"\1,ais))
 		local _ENV=u
 		max_hp=typ.hp/typ.const
 		id,ais,x,y,p,hp,const,
-			disc,prod,bldg=
+			disc,alive,prod,bldg=
 			x,y,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
-			_disc==1,
+			_disc==1,1,
 			_typ.prod or {},_typ.bldg
 	end
 	tot+=1
