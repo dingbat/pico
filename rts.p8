@@ -357,7 +357,7 @@ t=0]]
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,35"
 
-ant=p[[
+p[[var=ant
 idx=1
 spd=.286
 los=20
@@ -414,7 +414,7 @@ const=1
 tmap=-1
 d=0]]
 
-beetle=p[[
+p[[var=beetle
 idx=2
 spd=.19
 los=20
@@ -453,7 +453,7 @@ dir=1
 tmap=-1
 d=0]]
 
-spider=p[[
+p[[var=spider
 idx=3
 spd=.482
 los=30
@@ -491,7 +491,7 @@ dir=1
 tmap=-1
 d=0]]
 
-archer=p[[
+p[[var=archer
 idx=4
 spd=.343
 los=33
@@ -534,7 +534,7 @@ proj_s=52
 tmap=-1
 d=0]]
 
-warant=p[[
+p[[var=warant
 idx=5
 spd=.33
 los=25
@@ -572,7 +572,7 @@ dir=1
 tmap=-1
 d=0]]
 
-cat=p[[
+p[[var=cat
 idx=6
 spd=.2
 los=50
@@ -616,7 +616,7 @@ proj_s=56
 tmap=-1
 d=0]]
 
-queen=p[[
+p[[var=queen
 idx=7
 los=25
 hp=400
@@ -659,7 +659,7 @@ dir=-1
 tmap=-1
 d=61]]
 
-tower=p[[
+p[[var=tower
 idx=8
 los=30
 hp=352
@@ -700,7 +700,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-mound=p[[
+p[[var=mound
 idx=9
 los=5
 hp=100
@@ -730,7 +730,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-den=p[[
+p[[var=den
 idx=10
 los=10
 hp=250
@@ -762,7 +762,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-barracks=p[[
+p[[var=barracks
 idx=11
 los=10
 hp=200
@@ -794,7 +794,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-farm=p[[
+p[[var=farm
 idx=12
 los=1
 hp=48
@@ -826,7 +826,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-castle=p[[
+p[[var=castle
 idx=13
 los=45
 hp=640
@@ -907,7 +907,7 @@ dir=-1
 tmap=-1
 d=61]]
 
-mon=p[[
+p[[var=mon
 idx=25
 los=25
 hp=300
@@ -938,7 +938,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-monk=p[[
+p[[var=monk
 idx=26
 spd=.25
 los=45
@@ -2036,7 +2036,8 @@ function p(str,typ,x,y)
 				obj[k],o[k]=v,v end)
 		end
 	end)
-	add(obj.idx and typs,obj)
+	_ENV[tostr(obj.var)]=
+		add(obj.idx and typs,obj)
 	return obj
 end
 
