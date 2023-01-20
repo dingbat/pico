@@ -1387,7 +1387,8 @@ function tick(u)
 	local typ,targ,agg_d,agg_u=
 		u.typ,u.st.target,9999
 
-	box(u).onscr,u.upd,x8,y8=
+	box(u).ai,u.onscr,u.upd,x8,y8=
+		typ.lady or ais[u.p],
 		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
 		u.x8,u.y8
@@ -2074,8 +2075,6 @@ end
 
 function tile_unit(tx,ty)
 	return box(p([[
-ais=
-p=1
 hp=0
 max_hp=0
 const=1]],p[[w=8
@@ -2085,10 +2084,9 @@ end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,hu,ai,dmgd=
+	r,x8,y8,hu,dmgd=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,p==1,
-		typ.lady or ais[p],
 		hp<max_hp
 	k=x8|y8<<8
 	if not const then
@@ -2311,13 +2309,13 @@ lastp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]],_typ[_p],rnd"60"\1,ais))
+conv=0]],_typ[_p],rnd"60"\1))
 	do
 		local _ENV=u
 		max_hp=typ.hp/typ.const
-		id,ais,x,y,p,hp,const,
+		id,x,y,p,hp,const,
 			disc,alive,prod,bldg=
-			x,y,_x,_y,_p,
+			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,1,
