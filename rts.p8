@@ -24,9 +24,8 @@ function _update()
 		cy+=cvy
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
-		if btnp()<4 then
-			ai_diff+=tonum(btnp"1")-
-				tonum(btnp"0")
+		if btnp"0" or btnp"1" then
+			ai_diff+=btnp()^^-2
 			ai_diff%=5
 		end
 		if lclk then
@@ -34,7 +33,7 @@ function _update()
 			for k,r in inext,res do
 				r.pos,r.diff=
 					del(posidx,rnd(posidx)),
-					ai_diff%3+npl\1.5
+					split"1,2,3,2,3"[ai_diff+1]
 			end
 			foreach(split([[7,64,64
 1,49,64
@@ -1625,7 +1624,7 @@ function input()
 		if clk and buildable() then
 			sfx"1"
 			local b=unit(
-				to_build.typ.idx,
+				to_build.typ,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
 				unspl"1,1,1")
@@ -2039,9 +2038,11 @@ function p(str,typ,x,y)
 			foreach(obj,function(o)
 				obj[k],o[k]=v,v end)
 		end
+		if k=="idx" then
+			typs[v]=obj
+		end
 	end)
 	_ENV[tostr(obj.var)]=obj
-	add(obj.idx and typs,obj)
 	return obj
 end
 
@@ -2293,25 +2294,29 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local g,_ENV=_ENV,add(units,
+	local _typ=typs[t] or t
+	local u=add(units,
 		p([[dir=1
 lastp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]],typs[t][_p],rnd"60"\1))
-	max_hp=typ.hp/typ.const
-	id,x,y,p,hp,const,
-		disc,alive,prod,bldg=
-		x,_x,_y,_p,
-		min(_hp or 9999,max_hp),
-		max(_const)>0 and _const,
-		_disc==1,1,
-		typs[t].prod or {},typ.bldg
-	g.tot+=1
-	g.rest(g.box(_ENV))
-	if (bldg) g.reg_bldg(_ENV)
-	return _ENV
+conv=0]],_typ[_p],rnd"60"\1))
+	do
+		local _ENV=u
+		max_hp=typ.hp/typ.const
+		id,x,y,p,hp,const,
+			disc,alive,prod,bldg=
+			x,_x,_y,_p,
+			min(_hp or 9999,max_hp),
+			max(_const)>0 and _const,
+			_disc==1,1,
+			_typ.prod or {},typ.bldg
+	end
+	tot+=1
+	rest(box(u))
+	if (u.bldg) reg_bldg(u)
+	return u
 end
 
 function prod(u,b,m)
@@ -2985,7 +2990,7 @@ function ai_frame(ai)
 				res2.tot>=p and ai.safe then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
-					curr=unit(b.typ.idx,
+					curr=unit(b.typ,
 						x8+b.typ.w/2,
 						y8+b.typ.h/2,
 						2,1)
@@ -3105,6 +3110,8 @@ cartdata"eaoa1"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
+
+-->8
 
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
