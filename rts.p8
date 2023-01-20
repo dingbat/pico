@@ -344,8 +344,8 @@ t=0]]
 	res1,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
 		proj,bldgs,new_viz,dmap_st,
-		typs,heal,
-		ais,posidx,
+		typs,ais,
+		posidx,
 		cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
@@ -353,9 +353,21 @@ t=0]]
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
-		{},p"qty=.05",{},
+		{},{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,35"
+
+p[[var=heal
+qty=.05
+]]
+
+p[[var=ev
+ant=0
+queen=0
+spider=0
+seige=0
+bld=0
+]]
 
 p[[var=ant
 idx=1
@@ -1265,8 +1277,8 @@ tmap=512
 idx=23]],p[[
 portx=69
 porty=80]],function(_ENV)
-	qty+=10
-end,exviz),
+	bld+=10
+end,ev),
 	p([[
 t=40
 r=0
@@ -1478,7 +1490,7 @@ function tick(u)
 				typ.monk and e.dmgd and
 				not e.bldg) and
 				e.alive and
-				d<=typ.los
+				d<=typ.los+ev[u.p][typ.def]
 			then
 				if e.bldg then
 					d+=typ.seige and
@@ -1512,7 +1524,8 @@ end
 
 function update_viz(u)
 	if u.hu and u.upd then
-		local los=u.typ.los
+		local los=u.typ.los+
+			ev[u.p][u.typ.def]
 		local xo,yo,l=
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
@@ -1863,7 +1876,8 @@ function fight(u)
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
-		if typ.range>=d
+		if typ.range+
+			ev[u.p][typ.def]>=d
 			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
