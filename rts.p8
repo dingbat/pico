@@ -2853,29 +2853,25 @@ end
 
 function new()
 	init()
-	
-	res1.pos,res.p2.pos,res.p3.pos,
-	res.p2.diff,res.p3.diff=
-		del(posidx,rnd(posidx)),
-		del(posidx,rnd(posidx)),
-		rnd(posidx),
-		ai_diff+1,ai_diff+1	
+	npl=3
+	for k,r in inext,res do
+		r.pos,r.diff=
+			del(posidx,rnd(posidx)),
+			ai_diff+1
+	end	
 
-	foreach(split([[7,64,64,1
-7,64,64,2
-1,49,64,1
-1,77,59,1
-1,59,52,1
-5,61,76,1
-1,49,64,2
-1,77,59,2
-1,59,52,2
-5,61,76,2]],"\n"),
+	foreach(split([[7,64,64
+1,49,64
+1,77,59
+1,59,52
+5,61,76]],"\n"),
 	function(s)
-		local u,x,y,p=unspl(s)
-		local dx,dy=unspl(
-			stp[res[p].pos],":")
-		unit(u,x+dx,y+dy,p)
+		for p=1,npl do
+			local u,x,y=unspl(s)
+			local dx,dy=unspl(
+				stp[res[p].pos],":")
+			unit(u,x+dx,y+dy,p)
+		end
 	end)
 
 	ai_init()
@@ -2887,7 +2883,7 @@ function ai_init()
 	ais,hq,cx,cy={},units[1],
 		unspl(stp[res1.pos],":")
 
-	for i=2,nai do
+	for i=2,npl do
 		ais[i]=parse([[
 atkt=0
 boi=0
