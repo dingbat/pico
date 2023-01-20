@@ -315,9 +315,48 @@ function _draw()
 			and 185 or 187)) or 186)
 end
 -->8
---units
+--init
 
-function init_typs()
+function init()
+	poke(0x5f2d,3)
+	if stat"6"=="map" then
+		memcpy(unspl"0x2000,0x8000,0x1000")
+	else
+		reload()
+	end
+
+	music(unspl"0,0,7")
+	menuitem(3,"∧ resign",
+		function()hq.hp=0 end)
+
+	queue,exp,vcache,dmaps,
+	units,restiles,sel,ladys,
+		proj,bldgs,new_viz,dmap_st,
+		typs,heal,
+		res,loser,menu=
+		{},{},{},{},
+		{},{},{},{},
+		{},{},{},{d={}},
+		{},p"qty=.05",
+		p[[
+r=20
+g=10
+b=20
+p=4
+pl=10
+tot=4
+reqs=0
+diff=0
+techs=0
+t=0]]
+
+	res1,ais,posidx,
+	cf,selt,alert,ban,
+	amx,amy,tot=
+		res.p1,{},
+		split"1,2,3,4",
+		unspl"59,0,0,0,64,64,35"
+
 ant=p[[
 idx=1
 spd=.286
@@ -373,7 +412,7 @@ ant=1
 atksfx=10
 const=1
 tmap=-1
-do=0]]
+d=0]]
 
 beetle=p[[
 idx=2
@@ -412,7 +451,7 @@ unit=1
 atksfx=10
 dir=1
 tmap=-1
-do=0]]
+d=0]]
 
 spider=p[[
 idx=3
@@ -450,7 +489,7 @@ unit=1
 atksfx=10
 dir=1
 tmap=-1
-do=0]]
+d=0]]
 
 archer=p[[
 idx=4
@@ -493,7 +532,7 @@ proj_xo=-2
 proj_yo=0
 proj_s=52
 tmap=-1
-do=0]]
+d=0]]
 
 warant=p[[
 idx=5
@@ -531,7 +570,7 @@ unit=1
 atksfx=10
 dir=1
 tmap=-1
-do=0]]
+d=0]]
 
 cat=p[[
 idx=6
@@ -575,7 +614,7 @@ proj_xo=1
 proj_yo=-4
 proj_s=56
 tmap=-1
-do=0]]
+d=0]]
 
 queen=p[[
 idx=7
@@ -618,7 +657,7 @@ units=1
 queen=1
 dir=-1
 tmap=-1
-do=61]]
+d=61]]
 
 tower=p[[
 idx=8
@@ -659,7 +698,7 @@ proj_s=48
 breq=1
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 mound=p[[
 idx=9
@@ -689,7 +728,7 @@ drop=5
 breq=2
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 den=p[[
 idx=10
@@ -721,7 +760,7 @@ idle=1
 mil=1
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 barracks=p[[
 idx=11
@@ -753,7 +792,7 @@ idle=1
 mil=1
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 farm=p[[
 idx=12
@@ -785,7 +824,7 @@ bldg=farm
 breq=16
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 castle=p[[
 idx=13
@@ -827,7 +866,7 @@ units=1
 mil=1
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 p[[
 idx=14
@@ -866,7 +905,7 @@ unit=1
 atksfx=10
 dir=-1
 tmap=-1
-do=61]]
+d=61]]
 
 mon=p[[
 idx=25
@@ -897,7 +936,7 @@ breq=64
 mil=1
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 monk=p[[
 idx=26
@@ -940,7 +979,7 @@ unit=1
 atksfx=63
 dir=-1
 tmap=-1
-do=0]]
+d=0]]
 
 ant.prod={
 	p([[
@@ -1344,8 +1383,7 @@ function tick(u)
 	if u.hp<=0 and u.alive then
 		del(sel,u)
 		tot-=1
-		u.dead,u.farmer,u.alive=
-			typ.do
+		u.dead,u.farmer,u.alive=typ.d
 		u.st=
 			p"t=dead",
 			typ.bldg and reg_bldg(u),
@@ -2167,8 +2205,7 @@ end
 function reg_bldg(b)
 	local typ,x,y=b.typ,b.x8,b.y8
 	local function reg(xx,yy)
-		s(bldgs,xx,yy,
-			b.alive and b)
+		s(bldgs,xx,yy,b.alive and b)
 		if b.dead then
 			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
@@ -2828,49 +2865,79 @@ bldbld=.1]],
 	unspl"2,-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 -->8
---init
+--save
 
-function init()
-	poke(0x5f2d,3)
-	if stat"6"=="map" then
-		memcpy(unspl"0x2000,0x8000,0x1000")
-	else
-		reload()
+menuitem(1,"⌂ save",function()
+	if (menu) return
+	local ptr=campal()
+	banner(2,"savefile","drag+drop to load \|f\^x1 ")
+	local function draw(v,...)
+		if v then
+			for i=0,8,4 do
+				pset(ptr%128,ptr\128,
+					v>>i&0xf)
+				ptr+=1
+			end
+			draw(...)
+		end
 	end
+	for x=0,47 do
+		for y=0,31 do
+			draw(mget(x,y)|g(exp,x,y,0))
+		end
+	end
+	foreach(resk,function(k)
+		foreach(res,function(r)
+			draw(r[k])
+		end)
+	end)
+	draw(#units)
+	foreach(units,function(_ENV)
+		draw(typ.idx,x,y,p,
+			max(const),max(disc),hp)
+	end)
+	extcmd("screen",1)
+end)
 
-	music(unspl"0,0,7")
-	menuitem(3,"∧ resign",
-		function()hq.hp=0 end)
-
-	queue,exp,vcache,dmaps,
-	units,restiles,sel,ladys,
-		proj,bldgs,new_viz,dmap_st,
-		typs,heal,
-		res,loser,menu=
-		{},{},{},{},
-		{},{},{},{},
-		{},{},{},{d={}},
-		{},p"qty=.05",
-		p[[
-r=20
-g=10
-b=20
-p=4
-pl=10
-tot=4
-reqs=0
-diff=0
-techs=0
-t=0]]
-
-	init_typs()
-
-	res1,ais,posidx,
-	cf,selt,alert,ban,
-	amx,amy,tot=
-		res.p1,{},
-		split"1,2,3,4",
-		unspl"59,0,0,0,64,64,35"
+function loadgame()
+	init()
+	pal()
+	loaded,ptr=
+		serial(unspl"0x802,0x9000,0x4000"),
+		0x9004
+	local function px(n)
+		n-=1
+		if n>=0 then
+			local v1,v2,v3=peek(ptr,3)
+			ptr+=3
+			return v1|v2<<4|v3<<8,px(n)
+		end
+	end
+	for x=0,47 do
+		for y=0,31 do
+			local v=px"1"
+			if (v>127) s(exp,x,y,128)
+			mset(x,y,v&0x7f)
+		end
+	end
+	foreach(resk,function(k)
+		foreach(res,function(r)
+			r[k]=px"1"
+		end)
+	end)
+	for i=1,px"1" do
+		unit(px"7")
+	end
+	local techs=res1.techs
+	foreach(typs,function(_ENV)
+		if techs|tmap==techs then
+			x(y.p1)
+			up,done=up and 0,not up
+			typ.up=up
+		end
+	end)
+	npl+=res.p3.diff\1
+	ai_init()
 end
 -->8
 --ai
@@ -3030,81 +3097,6 @@ function ai_frame(ai)
 		ai.p3,ai.p2=ai.p2,{}
 	end
 	mvg(ai.p3,hq.x,hq.y,"atk")
-end
--->8
---save
-
-menuitem(1,"⌂ save",function()
-	if (menu) return
-	local ptr=campal()
-	banner(2,"savefile","drag+drop to load \|f\^x1 ")
-	local function draw(v,...)
-		if v then
-			for i=0,8,4 do
-				pset(ptr%128,ptr\128,
-					v>>i&0xf)
-				ptr+=1
-			end
-			draw(...)
-		end
-	end
-	for x=0,47 do
-		for y=0,31 do
-			draw(mget(x,y)|g(exp,x,y,0))
-		end
-	end
-	foreach(resk,function(k)
-		foreach(res,function(r)
-			draw(r[k])
-		end)
-	end)
-	draw(#units)
-	foreach(units,function(_ENV)
-		draw(typ.idx,x,y,p,
-			max(const),max(disc),hp)
-	end)
-	extcmd("screen",1)
-end)
-
-function loadgame()
-	init()
-	pal()
-	loaded,ptr=
-		serial(unspl"0x802,0x9000,0x4000"),
-		0x9004
-	local function px(n)
-		n-=1
-		if n>=0 then
-			local v1,v2,v3=peek(ptr,3)
-			ptr+=3
-			return v1|v2<<4|v3<<8,px(n)
-		end
-	end
-	for x=0,47 do
-		for y=0,31 do
-			local v=px"1"
-			if (v>127) s(exp,x,y,128)
-			mset(x,y,v&0x7f)
-		end
-	end
-	foreach(resk,function(k)
-		foreach(res,function(r)
-			r[k]=px"1"
-		end)
-	end)
-	for i=1,px"1" do
-		unit(px"7")
-	end
-	local techs=res1.techs
-	foreach(typs,function(_ENV)
-		if techs|tmap==techs then
-			x(y.p1)
-			up,done=up and 0,not up
-			typ.up=up
-		end
-	end)
-	npl+=res.p3.diff\1
-	ai_init()
 end
 -->8
 cartdata"eeooty_aoa1"
