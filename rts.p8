@@ -1308,15 +1308,15 @@ agg=1]]
 end
 
 function mvg(units,x,y,agg,frc)
-	local lspd=999
+	local l=999
 	foreach(units,function(u)
 		if frc or u.st.rest then
 			move(u,x,y,agg)
 		end
-		lspd=min(u.typ.spd,lspd)
+		l=min(u.typ.spd,l)
 	end)
 	foreach(units,function(_ENV)
-		st.spd,grp=lspd,agg end)
+		st.spd,grp=l,agg end)
 end
 
 function move(u,x,y,agg)
@@ -1740,7 +1740,7 @@ function draw_unit(u)
 		u.typ,u.st,
 		u.res and u.res.typ or "_"
 
-	local fw,w,h,stt,hpi,ux,uy=
+	local fw,w,h,stt,ihp,ux,uy=
 		typ.fw,typ.w,typ.h,
 		st.wayp and "move" or st.t,
 		u.max_hp/u.hp,unpack(u.r)
@@ -1777,12 +1777,12 @@ function draw_unit(u)
 	sspr(sx,sy,w,h,0,0,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
-	if u.alive and hpi>=2 then
+	if u.alive and ihp>=2 then
 		if typ.fire then
 			spr(247+f/20,w\3)
 		end
 		line(w,unspl"-1,0,-1,8")
-		line(w\hpi,-1,11)
+		line(w\ihp,-1,11)
 	end
 end
 
@@ -2119,16 +2119,16 @@ end
 
 --credit on bbs
 function dist(dx,dy)
-	local maskx,masky=dx>>31,dy>>31
-	local a0,b0=(dx+maskx)^^maskx,
-		(dy+masky)^^masky
+	local x,y=dx>>31,dy>>31
+	local a0,b0=(dx+x)^^x,
+		(dy+y)^^y
 	return a0>b0 and
 		a0*.9609+b0*.3984 or
 			b0*.9609+a0*.3984
 end
 
 function surr(fn,x,y,n,ig_acc)
-	local n,exist=n or 1
+	local n,e=n or 1
 	for dx=-n,n do
 	for dy=-n,n do
 		local xx,yy=x+dx,y+dy
@@ -2137,7 +2137,7 @@ function surr(fn,x,y,n,ig_acc)
 			xx<mapw and yy<maph and
 			(ig_acc or acc(xx,yy))
 		then
-			if (dx|dy!=0) exist=1
+			if (dx|dy!=0) e=1
 			if fn then
 				fn{
 					xx,yy,
@@ -2148,7 +2148,7 @@ function surr(fn,x,y,n,ig_acc)
 		end
 	end
 	end
-	return exist
+	return e
 end
 
 function avail_farm()
@@ -2342,21 +2342,21 @@ end
 --paths
 
 function dmap_find(u,k)
-	local x,y,dmap,wayp,lowest=
+	local x,y,dmap,wayp,l=
 		u.x8,
 		u.y8,
 		dmaps[k],
 		{},9
 	if (not dmap) return
-	while lowest>=1 do
-		local orig=max(1,g(dmap,x,y,9))
+	while l>=1 do
+		local o=max(1,g(dmap,x,y,9))
 		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
-			if w<lowest then
-				lowest,x,y=w,unpack(t)
+			if w<l then
+				l,x,y=w,unpack(t)
 			end
 		end,x,y,1,1)
-		if (lowest>=orig) return
+		if (l>=o) return
 		add(wayp,{x*8+3,y*8+3})
 	end
 	return wayp,x,y
@@ -2430,9 +2430,9 @@ function get_wayp(u,x,y,tol)
 	end
 	if u.typ.unit then
 		local dest,dest_d=nearest(x,y)
-		local wayp,exists=as(
+		local wayp,e=as(
 			nearest(u.x,u.y),dest)
-		if exists and
+		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
 			add(wayp,{x,y})
@@ -2465,8 +2465,8 @@ cfs=0]],st,32767),{},{}
 	while frl>0 do
 		local cost,iom=32767
 		for i=1,frl do
-			local temp=fr[i].cfs+fr[i].x
-			if (temp<=cost) iom,cost=i,temp
+			local t=fr[i].cfs+fr[i].x
+			if (t<=cost) iom,cost=i,t
 		end
 		sh=fr[iom]
 		fr[iom],sh.dead=fr[frl],1
