@@ -47,7 +47,7 @@ function _update()
 					unit(u,x+dx,y+dy,p)
 				end
 			end)
-			ai_init()
+			start()
 		else
 			return
 		end
@@ -2947,12 +2947,12 @@ function loadgame()
 		end
 	end)
 	npl+=res.p3.diff\1
-	ai_init()
+	start()
 end
 -->8
 --ai
 
-function ai_init()	
+function start()	
 	hq,cx,cy=units[1],
 		unspl(stp[res1.pos],":")
 	
@@ -3109,50 +3109,11 @@ function ai_frame(ai)
 	mvg(ai.p3,hq.x,hq.y,"atk")
 end
 -->8
-cartdata"eeooty_aoa1"
+cartdata"eaoa1"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
--->8
-tostr[[[[]]
-ai_debug=true
-srand"12"
-if ai_debug then
-	_update60=_update
-	_draw_map,_dr,_pr,_resbar=
-		draw_map,_draw,print_res,
-		resbar
-	function draw_map(o,y)
-		if not ai_debug or o==0 then
-			_draw_map(o,y)
-		end
-	end
-	function _draw()
-		_dr()
-		if ai_debug and res1 then
-		camera()
-		local secs=res1.t\1%60
-		?res.p2.diff,60,107,9
-		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
-		?bgrat,80,114,3
-		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
-		camera()
-		end
-	end
-	function print_res(...)
-		if (ai_debug) res1=res.p2
-		local x=_pr(...)
-		res1=res[1]
-		return x
-	end
-	function resbar(...)
-		if (ai_debug) res1=res.p2
-		_resbar(...)
-		res1=res[1]
-	end
-end
---]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b350000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
