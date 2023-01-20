@@ -70,8 +70,8 @@ function _update()
 		return
 	end
 
-	if to_build then
-		to_build.x,to_build.y=
+	if to_bld then
+		to_bld.x,to_bld.y=
 			mx8*8,my8*8
 	end
 
@@ -282,22 +282,22 @@ function _draw()
 	if hlv[4] then
 		circ(unpack(hlv))
 	end
-	if to_build then
-		camera(cx-to_build.x,
-			cy-to_build.y)
-		pspl(buildable() or
+	if to_bld then
+		camera(cx-to_bld.x,
+			cy-to_bld.y)
+		pspl(bldable() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
 			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"
-			rect(to_build.typ.fw,
-				to_build.typ.fh,
+			rect(to_bld.typ.fw,
+				to_bld.typ.fh,
 				unspl"-1,-1,3")
 			fillp()
 		end
-		local _ENV=to_build.typ
+		local _ENV=to_bld.typ
 		sspr(rest_x,rest_y,fw,h)
 		pal()
 	end
@@ -307,8 +307,8 @@ function _draw()
 		hovbtn and pset(unspl"-1,4,5")
 			and 188 or
 		sel1 and sel1.hu and
-		((to_build or
-			can_build() or
+		((to_bld or
+			can_bld() or
 			can_renew"1") and 190 or
 		can_gather() and 189 or
 		can_drop() and 191 or
@@ -407,10 +407,10 @@ gather_x=8
 gather_y=8
 gather_fr=2
 gather_fps=15
-build_x=40
-build_y=8
-build_fr=2
-build_fps=15
+bld_x=40
+bld_y=8
+bld_fr=2
+bld_fps=15
 farm_x=32
 farm_y=8
 farm_fr=2
@@ -1327,9 +1327,9 @@ function move(u,x,y,agg)
 	}
 end
 
-function build(u,b)
+function bld(u,b)
 	u.st,u.res={
-		t="build",
+		t="bld",
 		target=b,
 		wayp=get_wayp(u,b.x,b.y),
 	}
@@ -1628,21 +1628,21 @@ function input()
 				cam()
 			end
 		end
-		if (clk) to_build=nil
+		if (clk) to_bld=nil
 		return
 	end
 
-	if to_build then
-		if clk and buildable() then
+	if to_bld then
+		if clk and bldable() then
 			sfx"1"
 			local b=unit(
-				to_build.typ,
-				to_build.x+to_build.typ.w\2,
-				to_build.y+to_build.typ.h\2,
+				to_bld.typ,
+				to_bld.x+to_bld.typ.w\2,
+				to_bld.y+to_bld.typ.h\2,
 				unspl"1,1,1")
-			foreachsel(build,b)
-			pay(to_build,-1,res1)
-			b.cost,to_build,selx=to_build
+			foreachsel(bld,b)
+			pay(to_bld,-1,res1)
+			b.cost,to_bld,selx=to_bld
 		end
 		return
 	end
@@ -1679,9 +1679,9 @@ function input()
 				foreachsel(gather,mx8,my8)
 			end
 
-		elseif can_build() then
+		elseif can_bld() then
 			sfx"0"
-			foreachsel(build,hbld)
+			foreachsel(bld,hbld)
 			hilite(hbld)
 
 		elseif can_atk() then
@@ -1801,8 +1801,8 @@ function update_unit(u)
 	end
 	if st.active then
 		if (st.farm) farmer(u)
-		if t=="build" and cf%30==0 then
-			buildrepair(u)
+		if t=="bld" and cf%30==0 then
+			bldrepair(u)
 		end
 		if (t=="gather") mine(u)
 	elseif targ and
@@ -1922,7 +1922,7 @@ function fight(u)
 	end
 end
 
-function buildrepair(u)
+function bldrepair(u)
 	local _ENV,r,g=
 		u.st.target,res[u.p],_ENV
 	if const then
@@ -2181,7 +2181,7 @@ function can_atk()
 		g(viz,mx8,my8,hunit.disc)
 end
 
-function can_build()
+function can_bld()
 	return hbld.hu and
 		hbld.hp<hbld.typ.hp and
 		seltyp.ant
@@ -2204,14 +2204,14 @@ function acc(x,y,strict)
 			and (const or typ.farm))
 end
 
-function buildable()
-	local x,y=to_build.x/8,
-		to_build.y/8
+function bldable()
+	local x,y=to_bld.x/8,
+		to_bld.y/8
 
 	return	acc(x,y,1) and
-		(to_build.typ.h8 or
+		(to_bld.typ.h8 or
 			acc(x,y+1,1)) and
-		(to_build.typ.w8 or
+		(to_bld.typ.w8 or
 			acc(x+1,y,1) and
 			acc(x+1,y+1,1))
 end
@@ -2615,7 +2615,7 @@ portf=9]],
 						not q or
 						q.typ==b and q.qty<9) then
 						if b.typ.bldg then
-							to_build=b!=to_build and b
+							to_bld=b!=to_bld and b
 							return
 						end
 						sfx"2"
@@ -3068,7 +3068,7 @@ function ai_frame(ai)
 			end
 			if bldg and u.dmgd or u.const
 			then
-				go(build)
+				go(bld)
 			elseif typ.farm and
 				not u.const and
 				not u.farmer then
