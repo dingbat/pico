@@ -401,3 +401,18 @@ for k,r in inext,res do
 			del(posidx,rnd(posidx)),
 			ai_diff+1
 	end	
+
+	alt menu pal
+	pspl"0,5,3,13,13,13,6,2,6,5,13,13,1,0,5"
+
+
++               sspr(x,unspl"0,16,8,25,12,32,16")
++               sspr(x,unspl"0,16,8,74,12,32,16,1")
+                pspl"1,0,3,4,4,6,7,8,9,10,11,12,13,14,15"
++               sspr(x,unspl"0,16,8,25,11,32,16")
+                pspl"2"
++               sspr(x,unspl"0,16,8,74,11,32,16,1")
++               
++               ?"\^j58\-j\f0\^w\^tage of ants\^j58\|f\-i\f7age of ants\^-w\^-t\^jcg\-h\f0◀\-z\-p▶\^jad\|h\f0ai difficulty:\^jad\f6ai difficulty:\^jcn\-h\f0◀\-z\-p▶\^jck\-h\|h\f0ai count:\^jck\-h\f6ai count:\^j7q\f9\#0 press ❎ to start \^-#\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\0"
++               ?"\^jcg\-h\|f\fa◀\-z\-p▶"
++               ?"\^jcn\-h\|f\f6◀\-z\-p▶\^jeg\-j\0"

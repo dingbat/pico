@@ -25,15 +25,16 @@ function _update()
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
 		if btnp()<4 then
-			ai_diff-=btnp()
-			ai_diff%=3
+			ai_diff+=tonum(btnp"1")-
+				tonum(btnp"0")
+			ai_diff%=5
 		end
 		if lclk then
 			init()
 			for k,r in inext,res do
 				r.pos,r.diff=
 					del(posidx,rnd(posidx)),
-					ai_diff+1
+					ai_diff%3+npl\1.5
 			end
 			foreach(split([[7,64,64
 1,49,64
@@ -184,8 +185,9 @@ function _draw()
 		pspl"2"
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcj\-h\f0◀\-z\-p▶\^jcj\|f\f6\-h◀\-z\-p▶\^jag\|h\f0ai difficulty:\^jag\fcai difficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
-		?split"\f0easy\-0\|f\fbeasy,\f0\-cnormal\-0\-8\|f\fanormal,\f0hard\-0\|f\fehard"[ai_diff+1]
+		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcg\-e\|h\f0difficulty:\^jcg\-e\fcdifficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
+		camera(split"8,12,8,18,14"[ai_diff+1])
+		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\fe2 normals,\f02 hards\-0\-4\|f\f82 hards"[ai_diff+1].." \|h\f0▶\|f\-c\f7▶"
 		return
 	end
 
@@ -341,7 +343,7 @@ diff=0
 techs=0
 t=0]]
 
-	res1,dq,exp,vcache,dmaps,
+	res1,npl,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
 		proj,bldgs,new_viz,dmap_st,
 		typs,ais,
@@ -349,7 +351,7 @@ t=0]]
 		cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
-		res.p1,
+		res.p1,ai_diff\3+2,
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
@@ -2782,7 +2784,7 @@ pspl,rndspl,unspl,spldeli,campal=
 	comp(camera,pal)
 
 unl,unspr,stp,resk,
-	npl,hlt,ai_diff,action,
+	hlt,ai_diff,action,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2791,7 +2793,7 @@ unl,unspr,stp,resk,
 	comp(spr,unspl),
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos",
-	unspl"2,-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 p[[
 var=rescol
