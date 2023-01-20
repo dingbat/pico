@@ -356,7 +356,7 @@ t=0]]
 		{},p"qty=.05",{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,35"
-		
+
 p[[var=ant
 idx=1
 spd=.286
@@ -1374,7 +1374,7 @@ end
 function tick(u)
 	local typ,targ,agg_d,agg_u=
 		u.typ,u.st.target,9999
-	
+
 	box(u).onscr,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
@@ -1471,7 +1471,7 @@ function tick(u)
 	end
 
 	if u.upd and u.st.agg and
-	 typ.atk then
+		typ.atk then
 		for e in all(units) do
 			local d=dist(e.x-u.x,e.y-u.y)
 			if (e.ai!=u.ai or
@@ -2151,7 +2151,7 @@ function can_gather()
 	local f=fget(mget(mx8,my8))
 	return (seltyp.ant and
 		(f&2==2 or avail_farm())
- 	or seltyp.monk==f)
+		or seltyp.monk==f)
 		and g(exp,mx8,my8)
 		and surr(nil,mx8,my8)
 end
@@ -2161,7 +2161,7 @@ function can_atk()
 		and hunit
 		and hunit.alive
 		and (not hunit.hu or
-			seltyp.monk and	
+			seltyp.monk and
 			hunit.dmgd and not
 			hunit.bldg)
 		and
@@ -2372,8 +2372,7 @@ function dmap()
 			q.c+=1
 			q.typ,q.p2=q.p2,{}
 			if q.c==9 then
-				dmaps[q.x]=
-					deli(dq,1).p1
+				dmaps[q.x]=deli(dq,1).p1
 			end
 		else
 			local open,f={},p[[r=2
@@ -2395,11 +2394,7 @@ b=4]][q]
 					add(open,t).k=i
 				end
 			end
-			dq[1]=p(
-				"c=0",
-				open,
-				q
-			)
+			dq[1]=p("c=0",open,q)
 		end
 	end
 end
@@ -2952,14 +2947,14 @@ end
 -->8
 --ai
 
-function start()	
+function start()
 	hq,cx,cy=units[1],
 		unspl(stp[res1.pos],":")
-	
+
 	for i=2,npl do
 		ais[i]=p("boi=0",i)
 	end
-	
+
 	make_dmaps()
 end
 
@@ -2975,7 +2970,7 @@ function ai_frame(ai)
 	avail,nxtres,miners,
 		ants,res2,uhold=
 		{},{},{},0,res[ai.typ]
-	
+
 	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
 		local x,y=
@@ -3047,10 +3042,10 @@ function ai_frame(ai)
 			end
 		end
 	end)
-	
+
 	bal=(#miners-count(miners,"r"))
 		\bgrat-count(miners,"g")
-		
+
 	foreach(units,function(u)
 		local function go(fn)
 			if not u.w or
