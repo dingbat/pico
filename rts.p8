@@ -1719,7 +1719,7 @@ end
 --unit
 
 function draw_unit(u)
-	local typ,st,res_typ=
+	local typ,st,r=
 		u.typ,u.st,
 		u.res and u.res.typ or "_"
 
@@ -1729,11 +1729,9 @@ function draw_unit(u)
 		u.max_hp/u.hp,unpack(u.r)
 
 	local sx,sy,ufps,fr,f,selc=
-		typ[stt.."_x"]+
-			resoffx[res_typ]+
+		typ[stt.."_x"]+resx[r]+
 			u.sproff\8*8,
-		typ[stt.."_y"]+
-			resoffy[res_typ],
+		typ[stt.."_y"]+resy[r],
 		typ[stt.."_fps"],
 		typ[stt.."_fr"],
 		u.dead or (cf-u.id)%60,
@@ -2818,14 +2816,14 @@ e19=4
 e33=13]]
 
 p[[
-var=resoffx
+var=resx
 _=0
 r=16
 g=0
 b=16]]
 
 p[[
-var=resoffy
+var=resy
 _=0
 r=0
 g=4
