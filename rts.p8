@@ -129,7 +129,9 @@ c=13]],p.x,p.y))
 			or {}
 	end)
 
-	if (upc==0) ai_frame()
+	for k,v in next,ais do
+		if (upc==k) ai_frame(v)
+	end
 end
 
 function banner(a,t,subt)
@@ -1949,14 +1951,16 @@ end
 -->8
 --utils
 
-function p(str,typ,x,y)
+function p(str,typ,x,y,z)
 	local p1,p2,p3={},{},{}
 	local obj={p1,p2,p3,p2,
 		p1=p1,
 		p2=p2,
+		p3=p3,
 		typ=typ,
 		x=x,
-		y=y}
+		y=y,
+		z=z}
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
@@ -2005,7 +2009,7 @@ function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8,hu,ai,dmgd=
 		{x-w2,y-h2,x+w2,y+h2},
-		x\8,y\8,p==1,p==2,
+		x\8,y\8,p==1,ais[p],
 		hp<max_hp
 	k=x8|y8<<8
 	if not const then
@@ -2839,10 +2843,10 @@ t=0]]
 
 	init_typs()
 
-	res1,posidx,
+	res1,ais,posidx,
 	cf,selt,alert,ban,
-	amx,amy,
-		res.p1,
+	amx,amy=
+		res.p1,{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64"
 end
@@ -2850,8 +2854,8 @@ end
 function new()
 	init()
 	
-	res1.pos,res.p2.pos,res[3].pos,
-	res.p2.diff,res[3].diff=
+	res1.pos,res.p2.pos,res.p3.pos,
+	res.p2.diff,res.p3.diff=
 		del(posidx,rnd(posidx)),
 		del(posidx,rnd(posidx)),
 		rnd(posidx),
@@ -2883,39 +2887,28 @@ function ai_init()
 	ais,hq,cx,cy={},units[1],
 		unspl(stp[res1.pos],":")
 
-	for i=2,nai+1 do
-		add(ais,parse(i,[[
+	for i=2,nai do
+		ais[i]=parse([[
 atkt=0
 boi=0
-]]).rz=res[i]
+]],i,{},{},{})
 	end
 	
 	make_dmaps()
 end
 
-function merge(o1,o2,keys)
-	foreach(keys,function(k)
-		o2[k]=o1[k]
-	end)
-end
-
-ai_keys=
-	split"x,y,z,atkt,boi,safe,rz"
-
 function ai_frame(ai)
-	merge(ai,_ENV,ai_keys)
-
-	if (t6) safe=1
+	if (t6) ai.safe=1
 	avail,nxtres,miners,
-		ants,uhold=
-		{},{},{},0
+		ants,uhold,res2=
+		{},{},{},0,res[ai.typ]
 
-	for i=0,boi,2 do
+	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
 		local x,y=
-			peek(off+rz.pos*768,2)
+			peek(off+res2.pos*768,2)
 		local curr,x8,y8,p,pid=
-			boi==i,
+			ai.boi==i,
 			x*8,y*8,
 			peek(off,2)
 		local r,b,bld=
@@ -2924,9 +2917,9 @@ function ai_frame(ai)
 		if b then
 			curr=curr and bld and bld.hu
 			if not bld and
-				rz.tot>=p and safe then
-				if can_pay(b,rz) then
-					pay(b,-1,ez)
+				res2.tot>=p and ai.safe then
+				if can_pay(b,res2) then
+					pay(b,-1,res2)
 					curr=unit(b.typ,
 						x8+b.typ.w/2,
 						y8+b.typ.h/2,
@@ -2937,25 +2930,25 @@ function ai_frame(ai)
 			end
 		else
 			if pid>90 then
-				if (rz.diff<=p) break
+				if (res2.diff<=p) break
 				nxtres[r]=nxtres[r] or
 					g(dmaps[r] or {},x,y) and
 					{x8,y8}
 			elseif curr then
 				if pid==10 then
-					if not loaded then
+					if not loaded and ai.typ==2 then
 						unit(p,x8,y8,4)
 					end
 				elseif pid==11 then
 					bgrat=split"2.75,2.35,2"[p]
-				elseif rz.diff>=p then
+				elseif res2.diff>=p then
 					typs[pid].x(
 						typs[pid].y[ai.typ])
 				end
 			end
 		end
 		if curr then
-			boi+=2
+			ai.boi+=2
 		end
 	end
 
@@ -2964,14 +2957,12 @@ function ai_frame(ai)
 		\bgrat-count(miners,"g")
 	foreach(units,ai_unit2)
 
-	if #y>=rz.diff*5 and
-		safe and t()-atkt>split"180,0,0"[rz.diff]
+	if #ai.y>=res2.diff*5 and
+		ai.safe and t()-ai.atkt>split"180,0,0"[res2.diff]
 	then
-		z,y,atkt=y,{},t()
+		ai.z,ai.y,atkt=ai.y,{},t()
 	end
-	mvg(z,hq.x,hq.y,"atk")
-	
-	merge(_ENV,ai,ai_keys)
+	mvg(ai.z,hq.x,hq.y,"atk")
 end
 
 function miner(u,r)
@@ -2995,9 +2986,9 @@ function ai_unit1(u)
 			if u.dead then
 				del(u.sqd,u)
 			elseif not u.sqd then
-				u.sqd=(#x>#y or
+				u.sqd=(#ai.x>#ai.y or
 					u.typ.seige) and
-					y or x
+					ai.y or ai.x
 				add(u.sqd,u)
 			end
 		end
@@ -3032,23 +3023,23 @@ function ai_unit2(u)
 			go(gofarm)
 		elseif
 			typ.queen and
-			ants<rz.diff*12 or
+			ants<res2.diff*12 or
 			typ.mil and
-			rz.p<rz.diff*26
+			res2.p<res2.diff*26
 		then
 			local b,hold=u.prod[u.lastp]
 			foreach(split"r,g,b",function(k)
 				hold=hold or uhold and
 					b[k]!=0 and
-					rz[k]-b[k]<uhold[k]
+					res2[k]-b[k]<uhold[k]
 			end)
 			if not u.q and not hold and
-				can_pay(b,rz) then
+				can_pay(b,res2) then
 				queue_prod(u,b,
-					split"3,1,1"[rz.diff])
+					split"3,1,1"[res2.diff])
 				u.lastp%=typ.units
 				u.lastp+=1
-				rz.tot+=1
+				res2.tot+=1
 			end
 		end
 	end
@@ -3056,81 +3047,81 @@ end
 
 function ai_dmg(u)
 	if u.ai and u.grp!="atk" then
-		safe=mvg(x,u.x,u.y,1)
+		u.ai.safe=mvg(x,u.x,u.y,1)
 	end
 end
 
 -->8
---save
-
-menuitem(1,"⌂ save",function()
-	if (menu) return
-	local ptr=0
-	campal()
-	local function draw(v,...)
-		if v then
-			for i=0,8,4 do
-				pset(ptr%128,ptr\128,
-					v>>i&0xf)
-				ptr+=1
-			end
-			draw(...)
-		end
-	end
-	for x=0,47 do
-		for y=0,31 do
-			draw(mget(x,y)|g(exp,x,y,0))
-		end
-	end
-	foreach(resk,function(k)
-		draw(res1[k],res.p2[k],res[3][k])
-	end)
-	draw(#units)
-	foreach(units,function(_ENV)
-		draw(typ.idx,x,y,p,
-			max(const),max(disc),hp)
-	end)
-	banner(2,"savefile","drag+drop to load \|f\^x1 ")
-	extcmd("screen",1)
-end)
-
-function loadgame()
-	init()
-	pal()
-	loaded,ptr=
-		serial(unspl"0x802,0x9000,0x4000"),
-		0x9004
-	local function px(n)
-		n-=1
-		if n>=0 then
-			local v1,v2,v3=peek(ptr,3)
-			ptr+=3
-			return v1|v2<<4|v3<<8,px(n)
-		end
-	end
-	for x=0,47 do
-		for y=0,31 do
-			local v=px"1"
-			if (v>127) s(exp,x,y,128)
-			mset(x,y,v&0x7f)
-		end
-	end
-	foreach(resk,function(k)
-		res1[k],res.p2[k],res[3][k]=px"2"
-	end)
-	for i=1,px"1" do
-		unit(px"7")
-	end
-	local techs=res1.techs
-	foreach(typs,function(_ENV)
-		if techs|tmap==techs then
-			x(y.p1)
-			up,done=up and 0,not up
-			typ.up=up
-		end
-	end)
-	ai_init()
-end
+----save
+--
+--menuitem(1,"⌂ save",function()
+--	if (menu) return
+--	local ptr=0
+--	campal()
+--	local function draw(v,...)
+--		if v then
+--			for i=0,8,4 do
+--				pset(ptr%128,ptr\128,
+--					v>>i&0xf)
+--				ptr+=1
+--			end
+--			draw(...)
+--		end
+--	end
+--	for x=0,47 do
+--		for y=0,31 do
+--			draw(mget(x,y)|g(exp,x,y,0))
+--		end
+--	end
+--	foreach(resk,function(k)
+--		draw(res1[k],res.p2[k],res.p3[k])
+--	end)
+--	draw(#units)
+--	foreach(units,function(_ENV)
+--		draw(typ.idx,x,y,p,
+--			max(const),max(disc),hp)
+--	end)
+--	banner(2,"savefile","drag+drop to load \|f\^x1 ")
+--	extcmd("screen",1)
+--end)
+--
+--function loadgame()
+--	init()
+--	pal()
+--	loaded,ptr=
+--		serial(unspl"0x802,0x9000,0x4000"),
+--		0x9004
+--	local function px(n)
+--		n-=1
+--		if n>=0 then
+--			local v1,v2,v3=peek(ptr,3)
+--			ptr+=3
+--			return v1|v2<<4|v3<<8,px(n)
+--		end
+--	end
+--	for x=0,47 do
+--		for y=0,31 do
+--			local v=px"1"
+--			if (v>127) s(exp,x,y,128)
+--			mset(x,y,v&0x7f)
+--		end
+--	end
+--	foreach(resk,function(k)
+--		res1[k],res.p2[k],res.p3[k]=px"2"
+--	end)
+--	for i=1,px"1" do
+--		unit(px"7")
+--	end
+--	local techs=res1.techs
+--	foreach(typs,function(_ENV)
+--		if techs|tmap==techs then
+--			x(y.p1)
+--			up,done=up and 0,not up
+--			typ.up=up
+--		end
+--	end)
+--	ai_init()
+--end
 -->8
 cartdata"eeooty_aoa1"
 
