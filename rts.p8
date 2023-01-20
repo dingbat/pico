@@ -361,14 +361,6 @@ p[[var=heal
 qty=.05
 ]]
 
-p[[var=ev
-ant=0
-queen=0
-spider=0
-seige=0
-bld=0
-]]
-
 p[[var=ant
 idx=1
 spd=.286
@@ -1208,8 +1200,7 @@ tmap=32
 idx=19]],p[[
 portx=51
 porty=80]],function(_ENV)
-	range+=7
-	los+=7
+	los,range=40,35
 end,archer),
 	p([[
 t=18
@@ -1277,8 +1268,8 @@ tmap=512
 idx=23]],p[[
 portx=69
 porty=80]],function(_ENV)
-	bld+=10
-end,ev),
+	los,range=55,50
+end,castle),
 	p([[
 t=40
 r=0
@@ -1491,7 +1482,7 @@ function tick(u)
 				typ.monk and e.dmgd and
 				not e.bldg) and
 				e.alive and
-				d<=typ.los+ev[u.p][typ.def]
+				d<=typ.los
 			then
 				if e.bldg then
 					d+=typ.seige and
@@ -1525,8 +1516,7 @@ end
 
 function update_viz(u)
 	if u.hu and u.upd then
-		local los=u.typ.los+
-			ev[u.p][u.typ.def]
+		local los=u.typ.los
 		local xo,yo,l=
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
@@ -1633,7 +1623,7 @@ function input()
 		if clk and buildable() then
 			sfx"1"
 			local b=unit(
-				to_build.typ,
+				to_build.typ.idx,
 				to_build.x+to_build.typ.w\2,
 				to_build.y+to_build.typ.h\2,
 				unspl"1,1,1")
@@ -1877,8 +1867,7 @@ function fight(u)
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
-		if typ.range+
-			ev[u.p][typ.def]>=d
+		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
@@ -2302,29 +2291,25 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local _typ=typs[t] or t
-	local u=add(units,
+	local g,_ENV=_ENV,add(units,
 		p([[dir=1
 lastp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]],_typ[_p],rnd"60"\1))
-	do
-		local _ENV=u
-		max_hp=typ.hp/typ.const
-		id,x,y,p,hp,const,
-			disc,alive,prod,bldg=
-			x,_x,_y,_p,
-			min(_hp or 9999,max_hp),
-			max(_const)>0 and _const,
-			_disc==1,1,
-			_typ.prod or {},_typ.bldg
-	end
-	tot+=1
-	rest(box(u))
-	if (_typ.bldg) reg_bldg(u)
-	return u
+conv=0]],typs[t][_p],rnd"60"\1))
+	max_hp=typ.hp/typ.const
+	id,x,y,p,hp,const,
+		disc,alive,prod,bldg=
+		x,_x,_y,_p,
+		min(_hp or 9999,max_hp),
+		max(_const)>0 and _const,
+		_disc==1,1,
+		typs[t].prod or {},typ.bldg
+	g.tot+=1
+	g.rest(g.box(_ENV))
+	if (bldg) g.reg_bldg(_ENV)
+	return _ENV
 end
 
 function prod(u,b,m)
@@ -2998,7 +2983,7 @@ function ai_frame(ai)
 				res2.tot>=p and ai.safe then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
-					curr=unit(b.typ,
+					curr=unit(b.typ.idx,
 						x8+b.typ.w/2,
 						y8+b.typ.h/2,
 						2,1)
