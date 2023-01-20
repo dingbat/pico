@@ -77,10 +77,9 @@ function _update()
 
 	dmap()
 
-	local to=res1.p
-	upcycle=to>=100 and 30 or
-		to>=75 and 15 or
-		to>=40 and 10 or 5
+	upcycle=tot>=100 and 30 or
+		tot>=75 and 15 or
+		tot>=40 and 10 or 5
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
@@ -1329,6 +1328,7 @@ function tick(u)
 
 	if u.hp<=0 and not u.dead then
 		del(sel,u)
+		tot-=1
 		u.dead,u.farmer=0
 		u.st=
 			p"t=dead",
@@ -1354,8 +1354,11 @@ function tick(u)
 
 	if u.dead then
 		if typ.queen then
-			loser,sel=u.p,{}
-			music"56"
+			npl-=1
+			if npl==1 or u==hq then
+				loser,sel=min(u.p,2),{}
+				music"56"
+			end
 		end
 		u.dead+=1
 		update_viz(u)
@@ -2255,6 +2258,7 @@ conv=0]],_typ[_p],rnd"60"\1,ais))
 			_disc==1,
 			_typ.prod or {},_typ.bldg
 	end
+	tot+=1
 	rest(box(u))
 	if (_typ.bldg) reg_bldg(u)
 	return u
@@ -2407,27 +2411,27 @@ cfs=0]],st,32767),{},{}
 		fr[iom],sh.dead=fr[frl],1
 		frl-=1
 
-		local p=sh.typ
-		if p.k==g.k then
+		local pt=sh.typ
+		if pt.k==g.k then
 			f.e=1
 			return path(sh),1
 		end
 		surr(function(n)
 			local ob,ncfs=t[n.k],sh.cfs+n.d
 			if not ob then
-				ob=parse("cfs=32767",n,
+				ob=p("cfs=32767",n,
 					dist(n[1]-g[1],n[2]-g[2])
 				)
 				frl+=1
 				fr[frl],t[n.k]=ob,ob
 			end
 			if not ob.dead and ob.cfs>ncfs then
-				ob.cfs,ob.prev=ncfs,p
+				ob.cfs,ob.prev=ncfs,pt
 			end
 			if ob.x<cl.x then
 				cl=ob
 			end
-		end,unpack(p))
+		end,unpack(pt))
 	end
 	return path(cl)
 end
@@ -3084,7 +3088,7 @@ function loadgame()
 			typ.up=up
 		end
 	end)
-	if (res.p3.diff>0) npl+=1
+	npl+=res.p3.diff\1
 	ai_init()
 end
 -->8
