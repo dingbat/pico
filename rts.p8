@@ -1045,9 +1045,9 @@ i=7]],castle)
 
 mon.prod={
 	p([[
-t=20
+t=30
 r=0
-g=10
+g=12
 b=0
 p=
 breq=0
@@ -1517,10 +1517,9 @@ function tick(u)
 			not u.st.adj do
 			x+=rndspl"-1,-.5,0,0,.5,1"
 			y+=rndspl"-1,-.5,0,0,.5,1"
-			c=1
+			c={{x,y}}
 		end
-		u.st.wayp,u.st.adj=
-			c and {{x,y}},c
+		u.st.wayp,u.st.adj=c,c
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1531,20 +1530,20 @@ function update_viz(u)
 		local xo,yo,l=
 			u.x%8\2,u.y%8\2,
 			ceil(los/8)
-		local i=xo|yo*16|los*256
-		if not vcache[i] then
-			vcache[i]={}
+		local k=xo|yo*16|los*256
+		if not vcache[k] then
+			vcache[k]={}
 			for dx=-l,l do
 			for dy=-l,l do
 				add(
 					dist(xo*2-dx*8-4,
 						yo*2-dy*8-4)<los
-					and vcache[i],dx+dy*256)
+					and vcache[k],dx+dy*256)
 			end
 			end
 		end
 
-		foreach(vcache[i],function(t)
+		foreach(vcache[k],function(t)
 			local k=u.k+t
 			if k<maph<<8 and k>=0 and
 				k%256<mapw then
