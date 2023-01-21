@@ -322,7 +322,7 @@ function start()
 	hq,res1.npl,cx,cy=units[1],npl,
 		unspl(stp[res1.pos],":")
 
-	make_dmaps()
+	qdmaps()
 end
 
 function init()
@@ -1410,7 +1410,7 @@ function tick(u)
 			mset(x8,y8,86)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
-			make_dmaps()
+			qdmaps()
 		else
 			local _ENV=res[u.p]
 			if typ.drop and not u.const then
@@ -1974,7 +1974,7 @@ function mine(u)
 			mset(x,y,68)
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y)
-			make_dmaps()
+			qdmaps()
 		end
 		s(restiles,x,y,n-1)
 	end
@@ -2238,7 +2238,7 @@ function reg_bldg(b)
 			typ.h8 or reg(x+1,y-1))
 	end
 	if not b.const and not typ.farm then
-		make_dmaps()
+		qdmaps()
 		res[b.p].reqs|=typ.breq
 	end
 end
@@ -2364,7 +2364,7 @@ function dmap_find(u,k)
 	return wayp,x,y
 end
 
-function make_dmaps()
+function qdmaps()
 	dq,asc=split"d,r,g,b",{}
 end
 
