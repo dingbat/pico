@@ -77,7 +77,7 @@ function _update()
 
 	dmap()
 	upcycle=
-		split"5,10,15,30,60,60,60"[tot\35]
+		split"5,10,15,30,60,60,60"[tot\50]
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
@@ -110,22 +110,22 @@ function _update()
 		end
 	end
 
-	foreach(proj,function(p)
-		local typ=p.from_typ
-		if norm(p,p,typ.proj_spd)<1
+	foreach(proj,function(b)
+		local typ=b.from_typ
+		if norm(b,b,typ.proj_spd)<1
 		then
-			del(proj,p)
+			del(proj,b)
 			for u in all(units) do
 				if int(
 					u.r,
-					{p.x,p.y,p.x,p.y},
+					{b.x,b.y,b.x,b.y},
 					typ.proj_aoe
 				) then
 					dmg(typ,u)
 					if (typ.proj_aoe==0) break
 					if hlv.var then
 						hilite(p([[f=2
-c=13]],p.x,p.y))
+c=13]],b.x,b.y))
 					end
 				end
 			end
@@ -364,7 +364,7 @@ npl=0]]
 		{},{},{},{d={}},
 		{},{},
 		split"1,2,3,4",
-		unspl"59,0,0,0,64,64,35"
+		unspl"59,0,0,0,64,64,50"
 
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
@@ -1411,6 +1411,12 @@ function tick(u)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
 			qdmaps()
+		elseif typ.queen then
+			npl-=1
+			if npl==1 or u==hq then
+				loser,sel=min(u.p,2),{}
+				music"56"
+			end
 		else
 			local _ENV=res[u.p]
 			if typ.drop and not u.const then
@@ -1422,13 +1428,6 @@ function tick(u)
 	end
 
 	if u.dead then
-		if typ.queen then
-			npl-=1
-			if npl==1 or u==hq then
-				loser,sel=min(u.p,2),{}
-				music"56"
-			end
-		end
 		u.dead+=1
 		update_viz(u)
 		del(u.dead==60 and units,u)
