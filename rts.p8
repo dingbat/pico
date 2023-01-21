@@ -152,7 +152,8 @@ c=13]],b.x,b.y))
 	end
 end
 
-function banner(a,t,subt)
+function banner(a,t,subt,cx)
+	camera(cx)
 	local secs=res1.t\1%60
 	rectfill(unspl"0,88,128,107,9")
 	unl"6,87,44,87"
@@ -219,9 +220,8 @@ function _draw()
 	end)
 	if loser then
 		resbar()
-		camera(ban)
 		banner(loser,split"defeat\^x2....\^x4,victory!"[loser],
-			"press ❎ for menu \|f\^x1 ")
+			"press ❎ for menu \|f\^x1 ",ban)
 		return
 	end
 
@@ -2882,9 +2882,9 @@ bldbld=.1]]
 --save
 
 function save()
-	campal()
 	local ptr,foreach=0,foreach
 	banner(2,"savefile","drag+drop to load \|f\^x1 ")
+	campal()
 	local function draw(v)
 		for i=0,8,4 do
 			pset(ptr%128,ptr\128,
