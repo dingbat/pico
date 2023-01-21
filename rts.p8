@@ -2925,8 +2925,8 @@ function loadgame()
 	for x=0,47 do
 		for y=0,31 do
 			local v=px"1"
-			if (v>127) s(exp,x,y,128)
-			mset(x,y,v&0x7f)
+			mset(x,y,v&0x7f,
+				v>127 and s(exp,x,y,128))
 		end
 	end
 	foreach(resk,function(k)

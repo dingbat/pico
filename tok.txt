@@ -4,7 +4,7 @@ Tokens
 ⁃ (1) if statement whose body is a single function call:
  ⁃ if function is add,del,deli, you can do: `if (x) add(arr, i)` -> `add(x and arr,i)`. in turn, these will only return true if it actually happened, so this can be used to chain other statements
  ⁃ if function is setting camera X: `if (b) camera(x)` -> `camera(b and x)`, note that this resets the camera if not b
- ⁃ for any other function, if there is assignment nearby: `k=v; if (x) f()` -> `k=v,x and f()`
+ ⁃ for any other function, if there is assignment (or a function call that can take an extra argument) nearby: `k=v; if (x) f()` -> `k=v,x and f()` OR `if (x) f(); g(1,2)` -> `g(1,2,x and f())`
  ⁃ note that if you need to do "not X and", you can usually just do "X or"
 ⁃ (1) use return of add(), del() and deli(): `add(a,b) b.x=y` -> `add(a,b).x=y`
 ⁃ (2) `flr(a/b)` -> `a\b`
