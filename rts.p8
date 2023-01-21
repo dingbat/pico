@@ -1490,7 +1490,7 @@ function tick(u)
 		typ.atk then
 		for e in all(units) do
 			local d=dist(e.x-u.x,e.y-u.y)
-			if (e.ai!=u.ai or
+			if (e.ap!=u.ap or
 				typ.monk and e.dmgd and
 				not e.bldg) and
 				e.alive and
@@ -1887,7 +1887,7 @@ function fight(u)
 			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
 			then
-				if e.ai==u.ai then
+				if e.ap==u.ap then
 					if typ.monk and e.dmgd then
 						e.hp+=1
 						sfx"63"
@@ -2077,6 +2077,7 @@ end
 
 function tile_unit(tx,ty)
 	return box(p([[
+p=0
 ais=
 hp=0
 max_hp=0
@@ -2087,11 +2088,11 @@ end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,dmgd,ai=
+	r,x8,y8,dmgd,ai,ap=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,
 		hp<max_hp,
-		ais[p]
+		ais[p],p&6
 	k,hu=x8|y8<<8,not ai
 	if not const then
 		hp+=typ.hp-max_hp
