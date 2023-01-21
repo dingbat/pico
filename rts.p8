@@ -72,10 +72,6 @@ function _update()
 		return
 	end
 
-	if to_bld then
-		to_bld.tx,to_bld.ty=mx8,my8
-	end
-
 	dmap()
 	upcycle=
 		split"5,10,15,30,60,60,60"[tot\50]
@@ -284,8 +280,7 @@ function _draw()
 		circ(unpack(hlv))
 	end
 	if to_bld then
-		camera(cx-to_bld.tx*8,
-			cy-to_bld.ty*8)
+		camera(cx-mx8*8,cy-my8*8)
 		pspl(bldable() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
@@ -1631,8 +1626,8 @@ function input()
 			sfx"1"
 			local b=unit(
 				to_bld.typ,
-				to_bld.tx*8+to_bld.typ.w\2,
-				to_bld.ty*8+to_bld.typ.h\2,
+				mx8*8+to_bld.typ.w\2,
+				my8*8+to_bld.typ.h\2,
 				unspl"1,1,1")
 			foreachsel(bld,b)
 			pay(to_bld,-1,res1)
@@ -2202,14 +2197,12 @@ function acc(x,y,strict)
 end
 
 function bldable()
-	local x,y=to_bld.tx,to_bld.ty
-
-	return	acc(x,y,1) and
+	return	acc(mx8,my8,1) and
 		(to_bld.typ.h8 or
-			acc(x,y+1,1)) and
+			acc(mx8,my8+1,1)) and
 		(to_bld.typ.w8 or
-			acc(x+1,y,1) and
-			acc(x+1,y+1,1))
+			acc(mx8+1,my8,1) and
+			acc(mx8+1,my8+1,1))
 end
 
 function reg_bldg(b)
