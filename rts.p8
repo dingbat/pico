@@ -169,7 +169,7 @@ function banner(a,t,subt,cx)
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
 	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..subt
-	?"\^jdn\|h\^w\^t\fa"..t.."\-0\-0\-0\-0\|f\f1"..t
+	?"\^jdn\|h\^w\^t\fa"..t
 end
 
 function _draw()
@@ -220,7 +220,7 @@ function _draw()
 	end)
 	if loser then
 		resbar()
-		banner(loser,split"defeat\^x2....\^x4,victory!"[loser],
+		banner(loser,split"defeat\^x2....\^x4\^jdn\f1defeat\^x2....,victory!\^jdn\f1victory!"[loser],
 			"press ❎ for menu \|f\^x1 ",ban)
 		return
 	end
@@ -2883,7 +2883,7 @@ bldbld=.1]]
 
 function save()
 	local ptr,foreach=0,foreach
-	banner(2,"savefile","drag+drop to load \|f\^x1 ")
+	banner(2,"savefile\^jdn\f1savefile","drag+drop to load \|f\^x1 ")
 	campal()
 	local function draw(v)
 		for i=0,8,4 do
