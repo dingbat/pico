@@ -336,6 +336,7 @@ function init()
 	end
 
 	music(unspl"0,0,7")
+	menuitem(2,"⌂ save",save)
 	menuitem(3,"∧ resign",
 		function()hq.hp=0 end)
 
@@ -2880,10 +2881,9 @@ bldbld=.1]]
 -->8
 --save
 
-menuitem(1,"⌂ save",function()
-	if (menu) return
-	local ptr,foreach=
-		campal(),foreach
+function save()
+	campal()
+	local ptr,foreach=0,foreach
 	banner(2,"savefile","drag+drop to load \|f\^x1 ")
 	local function draw(v)
 		for i=0,8,4 do
@@ -2908,7 +2908,7 @@ menuitem(1,"⌂ save",function()
 			disc,hp},draw)
 	end)
 	extcmd("screen",1)
-end)
+end
 
 function loadgame()
 	init()
@@ -3100,7 +3100,7 @@ end
 -->8
 cartdata"age_of_ants"
 
-menuitem(2,"● toggle mouse",
+menuitem(1,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
 __gfx__
