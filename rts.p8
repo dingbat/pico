@@ -1440,8 +1440,7 @@ function tick(u)
 	end
 
 	if int(u.r,{mx,my,mx,my},1)
-		and (not hunit or
-			hunit.hu
+		and (not hunit or hunit.hu
 	) then
 		hunit=u
 	end
@@ -1458,18 +1457,14 @@ function tick(u)
 				selb={u}
 			end
 		end
-		sset(
-			109+u.x/mmwr,
-			72+u.y/mmhr,
-			u.p
-		)
+		sset(109+u.x/mmwr,72+u.y/mmhr,
+			u.p)
 	end
 
 	if (u.const) return
 	if targ and targ.dead then
 		rest(u)
 	end
-
 	if u.st.rest then
 		if typ.lady and t6 then
 			wander(u)
@@ -1485,41 +1480,40 @@ function tick(u)
 		end
 	end
 
+	update_unit(u)
+	update_viz(u)
+	local x,y,adj=u.x,u.y
 	if u.upd and u.st.agg and
 		typ.atk then
 		for e in all(units) do
-			local d=dist(e.x-u.x,e.y-u.y)
-			if (e.ap!=u.ap or
+			if e.ap!=u.ap or
 				typ.monk and e.dmgd and
-				not e.bldg) and
-				e.alive and
-				d<=typ.los
+				not e.bldg
 			then
-				if e.bldg then
-					d+=typ.seige and
-						e.bldg==1 and
-						-999 or 999
-				end
-				if d<agg_d then
-					agg_u,agg_d=e,d
+				local d=dist(x-e.x,y-e.y)
+				if e.alive and d<=typ.los then
+					if e.bldg then
+						d+=typ.seige and
+							e.bldg==1 and
+							-999 or 999
+					end
+					if d<agg_d then
+						agg_u,agg_d=e,d
+					end
 				end
 			end
 		end
 		atk(u,agg_u)
 	end
 
-	update_unit(u)
-	update_viz(u)
-
 	if typ.unit and not u.st.wayp then
-		local x,y,c=u.x,u.y
 		while g(pos,x\4,y\4) and
 			not u.st.adj do
 			x+=rndspl"-1,-.5,0,0,.5,1"
 			y+=rndspl"-1,-.5,0,0,.5,1"
-			c={{x,y}}
+			adj={{x,y}}
 		end
-		u.st.wayp,u.st.adj=c,c
+		u.st.wayp,u.st.adj=adj,adj
 		s(pos,x\4,y\4,1)
 	end
 end
