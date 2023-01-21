@@ -2880,16 +2880,14 @@ bldbld=.1]]
 
 menuitem(1,"⌂ save",function()
 	if (menu) return
-	local ptr=campal()
+	local ptr,foreach=
+		campal(),foreach
 	banner(2,"savefile","drag+drop to load \|f\^x1 ")
-	local function draw(v,...)
+	local function draw(v)
 		for i=0,8,4 do
 			pset(ptr%128,ptr\128,
 				max(v)>>i&0xf)
 			ptr+=1
-		end
-		if ... then
-			draw(...)
 		end
 	end
 	for x=0,47 do
@@ -2904,8 +2902,8 @@ menuitem(1,"⌂ save",function()
 	end)
 	draw(#units)
 	foreach(units,function(_ENV)
-		draw(typ.idx,x,y,p,
-			const,disc,hp)
+		foreach({typ.idx,x,y,p,const,
+			disc,hp},draw)
 	end)
 	extcmd("screen",1)
 end)
