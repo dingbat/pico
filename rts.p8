@@ -2129,7 +2129,7 @@ function dist(dx,dy)
 			b0*.9609+a0*.3984
 end
 
-function surr(fn,x,y,n,ig_acc)
+function surr(fn,x,y,n,na)
 	local n,e=n or 1
 	for dx=-n,n do
 	for dy=-n,n do
@@ -2137,7 +2137,7 @@ function surr(fn,x,y,n,ig_acc)
 		if
 			min(xx,yy)>=0 and
 			xx<mapw and yy<maph and
-			(ig_acc or acc(xx,yy))
+			(na or acc(xx,yy))
 		then
 			if (dx|dy!=0) e=1
 			if fn then
