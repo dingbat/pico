@@ -32,8 +32,9 @@ function _update()
 			init()
 			srand"12"
 			for k,r in inext,res do
-				r.pos,r.diff=
+				r.pos,r.npl,r.diff=
 					del(posidx,rnd(posidx)),
+					2+ai_diff\3,
 					split"1,2,3,2,3"[ai_diff+1]
 			end
 			foreach(split([[7,64,64
@@ -41,7 +42,7 @@ function _update()
 1,77,59
 1,59,52
 5,61,76]],"\n"),function(s)
-				for p=1,npl do
+				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
@@ -319,7 +320,8 @@ end
 --init
 
 function start()
-	hq,res1.npl,cx,cy=units[1],npl,
+	npl,hq,cx,cy=res1.npl,
+		units[1],
 		unspl(stp[res1.pos],":")
 
 	qdmaps()
@@ -350,7 +352,7 @@ techs=0
 t=0
 npl=0]]
 
-	res1,npl,dq,exp,vcache,dmaps,
+	res1,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
 		proj,bldgs,new_viz,dmap_st,
 		typs,ais,
@@ -358,7 +360,7 @@ npl=0]]
 		cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
-		res.p1,2+ai_diff\3,
+		res.p1,
 		{},{},{},{},
 		{},{},{},{},
 		{},{},{},{d={}},
@@ -2937,7 +2939,7 @@ function loadgame()
 	for i=1,px"1" do
 		unit(px"7")
 	end
-	npl,techs=res1.npl,res1.techs
+	local techs=res1.techs
 	foreach(typs,function(_ENV)
 		if techs|tmap==techs then
 			x(y.p1)
