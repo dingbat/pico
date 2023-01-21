@@ -304,7 +304,7 @@ function _draw()
 
 	camera(-amx,-amy)
 	spr(
-		hovbtn and pset(unspl"-1,4,5")
+		hbtn and pset(unspl"-1,4,5")
 			and 188 or
 		sel1 and sel1.hu and
 		((to_bld or
@@ -426,7 +426,7 @@ porty=72
 dir=1
 unit=1
 ant=1
-atksfx=10
+sfx=10
 const=1
 tmap=-1
 d=0]]
@@ -465,7 +465,7 @@ dead_y=0
 portx=27
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=1
 tmap=-1
 d=0]]
@@ -503,7 +503,7 @@ dead_y=16
 portx=18
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=1
 tmap=-1
 d=0]]
@@ -543,7 +543,7 @@ dead_y=25
 portx=45
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=1
 proj_xo=-2
 proj_yo=0
@@ -584,7 +584,7 @@ dead_y=64
 portx=36
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=1
 tmap=-1
 d=0]]
@@ -625,7 +625,7 @@ dead_y=16
 portx=54
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=1
 proj_xo=1
 proj_yo=-4
@@ -665,7 +665,7 @@ portx=9
 porty=72
 drop=0
 bldg=1
-atksfx=10
+sfx=10
 proj_xo=-4
 proj_yo=2
 proj_s=52
@@ -708,7 +708,7 @@ dead_fps=7.5
 portx=-1
 porty=0
 bldg=1
-atksfx=10
+sfx=10
 proj_yo=-2
 proj_xo=-1
 proj_s=48
@@ -874,7 +874,7 @@ dead_fps=15
 portx=42
 porty=80
 bldg=1
-atksfx=10
+sfx=10
 proj_yo=0
 proj_xo=0
 proj_s=48
@@ -919,7 +919,7 @@ dead_y=8
 portx=63
 porty=72
 unit=1
-atksfx=10
+sfx=10
 dir=-1
 tmap=-1
 d=61]]
@@ -993,7 +993,7 @@ dead_y=112
 portx=87
 porty=80
 unit=1
-atksfx=63
+sfx=63
 dir=-1
 tmap=-1
 d=0]]
@@ -1579,7 +1579,7 @@ function cam()
 		mid(amx,126),
 		mid(amy,126)
 
-	mx,my,hovbtn=amx+cx,amy+cy
+	mx,my,hbtn=amx+cx,amy+cy
 	mx8,my8=mx\8,my\8
 end
 
@@ -1594,7 +1594,7 @@ function input()
 
 	foreach(btns,function(b)
 		if int(b.r,{amx,amy,amx,amy},1) then
-			hovbtn=b
+			hbtn=b
 		end
 	end)
 
@@ -1603,8 +1603,8 @@ function input()
 		tile_unit(mx8,my8),action,
 		lclk or rclk
 
-	if clk and hovbtn then
-		hovbtn.fn(rclk)
+	if clk and hbtn then
+		hbtn.fn(rclk)
 		if (axn==action) action=0
 		return
 	end
@@ -2265,7 +2265,7 @@ function dmg(from_typ,to)
 	end
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32")
-		sfx(from_typ.atksfx)
+		sfx(from_typ.sfx)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
@@ -2763,16 +2763,16 @@ end,20,108)
 
 	resbar()
 
-	if hovbtn and hovbtn.costs and
-		res1.reqs|hovbtn.costs.breq==
+	if hbtn and hbtn.costs and
+		res1.reqs|hbtn.costs.breq==
 			res1.reqs then
 		local len=pres(
-			hovbtn.costs,0,150)
+			hbtn.costs,0,150)
 		camera(
-			len/2-4-hovbtn.r[1],
-			8-hovbtn.r[2]
+			len/2-4-hbtn.r[1],
+			8-hbtn.r[2]
 		)
-		pres(hovbtn.costs,2,2)
+		pres(hbtn.costs,2,2)
 		rect(len+2,unspl"0,0,8,1")
 	end
 end
@@ -3112,45 +3112,6 @@ cartdata"eaoa1"
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
--->8
-tostr[[[[]]
-ai_debug=true
-srand"12"
-if ai_debug then
-	_update60=_update
-	_draw_map,_dr,_pr,_resbar=
-		draw_map,_draw,print_res,
-		resbar
-	function draw_map(o,y)
-		if not ai_debug or o==0 then
-			_draw_map(o,y)
-		end
-	end
-	function _draw()
-		_dr()
-		if ai_debug and res1 then
-		camera()
-		local secs=res1.t\1%60
-		?res.p2.diff,60,107,9
-		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
-		?bgrat,80,114,3
-		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
-		camera()
-		end
-	end
-	function print_res(...)
-		if (ai_debug) res1=res.p2
-		local x=_pr(...)
-		res1=res[1]
-		return x
-	end
-	function resbar(...)
-		if (ai_debug) res1=res.p2
-		_resbar(...)
-		res1=res[1]
-	end
-end
---]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b350000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000

@@ -293,6 +293,7 @@ x remove make_dmap argument (priotize resource) (5 tok)
 x a8c9657 add `id=0` to cat (2 tok)
 - (2 tok) put d<0.5 in norm
 x (5 tok) inline new() in init()
+- (4 tok) 7ded44f - make p3 color black
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
