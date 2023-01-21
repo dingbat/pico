@@ -296,6 +296,7 @@ x (5 tok) inline new() in init()
 - (4 tok) 7ded44f - make p3 color black
 - (7 tok but +1.04%) arrs (see below)
 - (2 tok but .07%) r.npl,r.diff=unspl(split"2:1,2:2,2:3,3:2,3:3"[ai_diff+1],":"))
+- (14 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 

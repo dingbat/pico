@@ -1893,6 +1893,8 @@ function fight(u)
 						y=u.y+typ.proj_yo,
 					} or dmg(typ,e))
 					if e.conv>=e.max_hp then
+						res[e.p].p-=1
+						res[u.p].p+=1
 						e.p,e.conv=u.p,0
 						del(e.sqd,e)
 						sfx"38"
@@ -1991,8 +1993,7 @@ function produce(u)
 		else
 			local new=gl.unit(
 				bld.typ,x,y,p),
-				onscr and hu and
-					gl.sfx"19"
+				onscr and hu and gl.sfx"19"
 			if new.typ.ant and
 				rtx and
 				fget(mget(rtx,rty),1)
