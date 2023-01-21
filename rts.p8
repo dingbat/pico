@@ -1769,8 +1769,8 @@ function draw_unit(u)
 		sx+=f\ufps%fr*fw
 	end
 	pal{
-		selc or u.p,
-		u.p,
+		selc or u.col,
+		u.col,
 		[14]=pal(typ.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -2088,11 +2088,11 @@ end
 
 function box(_ENV)
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,dmgd,ai,ap=
+	r,x8,y8,dmgd,ai,ap,col=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,
 		hp<max_hp,
-		ais[p],p&6
+		ais[p],p&6,p%3
 	k,hu=x8|y8<<8,not ai
 	if not const then
 		hp+=typ.hp-max_hp
