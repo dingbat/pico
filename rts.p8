@@ -72,8 +72,7 @@ function _update()
 	end
 
 	if to_bld then
-		to_bld.x,to_bld.y=
-			mx8*8,my8*8
+		to_bld.tx,to_bld.ty=mx8,my8
 	end
 
 	dmap()
@@ -284,8 +283,8 @@ function _draw()
 		circ(unpack(hlv))
 	end
 	if to_bld then
-		camera(cx-to_bld.x,
-			cy-to_bld.y)
+		camera(cx-to_bld.tx*8,
+			cy-to_bld.ty*8)
 		pspl(bldable() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
@@ -1637,8 +1636,8 @@ function input()
 			sfx"1"
 			local b=unit(
 				to_bld.typ,
-				to_bld.x+to_bld.typ.w\2,
-				to_bld.y+to_bld.typ.h\2,
+				to_bld.tx*8+to_bld.typ.w\2,
+				to_bld.ty*8+to_bld.typ.h\2,
 				unspl"1,1,1")
 			foreachsel(bld,b)
 			pay(to_bld,-1,res1)
@@ -2208,8 +2207,7 @@ function acc(x,y,strict)
 end
 
 function bldable()
-	local x,y=to_bld.x/8,
-		to_bld.y/8
+	local x,y=to_bld.tx,to_bld.ty
 
 	return	acc(x,y,1) and
 		(to_bld.typ.h8 or
