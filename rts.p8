@@ -3098,7 +3098,7 @@ function ai_frame(ai)
 	mvg(ai.p3,hq.x,hq.y,"atk")
 end
 -->8
-cartdata"eaoa1"
+cartdata"age_of_ants"
 
 menuitem(2,"● toggle mouse",
 	function()dset(0,~dget"0")end)
