@@ -135,7 +135,7 @@ c=13]],b.x,b.y))
 		sel=selh or selb or sele
 	end
 	sel1,nsel,seltyp=sel[1],#sel
-	foreachsel(function(s)
+	fsel(function(s)
 		seltyp=(not seltyp or
 			s.typ==seltyp) and s.typ
 			or {}
@@ -1573,7 +1573,7 @@ function cam()
 	mx8,my8=mx\8,my\8
 end
 
-function foreachsel(func,...)
+function fsel(func,...)
 	for u in all(sel) do
 		func(u,...)
 	end
@@ -1610,7 +1610,7 @@ function input()
 			local x,y=mmwr*dx,mmhr*dy
 			if rclk and sel1 then
 				sfx"0"
-				foreachsel(move,x,y,axn==1)
+				fsel(move,x,y,axn==1)
 				hilite{amx,amy,2,8}
 			elseif axn==0 and btn"5" then
 				cx,cy=x-64,y-64
@@ -1629,7 +1629,7 @@ function input()
 				mx8*8+to_bld.typ.w\2,
 				my8*8+to_bld.typ.h\2,
 				unspl"1,1,1")
-			foreachsel(bld,b)
+			fsel(bld,b)
 			pay(to_bld,-1,res1)
 			b.cost,to_bld,selx=to_bld
 		end
@@ -1665,22 +1665,22 @@ function input()
 			if avail_farm() then
 				gofarm(sel1,hbld)
 			else
-				foreachsel(gather,mx8,my8)
+				fsel(gather,mx8,my8)
 			end
 
 		elseif can_bld() then
 			sfx"0"
-			foreachsel(bld,hbld)
+			fsel(bld,hbld)
 			hilite(hbld)
 
 		elseif can_atk() then
 			sfx"4"
-			foreachsel(atk,hunit)
+			fsel(atk,hunit)
 			hilite(hunit)
 
 		elseif can_drop() then
 			sfx"0"
-			foreachsel(drop,nil,hbld)
+			fsel(drop,nil,hbld)
 			hilite(hbld)
 
 		elseif sel1.typ.unit then
