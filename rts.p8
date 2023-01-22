@@ -662,6 +662,7 @@ portx=9
 porty=72
 drop=0
 bldg=1
+bldrs=15
 sfx=10
 proj_xo=-4
 proj_yo=2
@@ -705,6 +706,7 @@ dead_fps=7.5
 portx=-1
 porty=0
 bldg=1
+bldrs=2
 sfx=10
 proj_yo=-2
 proj_xo=-1
@@ -738,6 +740,7 @@ dead_y=104
 dead_fr=8
 dead_fps=7.5
 bldg=1
+bldrs=1
 drop=5
 breq=2
 dir=-1
@@ -768,6 +771,7 @@ dead_fps=7.5
 portx=97
 porty=80
 bldg=1
+bldrs=2
 breq=4
 units=2
 idle=1
@@ -800,6 +804,7 @@ dead_fps=7.5
 portx=15
 porty=112
 bldg=1
+bldrs=1
 breq=8
 units=2
 idle=1
@@ -835,6 +840,7 @@ portx=52
 porty=88
 farm=1
 bldg=farm
+bldrs=1
 breq=16
 dir=-1
 tmap=-1
@@ -871,6 +877,7 @@ dead_fps=15
 portx=42
 porty=80
 bldg=1
+bldrs=3
 sfx=10
 proj_yo=0
 proj_xo=0
@@ -945,6 +952,7 @@ dead_fps=7.5
 portx=39
 porty=111
 bldg=1
+bldrs=2
 units=1
 breq=64
 mil=1
@@ -1329,6 +1337,7 @@ function bld(u,b)
 		t="bld",
 		target=b,
 		wayp=get_wayp(u,b.x,b.y),
+		in_bld=1
 	}
 end
 
@@ -1360,6 +1369,7 @@ function drop(u,nxt_res,dropu)
 		res=nxt_res,
 		target=dropu or
 			tile_unit(x,y),
+		in_bld=1
 	}
 end
 
@@ -1380,7 +1390,8 @@ function gofarm(u,f)
 			f.x+rndspl"-2,-1,0,1,2",
 			f.y+rndspl"-2,-1,0,1,2"
 		),
-		farm=f
+		farm=f,
+		in_bld=1
 	}
 end
 
@@ -1534,7 +1545,7 @@ function tick(u)
 
 	if typ.unit and not u.st.wayp then
 		while g(pos,x\4,y\4,
-			u.st.t!="bld" and
+			not u.st.in_bld and
 			g(bldgs,x\8,y\8)) and
 			not u.st.adj do
 			x+=rndspl"-1,-.5,0,0,.5,1"
@@ -3014,6 +3025,9 @@ function ai_frame(ai)
 					miner(u,bgnxt and "b" or "r")
 					bgnxt=not bgnxt
 				end
+				del(u.bld and
+					not u.st.in_bld and
+					u.bld.p1,u)
 				add(add(miners,u.rs) and
 					not u.res and avail,u)
 			elseif u.typ.unit then
@@ -3033,16 +3047,15 @@ function ai_frame(ai)
 		\bgrat-count(miners,"g")
 
 	foreach(units,function(u)
+		local typ=u.typ
 		local function go(fn)
-			if not u.w or
-				u.w.st.target!=u then
-				u.w=deli(avail)
-				if u.w then
-					u.w.rs=fn(u.w,u)
+			if #u.p1<typ.bldrs then
+				local w=add(u.p1,deli(avail))
+				if w then
+					w.bld,w.rs=u,fn(w,u)
 				end
 			end
 		end
-		local typ=u.typ
 		if u.ai==ai then
 			local r=bal>0 and "g" or
 				bal<0 and "b"
@@ -3055,7 +3068,6 @@ function ai_frame(ai)
 			then
 				go(bld)
 			elseif typ.farm and
-				not u.const and
 				not u.farmer then
 				go(gofarm)
 			elseif
@@ -3096,9 +3108,10 @@ menuitem(1,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
 -->8
+
 tostr[[[[]]
 ai_debug=true
-srand"1"
+srand"12"
 if ai_debug then
 	_update60=_update
 	_draw_map,_dr,_pr,_resbar=
