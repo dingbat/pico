@@ -1427,7 +1427,6 @@ function tick(u)
 
 	if u.dead then
 		u.dead+=1
-		update_viz(u)
 		del(u.dead==60 and units,u)
 		return
 	end
@@ -1505,7 +1504,9 @@ function tick(u)
 	end
 
 	if typ.unit and not u.st.wayp then
-		while g(pos,x\4,y\4) and
+		while g(pos,x\4,y\4,
+			u.st.rest and
+			g(bldgs,x\8,y\8)) and
 			not u.st.adj do
 			x+=rndspl"-1,-.5,0,0,.5,1"
 			y+=rndspl"-1,-.5,0,0,.5,1"
