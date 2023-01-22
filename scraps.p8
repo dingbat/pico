@@ -3,6 +3,11 @@ credits:
 - dist
 - sfx pack: "explosion 18"
 
+before release:
+
+if tokens:
+- unparse a*
+
 32x32
 
 unspl"256,256,105,107,19,19,32,32,13.47,13.47"
