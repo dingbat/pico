@@ -307,6 +307,18 @@ end
 arrs(split"avail,nxtres,miners")
 arrs(split"dq,dmaps,exp,vcache,units,restiles,sel,ladys,proj,bldgs,new_viz,typs,ais")
 
+builders keep building (bldrepair):
+else
+		g.rest(u)
+	g.surr(function(_𝘦𝘯𝘷)
+			local b=g.bldgs[k]
+			if b and b.hu and b.const then
+				g.bld(u,b)
+			end
+		end,x8,y8,4)
+
+
+
 sfx/music toggle (47) (45 if combine assignment and smd is unspl'd)
 
 --	_sfx,_music,sm,
