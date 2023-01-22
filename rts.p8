@@ -107,7 +107,7 @@ function _update()
 	end
 
 	foreach(prj,function(b)
-		local typ=b.from_typ
+		local typ=b.typ
 		if norm(b,b,typ.prj_spd)<1
 		then
 			del(prj,b)
@@ -209,7 +209,7 @@ function _draw()
 	camera(cx,cy)
 	foreach(prj,function(_ENV)
 		sspr(
-			from_typ.prj_s+prj_so,
+			typ.prj_s+prj_so,
 			96,2,2,x,y
 		)
 	end)
@@ -1876,7 +1876,7 @@ function fight(u)
 					u.dir=sgn(dx)
 					add(prj,typ.prj_s and {
 						e.x,e.y,
-						from_typ=typ,
+						typ=typ,
 						ap=u.ap,
 						x=u.x-u.dir*typ.prj_xo,
 						y=u.y+typ.prj_yo,
@@ -2228,22 +2228,22 @@ function wander(u)
 		1)
 end
 
-function dmg(from_typ,to)
-	to.hp-=from_typ.atk*
-		dmg_mult[from_typ.atk_typ..
+function dmg(typ,to)
+	to.hp-=typ.atk*
+		dmg_mult[typ.atk_typ..
 			to.typ.def]
 	if to.typ.unit and
 		to.st.rest or to.st.y then
 		wander(to)
 	end
-	to.conv+=from_typ.conv
+	to.conv+=typ.conv
 	if to.ai and to.grp!="atk" then
 		to.ai.safe=
 			mvg(to.ai.p1,to.x,to.y,1)
 	end
 	if to.onscr then
 		poke(0x34a8,rnd"32",rnd"32")
-		sfx(from_typ.sfx)
+		sfx(typ.sfx)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
