@@ -1478,29 +1478,59 @@ function tick(u)
 	end
 
 	update_unit(u)
-	update_viz(u)
+
 	local x,y,adj=u.x,u.y
-	if u.upd and u.st.agg and
-		typ.atk then
-		for e in all(units) do
-			if e.ap!=u.ap or
-				typ.monk and e.dmgd and
-				not e.bldg
-			then
-				local d=dist(x-e.x,y-e.y)
-				if e.alive and d<=typ.los then
-					if e.bldg then
-						d+=typ.seige and
-							e.bldg==1 and
-							-999 or 999
+	if u.upd then
+		if u.hu then
+			local xo,yo,l=x%8\2,y%8\2,
+				ceil(typ.los/8)
+			local k=xo|yo*16|typ.los*256
+			if not vcache[k] then
+				vcache[k]={}
+				for dx=-l,l do
+				for dy=-l,l do
+					add(
+						dist(xo*2-dx*8-4,
+							yo*2-dy*8-4)<typ.los
+						and vcache[k],dx+dy*256)
+				end
+				end
+			end
+	
+			foreach(vcache[k],function(t)
+				local k=u.k+t
+				if k<maph<<8 and k>=0 and
+					k%256<mapw then
+					if bldgs[k] then
+						bldgs[k].disc=1
 					end
-					if d<agg_d then
-						agg_u,agg_d=e,d
+					exp[k],new_viz[k]=128,"v"
+				end
+			end)
+		end
+		
+		if u.st.agg and typ.atk then
+			for e in all(units) do
+				if e.ap!=u.ap or
+					typ.monk and e.dmgd and
+					not e.bldg
+				then
+					local d=dist(x-e.x,y-e.y)
+					if e.alive and
+						d<=typ.los then
+						if e.bldg then
+							d+=typ.seige and
+								e.bldg==1 and
+								-999 or 999
+						end
+						if d<agg_d then
+							agg_u,agg_d=e,d
+						end
 					end
 				end
 			end
+			atk(u,agg_u)
 		end
-		atk(u,agg_u)
 	end
 
 	if typ.unit and not u.st.wayp then
@@ -1514,38 +1544,6 @@ function tick(u)
 		end
 		u.st.wayp,u.st.adj=adj,adj
 		s(pos,x\4,y\4,1)
-	end
-end
-
-function update_viz(u)
-	if u.hu and u.upd then
-		local los=u.typ.los
-		local xo,yo,l=
-			u.x%8\2,u.y%8\2,
-			ceil(los/8)
-		local k=xo|yo*16|los*256
-		if not vcache[k] then
-			vcache[k]={}
-			for dx=-l,l do
-			for dy=-l,l do
-				add(
-					dist(xo*2-dx*8-4,
-						yo*2-dy*8-4)<los
-					and vcache[k],dx+dy*256)
-			end
-			end
-		end
-
-		foreach(vcache[k],function(t)
-			local k=u.k+t
-			if k<maph<<8 and k>=0 and
-				k%256<mapw then
-				if bldgs[k] then
-					bldgs[k].disc=1
-				end
-				exp[k],new_viz[k]=128,"v"
-			end
-		end)
 	end
 end
 -->8
