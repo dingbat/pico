@@ -318,7 +318,7 @@ function start()
 		units[1],
 		unspl(stp[res1.pos],":")
 
-	qdmaps()
+	qdmaps"d"
 end
 
 function init()
@@ -1399,7 +1399,7 @@ function tick(u)
 			mset(x8,y8,86)
 			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
-			qdmaps()
+			qdmaps"r"
 		elseif typ.queen then
 			npl-=1
 			if npl==1 or u==hq then
@@ -1936,10 +1936,10 @@ function mine(u)
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
 	local t=mget(x,y)
-	local f=p[[7=45
-11=50
-19=40
-39=60]][fget(t)]
+	local f=p[[7=6
+11=6
+19=6
+39=6]][fget(t)]
 	local n=g(restiles,x,y,f)
 	if not f then
 		if not mine_nxt(u,r) then
@@ -1955,8 +1955,8 @@ function mine(u)
 		elseif n==1 then
 			mset(x,y,68)
 			s(dmap_st[r],x,y)
-			s(dmaps[r],x,y)
-			qdmaps()
+			s(dmaps[r],x,y,.55)
+			qdmaps(r)
 		end
 		s(restiles,x,y,n-1)
 	end
@@ -2216,7 +2216,7 @@ function reg_bldg(b)
 			typ.h8 or reg(x+1,y-1))
 	end
 	if not b.const and not typ.farm then
-		qdmaps()
+		qdmaps"d"
 		res[b.p].reqs|=typ.breq
 	end
 end
@@ -2322,28 +2322,35 @@ end
 --paths
 
 function dmap_find(u,k)
-	local x,y,dmap,wayp,l=
+	local x,y,tk,dmap,wayp,l=
 		u.x8,
 		u.y8,
+		u.k,
 		dmaps[k],
 		{},9
 	if (not dmap) return
-	while l>=1 do
-		local o=max(1,g(dmap,x,y,9))
+	while l>=.5 do
+		local o=g(dmap,x,y,9)
 		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
-			if w<l then
-				l,x,y=w,unpack(t)
+			if w<l and (u.ai or exp[t.k]) then
+				l,tk,x,y=w,t.k,unpack(t)
 			end
 		end,x,y,1,1)
-		if (l>=o) return
+		if l>=o then
+			dmap[tk]=min(l+1,9)
+			return
+		end
 		add(wayp,{x*8+3,y*8+3})
 	end
 	return wayp,x,y
 end
 
-function qdmaps()
-	dq,asc=split"d,r,g,b",{}
+function qdmaps(r)
+	dq,asc=split(p[[r=r,g,b,d
+g=g,r,b,d
+b=b,g,r,d
+d=d,r,g,b]][r]),{}
 end
 
 function dmap()
@@ -3404,7 +3411,7 @@ __sfx__
 01020000052670061710267006171236700617123570161712357016170a157006170d147006170d147006170b047006170b037006170a037006170a727006170b727006170c717006170b117006170811700617
 010600000e5511a555000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 91040000154400e4501a4600e4201a4600e4501a4400e433164001f400174001440018400154001940016400114001a4001e4001b40018400214001940022400144001d400154001e400164001f4001740020400
-0120000015754157521575215752157550e7000e7000e7000e7000e7000e7000e700147000c700087000570002700017000070000700007000070000700007000070000700007000070000700007000070000700
+010a00000e7140e7120e7220e7220e7320e7320e7420e7420e7420e7420e7320e7320e7220e7220e7120e715147000c7000870005700027000170000700007000070000700007000070000700007000070000700
 191700000e5600e5600e5620e555180001800018000131300e130111301313015130151321513213130111301313013132131321313511130101300e1370c1300e1300e1320e1320e13511564115601156211555
 191700000e5600e5600e5620e55518000180000c0000c1300e1301113013130151301513215132131301113018130181321813218135101301313715130171301a1301a1321a1221a11311564115601156211555
 411700000e5600e5600e5620e555180001800018000131300e130111301313015130151321513213130111301313013132131321313511130101300e1370c1300e1300e1320e1320e13511564115601156211555
