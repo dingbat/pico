@@ -287,12 +287,12 @@ function _draw()
 			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"
-			rect(to_bld.typ.fw,
-				to_bld.typ.fh,
+			rect(to_bld.fw,
+				to_bld.fh,
 				unspl"-1,-1,3")
 			fillp()
 		end
-		local _ENV=to_bld.typ
+		local _ENV=to_bld
 		sspr(rest_x,rest_y,fw,h)
 		pal()
 	end
@@ -381,6 +381,12 @@ atk_typ=ant
 gr=3
 cap=6
 
+t=10
+r=5
+g=0
+b=0
+breq=0
+
 w=4
 fw=4
 h=4
@@ -437,6 +443,12 @@ def=sg
 atk_typ=sg
 sg=1
 
+t=13
+r=0
+g=10
+b=10
+breq=0
+
 const=1
 w=8
 fw=8
@@ -474,6 +486,12 @@ atk=1.667
 conv=0
 def=spider
 atk_typ=spider
+
+t=13
+r=8
+g=8
+b=0
+breq=0
 
 const=1
 w=8
@@ -514,6 +532,12 @@ aoe=0
 prj_spd=1
 atk_typ=acid
 def=ant
+
+t=14
+r=3
+g=0
+b=5
+breq=0
 
 const=1
 w=7
@@ -556,6 +580,12 @@ conv=0
 def=ant
 atk_typ=ant
 
+t=10
+r=6
+g=2
+b=0
+breq=0
+
 const=1
 w=8
 fw=8
@@ -596,6 +626,12 @@ prj_spd=.72
 def=sg
 atk_typ=sg
 sg=1
+
+t=18
+r=2
+g=14
+b=14
+breq=0
 
 const=1
 w=16
@@ -663,7 +699,7 @@ sfx=10
 prj_xo=-4
 prj_yo=2
 prj_s=52
-breq=0
+bmap=0
 units=1
 queen=1
 dir=-1
@@ -684,6 +720,11 @@ aoe=0
 prj_spd=.9
 atk_typ=bld
 def=bld
+
+r=0
+g=5
+b=15
+breq=0
 
 w=8
 w8=1
@@ -707,7 +748,7 @@ sfx=10
 prj_yo=-2
 prj_xo=-1
 prj_s=48
-breq=1
+bmap=1
 dir=-1
 tmap=-1
 d=0]]
@@ -719,6 +760,11 @@ hp=100
 const=10
 hpr=10
 def=bld
+
+r=0
+g=0
+b=6
+breq=0
 
 w=8
 fw=8
@@ -738,7 +784,7 @@ dead_fps=7.5
 bldg=1
 bldrs=1
 drop=5
-breq=2
+bmap=2
 dir=-1
 tmap=-1
 d=0]]
@@ -750,6 +796,11 @@ hp=250
 const=25
 hpr=10
 def=bld
+
+r=0
+g=4
+b=20
+breq=8
 
 w=8
 fw=8
@@ -768,7 +819,7 @@ portx=97
 porty=80
 bldg=1
 bldrs=2
-breq=4
+bmap=4
 units=2
 idl=1
 mil=1
@@ -783,6 +834,11 @@ hp=200
 const=20
 hpr=10
 def=bld
+
+r=0
+g=4
+b=15
+breq=0
 
 w=8
 fw=8
@@ -801,7 +857,7 @@ portx=15
 porty=112
 bldg=1
 bldrs=1
-breq=8
+bmap=8
 units=2
 idl=1
 mil=1
@@ -818,6 +874,11 @@ hpr=8
 def=bld
 cycles=5
 gr=.5
+
+r=0
+g=3
+b=3
+breq=2
 
 w=8
 fw=8
@@ -837,7 +898,7 @@ porty=88
 farm=1
 bldg=farm
 bldrs=1
-breq=16
+bmap=16
 dir=-1
 tmap=-1
 d=0]]
@@ -856,6 +917,11 @@ aoe=0
 prj_spd=.8
 atk_typ=bld
 def=bld
+
+r=0
+g=25
+b=60
+breq=13
 
 w=15
 fw=16
@@ -878,7 +944,7 @@ sfx=10
 prj_yo=0
 prj_xo=0
 prj_s=48
-breq=32
+bmap=32
 units=1
 mil=1
 dir=-1
@@ -932,6 +998,11 @@ const=16
 hpr=8
 def=bld
 
+r=0
+g=10
+b=15
+breq=4
+
 w=8
 fw=8
 h=8
@@ -950,7 +1021,7 @@ porty=111
 bldg=1
 bldrs=2
 units=1
-breq=64
+bmap=64
 mil=1
 dir=-1
 tmap=-1
@@ -968,6 +1039,13 @@ conv=2
 atk_typ=ant
 def=ant
 monk=65
+
+t=30
+r=0
+g=12
+b=0
+p=
+breq=0
 
 const=1
 w=8
@@ -1000,172 +1078,99 @@ tmap=-1
 d=0]]
 
 ant.prod={
-	p([[
-r=0
-g=0
-b=6
-breq=0
-i=1]],mound),
-	p([[
-r=0
-g=3
-b=3
-breq=2
-i=2]],farm),
-	p([[
-r=0
-g=4
-b=15
-breq=0
-i=3]],barracks),
-	p([[
-r=0
-g=4
-b=20
-breq=8
-i=4]],den),
-	p([[
-r=0
-g=10
-b=15
-breq=4
-i=5]],mon),
-	p([[
-r=0
-g=5
-b=15
-breq=0
-i=6]],tower),
-	p([[
-r=0
-g=25
-b=60
-breq=13
-i=7]],castle)
+	mound,
+	farm,
+	barracks,
+	den,
+	mon,
+	tower,
+	castle
 }
 
 mon.prod={
-	p([[
-t=30
-r=0
-g=12
-b=0
-p=
-breq=0
-i=1]],monk),
+	monk,
+	nil,nil,nil,nil,
 	p([[
 t=30
 r=10
 g=20
 b=0
 breq=0
-i=6
 tmap=1024
 up=-1
-idx=27]],p[[
+idx=27
 portx=62
-porty=88]],function(_ENV)
+porty=88]],monk,function(_ENV)
 	spd=.286
 	hp*=1.25
 	conv*=1.2
-end,monk),
+end)
 }
 
 queen.prod={
-	p([[
-t=10
-r=5
-g=0
-b=0
-p=
-breq=0
-i=1]],ant),
+	ant,
+	nil,nil,nil,nil,
 	p([[
 t=25
 r=20
 g=0
 b=20
 breq=0
-i=6
 tmap=1
 up=-1
-idx=15]],p[[
 portx=24
-porty=80]],function(_ENV)
+porty=80]],ant,function(_ENV)
 	cap\=.72
 	spd*=1.12
 	gr*=.9
-end,ant),
+end),
 	p([[
 t=20
 r=10
 g=10
 b=10
-breq=4
-i=7
+breq=2
 tmap=2
-idx=24]],p[[
+idx=24
 portx=33
-porty=80]],function()
+porty=80]],{},function()
 	mound.p1.units=
-		add(mound.prod,p([[
-t=12
-r=7
-g=0
-b=0
-p=
-breq=0
-i=2]],ant))
-end,{})
+		add(mound.prod,ant)
+end)
 }
 
 den.prod={
-	p([[
-t=13
-r=0
-g=10
-b=10
-p=
-breq=0
-i=1]],beetle),
-	p([[
-t=13
-r=8
-g=8
-b=0
-p=
-breq=0
-i=2]],spider),
+	beetle,
+	spider,
+	nil,nil,nil,
 	p([[
 t=20
 r=0
 g=20
 b=0
 breq=0
-i=6
 tmap=4
 up=-1
-idx=16]],p[[
+idx=16
 portx=25
-porty=88]],function(_ENV)
+porty=88]],beetle,function(_ENV)
 	atk*=1.15
 	hp*=1.15
-end,beetle),
+end),
 	p([[
 t=30
 r=10
 g=10
 b=0
 breq=0
-i=7
 tmap=8
 up=-1
-idx=17]],p[[
+idx=17
 portx=16
-porty=88]],function(_ENV)
+porty=88]],spider,function(_ENV)
 	atk*=1.2
 	hp*=1.2
-end,spider),
+end),
 }
 
 mound.prod={
@@ -1175,128 +1180,103 @@ r=15
 g=15
 b=10
 breq=0
-i=1
 tmap=16
 up=-1
-idx=18]],p[[
+idx=18
 portx=60
-porty=80]],function(_ENV)
+porty=80]],farm,function(_ENV)
 		gr*=1.15
 		cycles\=.6
-	end,farm),
+	end)
 }
 
 barracks.prod={
-	p([[
-t=10
-r=6
-g=2
-b=0
-p=
-breq=0
-i=1]],warant),
-	p([[
-t=14
-r=3
-g=0
-b=5
-p=
-breq=0
-i=2]],archer),
+	warant,
+	archer,
 	p([[
 t=10
 r=9
 g=6
 b=0
 breq=0
-i=3
 tmap=32
-idx=19]],p[[
+idx=19
 portx=51
-porty=80]],function(_ENV)
+porty=80]],archer,function(_ENV)
 	los,range=40,35
-end,archer),
+end),
+	nil,nil,
 	p([[
 t=18
 r=15
 g=7
 b=0
 breq=0
-i=6
 tmap=64
 up=-1
-idx=20]],p[[
+idx=20
 portx=43
-porty=88]],function(_ENV)
+porty=88]],warant,function(_ENV)
 	atk*=1.333
 	los=30
 	hp*=1.333
-end,warant),
+end),
 	p([[
 t=10
 r=15
 g=0
 b=9
 breq=0
-i=7
 tmap=128
 up=-1
-idx=21]],p[[
+idx=21
 portx=34
-porty=88]],function(_ENV)
+porty=88]],archer,function(_ENV)
 	atk*=1.25
 	hp*=1.2
-end,archer),
+end),
 }
 
 castle.prod={
-	p([[
-t=18
-r=2
-g=14
-b=14
-p=
-breq=0
-i=1]],cat),
-	p([[
-t=40
-r=20
-g=0
-b=0
-breq=64
-i=6
-tmap=256
-idx=22]],p[[
-portx=16
-porty=80]],function(_ENV)
-	qty+=.5
-end,heal),
-	p([[
-t=10
-r=0
-g=10
-b=20
-breq=0
-i=7
-tmap=512
-idx=23]],p[[
-portx=69
-porty=80]],function(_ENV)
-	los,range=55,50
-end,castle),
+	cat,
+	nil,
 	p([[
 t=30
 r=0
 g=25
 b=30
 breq=0
-i=2
 tmap=2048
-idx=28]],p[[
+idx=28
 portx=78
-porty=80]],function(_ENV)
+porty=80]],castle,function(_ENV)
 	aoe,prj_s,atk=1,60,2
-end,castle)
+end),
+	nil,nil,
+	p([[
+t=40
+r=20
+g=0
+b=0
+breq=64
+tmap=256
+idx=22
+portx=16
+porty=80]],heal,function(_ENV)
+	qty+=.5
+end),
+	p([[
+t=10
+r=0
+g=10
+b=20
+breq=0
+tmap=512
+idx=23
+portx=69
+porty=80]],castle,function(_ENV)
+	los,range=55,50
+end)
 }
 end
 -->8
@@ -1615,9 +1595,9 @@ function input()
 		if clk and bldable() then
 			sfx"1"
 			local b=unit(
-				to_bld.typ,
-				mx8*8+to_bld.typ.w\2,
-				my8*8+to_bld.typ.h\2,
+				to_bld,
+				mx8*8+to_bld.w\2,
+				my8*8+to_bld.h\2,
 				unspl"1,1,1")
 			fsel(bld,b)
 			pay(to_bld,-1,res1)
@@ -1970,7 +1950,7 @@ function produce(u)
 		if bld.x then
 			local _ENV=bld
 			gl.res1.techs|=tmap
-			x(y.p1)
+			x(typ.p1)
 			gl.sfx"33"
 			if up and up<1 then
 				up+=1
@@ -1978,13 +1958,12 @@ function produce(u)
 				g*=2
 				b*=2
 				t*=1.5
-				typ.up,done=up
+				done=nil
 			end
 		else
-			local new=gl.unit(
-				bld.typ,x,y,p),
+			local new=gl.unit(bld,x,y,p),
 				onscr and hu and gl.sfx"19"
-			if new.typ.ant and
+			if bld.ant and
 				rtx and
 				fget(mget(rtx,rty),1)
 			then
@@ -2082,20 +2061,20 @@ function box(_ENV)
 	return _ENV
 end
 
-function can_pay(costs,_ENV)
-	return r>=costs.r and
-		g>=costs.g and
-		b>=costs.b and
-		(not costs.p or
+function can_pay(typ,_ENV)
+	return r>=typ.r and
+		g>=typ.g and
+		b>=typ.b and
+		(not typ.p or
 			p<min(pl,99))
-		and reqs|costs.breq==reqs
+		and reqs|typ.breq==reqs
 end
 
-function pay(costs,dir,_ENV)
-	r+=costs.r*dir
-	g+=costs.g*dir
-	b+=costs.b*dir
-	if costs.p then
+function pay(typ,dir,_ENV)
+	r+=typ.r*dir
+	g+=typ.g*dir
+	b+=typ.b*dir
+	if typ.unit then
 		p-=dir
 	end
 end
@@ -2189,9 +2168,9 @@ end
 
 function bldable()
 	return	acc(mx8,my8,1) and
-		(to_bld.typ.h8 or
+		(to_bld.h8 or
 			acc(mx8,my8+1,1)) and
-		(to_bld.typ.w8 or
+		(to_bld.w8 or
 			acc(mx8+1,my8,1) and
 			acc(mx8+1,my8+1,1))
 end
@@ -2217,7 +2196,7 @@ function reg_bldg(b)
 	end
 	if not b.const and not typ.farm then
 		qdmaps"d"
-		res[b.p].reqs|=typ.breq
+		res[b.p].reqs|=typ.bmap
 	end
 end
 
@@ -2511,21 +2490,21 @@ function pres(r,x,y,z)
 end
 
 function draw_port(
-	typ,fn,x,y,costs,r,bg,fg,u)
+	typ,fn,x,y,r,bg,fg,u,cost)
 	camera(-x,-y)
 	local nopay,axnsel=
-		costs and not can_pay(costs,res1),
+		cost and not can_pay(typ,res1),
 		typ.portf and act>0
 	rect(0,0,10,9,
 		u and u.p or
 		nopay and 6 or
-		costs and 3 or
+		cost and 3 or
 		axnsel and 10 or
 		typ.porto or 1
 	)
 	rectfill(1,1,9,8,
-		nopay and 7 or costs and
-		costs.x and 10 or
+		nopay and 7 or
+		cost and cost.x and 10 or
 		axnsel and 9 or
 		typ.portf or 6
 	)
@@ -2539,7 +2518,7 @@ function draw_port(
 	add(fn and btns,{
 		r={x,y,x+10,y+8},
 		fn=fn,
-		costs=costs,
+		costs=cost,
 	})
 
 	if fg then
@@ -2564,7 +2543,7 @@ function sel_ports(x)
 						sel={u}
 					end
 				end,
-				x,107,nil,
+				x,107,
 				max(u.hp)/u.max_hp,8,11,u
 			)
 		end
@@ -2582,7 +2561,7 @@ portf=9]],
 			function()
 				pay(sel1.cost,1,res1)
 				sel1.hp=0
-			end,24,107,nil,
+			end,24,107,
 			sel1.const/seltyp.const,
 			5,12
 		)
@@ -2592,15 +2571,15 @@ portf=9]],
 	if sel1.typ.farm then
 		?"\f4\^jbr\|i"..sel1.cycles.."/"..seltyp.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
 	end
-	foreach(sel1.prod,function(b)
+	for i,b in next,sel1.prod do
 		if not b.done then
 			draw_port(
-				b.typ,
+				b,
 				function()
 					if can_pay(b,res1) and (
 						not q or
 						q.typ==b and q.qty<9) then
-						if b.typ.bldg then
+						if b.bldg then
 							to_bld=b!=to_bld and b
 							return
 						end
@@ -2611,15 +2590,16 @@ portf=9]],
 						sfx"16"
 					end
 				end,
-				split"88,76,64,52,40,88,76,64"[b.i],
-				split"106,106,106,106,106,117,117,117"[b.i],b
+				split"88,76,64,52,40,88,76,64"[i],
+				split"106,106,106,106,106,117,117,117"[i],
+				nil,nil,nil,nil,b
 			)
 		end
-	end)
+	end
 	if q then
 		local b=q.typ
 		draw_port(
-			b.typ,
+			b,
 			function()
 				b.done=pay(b,1,res1)
 				if q.qty==1 then
@@ -2632,7 +2612,7 @@ portf=9]],
 			b.x and 24 or
 				?"\f7\^j8r\|iX"..q.qty
 				and 20,
-			107,nil,
+			107,
 			q.x/b.t,5,12
 		)
 	end
@@ -2934,7 +2914,6 @@ function loadgame()
 		if techs|tmap==techs then
 			x(y.p1)
 			up,done=up and 0,not up
-			typ.up=up
 		end
 	end)
 	start()
@@ -2972,9 +2951,9 @@ function ai_frame(ai)
 				res2.tot>=p and ai.safe then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
-					curr=unit(b.typ,
-						x8+b.typ.w/2,
-						y8+b.typ.h/2,
+					curr=unit(b,
+						x8+b.w/2,
+						y8+b.h/2,
 						ai.typ,1)
 				else
 					uhold=b
@@ -2995,7 +2974,7 @@ function ai_frame(ai)
 					bgrat=split"2.75,2.35,2"[p]
 				elseif res2.diff>=p then
 					typs[pid].x(
-						typs[pid].y[ai.typ])
+						typs[pid].typ[ai.typ])
 				end
 			end
 		end
