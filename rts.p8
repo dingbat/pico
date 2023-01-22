@@ -147,9 +147,9 @@ c=13]],b.x,b.y))
 	end
 end
 
-function banner(a,t,subt,cx)
+function bnr(a,t,st,cx)
 	camera(cx)
-	local secs=res1.t\1%60
+	local s=res1.t\1%60
 	rectfill(unspl"0,88,128,107,9")
 	unl"6,87,44,87"
 	unl"82,87,121,87"
@@ -157,13 +157,13 @@ function banner(a,t,subt,cx)
 	line(
 		?split",\^j2l\|e\#9\f5 ,\^j2l\|e\#9\f0 2X "[res1.npl]..split"easy ai ,normal ai \|m\^x1 ,hard ai "[res.p2.diff]
 		-3,unspl"80,8,80,9")
-	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(secs<10 and ":0" or ":")..secs.." "
+	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
 	pspl"1,0"
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
-	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..subt
+	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..st
 	?"\^jdn\|h\^w\^t\fa"..t
 end
 
@@ -215,13 +215,13 @@ function _draw()
 	end)
 	if loser then
 		resbar()
-		banner(loser,split"defeat\^x2....\^x4\^jdn\f1defeat\^x2....,victory!\^jdn\f1victory!"[loser],
+		bnr(loser,split"defeat\^x2....\^x4\^jdn\f1defeat\^x2....,victory!\^jdn\f1victory!"[loser],
 			"press ❎ for menu \|f\^x1 ",ban)
 		return
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15) --f
+	draw_map(mapw,15)
 
 	_pal,pal=pal,max
 	foreach(af,draw_unit)
@@ -323,12 +323,8 @@ end
 
 function init()
 	poke(0x5f2d,3)
-	if stat"6"=="map" then
-		memcpy(unspl"0x2000,0x8000,0x1000")
-	else
-		reload()
-	end
-
+	reload()
+	
 	music(unspl"0,0,7")
 	menuitem(2,"⌂ save",save)
 	menuitem(3,"∧ resign",
@@ -2872,7 +2868,7 @@ bldbld=.1]]
 
 function save()
 	local ptr,foreach=0,foreach
-	banner(2,"savefile\^jdn\f1savefile","drag+drop to load \|f\^x1 ")
+	bnr(2,"savefile\^jdn\f1savefile","drag+drop to load \|f\^x1 ")
 	campal()
 	local function draw(v)
 		for i=0,8,4 do
