@@ -1,7 +1,7 @@
 credits:
 - a*
 - dist
-- sfx pack: "explosion 18", "17 slipways"
+- sfx pack: "explosion 18"
 
 32x32
 
