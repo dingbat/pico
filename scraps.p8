@@ -298,6 +298,7 @@ x (5 tok) inline new() in init()
 - (2 tok but .07%) r.npl,r.diff=unspl(split"2:1,2:2,2:3,3:2,3:3"[ai_diff+1],":"))
 - (14 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 - (1 tok) los var (=typ.loc) in tick()
+- (4 tok) parseify adding proj
 
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
@@ -377,6 +378,15 @@ hard: /1
 - double click
 - click on unit pic to deselect it, right click to select only it
 - alert when being attacked offscreen
+
+typ=wayp
+x=target
+
+
+agg (1)
+res (2) [tx,ty]
+farm (1)
+
 
 
 tostr[[[[]]

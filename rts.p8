@@ -112,7 +112,7 @@ function _update()
 		then
 			del(prj,b)
 			for u in all(units) do
-				if int(
+				if u.ap!=b.ap and int(
 					u.r,
 					{b.x,b.y,b.x,b.y},
 					typ.aoe
@@ -1879,6 +1879,7 @@ function fight(u)
 					add(prj,typ.prj_s and {
 						e.x,e.y,
 						from_typ=typ,
+						ap=u.ap,
 						x=u.x-u.dir*typ.prj_xo,
 						y=u.y+typ.prj_yo,
 					} or dmg(typ,e))
