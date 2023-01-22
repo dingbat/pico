@@ -1326,7 +1326,7 @@ end
 
 function move(u,x,y,agg)
 	u.st=p("t=move",
-		get_wayp(u,x,y,0))
+		path(u,x,y,0))
 	u.st.agg=agg
 end
 
@@ -1334,13 +1334,13 @@ function bld(u,b)
 	u.st,u.res=p([[
 t=bld
 in_bld=1
-]],get_wayp(u,b.x,b.y),b)
+]],path(u,b.x,b.y),b)
 end
 
 function gather(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	u.st=p("t=gather",
-		wp or get_wayp(u,t.x,t.y),
+		wp or path(u,t.x,t.y),
 		t,p[[7=r
 11=g
 19=b
@@ -1357,7 +1357,7 @@ function drop(u,nxt_res,dropu)
 t=drop
 in_bld=1]],
 		wayp or
-			get_wayp(u,dropu.x,dropu.y),
+			path(u,dropu.x,dropu.y),
 		dropu or tile_unit(x,y),
 		nxt_res)
 end
@@ -1366,7 +1366,7 @@ function atk(u,e)
 	if u.typ.atk and e then
 		u.st,u.disc,u.res=
 			p("t=atk",
-				get_wayp(u,e.x,e.y),e),
+				path(u,e.x,e.y),e),
 			e.hu and u.bldg
 	end
 end
@@ -1374,7 +1374,7 @@ end
 function gofarm(u,f)
 	f.farmer,u.st,u.res=u,p([[
 t=farm
-in_bld=1]],get_wayp(u,
+in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
 		f.y+rndspl"-2,-1,0,1,2"))
 	u.st.farm=f
@@ -2373,7 +2373,7 @@ function dmap()
 				dmaps[q.x]=deli(dq,1).p1
 			end
 		else
-			local open,f={},p[[r=2
+			local o,f={},p[[r=2
 g=3
 b=4]][q]
 			if not dmap_st[q] then
@@ -2389,15 +2389,15 @@ b=4]][q]
 
 			for i,t in next,dmap_st[q] do
 				if	surr(nil,unpack(t)) then
-					add(open,t).k=i
+					add(o,t).k=i
 				end
 			end
-			dq[1]=p("c=0",open,q)
+			dq[1]=p("c=0",o,q)
 		end
 	end
 end
 
-function get_wayp(u,x,y,tol)
+function path(u,x,y,tol)
 	local function nearest(gx,gy)
 		for n=0,16 do
 			local best_d,best_t=32767
