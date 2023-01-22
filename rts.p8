@@ -25,16 +25,16 @@ function _update()
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
 		if btnp"0" or btnp"1" then
-			ai_diff+=btnp()^^-2
-			ai_diff%=5
+			diff+=btnp()^^-2
+			diff%=5
 		end
 		if lclk then
 			init()
 			for k,r in inext,res do
 				r.pos,r.npl,r.diff=
 					del(posidx,rnd(posidx)),
-					2+ai_diff\3,
-					split"1,2,3,2,3"[ai_diff+1]
+					2+diff\3,
+					split"1,2,3,2,3"[diff+1]
 			end
 			foreach(split([[7,64,64
 1,49,64
@@ -77,7 +77,7 @@ function _update()
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
-		hunit,idle,idle_mil=
+		hunit,idl,idlm=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8,{}),
 		t()%6<1,{}
@@ -106,19 +106,19 @@ function _update()
 		end
 	end
 
-	foreach(proj,function(b)
+	foreach(prj,function(b)
 		local typ=b.from_typ
-		if norm(b,b,typ.proj_spd)<1
+		if norm(b,b,typ.prj_spd)<1
 		then
-			del(proj,b)
+			del(prj,b)
 			for u in all(units) do
 				if int(
 					u.r,
 					{b.x,b.y,b.x,b.y},
-					typ.proj_aoe
+					typ.aoe
 				) then
 					dmg(typ,u)
-					if (typ.proj_aoe==0) break
+					if (typ.aoe==0) break
 					if hlv.var then
 						hilite(p([[f=2
 c=13]],b.x,b.y))
@@ -182,12 +182,12 @@ function _draw()
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
 		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcg\-e\|h\f0difficulty:\^jcg\-e\fcdifficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
-		camera(split"8,12,8,18,14"[ai_diff+1])
-		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\fe2 normals,\f02 hards\-0\-4\|f\f82 hards"[ai_diff+1].." \|h\f0▶\|f\-c\f7▶"
+		camera(split"8,12,8,18,14"[diff+1])
+		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\fe2 normals,\f02 hards\-0\-4\|f\f82 hards"[diff+1].." \|h\f0▶\|f\-c\f7▶"
 		return
 	end
 
-	local bf,af,proj_so={},{},
+	local bf,af,prj_so={},{},
 		cf\5%2*2
 	foreach(units,function(u)
 		if u.onscr or loser then
@@ -207,9 +207,9 @@ function _draw()
 
 	foreach(bf,draw_unit)
 	camera(cx,cy)
-	foreach(proj,function(_ENV)
+	foreach(prj,function(_ENV)
 		sspr(
-			from_typ.proj_s+proj_so,
+			from_typ.prj_s+prj_so,
 			96,2,2,x,y
 		)
 	end)
@@ -345,7 +345,7 @@ npl=0]]
 
 	res1,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,
-		proj,bldgs,new_viz,dmap_st,
+		prj,bldgs,new_viz,dmap_st,
 		typs,ais,
 		posidx,
 		cf,selt,alert,ban,
@@ -433,9 +433,9 @@ range=0
 atk_freq=30
 atk=.75
 conv=0
-def=seige
-atk_typ=seige
-seige=1
+def=sg
+atk_typ=sg
+sg=1
 
 const=1
 w=8
@@ -510,8 +510,8 @@ range=28
 atk=.667
 conv=0
 atk_freq=30
-proj_aoe=0
-proj_spd=1
+aoe=0
+prj_spd=1
 atk_typ=acid
 def=ant
 
@@ -538,9 +538,9 @@ porty=72
 unit=1
 sfx=10
 dir=1
-proj_xo=-2
-proj_yo=0
-proj_s=52
+prj_xo=-2
+prj_yo=0
+prj_s=52
 tmap=-1
 d=0]]
 
@@ -591,11 +591,11 @@ range=50
 atk=1.5
 conv=0
 atk_freq=60
-proj_aoe=2
-proj_spd=.72
-def=seige
-atk_typ=seige
-seige=1
+aoe=2
+prj_spd=.72
+def=sg
+atk_typ=sg
+sg=1
 
 const=1
 w=16
@@ -620,9 +620,9 @@ porty=72
 unit=1
 sfx=10
 dir=1
-proj_xo=1
-proj_yo=-4
-proj_s=56
+prj_xo=1
+prj_yo=-4
+prj_s=56
 tmap=-1
 d=0]]
 
@@ -634,8 +634,8 @@ range=23
 atk=1.5
 conv=0
 atk_freq=30
-proj_aoe=0
-proj_spd=1
+aoe=0
+prj_spd=1
 atk_typ=acid
 def=queen
 
@@ -660,9 +660,9 @@ drop=0
 bldg=1
 bldrs=15
 sfx=10
-proj_xo=-4
-proj_yo=2
-proj_s=52
+prj_xo=-4
+prj_yo=2
+prj_s=52
 breq=0
 units=1
 queen=1
@@ -680,8 +680,8 @@ range=30
 atk=1.2
 conv=0
 atk_freq=30
-proj_aoe=0
-proj_spd=.9
+aoe=0
+prj_spd=.9
 atk_typ=bld
 def=bld
 
@@ -704,9 +704,9 @@ porty=0
 bldg=1
 bldrs=2
 sfx=10
-proj_yo=-2
-proj_xo=-1
-proj_s=48
+prj_yo=-2
+prj_xo=-1
+prj_s=48
 breq=1
 dir=-1
 tmap=-1
@@ -770,7 +770,7 @@ bldg=1
 bldrs=2
 breq=4
 units=2
-idle=1
+idl=1
 mil=1
 dir=-1
 tmap=-1
@@ -803,7 +803,7 @@ bldg=1
 bldrs=1
 breq=8
 units=2
-idle=1
+idl=1
 mil=1
 dir=-1
 tmap=-1
@@ -852,8 +852,8 @@ range=40
 atk=1.8
 conv=0
 atk_freq=15
-proj_aoe=0
-proj_spd=.8
+aoe=0
+prj_spd=.8
 atk_typ=bld
 def=bld
 
@@ -875,9 +875,9 @@ porty=80
 bldg=1
 bldrs=3
 sfx=10
-proj_yo=0
-proj_xo=0
-proj_s=48
+prj_yo=0
+prj_xo=0
+prj_s=48
 breq=32
 units=1
 mil=1
@@ -1295,7 +1295,7 @@ tmap=2048
 idx=28]],p[[
 portx=78
 porty=80]],function(_ENV)
-	proj_aoe,proj_s,atk=1,60,2
+	aoe,prj_s,atk=1,60,2
 end,castle)
 }
 end
@@ -1459,11 +1459,11 @@ function tick(u)
 		end
 		if u.hu then
 			if typ.ant then
-				if (u.st.idle) idle=u
-				u.st.idle=1
-			elseif typ.idle and not u.q
+				if (u.st.idl) idl=u
+				u.st.idl=1
+			elseif typ.idl and not u.q
 			then
-				idle_mil=u
+				idlm=u
 			end
 		end
 	end
@@ -1510,7 +1510,7 @@ function tick(u)
 					if e.alive and
 						d<=typ.los then
 						if e.bldg then
-							d+=typ.seige and
+							d+=typ.sg and
 								e.bldg==1 and
 								-999 or 999
 						end
@@ -1579,18 +1579,18 @@ function input()
 	end)
 
 	local cont,htile,axn,clk=
-		action==0,
-		tile_unit(mx8,my8),action,
+		act==0,
+		tile_unit(mx8,my8),act,
 		lclk or rclk
 
 	if clk and hbtn then
 		hbtn.fn(rclk)
-		if (axn==action) action=0
+		if (axn==act) act=0
 		return
 	end
 
-	if lclk and action>0 then
-		rclk,action=1,0
+	if lclk and act>0 then
+		rclk,act=1,0
 	end
 
 	if amy>104 and not selx then
@@ -1876,11 +1876,11 @@ function fight(u)
 					end
 				else
 					u.dir=sgn(dx)
-					add(proj,typ.proj_s and {
+					add(prj,typ.prj_s and {
 						e.x,e.y,
 						from_typ=typ,
-						x=u.x-u.dir*typ.proj_xo,
-						y=u.y+typ.proj_yo,
+						x=u.x-u.dir*typ.prj_xo,
+						y=u.y+typ.prj_yo,
 					} or dmg(typ,e))
 					if e.conv>=e.max_hp then
 						res[e.p].p-=1
@@ -2510,7 +2510,7 @@ function draw_port(
 	camera(-x,-y)
 	local nopay,axnsel=
 		costs and not can_pay(costs,res1),
-		typ.portf and action>0
+		typ.portf and act>0
 	rect(0,0,10,9,
 		u and u.p or
 		nopay and 6 or
@@ -2638,8 +2638,8 @@ porty=64
 porto=15
 portf=15
 ]],function()
-	action+=1
-	action%=2
+	act+=1
+	act%=2
 end,42,108)
 	end
 end
@@ -2686,7 +2686,7 @@ function draw_menu()
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
-			action==2 and p[[
+			act==2 and p[[
 portx=99
 porty=72
 porto=2
@@ -2702,32 +2702,32 @@ porty=72
 porto=2
 portf=13
 ]],function()
-	action+=1
-	action%=3
+	act+=1
+	act%=3
 end,20,108)
 	end
 
 	camera(-mmx,-mmy)
 
 	sspr(
-		add(btns,idle and {
+		add(btns,idl and {
 			r=split"116,121,125,128",
 			fn=function()
 				sfx"1"
-				hilite(idle)
-				sel={idle}
-				cx,cy=idle.x-64,idle.y-64
+				hilite(idl)
+				sel={idl}
+				cx,cy=idl.x-64,idl.y-64
 				cam()
 			end
 		}) and 48 or 56,
 		unspl"105,8,6,11,14")
 
 	sspr(
-		add(btns,idle_mil and {
+		add(btns,idlm and {
 			r=split"106,121,113,128",
 			fn=function()
-				hilite(idle_mil)
-				sel={idle_mil}
+				hilite(idlm)
+				sel={idlm}
 			end
 		}) and 48 or 56,
 		unspl"98,8,6,0,14")
@@ -2781,7 +2781,7 @@ pspl,rndspl,unspl,spldeli,campal=
 	comp(camera,pal)
 
 unl,unspr,stp,resk,
-	hlt,ai_diff,action,
+	hlt,diff,act,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2837,31 +2837,31 @@ var=dmg_mult
 antant=1
 antqueen=.7
 antspider=.8
-antseige=1.5
+antsg=1.5
 antbld=.5
 
 acidant=1
 acidqueen=.6
 acidspider=1.5
-acidseige=.7
+acidsg=.7
 acidbld=.25
 
 spiderant=1.5
 spiderqueen=1.1
 spiderspider=1
-spiderseige=1
+spidersg=1
 spiderbld=.1
 
-seigeant=.9
-seigequeen=3
-seigespider=.7
-seigeseige=1
-seigebld=12
+sgant=.9
+sgqueen=3
+sgspider=.7
+sgsg=1
+sgbld=12
 
 bldant=1
 bldqueen=.75
 bldspider=1.25
-bldseige=.9
+bldsg=.9
 bldbld=.1]]
 -->8
 --save
@@ -3017,7 +3017,7 @@ function ai_frame(ai)
 					del(u.sqd,u)
 				elseif not u.sqd then
 					u.sqd=(#ai.p1>#ai.p2 or
-						u.typ.seige) and
+						u.typ.sg) and
 						ai.p2 or ai.p1
 					add(u.sqd,u)
 				end
