@@ -816,7 +816,7 @@ hp=48
 const=8
 hpr=8
 def=bld
-cycles=1
+cycles=5
 gr=.5
 
 w=8
@@ -1182,7 +1182,7 @@ idx=18]],p[[
 portx=60
 porty=80]],function(_ENV)
 		gr*=1.15
-		cycles\=.65
+		cycles\=.6
 	end,farm),
 }
 
@@ -1936,10 +1936,10 @@ function mine(u)
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
 	local t=mget(x,y)
-	local f=p[[7=6
-11=6
-19=6
-39=6]][fget(t)]
+	local f=p[[7=45
+11=50
+19=40
+39=60]][fget(t)]
 	local n=g(restiles,x,y,f)
 	if not f then
 		if not mine_nxt(u,r) then
@@ -2322,15 +2322,14 @@ end
 --paths
 
 function dmap_find(u,k)
-	local x,y,tk,dmap,wayp,l=
+	local x,y,tk,dmap,p,l=
 		u.x8,
 		u.y8,
 		u.k,
-		dmaps[k],
+		dmaps[k] or {},
 		{},9
-	if (not dmap) return
 	while l>=.5 do
-		local o=g(dmap,x,y,9)
+		local o=dmap[tk] or 9
 		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<l and (u.ai or exp[t.k]) then
@@ -2341,9 +2340,9 @@ function dmap_find(u,k)
 			dmap[tk]=min(l+1,9)
 			return
 		end
-		add(wayp,{x*8+3,y*8+3})
+		add(p,{x*8+3,y*8+3})
 	end
-	return wayp,x,y
+	return p,x,y
 end
 
 function qdmaps(r)
