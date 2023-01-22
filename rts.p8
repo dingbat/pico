@@ -1325,35 +1325,26 @@ function mvg(units,x,y,agg,frc)
 end
 
 function move(u,x,y,agg)
-	u.st={
-		t="move",
-		wayp=get_wayp(u,x,y,0),
-		agg=agg,
-	}
+	u.st=p("t=move",
+		get_wayp(u,x,y,0))
+	u.st.agg=agg
 end
 
 function bld(u,b)
-	u.st,u.res={
-		t="bld",
-		target=b,
-		wayp=get_wayp(u,b.x,b.y),
-		in_bld=1
-	}
+	u.st,u.res=p([[
+t=bld
+in_bld=1
+]],get_wayp(u,b.x,b.y),b)
 end
 
 function gather(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
-	u.st={
-		tx,ty,
-		t="gather",
-		res=p[[7=r
+	u.st=p("t=gather",
+		wp or get_wayp(u,t.x,t.y),
+		t,p[[7=r
 11=g
 19=b
-39=r]][fget(mget(tx,ty))],
-		wayp=wp or
-			get_wayp(u,t.x,t.y),
-		target=t,
-	}
+39=r]][fget(mget(tx,ty))],tx,ty)
 end
 
 function drop(u,nxt_res,dropu)
@@ -1362,42 +1353,36 @@ function drop(u,nxt_res,dropu)
 		wayp,x,y=dmap_find(u,"d")
 		dropu=not wayp and units[u.p]
 	end
-	u.st={
-		t="drop",
-		wayp=wayp or
+	u.st=p([[
+t=drop
+in_bld=1]],
+		wayp or
 			get_wayp(u,dropu.x,dropu.y),
-		res=nxt_res,
-		target=dropu or
-			tile_unit(x,y),
-		in_bld=1
-	}
+		dropu or tile_unit(x,y),
+		nxt_res)
 end
 
 function atk(u,e)
 	if u.typ.atk and e then
-		u.st,u.disc,u.res={
-			t="atk",
-			target=e,
-			wayp=get_wayp(u,e.x,e.y),
-		},e.hu and u.bldg
+		u.st,u.disc,u.res=
+			p("t=atk",
+				get_wayp(u,e.x,e.y),e),
+			e.hu and u.bldg
 	end
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res=u,{
-		t="farm",
-		wayp=get_wayp(u,
-			f.x+rndspl"-2,-1,0,1,2",
-			f.y+rndspl"-2,-1,0,1,2"
-		),
-		farm=f,
-		in_bld=1
-	}
+	f.farmer,u.st,u.res=u,p([[
+t=farm
+in_bld=1]],get_wayp(u,
+		f.x+rndspl"-2,-1,0,1,2",
+		f.y+rndspl"-2,-1,0,1,2"))
+	u.st.farm=f
 end
 
 function tick(u)
 	local typ,targ,agg_d,agg_u=
-		u.typ,u.st.target,9999
+		u.typ,u.st.x,9999
 
 	box(u).onscr,u.upd,x8,y8=
 		int(u.r,{cx,cy,cx+128,cy+104},0),
@@ -1543,7 +1528,7 @@ function tick(u)
 		end
 	end
 
-	if typ.unit and not u.st.wayp then
+	if typ.unit and not u.st.typ then
 		while g(pos,x\4,y\4,
 			not u.st.in_bld and
 			g(bldgs,x\8,y\8)) and
@@ -1552,7 +1537,7 @@ function tick(u)
 			y+=rndspl"-1,-.5,0,0,.5,1"
 			adj={{x,y}}
 		end
-		u.st.wayp,u.st.adj=adj,adj
+		u.st.typ,u.st.adj=adj,adj
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1740,7 +1725,7 @@ function draw_unit(u)
 
 	local fw,w,h,stt,ihp,ux,uy=
 		typ.fw,typ.w,typ.h,
-		st.wayp and "move" or st.t,
+		st.typ and "move" or st.t,
 		u.max_hp/u.hp,unpack(u.r)
 
 	local sx,sy,ufps,fr,f,selc=
@@ -1787,7 +1772,7 @@ end
 function update_unit(u)
 	local st=u.st
 	local t,wayp,nxt,targ=
-		st.t,st.wayp,st.res,st.target
+		st.t,st.typ,st.y,st.x
 	if u.q and cf%15==u.q.y%15 then
 		produce(u)
 	end
@@ -1806,7 +1791,7 @@ function update_unit(u)
 	elseif targ and
 		int(targ.r,u.r,-2) then
 		u.dir,st.active,st.frame,
-			st.wayp=
+			st.typ=
 			sgn(targ.x-u.x),1,cf
 		if t=="drop" then
 			if u.res then
@@ -1818,11 +1803,11 @@ function update_unit(u)
 				gofarm(u,st.farm)
 			else
 				rest(u)
-				u.st.res,u.st.agg=nxt
+				u.st.y,u.st.agg=nxt
 			end
 		end
-	elseif st.res and not wayp then
-		mine_nxt(u,st.res)
+	elseif st.y and not wayp then
+		mine_nxt(u,st.y)
 	end
 
 	if wayp then
@@ -1830,7 +1815,7 @@ function update_unit(u)
 			st.spd or u.typ.spd)<.5
 		then
 			deli(wayp,1)
-			st.wayp=#wayp>0 and wayp
+			st.typ=#wayp>0 and wayp
 		end
 	elseif t=="move" then
 		rest(u)
@@ -1873,7 +1858,7 @@ function farmer(u)
 end
 
 function fight(u)
-	local typ,e=u.typ,u.st.target
+	local typ,e=u.typ,u.st.x
 	if u.upd then
 		local dx=e.x-u.x
 		local d=dist(dx,e.y-u.y)
@@ -1881,7 +1866,7 @@ function fight(u)
 			or int(u.r,e.r,0)
 		then
 			if not u.st.adj then
-				u.st.wayp=nil
+				u.st.typ=nil
 			end
 			if cf%typ.atk_freq==
 				u.id%typ.atk_freq
@@ -1915,7 +1900,7 @@ function fight(u)
 				typ.los>=d then
 				atk(u,e)
 			end
-			if not u.st.wayp then
+			if not u.st.typ then
 				rest(u)
 			end
 		end
@@ -1924,7 +1909,7 @@ end
 
 function bldrepair(u)
 	local _ENV,r,g=
-		u.st.target,res[u.p],_ENV
+		u.st.x,res[u.p],_ENV
 	if const then
 		const+=1
 		max_hp+=typ.hpr
@@ -1953,7 +1938,8 @@ function mine(u)
 		res1.g+=0x.00d
 		return
 	end
-	local r,x,y=u.st.res,unpack(u.st)
+	local r,x,y=u.st.y,
+		unpack(u.st.p1)
 	local t=mget(x,y)
 	local f=p[[7=45
 11=50
@@ -2033,8 +2019,8 @@ end
 -->8
 --utils
 
-function p(str,typ,x,y)
-	local p1,p2,p3={},{},{}
+function p(str,typ,x,y,...)
+	local p1,p2,p3={...},{},{}
 	local obj={p1,p2,p3,p2,
 		p1=p1,
 		p2=p2,
@@ -2252,7 +2238,7 @@ function dmg(from_typ,to)
 		dmg_mult[from_typ.atk_typ..
 			to.typ.def]
 	if to.typ.unit and
-		to.st.rest or to.st.res then
+		to.st.rest or to.st.y then
 		wander(to)
 	end
 	to.conv+=from_typ.conv
@@ -3107,46 +3093,6 @@ cartdata"age_of_ants"
 menuitem(1,"● toggle mouse",
 	function()dset(0,~dget"0")end)
 
--->8
-
-tostr[[[[]]
-ai_debug=true
-srand"12"
-if ai_debug then
-	_update60=_update
-	_draw_map,_dr,_pr,_resbar=
-		draw_map,_draw,print_res,
-		resbar
-	function draw_map(o,y)
-		if not ai_debug or o==0 then
-			_draw_map(o,y)
-		end
-	end
-	function _draw()
-		_dr()
-		if ai_debug and res1 then
-		camera()
-		local secs=res1.t\1%60
-		?res.p2.diff,60,107,9
-		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
-		?bgrat,80,114,3
-		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
-		camera()
-		end
-	end
-	function print_res(...)
-		if (ai_debug) res1=res.p2
-		local x=_pr(...)
-		res1=res[1]
-		return x
-	end
-	function resbar(...)
-		if (ai_debug) res1=res.p2
-		_resbar(...)
-		res1=res[1]
-	end
-end
---]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b350000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
