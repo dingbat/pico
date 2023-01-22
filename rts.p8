@@ -1304,7 +1304,7 @@ end
 
 function rest(u)
 	u.st=p[[t=rest
-rest=1
+rest=0
 agg=1]]
 end
 
@@ -1459,8 +1459,8 @@ function tick(u)
 		end
 		if u.hu then
 			if typ.ant then
-				if (u.st.idl) idl=u
-				u.st.idl=1
+				u.st.rest+=1
+				if (u.st.rest>30) idl=u
 			elseif typ.idl and not u.q
 			then
 				idlm=u
