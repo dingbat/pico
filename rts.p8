@@ -28,10 +28,7 @@ function _update()
 			diff+=btnp()^^-2
 			diff%=5
 		end
-		if btnp"2" then
-			add(pcol,deli(pcol),1)
-		end
-		if btnp"3" then
+		if btnp"4" then
 			add(pcol,deli(pcol,1))
 		end
 		if lclk then
@@ -166,7 +163,7 @@ function bnr(a,t,st,cx)
 		-3,unspl"80,8,80,9")
 	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
-	pspl"1,0"
+	pal{res1.col,[14]=0}
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
@@ -1440,7 +1437,7 @@ function tick(u)
 			end
 		end
 		sset(109+u.x/mmwr,72+u.y/mmhr,
-			u.p)
+			u.pres.col)
 	end
 
 	if (u.const) return
@@ -1742,7 +1739,6 @@ function draw_unit(u)
 	end
 	pal{
 		selc or u.pres.col,
-		u.pres.col,
 		[14]=pal(typ.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -2790,7 +2786,7 @@ unl,unspr,stp,resk,pcol,
 	comp(spr,unspl),
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
-	split"1,2,0,3",
+	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
 p[[
