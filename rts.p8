@@ -392,6 +392,7 @@ r=5
 g=0
 b=0
 breq=0
+p=
 
 w=4
 fw=4
@@ -454,6 +455,7 @@ r=0
 g=10
 b=10
 breq=0
+p=
 
 const=1
 w=8
@@ -498,6 +500,7 @@ r=8
 g=8
 b=0
 breq=0
+p=
 
 const=1
 w=8
@@ -544,6 +547,7 @@ r=3
 g=0
 b=5
 breq=0
+p=
 
 const=1
 w=7
@@ -591,6 +595,7 @@ r=6
 g=2
 b=0
 breq=0
+p=
 
 const=1
 w=8
@@ -638,6 +643,7 @@ r=2
 g=14
 b=14
 breq=0
+p=
 
 const=1
 w=16
