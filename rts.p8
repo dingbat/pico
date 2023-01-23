@@ -903,6 +903,13 @@ dir=-1
 tmap=-1
 d=0]]
 
+p[[
+var=renew
+r=0
+g=0
+b=6
+breq=0]]
+
 p[[var=castle
 idx=13
 los=45
@@ -2414,13 +2421,13 @@ function as(st,g)
 		return {unpack(c)},c.e
 	end
 
-	local sh,t,f=p([[
-cfs=0]],st,32767),{},{}
+	local sh,t,f={cfs=0,
+		last=st,ctg=32767},{},{}
 	t[st.k]=sh
 	local function path(s)
-		while s.typ!=st do
-			add(f,{s.typ[1]*8+4,
-				s.typ[2]*8+4},1)
+		while s.last!=st do
+			add(f,{s.last[1]*8+4,
+				s.last[2]*8+4},1)
 			s=t[s.prev.k]
 		end
 		asc[k]=f
@@ -2430,14 +2437,14 @@ cfs=0]],st,32767),{},{}
 	while frl>0 do
 		local cost,iom=32767
 		for i=1,frl do
-			local t=fr[i].cfs+fr[i].x
+			local t=fr[i].cfs+fr[i].ctg
 			if (t<=cost) iom,cost=i,t
 		end
 		sh=fr[iom]
 		fr[iom],sh.dead=fr[frl],1
 		frl-=1
 
-		local pt=sh.typ
+		local pt=sh.last
 		if pt.k==g.k then
 			f.e=1
 			return path(sh),1
@@ -2445,16 +2452,17 @@ cfs=0]],st,32767),{},{}
 		surr(function(n)
 			local ob,ncfs=t[n.k],sh.cfs+n.d
 			if not ob then
-				ob=p("cfs=32767",n,
-					dist(n[1]-g[1],n[2]-g[2])
-				)
+				ob={
+					cfs=32767,last=n,
+					ctg=dist(n[1]-g[1],n[2]-g[2])
+				}
 				frl+=1
 				fr[frl],t[n.k]=ob,ob
 			end
 			if not ob.dead and ob.cfs>ncfs then
 				ob.cfs,ob.prev=ncfs,pt
 			end
-			if ob.x<cl.x then
+			if ob.ctg<cl.ctg then
 				cl=ob
 			end
 		end,unpack(pt))
@@ -2809,13 +2817,6 @@ _=0
 r=0
 g=4
 b=4]]
-
-p[[
-var=renew
-r=0
-g=0
-b=6
-breq=0]]
 
 p[[
 var=dmg_mult
