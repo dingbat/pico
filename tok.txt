@@ -21,3 +21,6 @@ Tokens
  ⁃ x^^=0xf0 if x starts at 0 toggles between 0 and a high number, if passed into camera can be used to toggle showing/hiding something
 ⁃ (2) check if you actually need cls() (i didn't lol, if you fill the whole screen each frame with e.g. a map you might not)
 ⁃ (1) use next,tbl instead of pairs(tbl)
+
+
+99.86
