@@ -177,10 +177,10 @@ function _draw()
 		camera()
 
 		local x=64+t()\.5%2*16
-		pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5,0"
+		pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"
 		sspr(x,unspl"0,16,8,25,28,32,16")
 		sspr(x,unspl"0,16,8,74,28,32,16,1")
-		pspl"1,0,3,4,4,6,7,8,9,10,11,12,13,0,15"
+		pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0"
 		pal{pcol[1]}
 		sspr(x,unspl"0,16,8,25,27,32,16")
 		pal{pcol[2]}
@@ -188,7 +188,7 @@ function _draw()
 
 		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcg\-e\|h\f0difficulty:\^jcg\-e\fcdifficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
 		camera(split"8,12,8,18,14"[diff+1])
-		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\fe2 normals,\f02 hards\-0\-4\|f\f82 hards"[diff+1].." \|h\f0▶\|f\-c\f7▶"
+		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\f22 normals,\f02 hards\-0\-4\|f\f82 hards"[diff+1].." \|h\f0▶\|f\-c\f7▶"
 		return
 	end
 
