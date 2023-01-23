@@ -1394,11 +1394,10 @@ function tick(u)
 				music"56"
 			end
 		else
-			local _ENV=res[u.p]
 			if typ.drop and not u.const then
-				pl-=typ.drop
+				u.pres.pl-=typ.drop
 			elseif typ.unit then
-				p-=1
+				u.pres.p-=1
 			end
 		end
 	end
@@ -1734,8 +1733,8 @@ function draw_unit(u)
 		sx+=f\ufps%fr*fw
 	end
 	pal{
-		selc or u.col,
-		u.col,
+		selc or u.p,
+		u.p,
 		[14]=pal(typ.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,0,0,w,h,
@@ -1776,7 +1775,7 @@ function update_unit(u)
 			sgn(targ.x-u.x),1,cf
 		if t=="drop" then
 			if u.res then
-				res[u.p][u.res.typ]+=
+				u.pres[u.res.typ]+=
 					u.res.qty/u.typ.gr
 			end
 			u.res=nil
@@ -1869,8 +1868,8 @@ function fight(u)
 						y=u.y+typ.prj_yo,
 					} or dmg(typ,e))
 					if e.conv>=e.max_hp then
-						res[e.p].p-=1
-						res[u.p].p+=1
+						e.pres.p-=1
+						u.pres.p+=1
 						e.p,e.conv=u.p,0
 						del(e.sqd,e)
 						sfx"38"
@@ -1890,8 +1889,7 @@ function fight(u)
 end
 
 function bldrepair(u)
-	local _ENV,r,g=
-		u.st.x,res[u.p],_ENV
+	local _ENV,g=u.st.x,_ENV
 	if const then
 		const+=1
 		max_hp+=typ.hpr
@@ -1901,15 +1899,15 @@ function bldrepair(u)
 				u.hu and g.sfx"26"
 			g.reg_bldg(_ENV)
 			if typ.drop then
-				r.pl+=5
+				pres.pl+=5
 			elseif typ.farm then
 				g.gofarm(u,_ENV)
 			end
 		end
 	elseif dmgd and
-		r.b>=1 then
+		pres.b>=1 then
 		hp+=2
-		r.b-=.1
+		pres.b-=.1
 	else
 		g.rest(u)
 	end
@@ -2053,19 +2051,20 @@ h=8]],tx*8+4,ty*8+4
 	))
 end
 
-function box(_ENV)
+function box(u)
+	local _ENV,ais,rz=u,ais,res
 	local w2,h2=typ.w/2,typ.h/2
-	r,x8,y8,dmgd,ai,ap,col=
+	r,x8,y8,dmgd,ai,ap,pres=
 		{x-w2,y-h2,x+w2,y+h2},
 		x\8,y\8,
 		hp<max_hp,
-		ais[p],p&6,p%3
+		ais[p],p&6,rz[p]
 	k,hu=x8|y8<<8,not ai
 	if not const then
 		hp+=typ.hp-max_hp
 		max_hp=typ.hp
 	end
-	return _ENV
+	return u
 end
 
 function can_pay(typ,_ENV)
@@ -2203,7 +2202,7 @@ function reg_bldg(b)
 	end
 	if not b.const and not typ.farm then
 		qdmaps"d"
-		res[b.p].reqs|=typ.bmap
+		b.pres.reqs|=typ.bmap
 	end
 end
 
@@ -2280,11 +2279,11 @@ lastp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]],_typ[_p],rnd"60"\1,ais))
+conv=0]],_typ[_p],rnd"60"\1))
 		max_hp=typ.hp/typ.const
-		id,ais,x,y,p,hp,const,
+		id,x,y,p,hp,const,
 			disc,alive,prod,bldg=
-			x,y,_x,_y,_p,
+			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,1,
@@ -2297,7 +2296,7 @@ conv=0]],_typ[_p],rnd"60"\1,ais))
 end
 
 function prod(u,b,m)
-	pay(b,-1,res[u.p])
+	pay(b,-1,u.pres)
 	if u.q then
 		u.q.qty+=1
 	else
