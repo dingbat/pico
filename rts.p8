@@ -961,8 +961,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-p[[
-idx=14
+p[[idx=14
 spd=.21
 los=18
 hp=8
@@ -1100,8 +1099,7 @@ ant.prod={
 mon.prod={
 	monk,
 	nil,nil,nil,nil,
-	p([[
-t=30
+	p([[t=30
 r=10
 g=20
 b=0
@@ -1120,8 +1118,7 @@ end)
 queen.prod={
 	ant,
 	nil,nil,nil,nil,
-	p([[
-t=25
+	p([[t=25
 r=20
 g=0
 b=20
@@ -1135,8 +1132,7 @@ porty=80]],ant,function(_ENV)
 	spd*=1.12
 	gr*=.9
 end),
-	p([[
-t=20
+	p([[t=20
 r=10
 g=10
 b=10
@@ -1154,8 +1150,7 @@ den.prod={
 	beetle,
 	spider,
 	nil,nil,nil,
-	p([[
-t=20
+	p([[t=20
 r=0
 g=20
 b=0
@@ -1168,8 +1163,7 @@ porty=88]],beetle,function(_ENV)
 	atk*=1.15
 	hp*=1.15
 end),
-	p([[
-t=30
+	p([[t=30
 r=10
 g=10
 b=0
@@ -1181,12 +1175,11 @@ portx=16
 porty=88]],spider,function(_ENV)
 	atk*=1.2
 	hp*=1.2
-end),
+end)
 }
 
 mound.prod={
-	p([[
-t=12
+	p([[t=12
 r=15
 g=15
 b=10
@@ -1204,8 +1197,7 @@ porty=80]],farm,function(_ENV)
 barracks.prod={
 	warant,
 	archer,
-	p([[
-t=10
+	p([[t=10
 r=9
 g=6
 b=0
@@ -1217,8 +1209,7 @@ porty=80]],archer,function(_ENV)
 	los,range=40,35
 end),
 	nil,nil,
-	p([[
-t=18
+	p([[t=18
 r=15
 g=7
 b=0
@@ -1232,8 +1223,7 @@ porty=88]],warant,function(_ENV)
 	los=30
 	hp*=1.333
 end),
-	p([[
-t=10
+	p([[t=10
 r=15
 g=0
 b=9
@@ -1245,14 +1235,13 @@ portx=34
 porty=88]],archer,function(_ENV)
 	atk*=1.25
 	hp*=1.2
-end),
+end)
 }
 
 castle.prod={
 	cat,
 	nil,
-	p([[
-t=30
+	p([[t=30
 r=0
 g=25
 b=30
@@ -1264,8 +1253,7 @@ porty=80]],castle,function(_ENV)
 	aoe,prj_s,atk=1,60,2
 end),
 	nil,nil,
-	p([[
-t=40
+	p([[t=40
 r=20
 g=0
 b=0
@@ -1276,8 +1264,7 @@ portx=16
 porty=80]],heal,function(_ENV)
 	qty+=.5
 end),
-	p([[
-t=10
+	p([[t=10
 r=0
 g=10
 b=20
@@ -1318,8 +1305,7 @@ function move(u,x,y,agg)
 end
 
 function bld(u,b)
-	u.st,u.res=p([[
-t=bld
+	u.st,u.res=p([[t=bld
 in_bld=1
 ]],path(u,b.x,b.y),b)
 end
@@ -1340,8 +1326,7 @@ function drop(u,nxt_res,dropu)
 		wayp,x,y=dmap_find(u,"d")
 		dropu=not wayp and units[u.p]
 	end
-	u.st=p([[
-t=drop
+	u.st=p([[t=drop
 in_bld=1]],
 		wayp or
 			path(u,dropu.x,dropu.y),
@@ -1359,8 +1344,7 @@ function atk(u,e)
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res=u,p([[
-t=farm
+	f.farmer,u.st,u.res=u,p([[t=farm
 in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
 		f.y+rndspl"-2,-1,0,1,2"))
@@ -2044,8 +2028,7 @@ function int(r1,r2,e)
 end
 
 function tile_unit(tx,ty)
-	return box(p([[
-p=0
+	return box(p([[p=0
 ais=
 hp=0
 max_hp=0
@@ -2562,8 +2545,7 @@ end
 function single()
 	local q=sel1.q
 	if sel1.cost then
-		draw_port(p[[
-portx=72
+		draw_port(p[[portx=72
 porty=72
 porto=8
 portf=9]],
@@ -2626,8 +2608,7 @@ portf=9]],
 		)
 	end
 	if sel1.typ.units then
-		draw_port(p[[
-portx=120
+		draw_port(p[[portx=120
 porty=64
 porto=15
 portf=15
@@ -2680,18 +2661,15 @@ function draw_menu()
 	if sel1 and sel1.hu and
 		sel1.typ.unit then
 		draw_port(
-			act==2 and p[[
-portx=99
+			act==2 and p[[portx=99
 porty=72
 porto=2
 portf=13
-]] or seltyp.ant and p[[
-portx=81
+]] or seltyp.ant and p[[portx=81
 porty=72
 porto=2
 portf=13
-]] or p[[
-portx=90
+]] or p[[portx=90
 porty=72
 porto=2
 portf=13
@@ -2787,8 +2765,7 @@ unl,unspr,stp,resk,pcol,
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
-p[[
-var=rescol
+p[[var=rescol
 r=8
 g=3
 b=4
@@ -2806,22 +2783,19 @@ e11=3
 e19=4
 e33=13]]
 
-p[[
-var=resx
+p[[var=resx
 _=0
 r=16
 g=0
 b=16]]
 
-p[[
-var=resy
+p[[var=resy
 _=0
 r=0
 g=4
 b=4]]
 
-p[[
-var=dmg_mult
+p[[var=dmg_mult
 antant=1
 antqueen=.7
 antspider=.8
