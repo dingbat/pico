@@ -1130,6 +1130,7 @@ b=20
 breq=0
 tmap=1
 up=-1
+idx=15
 portx=24
 porty=80]],ant,function(_ENV)
 	cap\=.72
@@ -2075,8 +2076,7 @@ function can_pay(typ,_ENV)
 	return r>=typ.r and
 		g>=typ.g and
 		b>=typ.b and
-		(not typ.p or
-			p<min(pl,99))
+		(not typ.unit or p<min(pl,99))
 		and reqs|typ.breq==reqs
 end
 
