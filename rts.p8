@@ -159,15 +159,15 @@ function bnr(a,t,st,cx)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-	print(split",\^j2l\|e\#9\f5 ,\^j2l\|e\#9\f0 2X "[res1.npl]..split"easy ai ,normal ai \|m\^x1 ,hard ai "[res.p2.diff])-3,unspl"80,8,80,9")
-	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(s<10 and ":0" or ":")..s.." "
+	print(split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res.p2.diff])-3,unspl"80,8,80,9")
+	?"⁶jll²9⁴c⁴i ᶜ5⧗³h".. res1.t<600 and "0" or "" ..res1.t\60 ..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
 	pal{res1.col,[14]=0}
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
-	?"\^j7r\|i\^y7\#9\|f\-f\f4\^x1\|f \|h\^x4 "..st
-	?"\^jdn\|h\^w\^t\fa"..t
+	?"⁶j7r⁴i⁶y7²9⁴f³fᶜ4⁶x1⁴f ⁴h⁶x4 "..st
+	?"⁶jdn⁴h⁶w⁶tᶜa"..t
 end
 
 function _draw()
@@ -185,9 +185,9 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"\^j5c\-j\f0\^w\^tage of ants\^j5c\|f\-i\f7age of ants\^-w\^-t\^jcg\-e\|h\f0difficulty:\^jcg\-e\fcdifficulty:\^j8n\|h\f0press ❎ to start\^j8n\f9press ❎ to start\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\^jej\-j\0"
+		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁴f³iᶜ7age of ants⁶-w⁶-t⁶jcg³e⁴hᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0³0⁴fᶜ6V1.0⁶jej³j\0"
 		camera(split"8,12,8,18,14"[diff+1])
-		?"\f0◀\|f\-c\f7◀\|h "..split"\f0easy\-0\|f\fbeasy,\f0normal\-0\-8\|f\fanormal,\f0hard\-0\|f\f9hard,\f02 normals\-0\-0\-c\|f\f22 normals,\f02 hards\-0\-4\|f\f82 hards"[diff+1].." \|h\f0▶\|f\-c\f7▶"
+		?"ᶜ0◀⁴f³cᶜ7◀⁴h "..split"ᶜ0easy³0⁴fᶜbeasy,ᶜ0normal³0³8⁴fᶜanormal,ᶜ0hard³0⁴fᶜ9hard,ᶜ02 normals³0³0³c⁴fᶜ22 normals,ᶜ02 hards³0³4⁴fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁴f³cᶜ7▶"
 		return
 	end
 
@@ -219,8 +219,8 @@ function _draw()
 	end)
 	if loser then
 		resbar()
-		bnr(loser,split"defeat\^x2....\^x4\^jdn\f1defeat\^x2....,victory!\^jdn\f1victory!"[loser],
-			"press ❎ for menu \|f\^x1 ",ban)
+		bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],
+			"press ❎ for menu ⁴f⁶x1 ",ban)
 		return
 	end
 
@@ -907,8 +907,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-p[[
-var=renew
+p[[var=renew
 r=0
 g=0
 b=6
@@ -1534,8 +1533,8 @@ end
 function cam()
 	local b=btn()
 	if (b>255) b>>=8
-	local dx,dy=(b&0x2)-(b&0x1)*2,
-		(b&0x8)/4-(b&0x4)/2
+	local dx,dy=(b&2)-(b&1)*2,
+		(b&8)/4-(b&4)/2
 	if dget"0"==0 or loser then
 		amx,amy=stat"32",stat"33"
 	else
@@ -2091,8 +2090,8 @@ end
 --credit on bbs
 function dist(dx,dy)
 	local x,y=dx>>31,dy>>31
-	local a0,b0=(dx+x)^^x,
-		(dy+y)^^y
+	local a0,b0=dx+x^^x,
+		dy+y^^y
 	return a0>b0 and
 		a0*.9609+b0*.3984 or
 			b0*.9609+a0*.3984
@@ -2479,19 +2478,19 @@ function pres(r,x,y,z)
 	for i,k in inext,split"r,g,b,p" do
 		local newx,v=0,i!=4 and
 			min(r[k]\1,99) or z and
-			"\-b \-i"..res1.p..
-				"/\^x9 \^-#\^x1.\|h\#5\^x0 \^x4\^-#\|f\-6"..min(res1.pl,99) or
+			"³b ³i"..res1.p..
+				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#⁴f³6"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if z and i==3 then
 			newx=-2
-			v..="\-g \-c\^t\|f\f5\^-#|"
+			v..="³g ³c⁶t⁴fᶜ5⁶-#|"
 		end
 		pspl(
 			(i==4 and oop or
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
 		if v!=0 or z then
-			newx+=print("\#7 "..v,x,y,rescol[k])
+			newx+=print("²7 "..v,x,y,rescol[k])
 			spr(129+i,x,y)
 			x=newx+(z or 1)
 		end
@@ -2528,7 +2527,7 @@ function draw_port(
 	add(fn and btns,{
 		r={x,y,x+10,y+8},
 		fn=fn,
-		costs=cost,
+		costs=cost
 	})
 
 	if fg then
@@ -2544,7 +2543,7 @@ function sel_ports(x)
 		x+=13
 		if x>100 then
 			unspr"133,84,121"
-			?"\^jmu\|f\f1\^x2...\0"
+			?"⁶jmu⁴fᶜ1⁶x2...\0"
 		else
 			draw_port(u.typ,
 				nsel>1 and function(r)
@@ -2579,7 +2578,7 @@ portf=9]],
 	end
 
 	if sel1.typ.farm then
-		?"\f4\^jbr\|i"..sel1.cycles.."/"..seltyp.cycles.."\|e\-h\^:040c1e0d05010706\-c\|h\^:0c1c1014160f0604"
+		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁴e³h⁶:040c1e0d05010706³c⁴h⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2620,7 +2619,7 @@ portf=9]],
 				sfx"18"
 			end,
 			b.x and 24 or
-				print("\f7\^j8r\|iX"..q.qty)
+				print("ᶜ7⁶j8r⁴iX"..q.qty)
 				and 20,
 			107,
 			q.x/b.t,5,12
@@ -2668,7 +2667,7 @@ function draw_menu()
 	end
 	if nsel>1 then
 		camera(nsel<10 and -2)
-		?"\f1\^j1r\|j\-hX"..nsel
+		?"ᶜ1⁶j1r⁴j³hX"..nsel
 		unspr"133,1,111"
 		add(btns,{
 			r=split"0,110,14,119",
@@ -2857,7 +2856,7 @@ bldbld=.1]]
 
 function save()
 	local ptr,foreach=0,foreach
-	bnr(2,"savefile\^jdn\f1savefile","drag+drop to load \|f\^x1 ")
+	bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")
 	campal()
 	local function draw(v)
 		for i=0,8,4 do
@@ -2901,7 +2900,7 @@ function loadgame()
 	for x=0,47 do
 		for y=0,31 do
 			local v=px"1"
-			mset(x,y,v&0x7f,
+			mset(x,y,v&127,
 				v>127 and s(exp,x,y,128))
 		end
 	end
