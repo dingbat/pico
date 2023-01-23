@@ -70,7 +70,7 @@ function _update()
 			music"63"
 		end
 		if rclk then
-			ban^^=240
+			ban^^=0xf0
 		end
 		return
 	end
@@ -86,7 +86,7 @@ function _update()
 		g(bldgs,mx8,my8,{}),
 		t()%6<1,{}
 
-	res1.t+=.03333
+	res1.t+=0x.0888
 
 	if cf%30==19 then
 		for tx=0,mmw do
@@ -104,7 +104,7 @@ function _update()
 	if upc==0 then
 		viz,new_viz=new_viz,{}
 		for k in next,exp do
-			local x,y=k&255,k\256
+			local x,y=k&0x00ff,k\256
 			mset(x+mapw,y,viz[k] or
 				mget(x,y))
 		end
@@ -326,7 +326,7 @@ function start()
 end
 
 function init()
-	poke(24365,3)
+	poke(0x5f2d,3)
 	reload()
 	
 	music(unspl"0,0,7")
@@ -1868,7 +1868,7 @@ function fight(u)
 						typ=typ,
 						ap=u.ap,
 						x=u.x-u.dir*typ.prj_xo,
-						y=u.y+typ.prj_yo
+						y=u.y+typ.prj_yo,
 					} or dmg(typ,e))
 					if e.conv>=e.max_hp then
 						e.pres.p-=1
@@ -1918,7 +1918,7 @@ end
 
 function mine(u)
 	if u.typ.monk then
-		res1.g+=.00318
+		res1.g+=0x.00d
 		return
 	end
 	local r,x,y=u.st.y,
@@ -2229,7 +2229,7 @@ function dmg(typ,to)
 			mvg(to.ai.p1,to.x,to.y,1)
 	end
 	if to.onscr then
-		poke(13480,rnd"32",rnd"32")
+		poke(0x34a8,rnd"32",rnd"32")
 		sfx(typ.sfx)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
@@ -2861,7 +2861,7 @@ function save()
 	local function draw(v)
 		for i=0,8,4 do
 			pset(ptr%128,ptr\128,
-				max(v)>>i&15)
+				max(v)>>i&0xf)
 			ptr+=1
 		end
 	end
@@ -2888,7 +2888,7 @@ function loadgame()
 	pal()
 	loaded,ptr=
 		serial(unspl"0x802,0x9000,0x4000"),
-		36868
+		0x9004
 	local function px(n)
 		n-=1
 		if n>=0 then
