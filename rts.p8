@@ -159,8 +159,7 @@ function bnr(a,t,st,cx)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-		?split",\^j2l\|e\#9\f5 ,\^j2l\|e\#9\f0 2X "[res1.npl]..split"easy ai ,normal ai \|m\^x1 ,hard ai "[res.p2.diff]
-		-3,unspl"80,8,80,9")
+	print(split",\^j2l\|e\#9\f5 ,\^j2l\|e\#9\f0 2X "[res1.npl]..split"easy ai ,normal ai \|m\^x1 ,hard ai "[res.p2.diff])-3,unspl"80,8,80,9")
 	?"\^jll\#9\|c\|i \f5⧗\-h"..(res1.t<600 and "0" or "")..(res1.t\60)..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
 	pal{res1.col,[14]=0}
@@ -2492,7 +2491,7 @@ function pres(r,x,y,z)
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
 		if v!=0 or z then
-			newx+=?"\#7 "..v,x,y,rescol[k]
+			newx+=print("\#7 "..v,x,y,rescol[k])
 			spr(129+i,x,y)
 			x=newx+(z or 1)
 		end
@@ -2621,7 +2620,7 @@ portf=9]],
 				sfx"18"
 			end,
 			b.x and 24 or
-				?"\f7\^j8r\|iX"..q.qty
+				print("\f7\^j8r\|iX"..q.qty)
 				and 20,
 			107,
 			q.x/b.t,5,12
