@@ -77,7 +77,7 @@ function _update()
 
 	dmap()
 	upcycle=
-		split"5,10,15,30,60,60,60"[tot\50]
+		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
 	upc,pos,hbld,t6,
 		sele,selh,selb,
