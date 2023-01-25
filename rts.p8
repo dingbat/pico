@@ -3000,7 +3000,7 @@ function ai_frame(ai)
 
 	foreach(units,function(u)
 		local typ=u.typ
-		local function go(fn)
+		local function send(fn)
 			if #u.p1<typ.bldrs then
 				local w=add(u.p1,deli(avail))
 				if w then
@@ -3018,10 +3018,10 @@ function ai_frame(ai)
 			end
 			if bldg and u.dmgd or u.const
 			then
-				go(bld)
+				send(gobld)
 			elseif typ.farm and
 				not u.farmer then
-				go(gofarm)
+				send(gofarm)
 			elseif
 				typ.queen and
 				ants<res2.diff*12 or
