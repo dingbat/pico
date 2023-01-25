@@ -311,7 +311,7 @@ function _draw()
 		((to_bld or
 			can_bld() or
 			can_renew"1") and 190 or
-		can_gather() and 189 or
+		can_gth() and 189 or
 		can_drop() and 191 or
 		can_atk() and (seltyp.monk
 			and 185 or 187)) or 186)
@@ -409,10 +409,10 @@ move_x=8
 move_y=8
 move_fr=2
 move_fps=15
-gather_x=8
-gather_y=8
-gather_fr=2
-gather_fps=15
+gth_x=8
+gth_y=8
+gth_fr=2
+gth_fps=15
 bld_x=40
 bld_y=8
 bld_fr=2
@@ -1080,10 +1080,10 @@ atk_x=0
 atk_y=80
 atk_fr=2
 atk_fps=15
-gather_x=0
-gather_y=80
-gather_fr=2
-gather_fps=15
+gth_x=0
+gth_y=80
+gth_fr=2
+gth_fps=15
 dead_x=72
 dead_y=112
 portx=87
@@ -1322,9 +1322,9 @@ in_bld=1
 ]],path(u,b.x,b.y),b)
 end
 
-function gogather(u,tx,ty,wp)
+function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
-	u.st=p("t=gather",
+	u.st=p("t=gth",
 		wp or path(u,t.x,t.y),
 		t,p[[7=r
 11=g
@@ -1663,13 +1663,13 @@ function input()
 			pay(renew,-1,res1)
 			gofarm(sel1,hbld)
 
-		elseif can_gather() then
+		elseif can_gth() then
 			sfx"0"
 			hilite(htile)
 			if avail_farm() then
 				gofarm(sel1,hbld)
 			else
-				fsel(gogather,mx8,my8)
+				fsel(gogth,mx8,my8)
 			end
 
 		elseif can_bld() then
@@ -1907,7 +1907,7 @@ function bld(u)
 	end
 end
 
-function gather(u)
+function gth(u)
 	if u.typ.monk then
 		res1.g+=0x.00d
 		return
@@ -1966,7 +1966,7 @@ function produce(u)
 				rtx and
 				fget(mget(rtx,rty),1)
 			then
-				gl.gogather(new,rtx,rty)
+				gl.gogth(new,rtx,rty)
 			else
 				gl.move(new,rx or x+5,
 					ry or y+5)
@@ -1984,7 +1984,7 @@ end
 function mine_nxt(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
-		gogather(u,x,y,wp)
+		gogth(u,x,y,wp)
 		return res
 	end
 end
@@ -2120,7 +2120,7 @@ function avail_farm()
 		not const
 end
 
-function can_gather()
+function can_gth()
 	local f=fget(mget(mx8,my8))
 	return (seltyp.ant and
 		(f&2==2 or avail_farm())
