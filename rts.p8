@@ -2906,18 +2906,18 @@ end
 -->8
 --ai
 
-function miner(u,r)
-	u.rs=mine_nxt(u,r)
-	if not u.rs and nxtres[r] then
-		move(u,unpack(nxtres[r]))
-	end
-end
-
 function ai_frame(ai)
 	if (t6) ai.safe=1
-	avail,nxtres,miners,
+	local avail,nxtres,miners,
 		ants,res2,uhold=
 		{},{},{},0,res[ai.typ]
+		
+	local function miner(u,r)
+		u.rs=mine_nxt(u,r)
+		if not u.rs and nxtres[r] then
+			move(u,unpack(nxtres[r]))
+		end
+	end
 
 	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
