@@ -2,11 +2,9 @@ credits:
 - a*
 - dist
 - sfx pack: "explosion 18"
+- pxaviz
+- shrink0 (for string control code compression)
 
-before release:
-
-if tokens:
-- unparse a*
 
 32x32
 

@@ -330,7 +330,7 @@ end
 function init()
 	poke(0x5f2d,3)
 	reload()
-	
+
 	music(unspl"0,0,7")
 	menuitem(2,"⌂ save",save)
 	menuitem(3,"∧ resign",
@@ -839,7 +839,7 @@ dir=-1
 tmap=-1
 d=0]]
 
-p[[var=barracks
+p[[var=brks
 idx=11
 los=10
 hp=200
@@ -1097,7 +1097,7 @@ d=0]]
 ant.prod={
 	mound,
 	farm,
-	barracks,
+	brks,
 	den,
 	mon,
 	tower,
@@ -1202,7 +1202,7 @@ porty=80]],farm,function(_ENV)
 	end)
 }
 
-barracks.prod={
+brks.prod={
 	warant,
 	archer,
 	p([[t=10
@@ -1365,7 +1365,7 @@ in_bld=1]],path(u,
 	u.st.farm=f
 end
 
-function tick(u)	
+function tick(u)
 	typ,u.onscr,u.upd,x8,y8=
 		u.typ,
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
@@ -1407,7 +1407,7 @@ function tick(u)
 		del(u.dead==60 and units,u)
 		return
 	end
-	
+
 	local wayp=u.st.typ
 	if wayp then
 		if norm(wayp[1],u,
@@ -1421,11 +1421,11 @@ function tick(u)
 	elseif u.st.farm then
 		u.st.active=1
 	end
-	
+
 	local x,y,targ,agg_d,
 		agg_u,adj=
 		u.x,u.y,u.st.x,9999
-	
+
 	if u.q and cf%15==u.q.y%15 then
 		produce(u)
 	end
@@ -1470,7 +1470,7 @@ function tick(u)
 		end
 		sset(109+x/mmwr,72+y/mmhr,u.ap)
 	end
-	
+
 	if (u.const) return
 	if u.st.idl then
 		if typ.lady and t6 then
@@ -1502,7 +1502,7 @@ function tick(u)
 					end
 				end
 			end
-	
+
 			foreach(vcache[k],function(t)
 				local k=u.k+t
 				if k<maph<<8 and k>=0 and
@@ -1514,7 +1514,7 @@ function tick(u)
 				end
 			end)
 		end
-		
+
 		if u.st.agg and typ.atk then
 			for e in all(units) do
 				if e.ap!=u.ap or
