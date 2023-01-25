@@ -2922,25 +2922,23 @@ function ai_frame(ai)
 
 	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
-		local x,y=
+		local x8,y8=
 			peek(off+res2.pos*768,2)
-		local curr,x8,y8,p,pid=
+		local curr,x,y,p,pid=
 			ai.boi==i,
-			x*8,y*8,
+			x8*8,y8*8,
 			peek(off,2)
 		local r,b,bld=
 			chr(pid),ant.prod[pid],
-			g(bldgs,x,y)
+			g(bldgs,x8,y8)
 		if b then
 			curr=curr and bld and bld.hu
 			if not bld and
 				res2.tot>=p and ai.safe then
 				if can_pay(b,res2) then
 					pay(b,-1,res2)
-					curr=unit(b,
-						x8+b.w/2,
-						y8+b.h/2,
-						ai.typ,1)
+					curr=unit(b,x+b.w/2,
+						y+b.h/2,ai.typ,1)
 				else
 					uhold=b
 				end
@@ -2949,12 +2947,12 @@ function ai_frame(ai)
 			if pid>90 then
 				if (res2.diff<=p) break
 				nxtres[r]=nxtres[r] or
-					g(dmaps[r] or {},x,y) and
-					{x8,y8}
+					g(dmaps[r] or {},x8,y8) and
+					{x,y}
 			elseif curr then
 				if pid==10 then
 					if not loaded and ai.typ==2 then
-						unit(p,x8,y8,4)
+						unit(p,x,y,4)
 					end
 				elseif pid==11 then
 					bgrat=split"2.75,2.35,2"[p]
