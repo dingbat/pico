@@ -27,7 +27,8 @@ function _update()
 		end
 		if lclk then
 			init()
-			for k,r in inext,res do
+			for k=1,3 do
+				local r=res[k]
 				r.pos,r.npl,r.diff,r.col=
 					del(posidx,rnd(posidx)),
 					2+diff\3,
@@ -2495,7 +2496,7 @@ function draw_port(
 		cost and not can_pay(typ,res1),
 		typ.portf and act>0
 	rect(0,0,10,9,
-		u and u.p or
+		u and u.pres.col or
 		nopay and 6 or
 		cost and 3 or
 		axnsel and 10 or
@@ -3057,6 +3058,8 @@ cartdata"age_of_ants"
 
 menuitem(1,"● toggle mouse",
 	function()dset(0,~dget"0")end)
+
+-->8
 
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
