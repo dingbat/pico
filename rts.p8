@@ -417,10 +417,10 @@ bld_x=40
 bld_y=8
 bld_fr=2
 bld_fps=15
-farm_x=32
-farm_y=8
-farm_fr=2
-farm_fps=15
+frm_x=32
+frm_y=8
+frm_fr=2
+frm_fps=15
 atk_x=40
 atk_y=12
 atk_fr=4
@@ -1292,7 +1292,8 @@ end
 function rest(u)
 	u.st=p[[t=rest
 rest=0
-agg=1]]
+agg=1
+idl=1]]
 end
 
 function mvg(units,x,y,agg,frc)
@@ -1308,18 +1309,18 @@ function mvg(units,x,y,agg,frc)
 end
 
 function move(u,x,y,agg)
-	u.st=p("t=move",
-		path(u,x,y,0))
+	u.st=p([[t=move
+move=1]],path(u,x,y,0))
 	u.st.agg=agg
 end
 
-function bld(u,b)
+function gobld(u,b)
 	u.st,u.res=p([[t=bld
 in_bld=1
 ]],path(u,b.x,b.y),b)
 end
 
-function gather(u,tx,ty,wp)
+function gogather(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	u.st=p("t=gather",
 		wp or path(u,t.x,t.y),
@@ -1329,13 +1330,14 @@ function gather(u,tx,ty,wp)
 39=r]][fget(mget(tx,ty))],tx,ty)
 end
 
-function drop(u,nxt_res,dropu)
+function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dmap_find(u,"d")
 		dropu=not wayp and units[u.p]
 	end
 	u.st=p([[t=drop
+drop=1
 in_bld=1]],
 		wayp or
 			path(u,dropu.x,dropu.y),
@@ -1343,17 +1345,17 @@ in_bld=1]],
 		nxt_res)
 end
 
-function atk(u,e)
+function goatk(u,e)
 	if u.typ.atk and e then
 		u.st,u.disc,u.res=
-			p("t=atk",
-				path(u,e.x,e.y),e),
+			p([[t=atk
+active=1]],path(u,e.x,e.y),e),
 			e.hu and u.bldg
 	end
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res=u,p([[t=farm
+	f.farmer,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
 		f.y+rndspl"-2,-1,0,1,2"))
@@ -1361,16 +1363,11 @@ in_bld=1]],path(u,
 end
 
 function tick(u)	
-	update_unit(u)
-	
-	local typ,targ,x,y,x8,y8,
-		agg_d,agg_u,adj=
-		u.typ,u.st.x,u.x,u.y,
-		u.x8,u.y8,9999
-
-	box(u).onscr,u.upd=
-		int(u.r,{cx,cy,cx+128,cy+104},0),
-		u.id%upcycle==upc
+	typ,u.onscr,u.upd,x8,y8=
+		u.typ,
+		int(box(u).r,{cx,cy,cx+128,cy+104},0),
+		u.id%upcycle==upc,
+		u.x8,u.y8
 
 	if u.hp<=0 and u.alive then
 		del(sel,u)
@@ -1407,6 +1404,44 @@ function tick(u)
 		del(u.dead==60 and units,u)
 		return
 	end
+	
+	local wayp=u.st.typ
+	if wayp then
+		if norm(wayp[1],u,
+			u.st.spd or typ.spd)<.5
+		then
+			deli(wayp,1)
+			u.st.typ=#wayp>0 and wayp
+		end
+	elseif u.st.move then
+		rest(u)
+	elseif u.st.farm then
+		u.st.active=1
+	end
+	
+	local x,y,targ,agg_d,
+		agg_u,adj=
+		u.x,u.y,u.st.x,9999
+	
+	if u.q and cf%15==u.q.y%15 then
+		produce(u)
+	end
+	if typ.farm then
+		update_farm(u,cf)
+	end
+	if targ then
+		if targ.dead then
+			u.st=p([[t=move
+move=1
+agg=1]],u.st.typ)
+		elseif int(targ.r,u.r,-2) then
+			u.dir,u.st.active,u.st.typ=
+				sgn(targ.x-u.x),1
+		end
+	end
+	if u.st.active then
+		_ENV[u.st.t](u)
+	end
 
 	if not u.fire and u.dmgd and
 		cf==0 then
@@ -1434,20 +1469,15 @@ function tick(u)
 		sset(109+x/mmwr,72+y/mmhr,u.ap)
 	end
 	
-	if targ and targ.dead then
-		rest(u)
-	end
 	if (u.const) return
-	if u.st.rest then
+	if u.st.idl then
 		if typ.lady and t6 then
 			wander(u)
 		end
 		if u.hu then
 			if typ.ant then
-				u.st.rest+=1
-				if (u.st.rest>30) idl=u
-			elseif typ.idl and not u.q
-			then
+				idl=u
+			elseif typ.idl and not u.q then
 				idlm=u
 			end
 		end
@@ -1461,12 +1491,12 @@ function tick(u)
 			if not vcache[k] then
 				vcache[k]={}
 				for dx=-l,l do
-				for dy=-l,l do
-					add(
-						dist(xo*2-dx*8-4,
-							yo*2-dy*8-4)<typ.los
-						and vcache[k],dx+dy*256)
-				end
+					for dy=-l,l do
+						add(
+							dist(xo*2-dx*8-4,
+								yo*2-dy*8-4)<typ.los
+							and vcache[k],dx+dy*256)
+					end
 				end
 			end
 	
@@ -1492,9 +1522,8 @@ function tick(u)
 					if e.alive and
 						d<=typ.los then
 						if e.bldg then
-							d+=typ.sg and
-								e.bldg==1 and
-								-999 or 999
+							d+=typ.sg and e.bldg==1
+								and -999 or 999
 						end
 						if d<agg_d then
 							agg_u,agg_d=e,d
@@ -1502,7 +1531,7 @@ function tick(u)
 					end
 				end
 			end
-			atk(u,agg_u)
+			goatk(u,agg_u)
 		end
 	end
 
@@ -1601,7 +1630,7 @@ function input()
 				mx8*8+to_bld.w\2,
 				my8*8+to_bld.h\2,
 				unspl"1,1,1")
-			fsel(bld,b)
+			fsel(gobld,b)
 			pay(to_bld,-1,res1)
 			b.cost,to_bld,selx=to_bld
 		end
@@ -1637,22 +1666,22 @@ function input()
 			if avail_farm() then
 				gofarm(sel1,hbld)
 			else
-				fsel(gather,mx8,my8)
+				fsel(gogather,mx8,my8)
 			end
 
 		elseif can_bld() then
 			sfx"0"
-			fsel(bld,hbld)
+			fsel(gobld,hbld)
 			hilite(hbld)
 
 		elseif can_atk() then
 			sfx"4"
-			fsel(atk,hunit)
+			fsel(goatk,hunit)
 			hilite(hunit)
 
 		elseif can_drop() then
 			sfx"0"
-			fsel(drop,nil,hbld)
+			fsel(godrop,nil,hbld)
 			hilite(hbld)
 
 		elseif sel1.typ.unit then
@@ -1744,58 +1773,17 @@ function draw_unit(u)
 	end
 end
 
-function update_unit(u)
-	local st=u.st
-	local t,wayp,nxt,targ=
-		st.t,st.typ,st.y,st.x
-	if u.q and cf%15==u.q.y%15 then
-		produce(u)
+function drop(u)
+	if u.res then
+		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
 	end
-	if u.typ.farm then
-		update_farm(u,cf)
-	end
-	if t=="atk" then
-		fight(u)
-	end
-	if st.active then
-		if (st.farm) farmer(u)
-		if t=="bld" and cf%30==0 then
-			bldrepair(u)
-		end
-		if (t=="gather") mine(u)
-	elseif targ and
-		int(targ.r,u.r,-2) then
-		u.dir,st.active,st.frame,
-			st.typ=
-			sgn(targ.x-u.x),1,cf
-		if t=="drop" then
-			if u.res then
-				u.pres[u.res.typ]+=
-					u.res.qty/u.typ.gr
-			end
-			u.res=nil
-			if st.farm then
-				gofarm(u,st.farm)
-			else
-				rest(u)
-				u.st.y,u.st.agg=nxt
-			end
-		end
-	elseif st.y and not wayp then
-		mine_nxt(u,st.y)
-	end
-
-	if wayp then
-		if norm(wayp[1],u,
-			st.spd or u.typ.spd)<.5
-		then
-			deli(wayp,1)
-			st.typ=#wayp>0 and wayp
-		end
-	elseif t=="move" then
+	u.st.idl,u.res=1
+	if u.st.farm then
+		gofarm(u,u.st.farm)
+	elseif u.st.y then
+		mine_nxt(u,u.st.y)
+	else
 		rest(u)
-	elseif t=="farm" then
-		st.active=1
 	end
 end
 
@@ -1812,7 +1800,7 @@ function update_farm(_ENV,cf)
 	end
 end
 
-function farmer(u)
+function frm(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not farmer then
 		g.rest(u)
@@ -1821,7 +1809,7 @@ function farmer(u)
 		sproff+=1
 		g.collect(u,"r")
 		if fres<=0 then
-			g.drop(u)
+			g.godrop(u)
 			cycles+=1
 			exp,ready=hu and
 				cycles>=typ.cycles
@@ -1832,7 +1820,7 @@ function farmer(u)
 	end
 end
 
-function fight(u)
+function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
 		local dx=e.x-u.x
@@ -1874,7 +1862,7 @@ function fight(u)
 		else
 			if u.hu and viz[e.k] or
 				typ.los>=d then
-				atk(u,e)
+				goatk(u,e)
 			end
 			if not u.st.typ then
 				rest(u)
@@ -1883,32 +1871,34 @@ function fight(u)
 	end
 end
 
-function bldrepair(u)
-	local _ENV,g=u.st.x,_ENV
-	if const then
-		const+=1
-		max_hp+=typ.hpr
-		hp+=typ.hpr
-		if const>=typ.const then
-			const,cost=
-				u.hu and g.sfx"26"
-			g.reg_bldg(_ENV)
-			if typ.drop then
-				pres.pl+=5
-			elseif typ.farm then
-				g.gofarm(u,_ENV)
+function bld(u)
+	if cf%30==0 then
+		local _ENV,g=u.st.x,_ENV
+		if const then
+			const+=1
+			max_hp+=typ.hpr
+			hp+=typ.hpr
+			if const>=typ.const then
+				const,cost=
+					u.hu and g.sfx"26"
+				g.reg_bldg(_ENV)
+				if typ.drop then
+					pres.pl+=5
+				elseif typ.farm then
+					g.gofarm(u,_ENV)
+				end
 			end
+		elseif dmgd and
+			pres.b>=1 then
+			hp+=2
+			pres.b-=.1
+		else
+			g.rest(u)
 		end
-	elseif dmgd and
-		pres.b>=1 then
-		hp+=2
-		pres.b-=.1
-	else
-		g.rest(u)
 	end
 end
 
-function mine(u)
+function gather(u)
 	if u.typ.monk then
 		res1.g+=0x.00d
 		return
@@ -1923,9 +1913,9 @@ function mine(u)
 	local n=g(restiles,x,y,f)
 	if not f then
 		if not mine_nxt(u,r) then
-			drop(u,r)
+			godrop(u,r)
 		end
-	elseif cf==u.st.frame then
+	elseif cf==u.id then
 		collect(u,r)
 		if t<112 and
 			(n==f\3 or n==f\1.25)
@@ -1967,7 +1957,7 @@ function produce(u)
 				rtx and
 				fget(mget(rtx,rty),1)
 			then
-				gl.gather(new,rtx,rty)
+				gl.gogather(new,rtx,rty)
 			else
 				gl.move(new,rx or x+5,
 					ry or y+5)
@@ -1985,7 +1975,7 @@ end
 function mine_nxt(u,res)
 	local wp,x,y=dmap_find(u,res)
 	if wp then
-		gather(u,x,y,wp)
+		gogather(u,x,y,wp)
 		return res
 	end
 end
@@ -2240,7 +2230,7 @@ function collect(u,res)
 		u.res=p("qty=1",res)
 	end
 	if u.res.qty>=u.typ.cap then
-		drop(u,res)
+		godrop(u,res)
 	end
 end
 
@@ -2973,7 +2963,7 @@ function ai_frame(ai)
 		if u.ai==ai then
 			if u.typ.ant then
 				ants+=1
-				if u.st.rest then
+				if u.st.idl then
 					miner(u,bgnxt and "b" or "r")
 					bgnxt=not bgnxt
 				end
