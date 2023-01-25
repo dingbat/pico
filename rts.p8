@@ -1291,7 +1291,6 @@ end
 
 function rest(u)
 	u.st=p[[t=rest
-rest=0
 agg=1
 idl=1]]
 end
@@ -1299,7 +1298,7 @@ end
 function mvg(units,x,y,agg,frc)
 	local l=999
 	foreach(units,function(u)
-		if frc or u.st.rest then
+		if frc or u.st.idl then
 			move(u,x,y,agg)
 		end
 		l=min(u.typ.spd,l)
@@ -1349,6 +1348,7 @@ function goatk(u,e)
 	if u.typ.atk and e then
 		u.st,u.disc,u.res=
 			p([[t=atk
+atk=1
 active=1]],path(u,e.x,e.y),e),
 			e.hu and u.bldg
 	end
@@ -1431,9 +1431,8 @@ function tick(u)
 	end
 	if targ then
 		if targ.dead then
-			u.st=p([[t=move
-move=1
-agg=1]],u.st.typ)
+			u.st.agg=1,
+				u.st.typ or rest(u)
 		elseif int(targ.r,u.r,-2) then
 			u.dir,u.st.active,u.st.typ=
 				sgn(targ.x-u.x),1
@@ -1476,7 +1475,8 @@ agg=1]],u.st.typ)
 		end
 		if u.hu then
 			if typ.ant then
-				idl=u
+				if (u.st.idl>10) idl=u
+				u.st.idl+=1
 			elseif typ.idl and not u.q then
 				idlm=u
 			end
@@ -1610,7 +1610,7 @@ function input()
 			dx<mmw and dy<mmh+1	then
 			local x,y=mmwr*dx,mmhr*dy
 			if rclk and sel1 then
-				sfx"0"
+				sfx"1"
 				fsel(move,x,y,axn==1)
 				hilite{amx,amy,2,8}
 			elseif axn==0 and btn"5" then
@@ -2201,7 +2201,7 @@ function dmg(typ,to)
 		dmg_mult[typ.atk_typ..
 			to.typ.def]
 	if to.typ.unit and
-		to.st.rest or to.st.y then
+		to.st.idl or to.st.y then
 		wander(to)
 	end
 	to.conv+=typ.conv
