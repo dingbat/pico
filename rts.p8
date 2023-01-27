@@ -2911,7 +2911,7 @@ end
 function ai_frame(ai)
 	if (t6) ai.safe=1
 	local avail,nxtres,miners,
-		ants,res2,uhold=
+		ants,res2,h=
 		{},{},{},0,res[ai.typ]
 		
 	local function miner(u,r)
@@ -2941,7 +2941,7 @@ function ai_frame(ai)
 					unit(b,ux+b.w/2,
 						uy+b.h/2,ai.typ,1)
 				else
-					uhold=b
+					h=b
 				end
 			else
 				adv=bld and bld.hu
@@ -2959,16 +2959,16 @@ function ai_frame(ai)
 						unit(14,ux,uy,4)
 					end
 				elseif t then
-					uhold=typs[pid]
+					h=typs[pid]
 					if y==0 or
-						can_pay(uhold,res2) then
-						uhold.x(uhold.typ[ai.typ])
-						uhold=pay(uhold,y,res2)
+						can_pay(h,res2) then
+						h.x(h.typ[ai.typ])
+						h=pay(h,y,res2)
 					end
 				end
 			end
 		end
-		if adv and not uhold then
+		if adv and not h then
 			ai.boi+=2
 		end
 		end
@@ -3035,9 +3035,9 @@ function ai_frame(ai)
 			then
 				local b,hold=u.prod[u.lastp]
 				foreach(split"r,g,b",function(k)
-					hold=hold or uhold and
+					hold=hold or h and
 						b[k]!=0 and
-						res2[k]-b[k]<uhold[k]
+						res2[k]-b[k]<h[k]
 				end)
 				if not u.q and not hold and
 					can_pay(b,res2) then
