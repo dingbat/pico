@@ -268,6 +268,8 @@ function addpos(str)
 		if #xy==0 then
 			assert(pid>7,ctx.."x,y required")
 			xy[1],xy[2]=0,0
+		elseif #xy==1 then
+			xy[2]=0
 		end
 		-- add comment back in for
 		-- step mode
@@ -319,7 +321,6 @@ bo=loadbo[[
 3,hard_tech_beetle_16
 3,hard_tech_spider_17
 3,hard_tech_farm_18
-3,hard_tech_cstl_23
 5,h
 8,h
 8,b
@@ -327,14 +328,13 @@ bo=loadbo[[
 12,t
 15,f
 16,h
-3,med_tech_basket_15
+2,med_tech_basket_15
 16,f
 16,f
 16,f
 16,f
 21,h
 22,d
-3,med_tech_farm_18
 23,h
 23,f
 24,f
@@ -365,9 +365,14 @@ bo=loadbo[[
 53,t
 57,h
 3,b_50_%
+2,med_tech_cstl_23
 60,c
 65,h
 65,c
+2,med_tech_warant_21
+2,med_tech_archer_22
+2,med_tech_beetle_17
+2,med_tech_spider_18
 3,all_exit
 ]]
 -->8
@@ -396,7 +401,6 @@ hard_tech_archer_21
 hard_tech_beetle_16
 hard_tech_spider_17
 hard_tech_farm_18
-hard_tech_cstl_23
 h,4,4
 h,8,2
 b,9,7
@@ -404,14 +408,13 @@ h,9,4
 t,11,6
 f,6,6
 h,11,10
-hard_tech_basket_15
+med_tech_basket_15,1
 f,6,4
 f,7,4
 f,5,5
 f,5,6
 h,3,5
 d,9,6
-hard_tech_farm_18
 h,14,2
 f,5,4
 f,8,4
@@ -420,8 +423,8 @@ c,8,9
 easy_exit
 h,1,8
 m,7,7
-med_tech_warant_21
-med_tech_archer_22
+med_tech_warant_21,1
+med_tech_archer_22,1
 b,8,8
 d,7,8
 h,0,5
@@ -430,9 +433,9 @@ h,17,4
 b58_%
 h,16,9
 c,4,8
-med_tech_heal_23
-med_tech_beetle_17
-med_tech_spider_18
+med_tech_heal_23,1
+med_tech_beetle_17,1
+med_tech_spider_18,1
 t,12,8
 h,10,14
 b,15,7
@@ -442,9 +445,14 @@ h,22,7
 t,7,12
 h,9,0
 b50_%
+med_tech_cstl_23,1
 c,18,7
 h,5,15
 c,8,12
+med_tech_warant_21,1
+med_tech_archer_22,1
+med_tech_beetle_17,1
+med_tech_spider_18,1
 all_exit
 ]]
 -->8
