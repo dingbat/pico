@@ -414,6 +414,18 @@ if ai_debug then
 		end
 	end
 	function _draw()
+		if upcycle and not castles then
+			castles=1
+			castle.p1.atk=3
+			castle.p1.aoe=5
+			unit(13,298,194,1)
+			unit(13,298,214,1)
+			unit(13,280,224,1)
+			unit(13,280,206,1)
+			unit(13,317,160,1)
+			unit(13,333,160,1)
+		end
+
 		_dr()
 		if ai_debug and res1 then
 		camera()
