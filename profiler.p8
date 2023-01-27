@@ -32,21 +32,27 @@ calculation that figures out how many cycles
 the given code takes
 ]]
 
-arr={}
-for i=1,100 do
-add(arr,i)
+function dist1(dx,dy)
+	local x,y=dx>>31,dy>>31
+	local a0,b0=dx+x^^x,dy+y^^y
+	return max(a0,b0)*.9609+
+		min(a0,b0)*.3984
+end
+
+function dist2(dx,dy)
+	local x,y=dx>>31,dy>>31
+	local a0,b0=dx+x^^x,dy+y^^y
+	return a0>b0 and
+		a0*.9609+b0*.3984 or
+		b0*.9609+a0*.3984
 end
 
 function analyze()
-  profile("foreach", function()
-  	a=flr(5)
---  	foreach(arr,function(i)
---  	end)
+  profile("dist1", function()
+  	a=dist1(55,96)
   end)
-  profile("for all", function()
-  	a=5/1
---  	for i in all(arr) do
---  	end
+  profile("dist2", function()
+  	a=dist2(55,96)
   end)
 end
 

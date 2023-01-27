@@ -420,8 +420,14 @@ if ai_debug then
 		local secs=res1.t\1%60
 		?res.p2.diff,60,107,9
 		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
-		?bgrat,80,114,3
-		?":\-e#\-e:"..(ais[2].boi/2),80,107,2
+		local i=ais[2].boi
+		local off=8288+i%32+i\32*128
+		local p,pid=peek(off,2)
+		local bl={
+			"mnd","farm","bar","den","mon","twr","cstl"
+		}
+		?bl[pid] or pid,80,114,3
+		?":\-e#\-e:"..(i/2+1),80,107,2
 		camera()
 		end
 	end
