@@ -886,7 +886,7 @@ const=8
 hpr=8
 def=bld
 cycles=5
-gr=.5
+gr=0x.0222
 
 r=0
 g=3
@@ -1427,7 +1427,7 @@ function tick(u)
 		u.x,u.y,u.st.x,9999
 
 	if (u.q) produce(u)
-	if (typ.farm) update_farm(u,cf)
+	if (typ.farm) update_farm(u)
 	if t then
 		if t.dead then
 			u.st.agg=1,
@@ -1785,13 +1785,13 @@ function drop(u)
 	end
 end
 
-function update_farm(_ENV,cf)
+function update_farm(_ENV)
 	if not farmer or
 		farmer.st.farm!=_ENV
 		or exp then
 		farmer=nil
 	elseif farmer.st.active and
-		not ready and cf==59 then
+		not ready then
 		fres+=typ.gr
 		sproff+=typ.gr*2
 		ready=fres>=9
