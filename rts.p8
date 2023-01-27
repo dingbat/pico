@@ -2956,13 +2956,10 @@ function ai_frame(ai)
 					if not loaded and ai.typ==2 then
 						unit(p,x,y,4)
 					end
-				elseif pid==11 then
-					bgrat=split"2.75,2.35,2"[p]
 				elseif res2.diff>=p then
 					uhold=typs[pid]
 					if x==0 or
 						can_pay(uhold,res2) then
-						printh("paying x"..x8.." for "..pid,"log")
 						uhold.x(uhold.typ[ai.typ])
 						uhold=pay(uhold,x8,res2)
 					end
@@ -3001,7 +2998,7 @@ function ai_frame(ai)
 	end)
 
 	bal=(#miners-count(miners,"r"))
-		\bgrat-count(miners,"g")
+		\2.75-count(miners,"g")
 
 	foreach(units,function(u)
 		local typ=u.typ
