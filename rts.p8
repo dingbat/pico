@@ -371,7 +371,7 @@ npl=0]]
 	end
 
 p[[var=heal
-qty=.05
+qty=0x.0036
 ]]
 
 p[[var=ant
@@ -1272,7 +1272,7 @@ tmap=256
 idx=22
 portx=16
 porty=80]],heal,function(_ENV)
-	qty+=.5
+	qty+=0x.0222
 end),
 	p([[t=10
 r=0
@@ -1441,8 +1441,7 @@ function tick(u)
 		_ENV[u.st.t](u)
 	end
 
-	if not u.fire and u.dmgd and
-		cf==0 then
+	if not u.fire and u.dmgd then
 		u.hp+=heal[u.p].qty
 	end
 

@@ -47,12 +47,18 @@ function dist2(dx,dy)
 		b0*.9609+a0*.3984
 end
 
+heal={{qty=1}}
+u={hp=1,p=1}
+
 function analyze()
   profile("dist1", function()
-  	a=dist1(55,96)
+  	if 1==1 then
+  	u.hp+=heal[u.p].qty
+  	end
   end)
   profile("dist2", function()
-  	a=dist2(55,96)
+  	if 1==1 and 1==0 then
+  	end
   end)
 end
 
