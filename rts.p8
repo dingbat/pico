@@ -2911,7 +2911,7 @@ end
 function ai_frame(ai)
 	if (t6) ai.safe=1
 	local avail,nxtres,m,
-		ants,res2,h=
+		ants,res,h=
 		{},{},{},0,res[ai.typ]
 		
 	local function miner(u,r)
@@ -2924,20 +2924,20 @@ function ai_frame(ai)
 	for i=0,ai.boi,2 do
 		local off=8288+i%32+i\32*128
 		local x,y=
-			peek(off+res2.pos*768,2)
+			peek(off+res.pos*768,2)
 		local adv,t,ux,uy,p,pid=
 			ai.boi==i,
-			res2.diff==x,
+			res.diff==x,
 			x*8,y*8,
 			peek(off,2)
 		local r,b,bld=
 			chr(pid),ant.prod[pid],
 			g(bldgs,x,y)
-		if res2.tot>=p then
+		if res.tot>=p then
 		if b then
 			if not bld and ai.safe then
-				if can_pay(b,res2) then
-					pay(b,1,res2)
+				if can_pay(b,res) then
+					pay(b,1,res)
 					unit(b,ux+b.w/2,
 						uy+b.h/2,ai.typ,1)
 				else
@@ -2961,9 +2961,9 @@ function ai_frame(ai)
 				elseif t then
 					h=typs[pid]
 					if y==0 or
-						can_pay(h,res2) then
+						can_pay(h,res) then
 						h.x(h.typ[ai.typ])
-						h=pay(h,y,res2)
+						h=pay(h,y,res)
 					end
 				end
 			end
@@ -3029,29 +3029,29 @@ function ai_frame(ai)
 				send(gofarm)
 			elseif
 				typ.queen and
-				ants<res2.diff*13.5 or
+				ants<res.diff*13.5 or
 				typ.mil and
-				res2.p<res2.diff*26
+				res.p<res.diff*26
 			then
 				local b,hld=u.prod[u.lp]
 				foreach(split"r,g,b",function(k)
 					hld=hld or h and
 						b[k]!=0 and
-						res2[k]-b[k]<h[k]
+						res[k]-b[k]<h[k]
 				end)
 				if not u.q and not hld and
-					can_pay(b,res2) then
+					can_pay(b,res) then
 					prod(u,b,
-						split"5,1,1"[res2.diff])
+						split"5,1,1"[res.diff])
 					u.lp%=typ.units
 					u.lp+=1
-					res2.tot+=1
+					res.tot+=1
 				end
 			end
 		end
 	end)
 
-	if #ai.p2>=res2.diff*5 and
+	if #ai.p2>=res.diff*5 and
 		ai.safe
 	then
 		ai.p3,ai.p2=ai.p2,{}
