@@ -3033,13 +3033,13 @@ function ai_frame(ai)
 				typ.mil and
 				res2.p<res2.diff*26
 			then
-				local b,hold=u.prod[u.lastp]
+				local b,hld=u.prod[u.lastp]
 				foreach(split"r,g,b",function(k)
-					hold=hold or h and
+					hld=hld or h and
 						b[k]!=0 and
 						res2[k]-b[k]<h[k]
 				end)
-				if not u.q and not hold and
+				if not u.q and not hld and
 					can_pay(b,res2) then
 					prod(u,b,
 						split"5,1,1"[res2.diff])
