@@ -2910,7 +2910,7 @@ end
 
 function ai_frame(ai)
 	if (t6) ai.safe=1
-	local avail,nxtres,miners,
+	local avail,nxtres,m,
 		ants,res2,h=
 		{},{},{},0,res[ai.typ]
 		
@@ -2985,7 +2985,7 @@ function ai_frame(ai)
 				del(u.bld and
 					not u.st.in_bld and
 					u.bld.p1,u)
-				add(add(miners,u.rs) and
+				add(add(m,u.rs) and
 					not u.res and avail,u)
 			elseif u.typ.unit then
 				if u.dead then
@@ -3000,8 +3000,8 @@ function ai_frame(ai)
 		end
 	end)
 
-	bal=(#miners-count(miners,"r"))
-		\2.75-count(miners,"g")
+	bal=(#m-count(m,"r"))
+		\2.75-count(m,"g")
 
 	foreach(units,function(u)
 		local typ=u.typ
