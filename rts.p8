@@ -1838,9 +1838,8 @@ function atk(u)
 			if not u.st.adj then
 				u.st.typ=nil
 			end
-			if cf%typ.atk_freq==
-				u.id%typ.atk_freq
-			then
+			if cf%typ.atk_freq==u.id%
+				typ.atk_freq then
 				if e.ap==u.ap then
 					if typ.monk and e.dmgd then
 						e.hp+=1
@@ -2000,23 +1999,17 @@ end
 function p(str,typ,x,y,...)
 	local p1,p2,p3={...},{},{}
 	local obj={p1,p2,p3,p2,
-		p1=p1,
-		p2=p2,
-		p3=p3,
-		typ=typ,
-		x=x,
-		y=y}
+		p1=p1,p2=p2,p3=p3,typ=typ,
+		x=x,y=y}
 	foreach(split(str,"\n"),function(l)
 		local k,v=unspl(l,"=")
 		if v then
 			foreach(obj,function(o)
 				obj[k],o[k]=v,v end)
 		end
-		if k=="idx" then
-			typs[v]=obj
-		end
 	end)
-	_ENV[tostr(obj.var)]=obj
+	typs[obj.idx or ""],
+		_ENV[obj.var or ""]=obj,obj
 	return obj
 end
 
@@ -2045,8 +2038,7 @@ ais=
 hp=0
 max_hp=0
 const=1]],p[[w=8
-h=8]],tx*8+4,ty*8+4
-	))
+h=8]],tx*8+4,ty*8+4))
 end
 
 function box(u)
@@ -2116,10 +2108,8 @@ end
 
 function avail_farm()
 	local _ENV=hbld
-	return typ and
-		typ.farm and
-		not exp and
-		not farmer and
+	return typ and typ.farm and
+		not exp and not farmer and
 		not const
 end
 
@@ -2140,8 +2130,7 @@ function can_atk()
 			seltyp.monk and
 			hunit.dmgd and not
 			hunit.bldg)
-		and
-		g(viz,mx8,my8,hunit.disc)
+		and g(viz,mx8,my8,hunit.disc)
 end
 
 function can_bld()
@@ -2209,9 +2198,8 @@ function wander(u)
 end
 
 function dmg(typ,to)
-	to.hp-=typ.atk*
-		dmg_mult[typ.atk_typ..
-			to.typ.def]
+	to.hp-=typ.atk*dmg_mult[
+		typ.atk_typ..to.typ.def]
 	if to.typ.unit and
 		to.st.idl or to.st.y then
 		wander(to)
@@ -2303,10 +2291,7 @@ end
 
 function dmap_find(u,k)
 	local x,y,tk,dmap,p,l=
-		u.x8,
-		u.y8,
-		u.k,
-		dmaps[k] or {},
+		u.x8,u.y8,u.k,dmaps[k] or {},
 		{},9
 	while l>=.5 do
 		local o=dmap[tk] or 9
@@ -2367,9 +2352,8 @@ b=4]][q]
 				end
 				end
 			end
-
 			for i,t in next,dmap_st[q] do
-				if	surr(nil,unpack(t)) then
+				if surr(nil,unpack(t)) then
 					add(o,t).k=i
 				end
 			end
@@ -2385,8 +2369,7 @@ function path(u,x,y,tol)
 			surr(function(t)
 				local d=dist(
 					t[1]*8+4-x,
-					t[2]*8+4-y
-				)
+					t[2]*8+4-y)
 				if d<best_d then
 					best_t,best_d=t,d
 				end
@@ -2661,9 +2644,7 @@ function draw_menu()
 		unspr"133,1,111"
 		add(btns,{
 			r=split"0,110,14,119",
-			fn=function()
-				deli(sel)
-			end
+			fn=function() deli(sel) end
 		})
 	end
 
@@ -2696,8 +2677,8 @@ end,20,108)
 			fn=function()
 				sfx"1"
 				hilite(idl)
-				sel={idl}
-				cx,cy=idl.x-64,idl.y-64
+				sel,cx,cy={idl},
+					idl.x-64,idl.y-64
 				cam()
 			end
 		}) and 48 or 56,
@@ -2726,14 +2707,11 @@ end,20,108)
 	if hbtn and hbtn.costs and
 		res1.reqs|hbtn.costs.breq==
 			res1.reqs then
-		local len=pres(
-			hbtn.costs,0,150)
-		camera(
-			len/2-4-hbtn.r[1],
-			8-hbtn.r[2]
-		)
+		local l=pres(hbtn.costs,0,150)
+		camera(l/2-4-hbtn.r[1],
+			8-hbtn.r[2])
 		pres(hbtn.costs,2,2)
-		rect(len+2,unspl"0,0,8,1")
+		rect(l+2,unspl"0,0,8,1")
 	end
 end
 
@@ -2761,7 +2739,7 @@ pspl,rndspl,unspl,spldeli,campal=
 	comp(split,deli),
 	comp(camera,pal)
 
-unl,unspr,stp,resk,pcol,
+unl,unspr,typs,stp,resk,pcol,
 	hlt,diff,act,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
@@ -2769,6 +2747,7 @@ unl,unspr,stp,resk,pcol,
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
+	{},
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
@@ -2910,14 +2889,14 @@ end
 
 function ai_frame(ai)
 	if (t6) ai.safe=1
-	local avail,nxtres,m,
+	local avail,nxt,m,
 		ants,res,h=
 		{},{},{},0,res[ai.typ]
 		
 	local function miner(u,r)
 		u.rs=mine_nxt(u,r)
-		if not u.rs and nxtres[r] then
-			move(u,unpack(nxtres[r]))
+		if not u.rs and nxt[r] then
+			move(u,unpack(nxt[r]))
 		end
 	end
 
@@ -2949,7 +2928,7 @@ function ai_frame(ai)
 		else
 			if pid>90 then
 				if (t) break
-				nxtres[r]=nxtres[r] or
+				nxt[r]=nxt[r] or
 					g(dmaps[r] or {},x,y) and
 					{ux,uy}
 			elseif adv then
@@ -3000,8 +2979,8 @@ function ai_frame(ai)
 		end
 	end)
 
-	bal=(#m-count(m,"r"))
-		\2.75-count(m,"g")
+	bal=(#m-count(m,"r"))\2.75
+		-count(m,"g")
 
 	foreach(units,function(u)
 		local typ=u.typ
@@ -3051,9 +3030,7 @@ function ai_frame(ai)
 		end
 	end)
 
-	if #ai.p2>=res.diff*5 and
-		ai.safe
-	then
+	if #ai.p2>=res.diff*5 and ai.safe then
 		ai.p3,ai.p2=ai.p2,{}
 	end
 	mvg(ai.p3,hq.x,hq.y,"atk")
