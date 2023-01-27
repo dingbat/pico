@@ -1423,16 +1423,11 @@ function tick(u)
 		u.st.active=1
 	end
 
-	local x,y,t,agg_d,
-		agg_u,adj=
+	local x,y,t,agg_d,agg_u,adj=
 		u.x,u.y,u.st.x,9999
 
-	if u.q and cf%15==u.q.y%15 then
-		produce(u)
-	end
-	if typ.farm then
-		update_farm(u,cf)
-	end
+	if (u.q) produce(u)
+	if (typ.farm) update_farm(u,cf)
 	if t then
 		if t.dead then
 			u.st.agg=1,
@@ -1948,7 +1943,7 @@ end
 function produce(u)
 	local _ENV,gl=u,_ENV
 	local bld=q.typ
-	q.x-=.5
+	q.x-=0x.0888
 	if q.x<=0 then
 		if bld.x then
 			local _ENV=bld
@@ -2283,7 +2278,7 @@ function prod(u,b,m)
 	if u.q then
 		u.q.qty+=1
 	else
-		u.q=p("qty=1",b,b.t*m,cf)
+		u.q=p("qty=1",b,b.t*m)
 	end
 end
 -->8
