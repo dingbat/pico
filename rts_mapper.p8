@@ -19,9 +19,8 @@ pid_codes={
 	t=6, --t: tower
 	c=7, --c: castle
 	
-	--$: wild unit, created at x,y
-	--   at start of game.
-	--   val:unit id (14 for ladyb)
+	--$: wild ladybug, created at
+	--   tile x,y at start of game.
 	["$"]=10,
 	
 	--%: percentage of workers on
@@ -33,12 +32,17 @@ pid_codes={
 	--      large cluster of that
 	--      resource. goes to next
 	--      (in order) if runs out
+ -- must have p>3!
 	["grp>b"]=98,
 	["grp>g"]=103,
 	
 	--exit: stop orders for
-	--      difficulties <= val
-	exit=153	
+	--      difficulties <= p
+	exit=153,
+	
+	--tech: *_n (n=tech idx)
+	--      for difficulties >= x
+	--      y=0 ▶ free, y=1 ▶ paid
 }
 
 --step_mode=1
@@ -296,16 +300,14 @@ function printa(a)
 	print("data copied to clip")
 end
 -->8
-bo=loadbo[[
-1,b_64_%
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
-14,ladyb_$
+bo=loadbo[[0,ladyb_$
+0,ladyb_$
+0,ladyb_$
+0,ladyb_$
+0,ladyb_$
+0,ladyb_$
+0,ladyb_$
+0,ladyb_$
 0,grp>b
 0,grp>b
 0,grp>b
@@ -314,13 +316,14 @@ bo=loadbo[[
 0,grp>g
 0,grp>g
 0,grp>g
-3,hard_tech_basket_15
-3,hard_tech_heal_22
-3,hard_tech_warant_20
-3,hard_tech_archer_21
-3,hard_tech_beetle_16
-3,hard_tech_spider_17
-3,hard_tech_farm_18
+0,hard_tech_basket_15
+0,hard_tech_heal_22
+0,hard_tech_warant_20
+0,hard_tech_archer_21
+0,hard_tech_beetle_16
+0,hard_tech_spider_17
+0,hard_tech_monk_27
+0,hard_tech_farm_18
 5,h
 8,h
 8,b
@@ -328,7 +331,7 @@ bo=loadbo[[
 12,t
 15,f
 16,h
-2,med_tech_basket_15
+16,med_tech_basket_15
 16,f
 16,f
 16,f
@@ -340,22 +343,21 @@ bo=loadbo[[
 24,f
 25,h
 26,c
-1,easy_exit
+0,easy_exit
 31,h
 31,m
-2,med_tech_warant_21
-2,med_tech_archer_22
+31,med_tech_warant_21
+31,med_tech_archer_22
 32,b
 34,d
 36,h
 39,c
 40,h
-2,b_58_%
 43,h
 43,c
-2,med_tech_heal_23
-2,med_tech_beetle_17
-2,med_tech_spider_18
+43,med_tech_heal_23
+44,med_tech_beetle_17
+45,med_tech_spider_18
 45,t
 48,h
 49,b
@@ -364,21 +366,18 @@ bo=loadbo[[
 53,h
 53,t
 57,h
-3,b_50_%
-2,med_tech_cstl_23
+58,med_tech_cstl_23
 60,c
 65,h
 65,c
-2,med_tech_warant_21
-2,med_tech_archer_22
-2,med_tech_beetle_17
-2,med_tech_spider_18
-3,all_exit
+70,med_tech_warant_21
+70,med_tech_archer_22
+75,med_tech_beetle_17
+75,med_tech_spider_18
+0,all_exit
 ]]
 -->8
-addpos[[
-b64_%
-ladyb_$,15,5
+addpos[[ladyb_$,15,5
 ladyb_$,24,7
 ladyb_$,30,5
 ladyb_$,23,16
@@ -394,13 +393,14 @@ grp>g,8,3
 grp>g,17,5
 grp>g,18,9
 grp>g,10,13
-hard_tech_basket_15
-hard_tech_heal_22
-hard_tech_warant_20
-hard_tech_archer_21
-hard_tech_beetle_16
-hard_tech_spider_17
-hard_tech_farm_18
+hard_tech_basket_15,3,0
+hard_tech_heal_22,3,0
+hard_tech_warant_20,3,0
+hard_tech_archer_21,3,0
+hard_tech_beetle_16,3,0
+hard_tech_spider_17,3,0
+hard_tech_monk_27,3,0
+hard_tech_farm_18,3,0
 h,4,4
 h,8,2
 b,9,7
@@ -408,7 +408,7 @@ h,9,4
 t,11,6
 f,6,6
 h,11,10
-med_tech_basket_15,1
+med_tech_basket_15,2,1
 f,6,4
 f,7,4
 f,5,5
@@ -420,22 +420,21 @@ f,5,4
 f,8,4
 h,5,3
 c,8,9
-easy_exit
+easy_exit,1
 h,1,8
 m,7,7
-med_tech_warant_21,1
-med_tech_archer_22,1
+med_tech_warant_21,2,1
+med_tech_archer_22,2,1
 b,8,8
 d,7,8
 h,0,5
 c,13,5
 h,17,4
-b58_%
 h,16,9
 c,4,8
-med_tech_heal_23,1
-med_tech_beetle_17,1
-med_tech_spider_18,1
+med_tech_heal_23,2,1
+med_tech_beetle_17,2,1
+med_tech_spider_18,2,1
 t,12,8
 h,10,14
 b,15,7
@@ -444,20 +443,18 @@ d,15,6
 h,22,7
 t,7,12
 h,9,0
-b50_%
-med_tech_cstl_23,1
+med_tech_cstl_23,2,1
 c,18,7
 h,5,15
 c,8,12
-med_tech_warant_21,1
-med_tech_archer_22,1
-med_tech_beetle_17,1
-med_tech_spider_18,1
-all_exit
+med_tech_warant_21,2,1
+med_tech_archer_22,2,1
+med_tech_beetle_17,2,1
+med_tech_spider_18,2,1
+all_exit,3 
 ]]
 -->8
-addpos[[
-b%
+addpos[[b%
 ladyb,15,5
 ladyb,24,7
 ladyb,30,5
@@ -549,8 +546,7 @@ c,35,4
 all_exit
 ]]
 -->8
-addpos[[
-b%
+addpos[[b%
 ladyb,15,5
 ladyb,24,7
 ladyb,30,5
@@ -642,8 +638,7 @@ c,35,4
 all_exit
 ]]
 -->8
-addpos[[
-b%
+addpos[[b%
 ladyb,15,5
 ladyb,24,7
 ladyb,30,5
@@ -810,7 +805,7 @@ function render(n,max_bo)
 		{212,2,1}  --queen
 	}
 	local function set(x,y,s,i)
-		local ctx="pos"..n.." l#"..(i+1)
+		local ctx="pos"..n.." l#"..i
 		--bug
 		if s!=140 then
 			assertandsave(

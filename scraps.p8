@@ -6,6 +6,13 @@ credits:
 - shrink0 (for string control code compression)
 - https://aoe2techtree.net/
 
+ai:
+- easy: ai's units produce 5x slower
+- normal: ai's techs take no time
+- hard:
+	- ai starts with free techs (heal,1 of each repeatable)
+	- ai's techs take no time
+ - ai's resource tiles start with +20%
 
 32x32
 
