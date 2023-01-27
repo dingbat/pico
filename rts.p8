@@ -2270,7 +2270,7 @@ function unit(t,_x,_y,_p,
 		local _ENV=add(units,
 			p([[var=u
 dir=1
-lastp=1
+lp=1
 sproff=0
 cycles=0
 fres=0
@@ -3033,7 +3033,7 @@ function ai_frame(ai)
 				typ.mil and
 				res2.p<res2.diff*26
 			then
-				local b,hld=u.prod[u.lastp]
+				local b,hld=u.prod[u.lp]
 				foreach(split"r,g,b",function(k)
 					hld=hld or h and
 						b[k]!=0 and
@@ -3043,8 +3043,8 @@ function ai_frame(ai)
 					can_pay(b,res2) then
 					prod(u,b,
 						split"5,1,1"[res2.diff])
-					u.lastp%=typ.units
-					u.lastp+=1
+					u.lp%=typ.units
+					u.lp+=1
 					res2.tot+=1
 				end
 			end
