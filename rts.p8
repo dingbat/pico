@@ -13,6 +13,10 @@ function _update()
 		btn"5",btn"4",
 		stat"121" and loadgame()
 
+	if dget"0">1 and not loser then
+		lclk,rclk=btnp"5",btnp"4"
+	end
+	
 	if menu then
 		cx+=cvx
 		cy+=cvy
@@ -24,8 +28,8 @@ function _update()
 		end
 		add(pcol,
 			deli(btnp"4" and pcol,1))
-		if lclk then
-			init()
+		if llclk then
+			llclk=init()
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.npl,r.diff,r.col=
@@ -1428,9 +1432,7 @@ function tick(u)
 	if t then
 		if t.dead then
 			u.st.agg=1,
-				u.st.typ or rest(u),
-				typ.ant and t.typ.lady and
-					gogth(u,t.x8,t.y8)
+				u.st.typ or rest(u)
 		elseif int(t.r,u.r,-2) then
 			u.dir,u.st.active,u.st.typ=
 				sgn(t.x-u.x),1
@@ -1551,7 +1553,7 @@ function cam()
 	if (b>255) b>>=8
 	local dx,dy=(b&2)-(b&1)*2,
 		(b&8)/4-(b&4)/2
-	if dget"0"==0 or loser then
+	if dget"0"!=2 or loser then
 		amx,amy=stat"32",stat"33"
 	else
 		amx+=dx
@@ -1608,7 +1610,7 @@ function input()
 				sfx"1"
 				fsel(move,x,y,axn==1)
 				hilite{amx,amy,2,8}
-			elseif axn==0 and btn"5" then
+			elseif axn==0 and llclk then
 				cx,cy=x-64,y-64
 				cam()
 			end
@@ -1702,14 +1704,12 @@ c=8]],mx,my))
 		if btnp"5" and not selx then
 			selx,sely,selt=mx,my,t()
 		end
-		if btn"5" and selx then
+		if llclk and selx then
 			selbox={
 				min(selx,mx),
 				min(sely,my),
 				max(selx,mx),
-				max(sely,my),
-				7
-			}
+				max(sely,my),7}
 		else
 			selx=nil
 		end
@@ -3028,8 +3028,16 @@ function ai_frame(ai)
 end
 -->8
 cartdata"age_of_ants"
-menuitem(1,"● toggle mouse",
-	function()dset(0,~dget"0")end)
+function togmode()
+	dset(0,dget"0"%3+1)
+	menuitem(1,
+		split"● mode:touch,● mode:handheld,● mode:desktop"[dget"0"],
+		togmode)
+	return true
+end
+togmode()
+togmode()
+togmode()
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000

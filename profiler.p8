@@ -50,15 +50,13 @@ end
 heal={{qty=1}}
 u={hp=1,p=1}
 
+cartdata"abc"
 function analyze()
   profile("dist1", function()
-  	if 1==1 then
-  	u.hp+=heal[u.p].qty
-  	end
+  	dget"0"
   end)
   profile("dist2", function()
-  	if 1==1 and 1==0 then
-  	end
+  	
   end)
 end
 

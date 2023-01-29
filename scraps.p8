@@ -5,6 +5,10 @@ credits:
 - carlc27843's pxaviz https://carlc27843.itch.io/pico-8-source-compression-visualizer
 - siege engineers' [aoe2techtree.net]https://aoe2techtree.net/
 
+1; touch
+2; handheld
+3; desktop
+
 ai:
 - easy: ai's units produce 5x slower
 - normal: ai's techs take no time
@@ -12,6 +16,12 @@ ai:
 	- ai starts with free techs (heal,1 of each repeatable)
 	- ai's techs take no time
  - ai's resource tiles start with +20%
+
+
+	gather after kill:
+
+--				typ.ant and t.typ.lady and
+--					gogth(u,t.x8,t.y8)
 
 32x32
 
