@@ -2905,8 +2905,6 @@ function ai_frame(ai)
 				else
 					hold=b
 				end
-			else
-				adv=bld and bld.hu
 			end
 		else
 			if pid>90 then
