@@ -2807,7 +2807,7 @@ function save()
 	local function draw(v)
 		for i=0,8,4 do
 			pset(ptr%128,ptr\128,
-				max(v)>>i&0xf)
+				v>>i&0xf)
 			ptr+=1
 		end
 	end
@@ -2823,8 +2823,9 @@ function save()
 	end)
 	draw(#units)
 	foreach(units,function(_ENV)
-		foreach({typ.idx,x,y,p,const,
-			disc,hp},draw)
+		foreach({typ.idx,x,y,p,
+			max(const),
+			max(disc),hp},draw)
 	end)
 	extcmd("screen",1)
 end
