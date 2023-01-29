@@ -163,7 +163,7 @@ function bnr(a,t,st,cx)
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
-	?"⁶j7r⁴i⁶y7²9⁴f³fᶜ4⁶x1⁴f ⁴h⁶x4 "..st
+	?"⁶j7r⁴i⁶y7²9³f⁴fᶜ4⁶x1⁴f ⁴h⁶x4 "..st
 	?"⁶jdn⁴h⁶w⁶tᶜa"..t
 	campal()
 end
@@ -188,9 +188,9 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁴f³iᶜ7age of ants⁶-w⁶-t⁶jcg³e⁴hᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0³0⁴fᶜ6V1.0⁶jej³j\0"
+		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c³i⁴fᶜ7age of ants⁶-w⁶-t⁶jcg³e⁴hᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0³0⁴fᶜ6V1.0⁶jej³j\0"
 		camera(split"8,12,8,18,14"[diff+1])
-		?"ᶜ0◀⁴f³cᶜ7◀⁴h "..split"ᶜ0easy³0⁴fᶜbeasy,ᶜ0normal³0³8⁴fᶜanormal,ᶜ0hard³0⁴fᶜ9hard,ᶜ02 normals³0³0³c⁴fᶜ22 normals,ᶜ02 hards³0³4⁴fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁴f³cᶜ7▶"
+		?"ᶜ0◀³c⁴fᶜ7◀⁴h "..split"ᶜ0easy³0⁴fᶜbeasy,ᶜ0normal³0³8⁴fᶜanormal,ᶜ0hard³0⁴fᶜ9hard,ᶜ02 normals³0³0³c⁴fᶜ22 normals,ᶜ02 hards³0³4⁴fᶜ82 hards"[diff+1].." ⁴hᶜ0▶³c⁴fᶜ7▶"
 		return
 	end
 
@@ -2455,7 +2455,7 @@ function pres(r,x,y,z)
 		local newx,v=0,i!=4 and
 			min(r[k]\1,99) or z and
 			"³b ³i"..res1.p..
-				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#⁴f³6"..min(res1.pl,99) or
+				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#³6⁴f"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if z and i==3 then
 			newx=-2
@@ -2553,7 +2553,7 @@ portf=9]],
 	end
 
 	if sel1.typ.farm then
-		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁴e³h⁶:040c1e0d05010706³c⁴h⁶:0c1c1014160f0604"
+		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."³h⁴e⁶:040c1e0d05010706³c⁴h⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2641,7 +2641,7 @@ function draw_menu()
 	end
 	if nsel>1 then
 		camera(nsel<10 and -2)
-		?"ᶜ1⁶j1r⁴j³hX"..nsel
+		?"ᶜ1⁶j1r³h⁴jX"..nsel
 		unspr"133,1,111"
 		add(btns,{
 			r=split"0,110,14,119",

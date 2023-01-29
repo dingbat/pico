@@ -1,10 +1,9 @@
 credits:
-- a*
-- dist
-- sfx pack: "explosion 18"
-- pxaviz
-- shrink0 (for string control code compression)
-- https://aoe2techtree.net/
+- morgan mcGuire (morgan3d)'s [a*] https://github.com/morgan3d/misc/tree/master/p8pathfinder
+- fres/musurca's [fast dist] https://www.lexaloffle.com/bbs/?pid=90968#p
+- gruber's ["explosion 18"] https://www.lexaloffle.com/bbs/?pid=64837
+- carlc27843's pxaviz https://carlc27843.itch.io/pico-8-source-compression-visualizer
+- siege engineers' [aoe2techtree.net]https://aoe2techtree.net/
 
 ai:
 - easy: ai's units produce 5x slower
