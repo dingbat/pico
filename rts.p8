@@ -2874,9 +2874,9 @@ end
 
 function ai_frame(ai)
 	if (t6) ai.safe=1
-	local avail,nxt,m,
+	local avail,nxt,m,aiu,
 		ants,res,hold=
-		{},{},{},0,res[ai.typ]
+		{},{},{},{},0,res[ai.typ]
 
 	local function miner(u,r)
 		u.rs=mine_nxt(u,r)
@@ -2937,9 +2937,9 @@ function ai_frame(ai)
 		end
 	end
 
-	foreach(units,function(u)
+	for u in all(units) do
 		if u.ai==ai then
-			if u.typ.ant then
+			if add(aiu,u).typ.ant then
 				ants+=1
 				if u.st.idl then
 					miner(u,bgnxt and "b" or "r")
@@ -2961,12 +2961,13 @@ function ai_frame(ai)
 				end
 			end
 		end
-	end)
+	end
 
-	bal=(#m-count(m,"r"))\2.75
+	local bal=(
+		#m-count(m,"r"))\2.75
 		-count(m,"g")
 
-	foreach(units,function(u)
+	for u in all(aiu) do
 		local typ=u.typ
 		local function send(fn)
 			if #u.p1<typ.bldrs then
@@ -2976,43 +2977,41 @@ function ai_frame(ai)
 				end
 			end
 		end
-		if u.ai==ai then
-			local r=bal>0 and "g" or
-				bal<0 and "b"
-			if u.rs!=r and r and
-				del(avail,u) then
-				bal=0
-				miner(u,r)
-			end
-			if bldg and u.dmgd or u.const
-			then
-				send(gobld)
-			elseif typ.farm and
-				not u.farmer then
-				send(gofarm)
-			elseif
-				typ.queen and
-				ants<res.diff*13.5 or
-				typ.mil and
-				res.p<res.diff*26
-			then
-				local b,h=u.prod[u.lp]
-				foreach(split"r,g,b",function(k)
-					h=h or hold and
-						b[k]!=0 and
-						res[k]-b[k]<hold[k]
-				end)
-				if not u.q and not h and
-					can_pay(b,res) then
-					prod(u,b,
-						split"5,1,1"[res.diff])
-					u.lp%=typ.units
-					u.lp+=1
-					res.tot+=1
-				end
+		local r=bal>0 and "g" or
+			bal<0 and "b"
+		if u.rs!=r and r and
+			del(avail,u) then
+			bal=0
+			miner(u,r)
+		end
+		if bldg and u.dmgd or u.const
+		then
+			send(gobld)
+		elseif typ.farm and
+			not u.farmer then
+			send(gofarm)
+		elseif
+			typ.queen and
+			ants<res.diff*13.5 or
+			typ.mil and
+			res.p<res.diff*26
+		then
+			local b,h=u.prod[u.lp]
+			foreach(split"r,g,b",function(k)
+				h=h or hold and
+					b[k]!=0 and
+					res[k]-b[k]<hold[k]
+			end)
+			if not u.q and not h and
+				can_pay(b,res) then
+				prod(u,b,
+					split"5,1,1"[res.diff])
+				u.lp%=typ.units
+				u.lp+=1
+				res.tot+=1
 			end
 		end
-	end)
+	end
 
 	if #ai.p2>=res.diff*5 and ai.safe then
 		ai.p3,ai.p2=ai.p2,{}

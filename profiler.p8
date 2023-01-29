@@ -47,16 +47,35 @@ function dist2(dx,dy)
 		b0*.9609+a0*.3984
 end
 
+a={}
+for i=0,3 do
+	add(a,2)
+end
+
 heal={{qty=1}}
 u={hp=1,p=1}
+
+function fsel(a,func,...)
+	for u in all(a) do
+		func(u,...)
+	end
+end
+
+function xx()
+end
 
 cartdata"abc"
 function analyze()
   profile("dist1", function()
-  	dget"0"
+  	fsel(a,xx)
   end)
   profile("dist2", function()
-  	
+  	foreach(a,xx)
+  end)
+  profile("dist2", function()
+  	for u in all(a) do
+  		xx(u)
+			end
   end)
 end
 
