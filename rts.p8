@@ -94,14 +94,13 @@ function _update()
 			sset(109+tx,72+ty,
 				g(exp,x,y) and rescol[
 					g(viz,x,y,"e")..
-					fget(mget(x,y))
-				] or 14)
+					fget(mget(x,y))] or 14)
 		end
 		end
 	end
 
 	if upc==0 then
-		viz,new_viz=new_viz,{}
+		viz,nviz=nviz,{}
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
 			mset(x+mapw,y,viz[k] or
@@ -123,7 +122,7 @@ function _update()
 					dmg(typ,u)
 					if (typ.aoe==0) break
 					if hlv.var then
-						hilite(p([[f=2
+						hi(p([[f=2
 c=13]],b.x,b.y))
 					end
 				end
@@ -357,7 +356,7 @@ npl=0]]
 
 	res1,dq,exp,vcache,dmaps,
 	units,restiles,sel,ladys,prj,
-		bldgs,new_viz,typs,ais,dmst,
+		bldgs,nviz,typs,ais,dmst,
 		posidx,cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
@@ -1504,7 +1503,7 @@ function tick(u)
 					if bldgs[k] then
 						bldgs[k].disc=1
 					end
-					exp[k],new_viz[k]=128,"v"
+					exp[k],nviz[k]=128,"v"
 				end
 			end)
 		end
@@ -1609,7 +1608,7 @@ function input()
 			if rclk and sel1 then
 				sfx"1"
 				fsel(move,x,y,axn==1)
-				hilite{amx,amy,2,8}
+				hi{amx,amy,2,8}
 			elseif axn==0 and llclk then
 				cx,cy=x-64,y-64
 				cam()
@@ -1650,7 +1649,7 @@ function input()
 	then
 		if can_renew() then
 			sfx"0"
-			hilite(hbld)
+			hi(hbld)
 			hbld.sproff,
 				hbld.cycles,
 				hbld.exp=0,0
@@ -1659,7 +1658,7 @@ function input()
 
 		elseif can_gth() then
 			sfx"0"
-			hilite(htile)
+			hi(htile)
 			if avail_farm() then
 				gofarm(sel1,hbld)
 			else
@@ -1669,27 +1668,27 @@ function input()
 		elseif can_bld() then
 			sfx"0"
 			fsel(gobld,hbld)
-			hilite(hbld)
+			hi(hbld)
 
 		elseif can_atk() then
 			sfx"4"
 			fsel(goatk,hunit)
-			hilite(hunit)
+			hi(hunit)
 
 		elseif can_drop() then
 			sfx"0"
 			fsel(godrop,nil,hbld)
-			hilite(hbld)
+			hi(hbld)
 
 		elseif sel1.typ.unit then
 			sfx"1"
 			mvg(sel,mx,my,axn==1,1)
-			hilite(p([[f=.5
+			hi(p([[f=.5
 c=8]],mx,my))
 
 		elseif sel1.typ.units then
 			if fget(mget(mx8,my8),1) then
-				hilite(htile)
+				hi(htile)
 			end
 			sfx"3"
 			sel1.rx,sel1.ry,
@@ -2012,7 +2011,7 @@ function s(a,x,y,v)
 	a[x|y<<8]=v
 end
 
-function hilite(v)
+function hi(v)
 	hlt,hlv=t(),v
 end
 
@@ -2206,7 +2205,7 @@ function dmg(typ,to)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
 		sfx"34"
-		hilite{
+		hi{
 			mmx+to.x/mmwr,
 			mmy+to.y/mmhr,3,14}
 		alert=hlt
@@ -2667,7 +2666,7 @@ end,20,108)
 			r=split"116,121,125,128",
 			fn=function()
 				sfx"1"
-				hilite(idl)
+				hi(idl)
 				sel,cx,cy={idl},
 					idl.x-64,idl.y-64
 				cam()
@@ -2679,7 +2678,7 @@ end,20,108)
 		add(btns,idlm and {
 			r=split"106,121,113,128",
 			fn=function()
-				hilite(idlm)
+				hi(idlm)
 				sel={idlm}
 			end
 		}) and 48 or 56,
