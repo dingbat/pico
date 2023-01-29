@@ -2329,11 +2329,11 @@ b=4]][q]
 			if not dmst[q] then
 				dmst[q]={}
 				for x=0,mapw do
-				for y=0,maph do
-					if fget(mget(x,y),f) then
-						s(dmst[q],x,y,{x,y})
+					for y=0,maph do
+						if fget(mget(x,y),f) then
+							s(dmst[q],x,y,{x,y})
+						end
 					end
-				end
 				end
 			end
 			for i,t in next,dmst[q] do
@@ -2812,9 +2812,9 @@ function save()
 		end
 	end
 	for x=0,47 do
-	for y=0,31 do
-		draw(mget(x,y)|g(exp,x,y,0))
-	end
+		for y=0,31 do
+			draw(mget(x,y)|g(exp,x,y,0))
+		end
 	end
 	foreach(resk,function(k)
 		foreach(res,function(r)
@@ -2843,11 +2843,11 @@ function loadgame()
 		end
 	end
 	for x=0,47 do
-	for y=0,31 do
-		local v=px"1"
-		mset(x,y,v&127,
-			v>127 and s(exp,x,y,128))
-	end
+		for y=0,31 do
+			local v=px"1"
+			mset(x,y,v&127,
+				v>127 and s(exp,x,y,128))
+		end
 	end
 	foreach(resk,function(k)
 		foreach(res,function(r)
