@@ -114,11 +114,9 @@ function _update()
 		then
 			del(prj,b)
 			for u in all(units) do
-				if u.ap!=b.ap and int(
-					u.r,
-					{b.x,b.y,b.x,b.y},
-					typ.aoe
-				) then
+				if u.ap!=b.ap and
+					int(u.r,{b.x,b.y,b.x,b.y},
+					typ.aoe) then
 					dmg(typ,u)
 					if (typ.aoe==0) break
 					if hlv.var then
