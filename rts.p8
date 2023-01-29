@@ -1332,7 +1332,7 @@ end
 function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
-		wayp,x,y=dmap_find(u,"d")
+		wayp,x,y=dpath(u,"d")
 		dropu=not wayp and units[u.p]
 	end
 	u.st=p([[t=drop
@@ -1974,7 +1974,7 @@ function produce(u)
 end
 
 function mine_nxt(u,res)
-	local wp,x,y=dmap_find(u,res)
+	local wp,x,y=dpath(u,res)
 	if wp then
 		gogth(u,x,y,wp)
 		return res
@@ -2277,7 +2277,7 @@ end
 -->8
 --paths
 
-function dmap_find(u,k)
+function dpath(u,k)
 	local x,y,tk,dmap,p,l=
 		u.x8,u.y8,u.k,dmaps[k] or {},
 		{},9
