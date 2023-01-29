@@ -1265,7 +1265,7 @@ tmap=256
 idx=22
 portx=16
 porty=80]],heal,function(_ENV)
-	qty+=0x.0222
+	qty+=0x.016
 end),
 	p([[t=10
 r=0
