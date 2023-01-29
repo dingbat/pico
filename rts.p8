@@ -292,9 +292,8 @@ function _draw()
 			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"
-			rect(to_bld.fw,
-				to_bld.fh,
-				unspl"-1,-1,3")
+			rect(to_bld.fw,to_bld.fh,
+			unspl"-1,-1,3")
 			fillp()
 		end
 		local _ENV=to_bld
@@ -333,7 +332,7 @@ function init()
 	music(unspl"0,0,7")
 	menuitem(2,"⌂ save",save)
 	menuitem(3,"∧ resign",
-		function() hq.hp=0 end)
+		function()	hq.hp=0	end)
 
 	p[[var=res
 r=20
@@ -2313,10 +2312,9 @@ function dmap()
 				q.p1[pt.k]=q.c
 				if q.c<8 then
 					surr(function(t)
-						q.p3[t.k]=
-							q.p3[t.k] or
+						q.p3[t.k]=q.p3[t.k] or
 							add(q.p2,t)
-					end,unpack(pt))
+						end,unpack(pt))
 				end
 			end
 			q.c+=1
@@ -2383,48 +2381,47 @@ function as(st,g)
 		return {unpack(c)},c.e
 	end
 
-	local sh,t,f={cfs=0,
-		last=st,ctg=32767},{},{}
+	local sh,t,f={y=0,
+		l=st,u=32767},{},{}
 	t[st.k]=sh
 	local function path(s)
-		while s.last!=st do
-			add(f,{s.last[1]*8+4,
-				s.last[2]*8+4},1)
-			s=t[s.prev.k]
+		while s.l!=st do
+			add(f,{s.l[1]*8+4,
+				s.l[2]*8+4},1)
+			s=t[s.p.k]
 		end
 		asc[k]=f
 		return f
 	end
 	local fr,frl,cl={sh},1,sh
 	while frl>0 do
-		local cost,iom=32767
+		local c,m=32767
 		for i=1,frl do
-			local t=fr[i].cfs+fr[i].ctg
-			if (t<=cost) iom,cost=i,t
+			local t=fr[i].y+fr[i].u
+			if (t<=c) m,c=i,t
 		end
-		sh=fr[iom]
-		fr[iom],sh.dead=fr[frl],1
+		sh=fr[m]
+		fr[m],sh.d=fr[frl],1
 		frl-=1
-
-		local pt=sh.last
+		local pt=sh.l
 		if pt.k==g.k then
 			f.e=1
 			return path(sh),1
 		end
 		surr(function(n)
-			local ob,ncfs=t[n.k],sh.cfs+n.d
+			local ob,x=t[n.k],sh.y+n.d
 			if not ob then
 				ob={
-					cfs=32767,last=n,
-					ctg=dist(n[1]-g[1],n[2]-g[2])
+					y=32767,l=n,
+					u=dist(n[1]-g[1],n[2]-g[2])
 				}
 				frl+=1
 				fr[frl],t[n.k]=ob,ob
 			end
-			if not ob.dead and ob.cfs>ncfs then
-				ob.cfs,ob.prev=ncfs,pt
+			if not ob.d and ob.y>x then
+				ob.y,ob.p=x,pt
 			end
-			if ob.ctg<cl.ctg then
+			if ob.u<cl.u then
 				cl=ob
 			end
 		end,unpack(pt))
