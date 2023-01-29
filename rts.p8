@@ -2110,7 +2110,6 @@ end
 function can_atk()
 	return sel1.typ.atk
 		and hunit
-		and hunit.alive
 		and (not hunit.hu or
 			seltyp.monk and
 			hunit.dmgd and not
