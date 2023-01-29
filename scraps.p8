@@ -23,6 +23,13 @@ ai:
 --				typ.ant and t.typ.lady and
 --					gogth(u,t.x8,t.y8)
 
+custom load:
+if stat"6"=="map" then
+		memcpy(unspl"0x2000,0x8000,0x1000")
+	else
+		reload()
+	end
+
 32x32
 
 unspl"256,256,105,107,19,19,32,32,13.47,13.47"
