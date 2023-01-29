@@ -274,8 +274,7 @@ function _draw()
 			min(hlv.f/dt,4),hlv.c)
 	elseif mid(dt,.1,.25)!=dt
 		and hlv.r then
-		local w,x,y,z=unpack(hlv.r)
-		rect(w-1,x-1,y,z,8)
+		rect(unpack(hlv.r))
 	end
 
 	draw_menu()
@@ -2031,7 +2030,7 @@ function box(u)
 	local _ENV,ais,rz=u,ais,res
 	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8,dmgd,ai,ap,pres=
-		{x-w2,y-h2,x+w2,y+h2},
+		{x-w2-1,y-h2-1,x+w2,y+h2,8},
 		x\8,y\8,
 		hp<max_hp,
 		ais[p],p|9,rz[p]
