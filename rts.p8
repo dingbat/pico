@@ -279,7 +279,7 @@ function _draw()
 
 	draw_menu()
 	campal()
-	if hlv[4] then
+	if not hlv.p1 then
 		circ(unpack(hlv))
 	end
 	if to_bld then
