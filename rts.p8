@@ -2958,8 +2958,8 @@ function ai_frame(ai)
 		end
 	end
 
-	local bal=(
-		#m-count(m,"r"))\2.75
+	local bal=
+		(#m-count(m,"r"))\2.75
 		-count(m,"g")
 
 	for u in all(aiu) do
