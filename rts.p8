@@ -47,7 +47,8 @@ function _update()
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
-					unit(u,x+dx,y+dy,p)
+					res.p2.newg=
+						unit(u,x+dx,y+dy,p)
 				end
 			end)
 			start()
@@ -2837,9 +2838,8 @@ end
 function loadgame()
 	init()
 	pal()
-	loaded,ptr=
-		serial(unspl"0x802,0x9000,0x4000"),
-		0x9004
+	local ptr=0x9004
+	serial(unspl"0x802,0x9000,0x4000")
 	local function px(n)
 		n-=1
 		if n>=0 then
@@ -2921,8 +2921,7 @@ function ai_frame(ai)
 					{ux,uy}
 			elseif adv then
 				if pid==10 then
-					if not loaded and
-						ai.typ==2 then
+					if res.newg then
 						unit(14,ux,uy,4)
 					end
 				elseif t then
