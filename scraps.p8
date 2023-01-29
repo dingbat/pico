@@ -402,8 +402,12 @@ farm (1)
 
 tostr[[[[]]
 ai_debug=true
-srand"12"
 if ai_debug then
+	--ai in 1,2
+	--srand"18"
+	--ai in 2,3
+	--srand"12"
+	
 	_update60=_update
 	_draw_map,_dr,_pr,_resbar=
 		draw_map,_draw,print_res,
@@ -414,18 +418,18 @@ if ai_debug then
 		end
 	end
 	function _draw()
-		if upcycle and not castles then
+		if upcycle and castles then
 			castles=1
 			castle.p1.atk=3
 			castle.p1.aoe=5
-			unit(13,298,194,1)
-			unit(13,298,214,1)
-			unit(13,280,224,1)
+			unit(13,298,204,1)
+			unit(13,318,180,1)
+			unit(13,290,224,1)
 			unit(13,280,206,1)
-			unit(13,317,160,1)
-			unit(13,333,160,1)
+			unit(13,300,184,1)
+			unit(13,333,196,1)
 		end
-
+		
 		_dr()
 		if ai_debug and res1 then
 		camera()
