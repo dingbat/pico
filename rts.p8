@@ -22,9 +22,8 @@ function _update()
 			diff+=btnp()^^-2
 			diff%=5
 		end
-		if btnp"4" then
-			add(pcol,deli(pcol,1))
-		end
+		add(pcol,
+			deli(btnp"4" and pcol,1))
 		if lclk then
 			init()
 			for k=1,3 do
@@ -163,7 +162,7 @@ function bnr(a,t,st,cx)
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
-	?"⁶j7r⁴i⁶y7²9³f⁴fᶜ4⁶x1⁴f ⁴h⁶x4 "..st
+	?"⁶j7r⁴i⁶y7²9⁵ffᶜ4⁶x1⁴f ⁴h⁶x4 "..st
 	?"⁶jdn⁴h⁶w⁶tᶜa"..t
 	campal()
 end
@@ -188,9 +187,9 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c³i⁴fᶜ7age of ants⁶-w⁶-t⁶jcg³e⁴hᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0³0⁴fᶜ6V1.0⁶jej³j\0"
+		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0⁵0fᶜ6V1.0⁶jej³j\0"
 		camera(split"8,12,8,18,14"[diff+1])
-		?"ᶜ0◀³c⁴fᶜ7◀⁴h "..split"ᶜ0easy³0⁴fᶜbeasy,ᶜ0normal³0³8⁴fᶜanormal,ᶜ0hard³0⁴fᶜ9hard,ᶜ02 normals³0³0³c⁴fᶜ22 normals,ᶜ02 hards³0³4⁴fᶜ82 hards"[diff+1].." ⁴hᶜ0▶³c⁴fᶜ7▶"
+		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 		return
 	end
 
@@ -217,8 +216,7 @@ function _draw()
 	foreach(prj,function(_ENV)
 		sspr(
 			typ.prj_s+prj_so,
-			96,2,2,x,y
-		)
+			96,2,2,x,y)
 	end)
 	if loser then
 		resbar()
@@ -251,8 +249,7 @@ function _draw()
 		if not exp[i] then
 			b(exp)
 		elseif not viz[i] then
-			b(viz,
-				fget(mget(x,y),7) or 5)
+			b(viz,fget(mget(x,y),7) or 5)
 		end
 	end
 	end
@@ -339,7 +336,7 @@ function init()
 	music(unspl"0,0,7")
 	menuitem(2,"⌂ save",save)
 	menuitem(3,"∧ resign",
-		function()hq.hp=0 end)
+		function() hq.hp=0 end)
 
 	p[[var=res
 r=20
@@ -355,18 +352,14 @@ t=0
 npl=0]]
 
 	res1,dq,exp,vcache,dmaps,
-	units,restiles,sel,ladys,
-		prj,bldgs,new_viz,dmap_st,
-		typs,ais,
-		posidx,
-		cf,selt,alert,ban,
+	units,restiles,sel,ladys,prj,
+		bldgs,new_viz,typs,ais,dmst,
+		posidx,cf,selt,alert,ban,
 		amx,amy,tot,
 		loser,menu=
 		res.p1,
-		{},{},{},{},
-		{},{},{},{},
-		{},{},{},{d={}},
-		{},{},
+		{},{},{},{},{},{},{},
+		{},{},{},{},{},{},{d={}},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,50"
 
@@ -1389,7 +1382,7 @@ function tick(u)
 		if typ.lady then
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
-			s(dmap_st.r or {},x8,y8,
+			s(dmst.r or {},x8,y8,
 				{x8,y8})
 			qdmaps"r"
 		elseif typ.queen then
@@ -1435,10 +1428,9 @@ function tick(u)
 	if t then
 		if t.dead then
 			u.st.agg=1,
-				u.st.typ or rest(u)
-			if typ.ant and t.typ.lady then
-				gogth(u,t.x8,t.y8)
-			end
+				u.st.typ or rest(u),
+				typ.ant and t.typ.lady and
+					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
 			u.dir,u.st.active,u.st.typ=
 				sgn(t.x-u.x),1
@@ -1475,9 +1467,7 @@ function tick(u)
 
 	if (u.const) return
 	if u.st.idl then
-		if typ.lady and t6 then
-			wander(u)
-		end
+		if (typ.lady and t6)	wander(u)
 		if u.hu then
 			if typ.ant then
 				if (u.st.idl>10) idl=u
@@ -1938,7 +1928,7 @@ function gth(u)
 			mset(x,y,t+16)
 		elseif n==1 then
 			mset(x,y,68)
-			s(dmap_st[r],x,y)
+			s(dmst[r],x,y)
 			s(dmaps[r],x,y,.55)
 			qdmaps(r)
 		end
@@ -2172,12 +2162,12 @@ function reg_bldg(b)
 		s(bldgs,xx,yy,b.alive and b)
 		if b.dead then
 			s(exp,xx,yy,1)
-			s(dmap_st.d,xx,yy)
+			s(dmst.d,xx,yy)
 			if typ.fire and y==yy then
 				mset(xx,yy,69)
 			end
 		elseif	typ.drop then
-			s(dmap_st.d,xx,yy,{xx,yy})
+			s(dmst.d,xx,yy,{xx,yy})
 		end
 	end
 	reg(x,y,typ.h8 or reg(x,y-1))
@@ -2343,17 +2333,17 @@ function dmap()
 			local o,f={},p[[r=2
 g=3
 b=4]][q]
-			if not dmap_st[q] then
-				dmap_st[q]={}
+			if not dmst[q] then
+				dmst[q]={}
 				for x=0,mapw do
 				for y=0,maph do
 					if fget(mget(x,y),f) then
-						s(dmap_st[q],x,y,{x,y})
+						s(dmst[q],x,y,{x,y})
 					end
 				end
 				end
 			end
-			for i,t in next,dmap_st[q] do
+			for i,t in next,dmst[q] do
 				if surr(nil,unpack(t)) then
 					add(o,t).k=i
 				end
@@ -2455,7 +2445,7 @@ function pres(r,x,y,z)
 		local newx,v=0,i!=4 and
 			min(r[k]\1,99) or z and
 			"³b ³i"..res1.p..
-				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#³6⁴f"..min(res1.pl,99) or
+				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#⁵6f"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if z and i==3 then
 			newx=-2
@@ -2553,7 +2543,7 @@ portf=9]],
 	end
 
 	if sel1.typ.farm then
-		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."³h⁴e⁶:040c1e0d05010706³c⁴h⁶:0c1c1014160f0604"
+		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2641,7 +2631,7 @@ function draw_menu()
 	end
 	if nsel>1 then
 		camera(nsel<10 and -2)
-		?"ᶜ1⁶j1r³h⁴jX"..nsel
+		?"ᶜ1⁶j1r⁵hjX"..nsel
 		unspr"133,1,111"
 		add(btns,{
 			r=split"0,110,14,119",
@@ -2893,7 +2883,7 @@ function ai_frame(ai)
 	local avail,nxt,m,
 		ants,res,hold=
 		{},{},{},0,res[ai.typ]
-		
+
 	local function miner(u,r)
 		u.rs=mine_nxt(u,r)
 		if not u.rs and nxt[r] then
