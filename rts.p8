@@ -68,7 +68,7 @@ function _update()
 	input()
 
 	if loser then
-		poke"24365"
+		poke"0x5f2d"
 		if lclk then
 			menu,cx,cy=unspl"63,5,35"
 			music"63"
@@ -1651,7 +1651,7 @@ function input()
 				to_bld,
 				mx8*8+to_bld.w\2,
 				my8*8+to_bld.h\2,
-				unspl"1")
+				unspl"1,1,1")
 			fsel(gobld,b)
 			pay(to_bld,1,res1)
 			b.cost,to_bld,selx=nil

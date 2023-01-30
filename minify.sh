@@ -1,3 +1,5 @@
+set -e
+
 tab () {
  sed -i -E "s/function $1\(/-->8\n--$2\n\nfunction $1(/" rts_sh.p8
 }
@@ -12,7 +14,12 @@ python3 ~/shrinko8-main/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-re
 sed -i -E "s/print\((.*)\)/?\1/" rts_sh.p8
 sed -i -E "s/^function /\nfunction /" rts_sh.p8
 sed -i -E "s/^__lua__/__lua__$header/" rts_sh.p8
+sed -i -E "s/=240$/=0xf0/" rts_sh.p8
 sed -i -E "s/~=/!=/" rts_sh.p8
+sed -i -E "s/24365/0x5f2d/" rts_sh.p8
+sed -i -E "s/13480/0x34a8/" rts_sh.p8
+sed -i -E "s/61440/0xf000/" rts_sh.p8
+sed -i -E "s/36868/0x9004/" rts_sh.p8
 tab start init
 tab rest tick
 tab cam input
@@ -25,4 +32,4 @@ tab save save
 tab ai_frame ai
 tab mode options
 
-# rm rts_print.p8
+rm rts_print.p8
