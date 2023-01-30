@@ -1891,8 +1891,6 @@ function atk(u)
 						e.x,e.y,u.ap
 					) or dmg(typ,e))
 					if e.conv>=e.max_hp then
-						e.pres.p-=1
-						u.pres.p+=1
 						e.p,e.conv=u.p,0
 						del(e.sqd,e)
 						sfx"38"
