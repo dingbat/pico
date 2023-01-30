@@ -326,7 +326,22 @@ x (4 tok) 7ded44f - make p3 color black
 x (10 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 - (1 tok) los var (=typ.loc) in tick()
 - (4 tok) parseify adding proj
-- hunt
+- (6 tok) remove constants
+x hunt
+
+\)([^}|),\].<>\s/\-*%+=^\[\\!])
+) $1
+
+^\s+|\s+$
+
+--[[
+for source w/whitespace,
+see /bbs/1230431
+
+credits:
+fast dist - musurca
+a* - morgan3d
+]]
 
 clip(x+3,0,sec-6,128)
 		sspr(unspl"10,64,2,2,0,104,128,2")

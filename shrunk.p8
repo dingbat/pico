@@ -4,6 +4,15 @@ __lua__
 --age of ants
 --eeooty
 
+--[[
+for source w/whitespace,
+see /bbs/1230431
+
+credits:
+fast dist - musurca
+a* - morgan3d
+]]
+
 music(63,2000)
 
 function _update()
@@ -3375,4 +3384,4 @@ __music__
 
 __meta:title__
 age of ants
-eeootyÿÿ
+eeootyÿÿÿ
