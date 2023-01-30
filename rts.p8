@@ -334,9 +334,9 @@ function init()
 		function()	hq.hp=0	end)
 
 	p[[var=res
-r=20
-g=10
-b=20
+r=520
+g=510
+b=520
 p=4
 pl=10
 tot=4
@@ -367,7 +367,8 @@ qty=0x.0036
 ]]
 
 p[[var=ant
-txt=worker: gathers and builds
+txt1=²5ᶜ9worker ant: ᶜ7gathers resources,
+txt2=²5ᶜ7builds and repairs.
 idx=1
 spd=.286
 los=20
@@ -432,7 +433,8 @@ tmap=-1
 d=0]]
 
 p[[var=beetle
-txt=beetle: good vs buildings
+txt1=²5ᶜ9beetle: ᶜ7slow and melee but
+txt2=²5ᶜ7strong vs buildings.
 idx=2
 spd=.19
 los=20
@@ -479,7 +481,8 @@ tmap=-1
 d=0]]
 
 p[[var=spider
-txt=spider: good vs ants
+txt1=²5ᶜ9spider: ᶜ7fast and
+txt2=²5ᶜ7strong vs ants.
 idx=3
 spd=.482
 los=30
@@ -525,7 +528,8 @@ tmap=-1
 d=0]]
 
 p[[var=archer
-txt=acid-spitting ant: ranged
+txt1=²5ᶜ9acid-spitting ant: ᶜ7ranged unit,
+txt2=²5ᶜ7good vs spiders.
 idx=4
 spd=.343
 los=33
@@ -576,7 +580,8 @@ tmap=-1
 d=0]]
 
 p[[var=warant
-txt=army ant: well-rounded attacker
+txt1=²5ᶜ9army ant:ᶜ7 basic army unit. good
+txt2=²5ᶜ7vs beetles+catrplrs.
 idx=5
 spd=.33
 los=25
@@ -622,7 +627,8 @@ tmap=-1
 d=0]]
 
 p[[var=cat
-txt=caterpillar: good vs buildings
+txt1=²5ᶜ9caterpillar: ᶜ7ranged unit, very
+txt2=²5ᶜ7good vs buildings.
 idx=6
 spd=.2
 los=50
@@ -718,7 +724,8 @@ tmap=-1
 d=61]]
 
 p[[var=tower
-txt=guardtower: vision+defense
+txt1=²5ᶜeguardtower:ᶜ7 basic defensive
+txt2=²5ᶜ7structure with good vision.
 idx=8
 los=30
 hp=352
@@ -766,7 +773,8 @@ tmap=-1
 d=0]]
 
 p[[var=mound
-txt=mound: resource drop+population
+txt1=²5ᶜbmound:ᶜ7 drop-off for resources,
+txt2=²5ᶜ7+5 population limit.
 idx=9
 los=5
 hp=100
@@ -803,7 +811,8 @@ tmap=-1
 d=0]]
 
 p[[var=den
-txt=nest: train spiders+beetles
+txt1=²5ᶜbnest:ᶜ7 trains spiders and
+txt2=²5ᶜ7beetles.
 idx=10
 los=10
 hp=250
@@ -842,7 +851,8 @@ tmap=-1
 d=0]]
 
 p[[var=brks
-txt=barracks: train army ants
+txt1=²5ᶜbbarracks:ᶜ7 trains army ants and
+txt2=²5ᶜ7ranged ants.
 idx=11
 los=10
 hp=200
@@ -881,7 +891,8 @@ tmap=-1
 d=0]]
 
 p[[var=farm
-txt=farm: grow+harvest food
+txt1=²5ᶜbfarm:ᶜ7 grows food for harvesting.
+txt2=²5ᶜ7limited lifespan.
 idx=12
 los=1
 hp=48
@@ -926,7 +937,8 @@ b=6
 breq=0]]
 
 p[[var=castle
-txt=castle: strong defense+ctrplrs
+txt1=²5ᶜecastle:ᶜ7 very defensive building,
+txt2=²5ᶜ7trains caterpillars.
 idx=13
 los=45
 hp=640
@@ -1013,7 +1025,8 @@ tmap=-1
 d=61]]
 
 p[[var=mon
-txt=mantis nest: train mantises
+txt1=²5ᶜbmantis nest:ᶜ7 trains mantises.
+txt2=
 idx=25
 los=25
 hp=300
@@ -1051,7 +1064,8 @@ tmap=-1
 d=0]]
 
 p[[var=monk
-txt=mantis: convert/heal/pray
+txt1=²5ᶜ9mantis:ᶜ7 converts enemy units,
+txt2=²5ᶜ7heals yours, prays.
 idx=26
 spd=.25
 los=45
@@ -1122,12 +1136,13 @@ breq=0
 tmap=1024
 up=-1
 idx=27
-txt=+hp,+speed,+conversion rate
+txt1=²5ᶜamantis upgr.:ᶜ7 increase mantis
+txt2=²5ᶜ7conversion rate and hp by 25%
 portx=62
 porty=88]],monk,function(_ENV)
 	spd=.286
 	hp*=1.25
-	conv*=1.2
+	conv*=1.25
 end)
 }
 
@@ -1142,7 +1157,8 @@ breq=0
 tmap=1
 up=-1
 idx=15
-txt=+worker gather efficiency
+txt1=²5ᶜabaskets:ᶜ7 increase worker
+txt2=²5ᶜ7gathering efficiency.
 portx=24
 porty=80]],ant,function(_ENV)
 	cap\=.72
@@ -1156,7 +1172,8 @@ b=10
 breq=2
 tmap=2
 idx=24
-txt=lets mounds create workers
+txt1=²5ᶜaegg deposit:ᶜ7 let mounds
+txt2=²5ᶜ7produce worker ants.
 portx=33
 porty=80]],{},function()
 	mound.p1.units=
@@ -1176,7 +1193,8 @@ breq=0
 tmap=4
 up=-1
 idx=16
-txt=+atk,+hp for beetle
+txt1=²5ᶜabeetle upgr.:ᶜ7 increase beetle
+txt2=²5ᶜ7attack and hp by 15%
 portx=25
 porty=88]],beetle,function(_ENV)
 	atk*=1.15
@@ -1190,7 +1208,8 @@ breq=0
 tmap=8
 up=-1
 idx=17
-txt=+atk,+hp for spider
+txt1=²5ᶜaspider upgr.:ᶜ7 increase spider
+txt2=²5ᶜ7attack and hp by 20%
 portx=16
 porty=88]],spider,function(_ENV)
 	atk*=1.2
@@ -1207,7 +1226,8 @@ breq=0
 tmap=16
 up=-1
 idx=18
-txt=+farm grow rate and cycles
+txt1=²5ᶜafarm upgr.:ᶜ7 increase farm growth
+txt2=²5ᶜ7rate and lifespan.
 portx=60
 porty=80]],farm,function(_ENV)
 		gr*=1.15
@@ -1225,7 +1245,8 @@ b=0
 breq=0
 tmap=32
 idx=19
-txt=+range for acid-spitting ant
+txt1=²5ᶜaspray:ᶜ7 increase range for acid-
+txt2=²5ᶜ7spitting ants.
 portx=51
 porty=80]],archer,function(_ENV)
 	los,range=40,35
@@ -1239,7 +1260,8 @@ breq=0
 tmap=64
 up=-1
 idx=20
-txt=+atk,+vision,+hp for army ant
+txt1=²5ᶜaarmy ant upgr.:ᶜ7 increase army
+txt2=²5ᶜ7ant hp+attack by 33%
 portx=43
 porty=88]],warant,function(_ENV)
 	atk*=1.333
@@ -1254,31 +1276,17 @@ breq=0
 tmap=128
 up=-1
 idx=21
-txt=+atk,+hp for archer
+txt1=²5ᶜaacid-spitting ant upgr.:ᶜ7
+txt2=²5ᶜ7increase its hp+attack by 25%
 portx=34
 porty=88]],archer,function(_ENV)
 	atk*=1.25
-	hp*=1.2
+	hp*=1.25
 end)
 }
 
 castle.prod={
-	cat,
-	nil,
-	p([[t=30
-r=0
-g=25
-b=30
-breq=0
-tmap=2048
-idx=28
-txt=+atk,aOe damage for castle
-portx=78
-porty=80]],castle,function(_ENV)
-	aoe,prj_s,atk,atk_freq=
-		1,60,2,20
-end),
-	nil,nil,
+	cat,nil,
 	p([[t=40
 r=20
 g=0
@@ -1286,10 +1294,25 @@ b=0
 breq=64
 tmap=256
 idx=22
-txt=units passively heal
+txt1=²5ᶜaregeneration:ᶜ7 passively heal
+txt2=²5ᶜ7your units.
 portx=16
 porty=80]],heal,function(_ENV)
 	qty+=0x.016
+end),nil,nil,
+	p([[t=30
+r=0
+g=25
+b=30
+breq=0
+tmap=2048
+idx=28
+txt1=²5ᶜafireball:ᶜ7 increase castle
+txt2=²5ᶜ7attack, hit multiple units.
+portx=78
+porty=80]],castle,function(_ENV)
+	aoe,prj_s,atk,atk_freq=
+		1,60,2,20
 end),
 	p([[t=10
 r=0
@@ -1298,7 +1321,8 @@ b=20
 breq=0
 tmap=512
 idx=23
-txt=+range for castle
+txt1=
+txt2=²5ᶜaspotters:ᶜ7 increase castle range.
 portx=69
 porty=80]],castle,function(_ENV)
 	los,range=55,50
@@ -1645,10 +1669,10 @@ function input()
 				to_bld,
 				mx8*8+to_bld.w\2,
 				my8*8+to_bld.h\2,
-				unspl"1,1,1")
+				unspl"1")
 			fsel(gobld,b)
 			pay(to_bld,1,res1)
-			b.cost,to_bld,selx=to_bld
+			b.cost,to_bld,selx=nil
 		end
 		return
 	end
@@ -2074,7 +2098,7 @@ function can_pay(typ,_ENV)
 		g>=typ.g and
 		b>=typ.b and
 		(not typ.unit or p<min(pl,99))
-		and typ.reqs
+--		and typ.reqs
 end
 
 function pay(typ,dir,_ENV)
@@ -2705,6 +2729,17 @@ end,20,108)
 
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
 	sspr(unspl"109,72,19,12,0,0")
+	
+	if hc then-- and hc.reqs then
+		local l=pres(hc,0,150)
+		?hc.txt1,-104,-14
+		?hc.txt2
+		camera(l/2-4-hbtn.r[1],
+			8-hbtn.r[2])
+		pres(hc,2,2)
+		rect(l+2,unspl"0,0,8,1")
+	end
+	
 	camera(
 		-mmx-ceil(cx/mmwr),
 		-mmy-ceil(cy/mmhr)
@@ -2712,14 +2747,6 @@ end,20,108)
 	rect(unspl"-1,-1,7,7,10")
 
 	resbar()
-
-	if hc and hc.reqs then
-		local l=pres(hc,0,150)
-		camera(l/2-4-hbtn.r[1],
-			8-hbtn.r[2])
-		pres(hc,2,2)
-		rect(l+2,unspl"0,0,8,1")
-	end
 end
 
 function resbar()
