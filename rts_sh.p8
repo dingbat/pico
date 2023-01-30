@@ -85,7 +85,8 @@ res1.t+=.03333
 if cf%30==19then
 for tx=0,19do
 for ty=0,12do
-local x,y=tx*20.21\8,ty*21.33\8
+local x,y=tx\.39585,
+ty\.37505
 sset(109+tx,72+ty,
 g(exp,x,y)and rescol[
 g(viz,x,y,"e")..
@@ -1395,7 +1396,9 @@ if(typ.farm)update_farm(u)
 if t then
 if t.dead then
 u.st.agg=1,
-u.st.typ or rest(u)
+u.st.typ or rest(u),
+typ.ant and t.typ.lady and
+gogth(u,t.x8,t.y8)
 elseif int(t.r,u.r,-2)then
 u.dir,u.st.active,u.st.typ=
 sgn(t.x-u.x),1
@@ -1456,7 +1459,7 @@ end
 end
 foreach(vcache[k],function(t)
 local k=u.k+t
-if k<32<<8and k>=0and
+if k<8192and k>=0and
 k%256<48then
 if bldgs[k]then
 bldgs[k].disc=1
@@ -1554,7 +1557,7 @@ end
 if amy>104and not selx then
 local dx,dy=amx-105,amy-107
 if min(dx,dy)>=0and
-dx<19and dy<12+1then
+dx<19and dy<13then
 local x,y=20.21*dx,21.33*dy
 if rclk and sel1 then
 sfx"1"
