@@ -334,9 +334,9 @@ function init()
 		function()	hq.hp=0	end)
 
 	p[[var=res
-r=520
-g=510
-b=520
+r=20
+g=10
+b=20
 p=4
 pl=10
 tot=4
@@ -367,8 +367,7 @@ qty=0x.0036
 ]]
 
 p[[var=ant
-txt1=²5ᶜ9worker ant: ᶜ7gathers resources,
-txt2=²5ᶜ7builds and repairs.
+txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
 spd=.286
 los=20
@@ -433,8 +432,7 @@ tmap=-1
 d=0]]
 
 p[[var=beetle
-txt1=²5ᶜ9beetle: ᶜ7slow and melee but
-txt2=²5ᶜ7strong vs buildings.
+txt=⁶h²5ᶜ9beetle: ᶜ7slow and melee unit but⁶g⁴mstrong vs buildings.
 idx=2
 spd=.19
 los=20
@@ -481,8 +479,7 @@ tmap=-1
 d=0]]
 
 p[[var=spider
-txt1=²5ᶜ9spider: ᶜ7fast and
-txt2=²5ᶜ7strong vs ants.
+txt=⁶h²5ᶜ9spider: ᶜ7fastest unit, low def.⁶g⁴mbut good vs ants.
 idx=3
 spd=.482
 los=30
@@ -528,8 +525,7 @@ tmap=-1
 d=0]]
 
 p[[var=archer
-txt1=²5ᶜ9acid-spitting ant: ᶜ7ranged unit,
-txt2=²5ᶜ7good vs spiders.
+txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged unit,⁶g⁴mgood vs spiders.
 idx=4
 spd=.343
 los=33
@@ -580,8 +576,7 @@ tmap=-1
 d=0]]
 
 p[[var=warant
-txt1=²5ᶜ9army ant:ᶜ7 basic army unit. good
-txt2=²5ᶜ7vs beetles+catrplrs.
+txt=⁶h²5ᶜ9army ant:ᶜ7 basic army unit. good⁶g⁴mvs beetles+catrplrs.
 idx=5
 spd=.33
 los=25
@@ -627,8 +622,7 @@ tmap=-1
 d=0]]
 
 p[[var=cat
-txt1=²5ᶜ9caterpillar: ᶜ7ranged unit, very
-txt2=²5ᶜ7good vs buildings.
+txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
 idx=6
 spd=.2
 los=50
@@ -724,8 +718,7 @@ tmap=-1
 d=61]]
 
 p[[var=tower
-txt1=²5ᶜeguardtower:ᶜ7 basic defensive
-txt2=²5ᶜ7structure with good vision.
+txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
 idx=8
 los=30
 hp=352
@@ -773,8 +766,7 @@ tmap=-1
 d=0]]
 
 p[[var=mound
-txt1=²5ᶜbmound:ᶜ7 drop-off for resources,
-txt2=²5ᶜ7+5 population limit.
+txt=⁶h²5ᶜbmound:ᶜ7 drop-off for resources,⁶g⁴m+5 population limit.
 idx=9
 los=5
 hp=100
@@ -811,8 +803,8 @@ tmap=-1
 d=0]]
 
 p[[var=den
-txt1=²5ᶜbnest:ᶜ7 trains spiders and
-txt2=²5ᶜ7beetles.
+txt=⁶h²5ᶜbnest:ᶜ7 trains spiders and⁶g⁴mbeetles.
+req=⁶h²5ᶜ6nestᶜd⁶g⁴m[requires barracks]
 idx=10
 los=10
 hp=250
@@ -851,8 +843,7 @@ tmap=-1
 d=0]]
 
 p[[var=brks
-txt1=²5ᶜbbarracks:ᶜ7 trains army ants and
-txt2=²5ᶜ7ranged ants.
+txt=⁶h²5ᶜbbarracks:ᶜ7 trains army ants and⁶g⁴mranged ants.
 idx=11
 los=10
 hp=200
@@ -891,8 +882,8 @@ tmap=-1
 d=0]]
 
 p[[var=farm
-txt1=²5ᶜbfarm:ᶜ7 grows food for harvesting.
-txt2=²5ᶜ7limited lifespan.
+txt=⁶h²5ᶜbfarm:ᶜ7 grows food for harvesting.⁶g⁴mlimited lifespan.
+req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mound]
 idx=12
 los=1
 hp=48
@@ -937,8 +928,8 @@ b=6
 breq=0]]
 
 p[[var=castle
-txt1=²5ᶜecastle:ᶜ7 very defensive building,
-txt2=²5ᶜ7trains caterpillars.
+txt=⁶h²5ᶜecastle:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
+req=⁶h²5ᶜ6castleᶜd⁶g⁴m[requires nest+guardtower]
 idx=13
 los=45
 hp=640
@@ -1025,8 +1016,8 @@ tmap=-1
 d=61]]
 
 p[[var=mon
-txt1=²5ᶜbmantis nest:ᶜ7 trains mantises.
-txt2=
+txt=⁶h²5ᶜbmantis nest:ᶜ7 trains mantises.
+req=⁶h²5ᶜ6mantis nestᶜd⁶g⁴m[requires nest]
 idx=25
 los=25
 hp=300
@@ -1064,8 +1055,7 @@ tmap=-1
 d=0]]
 
 p[[var=monk
-txt1=²5ᶜ9mantis:ᶜ7 converts enemy units,
-txt2=²5ᶜ7heals yours, prays.
+txt=⁶h²5ᶜ9mantis:ᶜ7 converts enemy units,⁶g⁴mheals yours, prays.
 idx=26
 spd=.25
 los=45
@@ -1136,8 +1126,7 @@ breq=0
 tmap=1024
 up=-1
 idx=27
-txt1=²5ᶜamantis upgr.:ᶜ7 increase mantis
-txt2=²5ᶜ7conversion rate and hp by 25%
+txt=⁶h²5ᶜamantis upgr.:ᶜ7 increase mantis⁶g⁴mconversion rate and hp by 25%
 portx=62
 porty=88]],monk,function(_ENV)
 	spd=.286
@@ -1157,8 +1146,7 @@ breq=0
 tmap=1
 up=-1
 idx=15
-txt1=²5ᶜabaskets:ᶜ7 increase worker
-txt2=²5ᶜ7gathering efficiency.
+txt=⁶h²5ᶜabaskets:ᶜ7 increase worker⁶g⁴mgathering efficiency.
 portx=24
 porty=80]],ant,function(_ENV)
 	cap\=.72
@@ -1172,8 +1160,8 @@ b=10
 breq=2
 tmap=2
 idx=24
-txt1=²5ᶜaegg deposit:ᶜ7 let mounds
-txt2=²5ᶜ7produce worker ants.
+txt=⁶h²5ᶜaegg deposit:ᶜ7 let mounds⁶g⁴mproduce worker ants.
+req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mound]
 portx=33
 porty=80]],{},function()
 	mound.p1.units=
@@ -1193,8 +1181,7 @@ breq=0
 tmap=4
 up=-1
 idx=16
-txt1=²5ᶜabeetle upgr.:ᶜ7 increase beetle
-txt2=²5ᶜ7attack and hp by 15%
+txt=⁶h²5ᶜabeetle upgr.:ᶜ7 increase beetle⁶g⁴mattack and hp by 15%
 portx=25
 porty=88]],beetle,function(_ENV)
 	atk*=1.15
@@ -1208,8 +1195,7 @@ breq=0
 tmap=8
 up=-1
 idx=17
-txt1=²5ᶜaspider upgr.:ᶜ7 increase spider
-txt2=²5ᶜ7attack and hp by 20%
+txt=⁶h²5ᶜaspider upgr.:ᶜ7 increase spider⁶g⁴mattack and hp by 20%
 portx=16
 porty=88]],spider,function(_ENV)
 	atk*=1.2
@@ -1226,8 +1212,7 @@ breq=0
 tmap=16
 up=-1
 idx=18
-txt1=²5ᶜafarm upgr.:ᶜ7 increase farm growth
-txt2=²5ᶜ7rate and lifespan.
+txt=⁶h²5ᶜafarm upgr.:ᶜ7 increase farm growth⁶g⁴mrate and lifespan.
 portx=60
 porty=80]],farm,function(_ENV)
 		gr*=1.15
@@ -1245,8 +1230,7 @@ b=0
 breq=0
 tmap=32
 idx=19
-txt1=²5ᶜaspray:ᶜ7 increase range for acid-
-txt2=²5ᶜ7spitting ants.
+txt=⁶h²5ᶜaspray:ᶜ7 increase range for acid-⁶g⁴mspitting ants.
 portx=51
 porty=80]],archer,function(_ENV)
 	los,range=40,35
@@ -1260,8 +1244,7 @@ breq=0
 tmap=64
 up=-1
 idx=20
-txt1=²5ᶜaarmy ant upgr.:ᶜ7 increase army
-txt2=²5ᶜ7ant hp+attack by 33%
+txt=⁶h²5ᶜaarmy ant upgr.:ᶜ7 increase army⁶g⁴mant hp+attack by 33%
 portx=43
 porty=88]],warant,function(_ENV)
 	atk*=1.333
@@ -1276,8 +1259,7 @@ breq=0
 tmap=128
 up=-1
 idx=21
-txt1=²5ᶜaacid-spitting ant upgr.:ᶜ7
-txt2=²5ᶜ7increase its hp+attack by 25%
+txt=⁶h²5ᶜaacid-spitting ant upgr.:ᶜ7⁶g⁴mincrease its hp+attack by 25%
 portx=34
 porty=88]],archer,function(_ENV)
 	atk*=1.25
@@ -1294,8 +1276,8 @@ b=0
 breq=64
 tmap=256
 idx=22
-txt1=²5ᶜaregeneration:ᶜ7 passively heal
-txt2=²5ᶜ7your units.
+req=⁶h²5ᶜ6regenerationᶜd⁶g⁴m[requires mantis nest]
+txt=⁶h²5ᶜaregeneration:ᶜ7 passively heal⁶g⁴myour units.
 portx=16
 porty=80]],heal,function(_ENV)
 	qty+=0x.016
@@ -1307,8 +1289,7 @@ b=30
 breq=0
 tmap=2048
 idx=28
-txt1=²5ᶜafireball:ᶜ7 increase castle
-txt2=²5ᶜ7attack, hit multiple units.
+txt=⁶h²5ᶜafireball:ᶜ7 increase castle⁶g⁴mattack, hit multiple units.
 portx=78
 porty=80]],castle,function(_ENV)
 	aoe,prj_s,atk,atk_freq=
@@ -1321,8 +1302,7 @@ b=20
 breq=0
 tmap=512
 idx=23
-txt1=
-txt2=²5ᶜaspotters:ᶜ7 increase castle range.
+txt=⁴m²5ᶜaspotters:ᶜ7 increase castle range.
 portx=69
 porty=80]],castle,function(_ENV)
 	los,range=55,50
@@ -1798,7 +1778,7 @@ function draw_unit(u)
 		selc or u.pres.col,
 		[14]=pal(typ.farm and 5,selc or 5)
 	}
-	sspr(sx,sy,w,h,0,0,w,h,
+	sspr(sx,sy,w,h,1,1,w,h,
 		not typ.fire and u.dir==typ.dir)
 	pal()
 	if u.alive and ihp>=2 then
@@ -2727,11 +2707,16 @@ end,20,108)
 	
 	resbar()
 
-	if hc and hc.reqs then
+	if hc then
 		campal()
 		if dget"1"==0 then
-			?hc.txt1,1,93
-			?hc.txt2
+			cursor(1,93)
+			if hc.reqs then
+				?hc.txt
+			else
+				?hc.req
+				goto skip
+			end
 		end
 		local l=pres(hc,0,150)
 		camera(l/2-4-hbtn.r[1],
@@ -2739,6 +2724,7 @@ end,20,108)
 		pres(hc,2,2)
 		rect(l+2,unspl"0,0,8,1")
 	end
+	::skip::
 	
 	camera(
 		-mmx-ceil(cx/mmwr),
