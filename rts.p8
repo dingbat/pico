@@ -7,14 +7,14 @@ __lua__
 music(63,2000)
 
 function _update()
-	lclk,rclk,llclk,lrclk=
-		llclk and not btn"5",
-		lrclk and not btn"4",
+	lc,rc,llc,lrc=
+		llc and not btn"5",
+		lrc and not btn"4",
 		btn"5",btn"4",
-		stat"121" and loadgame()
+		stat"121" and lg()
 
-	if dget"0">1 and not loser then
-		lclk,rclk=btnp"5",btnp"4"
+	if dget"0">1 and not lr then
+		lc,rc=btnp"5",btnp"4"
 	end
 	
 	if menu then
@@ -23,19 +23,19 @@ function _update()
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
 		if btnp"0" or btnp"1" then
-			diff+=btnp()^^-2
-			diff%=5
+			df+=btnp()^^-2
+			df%=5
 		end
 		add(pcol,
 			deli(btnp"4" and pcol,1))
-		if llclk then
-			llclk=init()
+		if llc then
+			llc=init()
 			for k=1,3 do
 				local r=res[k]
-				r.pos,r.npl,r.diff,r.col=
-					del(posidx,rnd(posidx)),
-					2+diff\3,
-					split"1,2,3,2,3"[diff+1],
+				r.pos,r.npl,r.df,r.col=
+					del(pi,rnd(pi)),
+					2+df\3,
+					split"1,2,3,2,3"[df+1],
 					pcol[k]
 			end
 			foreach(split([[7,64,64
@@ -48,7 +48,7 @@ function _update()
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
 					res.p2.newg=
-						unit(u,x+dx,y+dy,p)
+						un(u,x+dx,y+dy,p)
 				end
 			end)
 			start()
@@ -61,28 +61,28 @@ function _update()
 	cf+=1
 	cf%=60
 
-	input()
+	io()
 
-	if loser then
+	if lr then
 		poke"24365"
-		if lclk then
+		if lc then
 			menu,cx,cy=unspl"63,5,35"
 			music"63"
 		end
-		if rclk then
+		if rc then
 			ban^^=0xf0
 		end
 		return
 	end
 
 	dmap()
-	upcycle=
+	ucy=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
 	upc,pos,hbld,t6,sele,selh,selb,
-		hunit,idl,idlm=
-		cf%upcycle,{},
-		g(bldgs,mx8,my8,{}),
+		hun,idl,idlm=
+		cf%ucy,{},
+		g(bls,mx8,my8,{}),
 		t()%6<1,{}
 
 	res1.t+=0x.0888
@@ -113,14 +113,14 @@ function _update()
 		if norm(b.p1,b,typ.prj_spd)<1
 		then
 			del(prj,b)
-			for u in all(units) do
+			for u in all(us) do
 				if u.ap!=b.p1[3] and
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
 					dmg(typ,u)
 					if (typ.aoe==0) break
-					if hlv.var then
-						hilite(p([[f=2
+					if hlv.v then
+						hi(p([[f=2
 c=13]],b.x,b.y))
 					end
 				end
@@ -128,7 +128,7 @@ c=13]],b.x,b.y))
 		end
 	end)
 
-	foreach(units,tick)
+	foreach(us,tick)
 
 	if selx then
 		sel=selh or selb or sele
@@ -141,8 +141,8 @@ c=13]],b.x,b.y))
 	end)
 
 	for i=2,npl do
-		if upc==i and units[i].alive then
-			ai_frame(ais[i])
+		if upc==i and us[i].al then
+			ai(ais[i])
 		end
 	end
 end
@@ -155,7 +155,7 @@ function bnr(a,t,st,cx)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-		print(split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff])
+		print(split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.df])
 		-3,unspl"80,8,80,9")
 	?"⁶jll²9⁴c⁴i ᶜ5⧗³h"..(res1.t<600 and "0" or "")..res1.t\60 ..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
@@ -168,13 +168,13 @@ function bnr(a,t,st,cx)
 	campal()
 end
 
-function draw_map(o,y)
+function dm(o,y)
 	camera(cx%8,cy%8)
 	map(cx/8+o,cy/8,0,0,17,y)
 end
 
 function _draw()
-	draw_map(0,17)
+	dm(0,17)
 	if menu then
 		camera()
 
@@ -188,49 +188,49 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0⁵0fᶜ6V1.0⁶jej³j\0"
-		camera(split"8,12,8,18,14"[diff+1])
-		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
+		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0dficulty:⁶jcg³eᶜcdficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0⁵0fᶜ6V1.0⁶jej³j\0"
+		camera(split"8,12,8,18,14"[df+1])
+		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[df+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 		return
 	end
 
 	local bf,af,prj_so={},{},
 		cf\5%2*2
-	for u in all(units) do
-		if u.onscr or loser then
+	for u in all(us) do
+		if u.os or lr then
 			if
-				not loser and
+				not lr and
 				not g(viz,u.x8,u.y8)
-				and u.disc
+				and u.dc
 			then
 				add(af,u)
-			elseif u.bldg or u.dead then
-				draw_unit(u)
+			elseif u.bl or u.dd then
+				du(u)
 			else
 				add(bf,u)
 			end
 		end
 	end
 
-	foreach(bf,draw_unit)
+	foreach(bf,du)
 	camera(cx,cy)
 	foreach(prj,function(_ENV)
 		sspr(
 			typ.prj_s+prj_so,
 			96,2,2,x,y)
 	end)
-	if loser then
+	if lr then
 		resbar()
-		bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],
+		bnr(lr,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[lr],
 			"press ❎ for menu ⁴f⁶x1 ",ban)
 		return
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(mapw,15)
+	dm(mapw,15)
 
 	_pal,pal=pal,max
-	foreach(af,draw_unit)
+	foreach(af,du)
 	pal,btns=_pal,{}
 	pal()
 
@@ -268,7 +268,7 @@ function _draw()
 
 	local dt=t()-hlt
 	if dt>.5 then
-		p"var=hlv"
+		p"v=hlv"
 	elseif hlv.f then
 		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
@@ -284,7 +284,7 @@ function _draw()
 	end
 	if to_bld then
 		camera(cx-mx8*8,cy-my8*8)
-		pspl(bldable() or
+		pspl(bdb() or
 		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
@@ -296,7 +296,7 @@ function _draw()
 			fillp()
 		end
 		local _ENV=to_bld
-		sspr(rest_x,rest_y,fw,h)
+		sspr(rst_x,rst_y,fw,h)
 		pal()
 	end
 
@@ -307,9 +307,9 @@ function _draw()
 		sel1 and sel1.hu and
 		((to_bld or
 			can_bld() or
-			can_renew"1") and 190 or
+			can_rw"1") and 190 or
 		can_gth() and 189 or
-		can_drop() and 191 or
+		can_dr() and 191 or
 		can_atk() and (seltyp.monk
 			and 185 or 187)) or 186)
 end
@@ -318,7 +318,7 @@ end
 
 function start()
 	npl,hq,cx,cy=res1.npl,
-		units[1],
+		us[1],
 		unspl(stp[res1.pos],":")
 
 	qdmaps"d"
@@ -333,7 +333,7 @@ function init()
 	menuitem(4,"∧ resign",
 		function()	hq.hp=0	end)
 
-	p[[var=res
+	p[[v=res
 r=20
 g=10
 b=20
@@ -341,17 +341,17 @@ p=4
 pl=10
 tot=4
 reqs=0
-diff=0
+df=0
 techs=0
 t=0
 npl=0]]
 
 	res1,dq,exp,vcache,dmaps,
-	units,restiles,sel,ladys,prj,
-		bldgs,nviz,typs,ais,dmst,
-		posidx,cf,selt,alert,ban,
+	us,rstiles,sel,ladys,prj,
+		bls,nviz,typs,ais,dmst,
+		pi,cf,selt,al,ban,
 		amx,amy,tot,
-		loser,menu=
+		lr,menu=
 		res.p1,
 		{},{},{},{},{},{},{},
 		{},{},{},{},{},{},{d={}},
@@ -362,18 +362,18 @@ npl=0]]
 		ais[i]=p("boi=0",i)
 	end
 
-p[[var=heal
+p[[v=heal
 qty=0x.0036
 ]]
 
-p[[var=ant
+p[[v=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
 spd=.286
 los=20
 hp=6
 range=0
-atk_freq=30
+atk_fq=30
 atk=.2
 conv=0
 def=ant
@@ -385,20 +385,20 @@ t=10
 r=5
 g=0
 b=0
-breq=0
+br=0
 p=
 
 w=4
 fw=4
 h=4
-rest_x=0
-rest_y=8
-rest_fr=2
-rest_fps=30
-drop_x=0
-drop_y=8
-drop_fr=2
-drop_fps=30
+rst_x=0
+rst_y=8
+rst_fr=2
+rst_fps=30
+dr_x=0
+dr_y=8
+dr_fr=2
+dr_fps=30
 move_x=8
 move_y=8
 move_fr=2
@@ -419,26 +419,26 @@ atk_x=40
 atk_y=12
 atk_fr=4
 atk_fps=3.75
-dead_x=32
-dead_y=12
-portx=0
-porty=72
+dd_x=32
+dd_y=12
+px=0
+py=72
 dir=1
-unit=1
+un=1
 ant=1
 sfx=10
-const=1
-tmap=-1
+cn=1
+tm=-1
 d=0]]
 
-p[[var=beetle
-txt=⁶h²5ᶜ9beetle: ᶜ7slow and melee unit but⁶g⁴mstrong vs buildings.
+p[[v=btl
+txt=⁶h²5ᶜ9btl: ᶜ7slow and melee un but⁶g⁴mstrong vs buildings.
 idx=2
 spd=.19
 los=20
 hp=20
 range=0
-atk_freq=30
+atk_fq=30
 atk=.75
 conv=0
 def=sg
@@ -449,17 +449,17 @@ t=13
 r=0
 g=10
 b=10
-breq=0
+br=0
 p=
 
-const=1
+cn=1
 w=8
 fw=8
 h=6
-rest_x=8
-rest_y=0
-rest_fr=2
-rest_fps=30
+rst_x=8
+rst_y=0
+rst_fr=2
+rst_fps=30
 move_x=16
 move_y=0
 move_fr=2
@@ -468,44 +468,44 @@ atk_x=40
 atk_y=0
 atk_fr=3
 atk_fps=10
-dead_x=32
-dead_y=0
-portx=27
-porty=72
-unit=1
+dd_x=32
+dd_y=0
+px=27
+py=72
+un=1
 sfx=10
 dir=1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=spider
-txt=⁶h²5ᶜ9spider: ᶜ7fastest unit, low def.⁶g⁴mbut good vs ants.
+p[[v=spd
+txt=⁶h²5ᶜ9spd: ᶜ7fastest un, low def.⁶g⁴mbut good vs ants.
 idx=3
 spd=.482
 los=30
 hp=15
 range=0
-atk_freq=30
+atk_fq=30
 atk=1.667
 conv=0
-def=spider
-atk_typ=spider
+def=spd
+atk_typ=spd
 
 t=13
 r=8
 g=8
 b=0
-breq=0
+br=0
 p=
 
-const=1
+cn=1
 w=8
 fw=8
 h=5
-rest_x=0
-rest_y=16
-rest_fr=2
-rest_fps=30
+rst_x=0
+rst_y=16
+rst_fr=2
+rst_fps=30
 atk_x=64
 atk_y=16
 atk_fr=3
@@ -514,18 +514,18 @@ move_x=8
 move_y=16
 move_fr=6
 move_fps=2
-dead_x=56
-dead_y=16
-portx=18
-porty=72
-unit=1
+dd_x=56
+dd_y=16
+px=18
+py=72
+un=1
 sfx=10
 dir=1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=archer
-txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged unit,⁶g⁴mgood vs spiders.
+p[[v=arc
+txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged un,⁶g⁴mgood vs spds.
 idx=4
 spd=.343
 los=33
@@ -533,7 +533,7 @@ hp=5
 range=28
 atk=.667
 conv=0
-atk_freq=30
+atk_fq=30
 aoe=0
 prj_spd=1
 atk_typ=acid
@@ -543,17 +543,17 @@ t=14
 r=3
 g=0
 b=5
-breq=0
+br=0
 p=
 
-const=1
+cn=1
 w=7
 fw=8
 h=6
-rest_x=0
-rest_y=25
-rest_fr=2
-rest_fps=30
+rst_x=0
+rst_y=25
+rst_fr=2
+rst_fps=30
 move_x=8
 move_y=24
 move_fr=2
@@ -562,27 +562,27 @@ atk_x=32
 atk_y=24
 atk_fr=2
 atk_fps=10
-dead_x=24
-dead_y=25
-portx=45
-porty=72
-unit=1
+dd_x=24
+dd_y=25
+px=45
+py=72
+un=1
 sfx=10
 dir=1
 prj_xo=-2
 prj_yo=0
 prj_s=52
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=warant
-txt=⁶h²5ᶜ9army ant:ᶜ7 basic army unit. good⁶g⁴mvs beetles+catrplrs.
+p[[v=warant
+txt=⁶h²5ᶜ9army ant:ᶜ7 basic army un. good⁶g⁴mvs btls+catrplrs.
 idx=5
 spd=.33
 los=25
 hp=10
 range=0
-atk_freq=30
+atk_fq=30
 atk=1
 conv=0
 def=ant
@@ -592,17 +592,17 @@ t=10
 r=6
 g=2
 b=0
-breq=0
+br=0
 p=
 
-const=1
+cn=1
 w=8
 fw=8
 h=6
-rest_x=48
-rest_y=64
-rest_fr=2
-rest_fps=30
+rst_x=48
+rst_y=64
+rst_fr=2
+rst_fps=30
 move_x=56
 move_y=64
 move_fr=2
@@ -611,18 +611,18 @@ atk_x=80
 atk_y=64
 atk_fr=2
 atk_fps=10
-dead_x=72
-dead_y=64
-portx=36
-porty=72
-unit=1
+dd_x=72
+dd_y=64
+px=36
+py=72
+un=1
 sfx=10
 dir=1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=cat
-txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
+p[[v=cat
+txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged un, very⁶g⁴mgood vs buildings.
 idx=6
 spd=.2
 los=50
@@ -630,7 +630,7 @@ hp=15
 range=50
 atk=1.5
 conv=0
-atk_freq=60
+atk_fq=60
 aoe=2
 prj_spd=.72
 def=sg
@@ -641,17 +641,17 @@ t=18
 r=2
 g=14
 b=14
-breq=0
+br=0
 p=
 
-const=1
+cn=1
 w=16
 fw=16
 h=8
-rest_x=48
-rest_y=24
-rest_fr=2
-rest_fps=30
+rst_x=48
+rst_y=24
+rst_fr=2
+rst_fps=30
 move_x=64
 move_y=24
 move_fr=4
@@ -660,74 +660,74 @@ atk_x=64
 atk_y=8
 atk_fr=4
 atk_fps=15
-dead_x=112
-dead_y=16
-portx=54
-porty=72
-unit=1
+dd_x=112
+dd_y=16
+px=54
+py=72
+un=1
 sfx=10
 dir=1
 prj_xo=1
 prj_yo=-4
 prj_s=56
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=queen
+p[[v=qn
 idx=7
 los=25
 hp=400
 range=23
 atk=1.5
 conv=0
-atk_freq=30
+atk_fq=30
 aoe=0
 prj_spd=1
 atk_typ=acid
-def=queen
+def=qn
 
-const=1
+cn=1
 w=16
 h=8
 h8=1
 fw=16
-rest_x=64
-rest_y=-1
-rest_fr=2
-rest_fps=30
+rst_x=64
+rst_y=-1
+rst_fr=2
+rst_fps=30
 atk_x=80
 atk_y=-1
 atk_fr=2
 atk_fps=15
-dead_x=112
-dead_y=0
-portx=9
-porty=72
-drop=0
-bldg=1
-bldrs=15
+dd_x=112
+dd_y=0
+px=9
+py=72
+dr=0
+bl=1
+bs=15
 sfx=10
 prj_xo=-4
 prj_yo=2
 prj_s=52
-bmap=0
-units=1
-queen=1
+bm=0
+us=1
+qn=1
 dir=-1
-tmap=-1
+tm=-1
 d=61]]
 
-p[[var=tower
+p[[v=tower
 txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
 idx=8
 los=30
 hp=352
-const=32
+cn=32
 hpr=11
 range=30
 atk=1.2
 conv=0
-atk_freq=30
+atk_fq=30
 aoe=0
 prj_spd=.9
 atk_typ=bld
@@ -736,48 +736,48 @@ def=bld
 r=0
 g=5
 b=15
-breq=0
+br=0
 
 w=8
 w8=1
 fw=8
 h=16
 fh=16
-rest_x=40
-rest_y=96
+rst_x=40
+rst_y=96
 atk_x=40
 atk_y=96
-fire=1
-dead_x=64
-dead_y=96
-dead_fr=8
-dead_fps=7.5
-portx=-1
-porty=0
-bldg=1
-bldrs=2
+fi=1
+dd_x=64
+dd_y=96
+dd_fr=8
+dd_fps=7.5
+px=-1
+py=0
+bl=1
+bs=2
 sfx=10
 prj_yo=-2
 prj_xo=-1
 prj_s=48
-bmap=1
+bm=1
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=mound
+p[[v=mn
 txt=⁶h²5ᶜbmound:ᶜ7 drop-off for resources,⁶g⁴m+5 population limit.
 idx=9
 los=5
 hp=100
-const=10
+cn=10
 hpr=10
 def=bld
 
 r=0
 g=0
 b=6
-breq=0
+br=0
 
 w=8
 fw=8
@@ -785,37 +785,37 @@ h=8
 fh=8
 w8=1
 h8=1
-rest_x=16
-rest_y=104
-portx=15
-porty=103
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-bldg=1
-bldrs=1
-drop=5
-bmap=2
+rst_x=16
+rst_y=104
+px=15
+py=103
+fi=1
+dd_x=64
+dd_y=104
+dd_fr=8
+dd_fps=7.5
+bl=1
+bs=1
+dr=5
+bm=2
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=den
-txt=⁶h²5ᶜbnest:ᶜ7 trains spiders and⁶g⁴mbeetles.
+p[[v=den
+txt=⁶h²5ᶜbnest:ᶜ7 trains spds and⁶g⁴mbtls.
 req=⁶h²5ᶜ6nestᶜd⁶g⁴m[requires barracks]
 idx=10
 los=10
 hp=250
-const=25
+cn=25
 hpr=10
 def=bld
 
 r=0
 g=4
 b=20
-breq=8
+br=8
 
 w=8
 fw=8
@@ -823,38 +823,38 @@ h=8
 fh=8
 w8=1
 h8=1
-rest_x=16
-rest_y=96
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=97
-porty=80
-bldg=1
-bldrs=2
-bmap=4
-units=2
+rst_x=16
+rst_y=96
+fi=1
+dd_x=64
+dd_y=104
+dd_fr=8
+dd_fps=7.5
+px=97
+py=80
+bl=1
+bs=2
+bm=4
+us=2
 idl=1
 mil=1
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=brks
+p[[v=brks
 txt=⁶h²5ᶜbbarracks:ᶜ7 trains army ants and⁶g⁴mranged ants.
 idx=11
 los=10
 hp=200
-const=20
+cn=20
 hpr=10
 def=bld
 
 r=0
 g=4
 b=15
-breq=0
+br=0
 
 w=8
 fw=8
@@ -862,41 +862,41 @@ h=8
 fh=8
 w8=1
 h8=1
-rest_x=16
-rest_y=112
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=15
-porty=112
-bldg=1
-bldrs=1
-bmap=8
-units=2
+rst_x=16
+rst_y=112
+fi=1
+dd_x=64
+dd_y=104
+dd_fr=8
+dd_fps=7.5
+px=15
+py=112
+bl=1
+bs=1
+bm=8
+us=2
 idl=1
 mil=1
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=farm
+p[[v=farm
 txt=⁶h²5ᶜbfarm:ᶜ7 grows food for harvesting.⁶g⁴mlimited lifespan.
-req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mound]
+req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mn]
 idx=12
 los=1
 hp=48
-const=8
+cn=8
 hpr=8
 def=bld
-cycles=5
+cy=5
 gr=0x.0222
 
 r=0
 g=3
 b=3
-breq=2
+br=2
 
 w=8
 fw=8
@@ -904,41 +904,41 @@ h=8
 fh=8
 w8=1
 h8=1
-rest_x=16
-rest_y=120
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=52
-porty=88
+rst_x=16
+rst_y=120
+fi=1
+dd_x=64
+dd_y=104
+dd_fr=8
+dd_fps=7.5
+px=52
+py=88
 farm=1
-bldg=farm
-bldrs=1
-bmap=16
+bl=farm
+bs=1
+bm=16
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=renew
+p[[v=rw
 r=0
 g=0
 b=6
-breq=0]]
+br=0]]
 
-p[[var=castle
-txt=⁶h²5ᶜecastle:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
-req=⁶h²5ᶜ6castleᶜd⁶g⁴m[requires nest+guardtower]
+p[[v=cst
+txt=⁶h²5ᶜecst:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
+req=⁶h²5ᶜ6cstᶜd⁶g⁴m[requires nest+guardtower]
 idx=13
 los=45
 hp=640
-const=80
+cn=80
 hpr=8
 range=40
 atk=1.8
 conv=0
-atk_freq=15
+atk_fq=15
 aoe=0
 prj_spd=.8
 atk_typ=bld
@@ -947,34 +947,34 @@ def=bld
 r=0
 g=25
 b=60
-breq=13
+br=13
 
 w=15
 fw=16
 h=16
 fh=16
-rest_x=112
-rest_y=113
+rst_x=112
+rst_y=113
 atk_x=112
 atk_y=113
-fire=1
-dead_x=64
-dead_y=97
-dead_fr=4
-dead_fps=15
-portx=42
-porty=80
-bldg=1
-bldrs=3
+fi=1
+dd_x=64
+dd_y=97
+dd_fr=4
+dd_fps=15
+px=42
+py=80
+bl=1
+bs=3
 sfx=10
 prj_yo=0
 prj_xo=0
 prj_s=48
-bmap=32
-units=1
+bm=32
+us=1
 mil=1
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
 p[[idx=14
@@ -982,21 +982,21 @@ spd=.21
 los=18
 hp=8
 range=0
-atk_freq=30
+atk_fq=30
 atk=.47
 conv=0
 lady=1
 def=ant
 atk_typ=ant
 
-const=1
+cn=1
 w=8
 fw=8
 h=6
-rest_x=88
-rest_y=16
-rest_fr=2
-rest_fps=40
+rst_x=88
+rst_y=16
+rst_fr=2
+rst_fps=40
 move_x=96
 move_y=16
 move_fr=2
@@ -1005,30 +1005,30 @@ atk_x=96
 atk_y=64
 atk_fr=3
 atk_fps=10
-dead_x=56
-dead_y=8
-portx=63
-porty=72
-unit=1
+dd_x=56
+dd_y=8
+px=63
+py=72
+un=1
 sfx=10
 dir=-1
-tmap=-1
+tm=-1
 d=61]]
 
-p[[var=mon
+p[[v=mon
 txt=⁶h²5ᶜbmantis nest:ᶜ7 trains mantises.
 req=⁶h²5ᶜ6mantis nestᶜd⁶g⁴m[requires nest]
 idx=25
 los=25
 hp=300
-const=16
+cn=16
 hpr=8
 def=bld
 
 r=0
 g=10
 b=15
-breq=4
+br=4
 
 w=8
 fw=8
@@ -1036,32 +1036,32 @@ h=8
 fh=8
 w8=1
 h8=1
-rest_x=40
-rest_y=112
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=39
-porty=111
-bldg=1
-bldrs=2
-units=1
-bmap=64
+rst_x=40
+rst_y=112
+fi=1
+dd_x=64
+dd_y=104
+dd_fr=8
+dd_fps=7.5
+px=39
+py=111
+bl=1
+bs=2
+us=1
+bm=64
 mil=1
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
-p[[var=monk
-txt=⁶h²5ᶜ9mantis:ᶜ7 converts enemy units,⁶g⁴mheals yours, prays.
+p[[v=monk
+txt=⁶h²5ᶜ9mantis:ᶜ7 converts enemy us,⁶g⁴mheals yours, prays.
 idx=26
 spd=.25
 los=45
 hp=6
 range=42
-atk_freq=60
+atk_fq=60
 atk=0
 conv=2
 atk_typ=ant
@@ -1073,16 +1073,16 @@ r=0
 g=12
 b=0
 p=
-breq=0
+br=0
 
-const=1
+cn=1
 w=8
 fw=8
 h=8
-rest_x=48
-rest_y=112
-rest_fr=2
-rest_fps=30
+rst_x=48
+rst_y=112
+rst_fr=2
+rst_fps=30
 move_x=56
 move_y=112
 move_fr=2
@@ -1095,24 +1095,24 @@ gth_x=0
 gth_y=80
 gth_fr=2
 gth_fps=15
-dead_x=72
-dead_y=112
-portx=87
-porty=80
-unit=1
+dd_x=72
+dd_y=112
+px=87
+py=80
+un=1
 sfx=63
 dir=-1
-tmap=-1
+tm=-1
 d=0]]
 
 ant.prod={
-	mound,
+	mn,
 	farm,
 	brks,
 	den,
 	mon,
 	tower,
-	castle
+	cst
 }
 
 mon.prod={
@@ -1122,33 +1122,33 @@ mon.prod={
 r=10
 g=20
 b=0
-breq=0
-tmap=1024
+br=0
+tm=1024
 up=-1
 idx=27
 txt=⁶h²5ᶜamantis upgr.:ᶜ7 increase mantis⁶g⁴mconversion rate and hp by 25%
-portx=62
-porty=88]],monk,function(_ENV)
+px=62
+py=88]],monk,function(_ENV)
 	spd=.286
 	hp*=1.25
 	conv*=1.25
 end)
 }
 
-queen.prod={
+qn.prod={
 	ant,
 	nil,nil,nil,nil,
 	p([[t=25
 r=20
 g=0
 b=20
-breq=0
-tmap=1
+br=0
+tm=1
 up=-1
 idx=15
 txt=⁶h²5ᶜabaskets:ᶜ7 increase worker⁶g⁴mgathering efficiency.
-portx=24
-porty=80]],ant,function(_ENV)
+px=24
+py=80]],ant,function(_ENV)
 	cap\=.72
 	spd*=1.12
 	gr*=.9
@@ -1157,33 +1157,33 @@ end),
 r=10
 g=10
 b=10
-breq=2
-tmap=2
+br=2
+tm=2
 idx=24
-txt=⁶h²5ᶜaegg deposit:ᶜ7 let mounds⁶g⁴mproduce worker ants.
-req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mound]
-portx=33
-porty=80]],{},function()
-	mound.p1.units=
-		add(mound.prod,ant)
+txt=⁶h²5ᶜaegg deposit:ᶜ7 let mns⁶g⁴mproduce worker ants.
+req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mn]
+px=33
+py=80]],{},function()
+	mn.p1.us=
+		add(mn.prod,ant)
 end)
 }
 
 den.prod={
-	beetle,
-	spider,
+	btl,
+	spd,
 	nil,nil,nil,
 	p([[t=20
 r=0
 g=20
 b=0
-breq=0
-tmap=4
+br=0
+tm=4
 up=-1
 idx=16
-txt=⁶h²5ᶜabeetle upgr.:ᶜ7 increase beetle⁶g⁴mattack and hp by 15%
-portx=25
-porty=88]],beetle,function(_ENV)
+txt=⁶h²5ᶜabtl upgr.:ᶜ7 increase btl⁶g⁴mattack and hp by 15%
+px=25
+py=88]],btl,function(_ENV)
 	atk*=1.15
 	hp*=1.15
 end),
@@ -1191,48 +1191,48 @@ end),
 r=10
 g=10
 b=0
-breq=0
-tmap=8
+br=0
+tm=8
 up=-1
 idx=17
-txt=⁶h²5ᶜaspider upgr.:ᶜ7 increase spider⁶g⁴mattack and hp by 20%
-portx=16
-porty=88]],spider,function(_ENV)
+txt=⁶h²5ᶜaspd upgr.:ᶜ7 increase spd⁶g⁴mattack and hp by 20%
+px=16
+py=88]],spd,function(_ENV)
 	atk*=1.2
 	hp*=1.2
 end)
 }
 
-mound.prod={
+mn.prod={
 	p([[t=12
 r=15
 g=15
 b=10
-breq=0
-tmap=16
+br=0
+tm=16
 up=-1
 idx=18
 txt=⁶h²5ᶜafarm upgr.:ᶜ7 increase farm growth⁶g⁴mrate and lifespan.
-portx=60
-porty=80]],farm,function(_ENV)
+px=60
+py=80]],farm,function(_ENV)
 		gr*=1.15
-		cycles\=.6
+		cy\=.6
 	end)
 }
 
 brks.prod={
 	warant,
-	archer,
+	arc,
 	p([[t=10
 r=9
 g=6
 b=0
-breq=0
-tmap=32
+br=0
+tm=32
 idx=19
 txt=⁶h²5ᶜaspray:ᶜ7 increase range for acid-⁶g⁴mspitting ants.
-portx=51
-porty=80]],archer,function(_ENV)
+px=51
+py=80]],arc,function(_ENV)
 	los,range=40,35
 end),
 	nil,nil,
@@ -1240,13 +1240,13 @@ end),
 r=15
 g=7
 b=0
-breq=0
-tmap=64
+br=0
+tm=64
 up=-1
 idx=20
 txt=⁶h²5ᶜaarmy ant upgr.:ᶜ7 increase army⁶g⁴mant hp+attack by 33%
-portx=43
-porty=88]],warant,function(_ENV)
+px=43
+py=88]],warant,function(_ENV)
 	atk*=1.333
 	los=30
 	hp*=1.333
@@ -1255,56 +1255,56 @@ end),
 r=15
 g=0
 b=9
-breq=0
-tmap=128
+br=0
+tm=128
 up=-1
 idx=21
 txt=⁶h²5ᶜaacid-spitting ant upgr.:ᶜ7⁶g⁴mincrease its hp+attack by 25%
-portx=34
-porty=88]],archer,function(_ENV)
+px=34
+py=88]],arc,function(_ENV)
 	atk*=1.25
 	hp*=1.25
 end)
 }
 
-castle.prod={
+cst.prod={
 	cat,nil,
 	p([[t=40
 r=20
 g=0
 b=0
-breq=64
-tmap=256
+br=64
+tm=256
 idx=22
 req=⁶h²5ᶜ6regenerationᶜd⁶g⁴m[requires mantis nest]
-txt=⁶h²5ᶜaregeneration:ᶜ7 passively heal⁶g⁴myour units.
-portx=16
-porty=80]],heal,function(_ENV)
+txt=⁶h²5ᶜaregeneration:ᶜ7 passively heal⁶g⁴myour us.
+px=16
+py=80]],heal,function(_ENV)
 	qty+=0x.016
 end),nil,nil,
 	p([[t=30
 r=0
 g=25
 b=30
-breq=0
-tmap=2048
+br=0
+tm=2048
 idx=28
-txt=⁶h²5ᶜafireball:ᶜ7 increase castle⁶g⁴mattack, hit multiple units.
-portx=78
-porty=80]],castle,function(_ENV)
-	aoe,prj_s,atk,atk_freq=
+txt=⁶h²5ᶜafiball:ᶜ7 increase cst⁶g⁴mattack, hit multiple us.
+px=78
+py=80]],cst,function(_ENV)
+	aoe,prj_s,atk,atk_fq=
 		1,60,2,20
 end),
 	p([[t=10
 r=0
 g=10
 b=20
-breq=0
-tmap=512
+br=0
+tm=512
 idx=23
-txt=⁴m²5ᶜaspotters:ᶜ7 increase castle range.
-portx=69
-porty=80]],castle,function(_ENV)
+txt=⁴m²5ᶜaspotters:ᶜ7 increase cst range.
+px=69
+py=80]],cst,function(_ENV)
 	los,range=55,50
 end)
 }
@@ -1312,21 +1312,21 @@ end
 -->8
 --tick
 
-function rest(u)
-	u.st=p[[t=rest
+function rst(u)
+	u.st=p[[t=rst
 agg=1
 idl=1]]
 end
 
-function mvg(units,x,y,agg,frc)
+function mvg(us,x,y,agg,frc)
 	local l=999
-	foreach(units,function(u)
+	foreach(us,function(u)
 		if frc or u.st.idl then
 			move(u,x,y,agg)
 		end
 		l=min(u.typ.spd,l)
 	end)
-	foreach(units,function(_ENV)
+	foreach(us,function(_ENV)
 		st.spd,grp=l,agg end)
 end
 
@@ -1346,7 +1346,7 @@ in_bld=1
 end
 
 function gogth(u,tx,ty,wp)
-	local t=tile_unit(tx,ty)
+	local t=tile(tx,ty)
 	u.st=p("t=gth",
 		wp or path(u,t.x,t.y),
 		t,p[[7=r
@@ -1355,79 +1355,79 @@ function gogth(u,tx,ty,wp)
 39=r]][fget(mget(tx,ty))],tx,ty)
 end
 
-function godrop(u,nxt_res,dropu)
+function godr(u,nxt_res,dru)
 	local wayp
-	if not dropu then
+	if not dru then
 		wayp,x,y=dpath(u,"d")
-		dropu=not wayp and units[u.p]
+		dru=not wayp and us[u.p]
 	end
-	u.st=p([[t=drop
-drop=1
+	u.st=p([[t=dr
+dr=1
 in_bld=1]],
 		wayp or
-			path(u,dropu.x,dropu.y),
-		dropu or tile_unit(x,y),
+			path(u,dru.x,dru.y),
+		dru or tile(x,y),
 		nxt_res)
 end
 
 function goatk(u,e)
 	if u.typ.atk and e then
-		u.st,u.disc,u.res=
+		u.st,u.dc,u.res=
 			p([[t=atk
 atk=1
-active=1]],path(u,e.x,e.y),e),
-			e.hu and u.bldg
+ac=1]],path(u,e.x,e.y),e),
+			e.hu and u.bl
 	end
 end
 
 function gofarm(u,f)
-	f.farmer,u.st,u.res=u,p([[t=frm
+	f.f,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
-		f.x+rndspl"-2,-1,0,1,2",
-		f.y+rndspl"-2,-1,0,1,2"))
+		f.x+rs"-2,-1,0,1,2",
+		f.y+rs"-2,-1,0,1,2"))
 	u.st.farm=f
 end
 
 function tick(u)
-	typ,u.onscr,u.upd,x8,y8=
+	typ,u.os,u.upd,x8,y8=
 		u.typ,
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
-		u.id%upcycle==upc,
+		u.id%ucy==upc,
 		u.x8,u.y8
 
-	if u.hp<=0 and u.alive then
+	if u.hp<=0 and u.al then
 		del(sel,u)
 		tot-=1
-		u.dead,u.farmer,u.alive=typ.d
+		u.dd,u.f,u.al=typ.d
 		u.st=
-			p"t=dead",
-			typ.bldg and reg_bldg(u),
-			u.onscr and
-				sfx(typ.bldg and 17 or 62)
+			p"t=dd",
+			typ.bl and reg_bl(u),
+			u.os and
+				sfx(typ.bl and 17 or 62)
 		if typ.lady then
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
 			s(dmst.r or {},x8,y8,
 				{x8,y8})
 			qdmaps"r"
-		elseif typ.queen then
+		elseif typ.qn then
 			npl-=1
 			if npl==1 or u==hq then
-				loser,sel=min(u.p,2),{}
+				lr,sel=min(u.p,2),{}
 				music"56"
 			end
 		else
-			if typ.drop and not u.const then
-				u.pres.pl-=typ.drop
-			elseif typ.unit then
+			if typ.dr and not u.cn then
+				u.pres.pl-=typ.dr
+			elseif typ.un then
 				u.pres.p-=1
 			end
 		end
 	end
 
-	if u.dead then
-		u.dead+=1
-		del(u.dead==60 and units,u)
+	if u.dd then
+		u.dd+=1
+		del(u.dd==60 and us,u)
 		return
 	end
 
@@ -1440,45 +1440,45 @@ function tick(u)
 			u.st.typ=#wayp>0 and wayp
 		end
 	elseif u.st.move then
-		rest(u)
+		rst(u)
 	elseif u.st.farm then
-		u.st.active=1
+		u.st.ac=1
 	end
 
 	local x,y,t,agg_d,agg_u,adj=
 		u.x,u.y,u.st.x,9999
 
-	if (u.q) produce(u)
-	if (typ.farm) update_farm(u)
+	if (u.q) up(u)
+	if (typ.farm) uf(u)
 	if t then
-		if t.dead then
+		if t.dd then
 			u.st.agg=1,
-				u.st.typ or rest(u)
+				u.st.typ or rst(u)
 		elseif int(t.r,u.r,-2) then
-			u.dir,u.st.active,u.st.typ=
+			u.dir,u.st.ac,u.st.typ=
 				sgn(t.x-u.x),1
 		end
 	end
-	if u.st.active then
+	if u.st.ac then
 		_ENV[u.st.t](u)
 	end
 
-	if not u.fire and u.dmgd then
+	if not u.fi and u.dmgd then
 		u.hp+=heal[u.p].qty
 	end
 
 	if int(u.r,{mx,my,mx,my},1)
-		and (not hunit or hunit.hu
+		and (not hun or hun.hu
 	) then
-		hunit=u
+		hun=u
 	end
 
-	if g(viz,x8,y8,u.disc) then
+	if g(viz,x8,y8,u.dc) then
 		if selx and int(u.r,selbox,0)
 		then
 			if not u.hu then
 				sele={u}
-			elseif typ.unit then
+			elseif typ.un then
 				selh=selh or {}
 				add(selh,u)
 			else
@@ -1488,9 +1488,9 @@ function tick(u)
 		sset(109+x/mmwr,72+y/mmhr,u.ap)
 	end
 
-	if (u.const) return
+	if (u.cn) return
 	if u.st.idl then
-		if (typ.lady and t6)	wander(u)
+		if (typ.lady and t6)	w(u)
 		if u.hu then
 			if typ.ant then
 				if (u.st.idl>10) idl=u
@@ -1522,8 +1522,8 @@ function tick(u)
 				local k=u.k+t
 				if k<maph<<8 and k>=0 and
 					k%256<mapw then
-					if bldgs[k] then
-						bldgs[k].disc=1
+					if bls[k] then
+						bls[k].dc=1
 					end
 					exp[k],nviz[k]=128,"v"
 				end
@@ -1531,16 +1531,16 @@ function tick(u)
 		end
 
 		if u.st.agg and typ.atk then
-			for e in all(units) do
+			for e in all(us) do
 				if e.ap!=u.ap or
 					typ.monk and e.dmgd and
-					not e.bldg
+					not e.bl
 				then
 					local d=dist(x-e.x,y-e.y)
-					if e.alive and
+					if e.al and
 						d<=typ.los then
-						if e.bldg then
-							d+=typ.sg and e.bldg==1
+						if e.bl then
+							d+=typ.sg and e.bl==1
 								and -999 or 999
 						end
 						if d<agg_d then
@@ -1553,13 +1553,13 @@ function tick(u)
 		end
 	end
 
-	if typ.unit and not u.st.typ then
+	if typ.un and not u.st.typ then
 		while g(pos,x\4,y\4,
 			not u.st.in_bld and
-			g(bldgs,x\8,y\8,{}).bldg==1) and
+			g(bls,x\8,y\8,{}).bl==1) and
 			not u.st.adj do
-			x+=rndspl"-1,-.5,0,0,.5,1"
-			y+=rndspl"-1,-.5,0,0,.5,1"
+			x+=rs"-1,-.5,0,0,.5,1"
+			y+=rs"-1,-.5,0,0,.5,1"
 			adj={{x,y}}
 		end
 		u.st.typ,u.st.adj=adj,adj
@@ -1567,14 +1567,14 @@ function tick(u)
 	end
 end
 -->8
---input
+--io
 
 function cam()
 	local b=btn()
 	if (b>255) b>>=8
 	local dx,dy=(b&2)-(b&1)*2,
 		(b&8)/4-(b&4)/2
-	if dget"0"!=2 or loser then
+	if dget"0"!=2 or lr then
 		amx,amy=stat"32",stat"33"
 	else
 		amx+=dx
@@ -1584,7 +1584,7 @@ function cam()
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
 		mid(cy+dy,
-			loser and 128 or 151),
+			lr and 128 or 151),
 		mid(amx,126),
 		mid(amy,126)
 
@@ -1598,7 +1598,7 @@ function fsel(func,...)
 	end
 end
 
-function input()
+function io()
 	cam()
 
 	foreach(btns,function(b)
@@ -1609,17 +1609,17 @@ function input()
 
 	local cont,htile,axn,clk=
 		act==0,
-		tile_unit(mx8,my8),act,
-		lclk or rclk
+		tile(mx8,my8),act,
+		lc or rc
 
 	if clk and hbtn then
-		hbtn.fn(rclk)
+		hbtn.fn(rc)
 		if (axn==act) act=0
 		return
 	end
 
-	if lclk and act>0 then
-		rclk,act=1,0
+	if lc and act>0 then
+		rc,act=1,0
 	end
 
 	if amy>104 and not selx then
@@ -1627,11 +1627,11 @@ function input()
 		if min(dx,dy)>=0 and
 			dx<mmw and dy<mmh+1	then
 			local x,y=mmwr*dx,mmhr*dy
-			if rclk and sel1 then
+			if rc and sel1 then
 				sfx"1"
 				fsel(move,x,y,axn==1)
-				hilite{amx,amy,2,8}
-			elseif axn==0 and llclk then
+				hi{amx,amy,2,8}
+			elseif axn==0 and llc then
 				cx,cy=x-64,y-64
 				cam()
 			end
@@ -1641,9 +1641,9 @@ function input()
 	end
 
 	if to_bld then
-		if clk and bldable() then
+		if clk and bdb() then
 			sfx"1"
-			local b=unit(
+			local b=un(
 				to_bld,
 				mx8*8+to_bld.w\2,
 				my8*8+to_bld.h\2,
@@ -1655,34 +1655,34 @@ function input()
 		return
 	end
 
-	if btnp"5" and hunit and
-		hunit.typ.unit and
+	if btnp"5" and hun and
+		hun.typ.un and
 		t()-selt<.2 then
 		sel,selx={}
-		foreach(units,function(u)
-			add(u.onscr and
-				hunit.hu and
-				u.typ.idx==hunit.typ.idx and
+		foreach(us,function(u)
+			add(u.os and
+				hun.hu and
+				u.typ.idx==hun.typ.idx and
 				sel,u)
 		end)
 		return
 	end
 
-	if rclk and sel1 and sel1.hu
+	if rc and sel1 and sel1.hu
 	then
-		if can_renew() then
+		if can_rw() then
 			sfx"0"
-			hilite(hbld)
+			hi(hbld)
 			hbld.sproff,
-				hbld.cycles,
+				hbld.cy,
 				hbld.exp=0,0
-			pay(renew,1,res1)
+			pay(rw,1,res1)
 			gofarm(sel1,hbld)
 
 		elseif can_gth() then
 			sfx"0"
-			hilite(htile)
-			if avail_farm() then
+			hi(htile)
+			if af() then
 				gofarm(sel1,hbld)
 			else
 				fsel(gogth,mx8,my8)
@@ -1691,27 +1691,27 @@ function input()
 		elseif can_bld() then
 			sfx"0"
 			fsel(gobld,hbld)
-			hilite(hbld)
+			hi(hbld)
 
 		elseif can_atk() then
 			sfx"4"
-			fsel(goatk,hunit)
-			hilite(hunit)
+			fsel(goatk,hun)
+			hi(hun)
 
-		elseif can_drop() then
+		elseif can_dr() then
 			sfx"0"
-			fsel(godrop,nil,hbld)
-			hilite(hbld)
+			fsel(godr,nil,hbld)
+			hi(hbld)
 
-		elseif sel1.typ.unit then
+		elseif sel1.typ.un then
 			sfx"1"
 			mvg(sel,mx,my,axn==1,1)
-			hilite(p([[f=.5
+			hi(p([[f=.5
 c=8]],mx,my))
 
-		elseif sel1.typ.units then
+		elseif sel1.typ.us then
 			if fget(mget(mx8,my8),1) then
-				hilite(htile)
+				hi(htile)
 			end
 			sfx"3"
 			sel1.rx,sel1.ry,
@@ -1726,7 +1726,7 @@ c=8]],mx,my))
 		if btnp"5" and not selx then
 			selx,sely,selt=mx,my,t()
 		end
-		if llclk and selx then
+		if llc and selx then
 			selbox={
 				min(selx,mx),
 				min(sely,my),
@@ -1738,9 +1738,9 @@ c=8]],mx,my))
 	end
 end
 -->8
---unit
+--un
 
-function draw_unit(u)
+function du(u)
 	local typ,st,r=
 		u.typ,u.st,
 		u.res and u.res.typ or "_"
@@ -1756,17 +1756,17 @@ function draw_unit(u)
 		typ[stt.."_y"]+resy[r],
 		typ[stt.."_fps"],
 		typ[stt.."_fr"],
-		u.dead or (cf-u.id)%60,
+		u.dd or (cf-u.id)%60,
 		count(sel,u)==1 and 9
 
 	camera(cx-ux,cy-uy)
 
-	if u.const and u.alive then
+	if u.cn and u.al then
 		fillp"23130.5"
 		rect(-1,-1,w,h,
 			u==sel1 and 9 or 12)
 		fillp()
-		local p=u.const/typ.const
+		local p=u.cn/typ.cn
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
 		sx-=fw*ceil(p*2)
@@ -1779,10 +1779,10 @@ function draw_unit(u)
 		[14]=pal(typ.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,1,1,w,h,
-		not typ.fire and u.dir==typ.dir)
+		not typ.fi and u.dir==typ.dir)
 	pal()
-	if u.alive and ihp>=2 then
-		if typ.fire then
+	if u.al and ihp>=2 then
+		if typ.fi then
 			spr(247+f/20,w\3)
 		end
 		line(w,unspl"-1,0,-1,8")
@@ -1790,7 +1790,7 @@ function draw_unit(u)
 	end
 end
 
-function drop(u)
+function dr(u)
 	if u.res then
 		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
 	end
@@ -1800,16 +1800,16 @@ function drop(u)
 	elseif u.st.y then
 		mine_nxt(u,u.st.y)
 	else
-		rest(u)
+		rst(u)
 	end
 end
 
-function update_farm(_ENV)
-	if not farmer or
-		farmer.st.farm!=_ENV
+function uf(_ENV)
+	if not f or
+		f.st.farm!=_ENV
 		or exp then
-		farmer=nil
-	elseif farmer.st.active and
+		f=nil
+	elseif f.st.ac and
 		not ready then
 		fres+=typ.gr
 		sproff+=typ.gr*2
@@ -1819,19 +1819,19 @@ end
 
 function frm(u)
 	local _ENV,g=u.st.farm,_ENV
-	if not farmer then
-		g.rest(u)
+	if not f then
+		g.rst(u)
 	elseif ready and g.cf==0 then
 		fres-=1
 		sproff+=1
 		g.collect(u,"r")
 		if fres<=0 then
-			g.godrop(u)
-			cycles+=1
-			exp,ready=cycles>=typ.cycles
+			g.godr(u)
+			cy+=1
+			exp,ready=cy>=typ.cy
 			if exp and ai then
-				cycles,exp=0,
-					g.pay(g.renew,1,pres)
+				cy,exp=0,
+					g.pay(g.rw,1,pres)
 			end
 			sproff=exp and
 				(g.sfx"36" or 32) or 0
@@ -1851,14 +1851,14 @@ function atk(u)
 			if not u.st.adj then
 				u.st.typ=nil
 			end
-			if cf%typ.atk_freq==u.id%
-				typ.atk_freq then
+			if cf%typ.atk_fq==u.id%
+				typ.atk_fq then
 				if e.ap==u.ap then
 					if typ.monk and e.dmgd then
 						e.hp+=1
-						if (u.onscr) sfx"20"
+						if (u.os) sfx"20"
 					else
-						rest(u)
+						rst(u)
 					end
 				else
 					u.dir=sgn(dx)
@@ -1881,7 +1881,7 @@ function atk(u)
 				goatk(u,e)
 			end
 			if not u.st.typ then
-				rest(u)
+				rst(u)
 			end
 		end
 	end
@@ -1890,15 +1890,15 @@ end
 function bld(u)
 	if cf%30==0 then
 		local _ENV,g=u.st.x,_ENV
-		if const then
-			const+=1
+		if cn then
+			cn+=1
 			max_hp+=typ.hpr
 			hp+=typ.hpr
-			if const>=typ.const then
-				const,cost=
+			if cn>=typ.cn then
+				cn,cost=
 					u.hu and g.sfx"26"
-				g.reg_bldg(_ENV)
-				if typ.drop then
+				g.reg_bl(_ENV)
+				if typ.dr then
 					pres.pl+=5
 				elseif typ.farm then
 					g.gofarm(u,_ENV)
@@ -1909,10 +1909,10 @@ function bld(u)
 			hp+=2
 			pres.b-=.1
 		else
-			g.rest(u)
+			g.rst(u)
 			g.surr(function(t)
-				local _ENV=g.bldgs[t.k]
-				if _ENV and hu and const then
+				local _ENV=g.bls[t.k]
+				if _ENV and hu and cn then
 					g.gobld(u,_ENV)
 				end
 			end,x8,y8,4)
@@ -1934,16 +1934,16 @@ function gth(u)
 39=60]][fget(t)]
 	if not f then
 		if not mine_nxt(u,r) then
-			godrop(u,r)
+			godr(u,r)
 		end
 	elseif cf==u.id then
-		if (u.ai) f+=res1.diff\3*10
-		local n=g(restiles,x,y,f)
+		if (u.ai) f+=res1.df\3*10
+		local n=g(rstiles,x,y,f)
 		collect(u,r)
 		if t<112 and
 			(n==f\3 or n==f\1.25)
 		then
-			del(units,g(ladys,x,y))
+			del(us,g(ladys,x,y))
 			mset(x,y,t+16)
 		elseif n==1 then
 			mset(x,y,68)
@@ -1951,18 +1951,18 @@ function gth(u)
 			s(dmaps[r],x,y,.55)
 			qdmaps(r)
 		end
-		s(restiles,x,y,n-1)
+		s(rstiles,x,y,n-1)
 	end
 end
 
-function produce(u)
+function up(u)
 	local _ENV,gl=u,_ENV
 	local bld=q.typ
 	q.x-=0x.0888
 	if q.x<=0 then
 		if bld.x then
 			local _ENV=bld
-			gl.res1.techs|=tmap
+			gl.res1.techs|=tm
 			x(typ.p1)
 			gl.sfx"33"
 			if up and up<1 then
@@ -1974,8 +1974,8 @@ function produce(u)
 				done=nil
 			end
 		else
-			local new=gl.unit(bld,x,y,p),
-				onscr and hu and gl.sfx"19"
+			local new=gl.un(bld,x,y,p),
+				os and hu and gl.sfx"19"
 			if bld.ant and
 				rtx and
 				fget(mget(rtx,rty),1)
@@ -2019,7 +2019,7 @@ function p(str,typ,x,y,...)
 		end
 	end)
 	typs[obj.idx or ""],
-		_ENV[obj.var or ""]=obj,obj
+		_ENV[obj.v or ""]=obj,obj
 	return obj
 end
 
@@ -2031,7 +2031,7 @@ function s(a,x,y,v)
 	a[x|y<<8]=v
 end
 
-function hilite(v)
+function hi(v)
 	hlt,hlv=t(),v
 end
 
@@ -2042,12 +2042,12 @@ function int(r1,r2,e)
 		r1[4]+e>r2[2]
 end
 
-function tile_unit(tx,ty)
+function tile(tx,ty)
 	return box(p([[p=0
 ais=
 hp=0
 max_hp=0
-const=1]],p[[w=8
+cn=1]],p[[w=8
 h=8]],tx*8+4,ty*8+4))
 end
 
@@ -2060,7 +2060,7 @@ function box(u)
 		hp<max_hp,
 		ais[p],p|9,rz[p]
 	k,hu=x8|y8<<8,not ai
-	if not const then
+	if not cn then
 		hp+=typ.hp-max_hp
 		max_hp=typ.hp
 	end
@@ -2068,11 +2068,11 @@ function box(u)
 end
 
 function can_pay(typ,_ENV)
-	typ.reqs=reqs|typ.breq==reqs
+	typ.reqs=reqs|typ.br==reqs
 	return r>=typ.r and
 		g>=typ.g and
 		b>=typ.b and
-		(not typ.unit or p<min(pl,99))
+		(not typ.un or p<min(pl,99))
 		and typ.reqs
 end
 
@@ -2080,7 +2080,7 @@ function pay(typ,dir,_ENV)
 	r-=typ.r*dir
 	g-=typ.g*dir
 	b-=typ.b*dir
-	if typ.unit then
+	if typ.un then
 		p+=dir
 	end
 end
@@ -2117,17 +2117,17 @@ function surr(fn,x,y,n,na)
 	return e
 end
 
-function avail_farm()
+function af()
 	local _ENV=hbld
 	return typ and typ.farm and
-		not exp and not farmer and
-		not const
+		not exp and not f and
+		not cn
 end
 
 function can_gth()
 	local f=fget(mget(mx8,my8))
 	return (seltyp.ant and
-		(f&2==2 or avail_farm())
+		(f&2==2 or af())
 		or seltyp.monk==f)
 		and g(exp,mx8,my8)
 		and surr(nil,mx8,my8)
@@ -2135,12 +2135,12 @@ end
 
 function can_atk()
 	return sel1.typ.atk
-		and hunit
-		and (not hunit.hu or
+		and hun
+		and (not hun.hu or
 			seltyp.monk and
-			hunit.dmgd and not
-			hunit.bldg)
-		and g(viz,mx8,my8,hunit.disc)
+			hun.dmgd and not
+			hun.bl)
+		and g(viz,mx8,my8,hun.dc)
 end
 
 function can_bld()
@@ -2160,13 +2160,13 @@ function norm(it,nt,f)
 end
 
 function acc(x,y,strict)
-	local _ENV=g(bldgs,x,y)
+	local _ENV=g(bls,x,y)
 	return not fget(mget(x,y),0)
 		and (not _ENV or not strict
-			and (const or typ.farm))
+			and (cn or typ.farm))
 end
 
-function bldable()
+function bdb()
 	return	acc(mx8,my8,1) and
 		(to_bld.h8 or
 			acc(mx8,my8+1,1)) and
@@ -2175,17 +2175,17 @@ function bldable()
 			acc(mx8+1,my8+1,1))
 end
 
-function reg_bldg(b)
+function reg_bl(b)
 	local typ,x,y=b.typ,b.x8,b.y8
 	local function reg(xx,yy)
-		s(bldgs,xx,yy,b.alive and b)
-		if b.dead then
+		s(bls,xx,yy,b.al and b)
+		if b.dd then
 			s(exp,xx,yy,1)
 			s(dmst.d,xx,yy)
-			if typ.fire and y==yy then
+			if typ.fi and y==yy then
 				mset(xx,yy,69)
 			end
-		elseif	typ.drop then
+		elseif	typ.dr then
 			s(dmst.d,xx,yy,{xx,yy})
 		end
 	end
@@ -2194,41 +2194,41 @@ function reg_bldg(b)
 		reg(x+1,y,
 			typ.h8 or reg(x+1,y-1))
 	end
-	if not b.const and not typ.farm then
+	if not b.cn and not typ.farm then
 		qdmaps"d"
-		b.pres.reqs|=typ.bmap
+		b.pres.reqs|=typ.bm
 	end
 end
 
-function wander(u)
+function w(u)
 	move(u,
-		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
-		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
+		u.x+rs"-6,-5,-4,-3,3,4,5,6",
+		u.y+rs"-6,-5,-4,-3,3,4,5,6",
 		1)
 end
 
 function dmg(typ,to)
-	to.hp-=typ.atk*dmg_mult[
+	to.hp-=typ.atk*dt[
 		typ.atk_typ..to.typ.def]
-	if to.typ.unit and
+	if to.typ.un and
 		to.st.idl or to.st.y then
-		wander(to)
+		w(to)
 	end
 	to.conv+=typ.conv
 	if to.ai and to.grp!="atk" then
-		to.ai.safe=
+		to.ai.sf=
 			mvg(to.ai.p1,to.x,to.y,1)
 	end
-	if to.onscr then
+	if to.os then
 		poke(0x34a8,rnd"32",rnd"32")
 		sfx(typ.sfx)
-		alert=t()
-	elseif to.hu and t()-alert>10 then
+		al=t()
+	elseif to.hu and t()-al>10 then
 		sfx"34"
-		hilite{
+		hi{
 			mmx+to.x/mmwr,
 			mmy+to.y/mmhr,3,14}
-		alert=hlt
+		al=hlt
 		hlt+=2.5
 	end
 end
@@ -2240,51 +2240,51 @@ function collect(u,res)
 		u.res=p("qty=1",res)
 	end
 	if u.res.qty>=u.typ.cap then
-		godrop(u,res)
+		godr(u,res)
 	end
 end
 
-function can_drop()
+function can_dr()
 	for u in all(sel) do
 		if u.res then
 			return hbld.hu and
-				hbld.typ.drop
+				hbld.typ.dr
 		end
 	end
 end
 
-function can_renew(t)
+function can_rw(t)
 	if hbld.exp and seltyp.ant then
-		pres(renew,10,2)
+		pres(rw,10,2)
 		rect(unspl"8,0,18,8,4")
-		return	can_pay(renew,res1) or t
+		return	can_pay(rw,res1) or t
 	end
 end
 
-function unit(t,_x,_y,_p,
-	_const,_disc,_hp)
+function un(t,_x,_y,_p,
+	_cn,_dc,_hp)
 	local _typ=typs[t] or t
 	do
-		local _ENV=add(units,
-			p([[var=u
+		local _ENV=add(us,
+			p([[v=u
 dir=1
 lp=1
 sproff=0
-cycles=0
+cy=0
 fres=0
 conv=0]],_typ[_p],rnd"60"\1))
-		max_hp=typ.hp/typ.const
-		id,x,y,p,hp,const,
-			disc,alive,prod,bldg=
+		max_hp=typ.hp/typ.cn
+		id,x,y,p,hp,cn,
+			dc,al,prod,bl=
 			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
-			max(_const)>0 and _const,
-			_disc==1,1,
-			_typ.prod or {},typ.bldg
+			max(_cn)>0 and _cn,
+			_dc==1,1,
+			_typ.prod or {},typ.bl
 	end
 	tot+=1
-	rest(box(u))
-	if (u.bldg) reg_bldg(u)
+	rst(box(u))
+	if (u.bl) reg_bl(u)
 	return u
 end
 
@@ -2372,7 +2372,7 @@ b=4]][q]
 end
 
 function path(u,x,y,tol)
-	local function nearest(gx,gy)
+	local function nearst(gx,gy)
 		for n=0,16 do
 			local best_d,best_t=32767
 			surr(function(t)
@@ -2386,10 +2386,10 @@ function path(u,x,y,tol)
 			if (best_t) return best_t,n
 		end
 	end
-	if u.typ.unit then
-		local dest,dest_d=nearest(x,y)
+	if u.typ.un then
+		local dest,dest_d=nearst(x,y)
 		local wayp,e=as(
-			nearest(u.x,u.y),dest)
+			nearst(u.x,u.y),dest)
 		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
@@ -2503,7 +2503,7 @@ function draw_port(
 	pspl(
 		nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,0,5"
 		or "1,2,3,4,5,7,7,8,9,10,11,12,13,0")
-	sspr(typ.portx,typ.porty,
+	sspr(typ.px,typ.py,
 		unspl"9,8,1,1")
 	sspr((typ.up or -1)*8,unspl"88,8,8,2,1")
 
@@ -2545,22 +2545,22 @@ end
 function single()
 	local q=sel1.q
 	if sel1.cost then
-		draw_port(p[[portx=72
-porty=72
+		draw_port(p[[px=72
+py=72
 porto=8
 portf=9]],
 			function()
 				pay(sel1.cost,-1,res1)
 				sel1.hp=0
 			end,24,107,
-			sel1.const/seltyp.const,
+			sel1.cn/seltyp.cn,
 			5,12
 		)
 		return
 	end
 
 	if sel1.typ.farm then
-		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
+		?"ᶜ4⁶jbr⁴i"..sel1.cy.."/"..seltyp.cy.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
@@ -2570,7 +2570,7 @@ portf=9]],
 					if can_pay(b,res1) and (
 						not q or
 						q.typ==b and q.qty<9) then
-						if b.bldg then
+						if b.bl then
 							to_bld=b!=to_bld and b
 							return
 						end
@@ -2607,9 +2607,9 @@ portf=9]],
 			q.x/b.t,5,12
 		)
 	end
-	if sel1.typ.units then
-		draw_port(p[[portx=120
-porty=64
+	if sel1.typ.us then
+		draw_port(p[[px=120
+py=64
 porto=15
 portf=15
 ]],function()
@@ -2623,7 +2623,7 @@ function draw_menu()
 	local x,hc=0,hbtn and hbtn.costs
 	for i,sec in inext,split(
 		sel1 and sel1.hu and
-		(sel1.bldg and
+		(sel1.bl and
 			"17,24,61,26" or
 			"17,17,68,26") or "102,26")
 	do
@@ -2659,18 +2659,18 @@ function draw_menu()
 	end
 
 	if sel1 and sel1.hu and
-		sel1.typ.unit then
+		sel1.typ.un then
 		draw_port(
-			act==2 and p[[portx=99
-porty=72
+			act==2 and p[[px=99
+py=72
 porto=2
 portf=13
-]] or seltyp.ant and p[[portx=81
-porty=72
+]] or seltyp.ant and p[[px=81
+py=72
 porto=2
 portf=13
-]] or p[[portx=90
-porty=72
+]] or p[[px=90
+py=72
 porto=2
 portf=13
 ]],function()
@@ -2686,7 +2686,7 @@ end,20,108)
 			r=split"116,121,125,128",
 			fn=function()
 				sfx"1"
-				hilite(idl)
+				hi(idl)
 				sel,cx,cy={idl},
 					idl.x-64,idl.y-64
 				cam()
@@ -2698,7 +2698,7 @@ end,20,108)
 		add(btns,idlm and {
 			r=split"106,121,113,128",
 			fn=function()
-				hilite(idlm)
+				hi(idlm)
 				sel={idlm}
 			end
 		}) and 48 or 56,
@@ -2739,7 +2739,7 @@ function resbar()
 	pset(-3,121)
 end
 -->8
---const
+--cn
 
 function comp(f,g)
 	return function(...)
@@ -2747,7 +2747,7 @@ function comp(f,g)
 	end
 end
 
-pspl,rndspl,unspl,spldeli,campal=
+pspl,rs,unspl,spldeli,campal=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
@@ -2755,7 +2755,7 @@ pspl,rndspl,unspl,spldeli,campal=
 	comp(camera,pal)
 
 unl,unspr,typs,stp,resk,pcol,
-	hlt,diff,act,
+	hlt,df,act,
 	mmx,mmy,mmw,mmh,
 	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
@@ -2764,11 +2764,11 @@ unl,unspr,typs,stp,resk,pcol,
 	comp(spr,unspl),
 	{},
 	split"-9:-20,263:-20,263:148,-9:148",
-	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
+	split"r,g,b,p,pl,reqs,tot,df,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
 
-p[[var=rescol
+p[[v=rescol
 r=8
 g=3
 b=4
@@ -2788,46 +2788,46 @@ e11=3
 e19=4
 e33=1]]
 
-p[[var=resx
+p[[v=resx
 _=0
 r=16
 g=0
 b=16]]
 
-p[[var=resy
+p[[v=resy
 _=0
 r=0
 g=4
 b=4]]
 
-p[[var=dmg_mult
+p[[v=dt
 antant=1
-antqueen=.7
-antspider=.8
+antqn=.7
+antspd=.8
 antsg=1.5
 antbld=.5
 
 acidant=1
-acidqueen=.6
-acidspider=1.5
+acidqn=.6
+acidspd=1.5
 acidsg=.7
 acidbld=.25
 
-spiderant=1.5
-spiderqueen=1.1
-spiderspider=1
-spidersg=1
-spiderbld=.1
+spdant=1.5
+spdqn=1.1
+spdspd=1
+spdsg=1
+spdbld=.1
 
 sgant=.9
-sgqueen=3
-sgspider=.7
+sgqn=3
+sgspd=.7
 sgsg=1
 sgbld=12
 
 bldant=1
-bldqueen=.75
-bldspider=1.25
+bldqn=.75
+bldspd=1.25
 bldsg=.9
 bldbld=.1]]
 -->8
@@ -2835,7 +2835,7 @@ bldbld=.1]]
 
 function save()
 	local ptr,foreach=0,foreach
-	bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")
+	bnr(2,"savefile⁶jdnᶜ1savefile","drag+dr to load ⁴f⁶x1 ")
 	local function draw(v)
 		for i=0,8,4 do
 			pset(ptr%128,ptr\128,
@@ -2853,16 +2853,16 @@ function save()
 			draw(r[k])
 		end)
 	end)
-	draw(#units)
-	foreach(units,function(_ENV)
+	draw(#us)
+	foreach(us,function(_ENV)
 		foreach({typ.idx,x,y,p,
-			max(const),
-			max(disc),hp},draw)
+			max(cn),
+			max(dc),hp},draw)
 	end)
 	extcmd("screen",1)
 end
 
-function loadgame()
+function lg()
 	init()
 	pal()
 	local ptr=0x9004
@@ -2888,11 +2888,11 @@ function loadgame()
 		end)
 	end)
 	for i=1,px"1" do
-		unit(px"7")
+		un(px"7")
 	end
 	local techs=res1.techs
 	foreach(typs,function(_ENV)
-		if techs|tmap==techs then
+		if techs|tm==techs then
 			x(y.p1)
 			up,done=up and 0,not up
 		end
@@ -2902,13 +2902,13 @@ end
 -->8
 --ai
 
-function ai_frame(ai)
-	if (t6) ai.safe=1
-	local avail,nxt,miners,aiu,
+function ai(ai)
+	if (t6) ai.sf=1
+	local avail,nxt,m,aiu,
 		ants,res,hold=
 		{},{},{},{},0,res[ai.typ]
 
-	local function miner(u,r)
+	local function mr(u,r)
 		u.rs=mine_nxt(u,r)
 		if not u.rs and nxt[r] then
 			move(u,unpack(nxt[r]))
@@ -2921,18 +2921,18 @@ function ai_frame(ai)
 			peek(off+res.pos*768,2)
 		local adv,t,ux,uy,p,pid=
 			ai.boi==i,
-			res.diff==x,
+			res.df==x,
 			x*8,y*8,
 			peek(off,2)
 		local r,b,bld=
 			chr(pid),ant.prod[pid],
-			g(bldgs,x,y)
+			g(bls,x,y)
 		if res.tot>=p then
 		if b then
-			if not bld and ai.safe then
+			if not bld and ai.sf then
 				if can_pay(b,res) then
 					pay(b,1,res)
-					unit(b,ux+b.w/2,
+					un(b,ux+b.w/2,
 						uy+b.h/2,ai.typ,1)
 				else
 					hold=b
@@ -2947,7 +2947,7 @@ function ai_frame(ai)
 			elseif adv then
 				if pid==10 then
 					if res.newg then
-						unit(14,ux,uy,4)
+						un(14,ux,uy,4)
 					end
 				elseif t then
 					hold=typs[pid]
@@ -2965,21 +2965,21 @@ function ai_frame(ai)
 		end
 	end
 
-	for u in all(units) do
+	for u in all(us) do
 		if u.ai==ai then
 			if add(aiu,u).typ.ant then
 				ants+=1
 				if u.st.idl then
-					miner(u,bgnxt and "b" or "r")
-					bgnxt=not bgnxt
+					mr(u,bg and "b" or "r")
+					bg=not bg
 				end
 				del(u.bld and
 					not u.st.in_bld and
 					u.bld.p1,u)
-				add(add(miners,u.rs) and
+				add(add(m,u.rs) and
 					not u.res and avail,u)
-			elseif u.typ.unit then
-				if u.dead then
+			elseif u.typ.un then
+				if u.dd then
 					del(u.sqd,u)
 				elseif not u.sqd then
 					u.sqd=(#ai.p1>#ai.p2 or
@@ -2992,13 +2992,13 @@ function ai_frame(ai)
 	end
 
 	local bal=
-		(#miners-count(miners,"r"))\2.75
-		-count(miners,"g")
+		(#m-count(m,"r"))\2.75
+		-count(m,"g")
 
 	for u in all(aiu) do
 		local typ=u.typ
 		local function send(fn)
-			if #u.p1<typ.bldrs then
+			if #u.p1<typ.bs then
 				local w=add(u.p1,deli(avail))
 				if w then
 					w.bld,w.rs=u,fn(w,u)
@@ -3010,19 +3010,19 @@ function ai_frame(ai)
 		if u.rs!=r and r and
 			del(avail,u) then
 			bal=0
-			miner(u,r)
+			mr(u,r)
 		end
-		if bldg and u.dmgd or u.const
+		if bl and u.dmgd or u.cn
 		then
 			send(gobld)
 		elseif typ.farm and
-			not u.farmer then
+			not u.f then
 			send(gofarm)
 		elseif
-			typ.queen and
-			ants<res.diff*13.5 or
+			typ.qn and
+			ants<res.df*13.5 or
 			typ.mil and
-			res.p<res.diff*26
+			res.p<res.df*26
 		then
 			local b,h=u.prod[u.lp]
 			foreach(split"r,g,b",function(k)
@@ -3033,15 +3033,15 @@ function ai_frame(ai)
 			if not u.q and not h and
 				can_pay(b,res) then
 				prod(u,b,
-					split"5,1,1"[res.diff])
-				u.lp%=typ.units
+					split"5,1,1"[res.df])
+				u.lp%=typ.us
 				u.lp+=1
 				res.tot+=1
 			end
 		end
 	end
 
-	if #ai.p2>=res.diff*5 and ai.safe then
+	if #ai.p2>=res.df*5 and ai.sf then
 		ai.p3,ai.p2=ai.p2,{}
 	end
 	mvg(ai.p3,hq.x,hq.y,"atk")
