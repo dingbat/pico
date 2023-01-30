@@ -164,7 +164,7 @@ function bnr(a,t,st,cx)
 	unl"82,87,121,87"
 	unl"25,108,105,108"
 	line(
-		?split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff]
+		print(split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff])
 		-3,unspl"80,8,80,9")
 	?"⁶jll²9⁴c⁴i ᶜ5⧗³h"..(res1.t<600 and "0" or "")..res1.t\60 ..(s<10 and ":0" or ":")..s.." "
 	unl"119,80,84,80,9"
@@ -2482,7 +2482,7 @@ function pres(r,x,y,z)
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
 		if v!=0 or z then
-			newx+=?"²7 "..v,x,y,rescol[k]
+			newx+=print("²7 "..v,x,y,rescol[k])
 			spr(129+i,x,y)
 			x=newx+(z or 1)
 		end
@@ -2610,7 +2610,7 @@ portf=9]],
 				sfx"18"
 			end,
 			b.x and 24 or
-				?"ᶜ7⁶j8r⁴iX"..q.qty
+				print("ᶜ7⁶j8r⁴iX"..q.qty)
 				and 20,
 			107,
 			q.x/b.t,5,12
