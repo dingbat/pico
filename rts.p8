@@ -257,7 +257,7 @@ function _draw()
 
 	camera(cx,cy)
 
-	if (selx) rect(unpack(sbx))
+	if (selx) rect(unpack(selbox))
 
 	fillp()
 
@@ -347,7 +347,7 @@ t=0
 npl=0]]
 
 	res1,dq,exp,vcache,dmaps,
-	us,rstl,sel,ladys,prj,
+	us,rstiles,sel,ladys,prj,
 		bls,nviz,typs,ais,dmst,
 		pi,cf,selt,al,ban,
 		amx,amy,tot,
@@ -525,7 +525,7 @@ tm=-1
 d=0]]
 
 p[[v=arc
-txt=⁶h²5ᶜ9acd-spitting ant: ᶜ7ranged un,⁶g⁴mgood vs spds.
+txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged un,⁶g⁴mgood vs spds.
 idx=4
 spd=.343
 los=33
@@ -536,7 +536,7 @@ conv=0
 atk_fq=30
 aoe=0
 prj_spd=1
-atk_typ=acd
+atk_typ=acid
 def=ant
 
 t=14
@@ -683,7 +683,7 @@ conv=0
 atk_fq=30
 aoe=0
 prj_spd=1
-atk_typ=acd
+atk_typ=acid
 def=qn
 
 cn=1
@@ -1230,7 +1230,7 @@ b=0
 br=0
 tm=32
 idx=19
-txt=⁶h²5ᶜaspray:ᶜ7 increase range for acd-⁶g⁴mspitting ants.
+txt=⁶h²5ᶜaspray:ᶜ7 increase range for acid-⁶g⁴mspitting ants.
 px=51
 py=80]],arc,function(_ENV)
 	los,range=40,35
@@ -1259,7 +1259,7 @@ br=0
 tm=128
 up=-1
 idx=21
-txt=⁶h²5ᶜaacd-spitting ant upgr.:ᶜ7⁶g⁴mincrease its hp+attack by 25%
+txt=⁶h²5ᶜaacid-spitting ant upgr.:ᶜ7⁶g⁴mincrease its hp+attack by 25%
 px=34
 py=88]],arc,function(_ENV)
 	atk*=1.25
@@ -1401,7 +1401,7 @@ function tick(u)
 		u.dd,u.f,u.al=typ.d
 		u.st=
 			p"t=dd",
-			typ.bl and rgbl(u),
+			typ.bl and reg_bl(u),
 			u.os and
 				sfx(typ.bl and 17 or 62)
 		if typ.lady then
@@ -1474,7 +1474,7 @@ function tick(u)
 	end
 
 	if g(viz,x8,y8,u.dc) then
-		if selx and int(u.r,sbx,0)
+		if selx and int(u.r,selbox,0)
 		then
 			if not u.hu then
 				sele={u}
@@ -1673,7 +1673,7 @@ function io()
 		if can_rw() then
 			sfx"0"
 			hi(hbld)
-			hbld.so,
+			hbld.sproff,
 				hbld.cy,
 				hbld.exp=0,0
 			pay(rw,1,res1)
@@ -1727,7 +1727,7 @@ c=8]],mx,my))
 			selx,sely,selt=mx,my,t()
 		end
 		if llc and selx then
-			sbx={
+			selbox={
 				min(selx,mx),
 				min(sely,my),
 				max(selx,mx),
@@ -1752,7 +1752,7 @@ function du(u)
 
 	local sx,sy,ufps,fr,f,selc=
 		typ[stt.."_x"]+resx[r]+
-			u.so\8*8,
+			u.sproff\8*8,
 		typ[stt.."_y"]+resy[r],
 		typ[stt.."_fps"],
 		typ[stt.."_fr"],
@@ -1798,7 +1798,7 @@ function dr(u)
 	if u.st.farm then
 		gofarm(u,u.st.farm)
 	elseif u.st.y then
-		mnxt(u,u.st.y)
+		mine_nxt(u,u.st.y)
 	else
 		rst(u)
 	end
@@ -1810,10 +1810,10 @@ function uf(_ENV)
 		or exp then
 		f=nil
 	elseif f.st.ac and
-		not rdy then
+		not ready then
 		fres+=typ.gr
-		so+=typ.gr*2
-		rdy=fres>=9
+		sproff+=typ.gr*2
+		ready=fres>=9
 	end
 end
 
@@ -1821,19 +1821,19 @@ function frm(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not f then
 		g.rst(u)
-	elseif rdy and g.cf==0 then
+	elseif ready and g.cf==0 then
 		fres-=1
-		so+=1
-		g.ct(u,"r")
+		sproff+=1
+		g.collect(u,"r")
 		if fres<=0 then
 			g.godr(u)
 			cy+=1
-			exp,rdy=cy>=typ.cy
+			exp,ready=cy>=typ.cy
 			if exp and ai then
 				cy,exp=0,
 					g.pay(g.rw,1,pres)
 			end
-			so=exp and
+			sproff=exp and
 				(g.sfx"36" or 32) or 0
 		end
 		u.st.farm=_ENV
@@ -1897,7 +1897,7 @@ function bld(u)
 			if cn>=typ.cn then
 				cn,cost=
 					u.hu and g.sfx"26"
-				g.rgbl(_ENV)
+				g.reg_bl(_ENV)
 				if typ.dr then
 					pres.pl+=5
 				elseif typ.farm then
@@ -1933,13 +1933,13 @@ function gth(u)
 19=45
 39=60]][fget(t)]
 	if not f then
-		if not mnxt(u,r) then
+		if not mine_nxt(u,r) then
 			godr(u,r)
 		end
 	elseif cf==u.id then
 		if (u.ai) f+=res1.df\3*10
-		local n=g(rstl,x,y,f)
-		ct(u,r)
+		local n=g(rstiles,x,y,f)
+		collect(u,r)
 		if t<112 and
 			(n==f\3 or n==f\1.25)
 		then
@@ -1951,7 +1951,7 @@ function gth(u)
 			s(dmaps[r],x,y,.55)
 			qdmaps(r)
 		end
-		s(rstl,x,y,n-1)
+		s(rstiles,x,y,n-1)
 	end
 end
 
@@ -1995,7 +1995,7 @@ function up(u)
 	end
 end
 
-function mnxt(u,res)
+function mine_nxt(u,res)
 	local wp,x,y=dpath(u,res)
 	if wp then
 		gogth(u,x,y,wp)
@@ -2175,7 +2175,7 @@ function bdb()
 			acc(mx8+1,my8+1,1))
 end
 
-function rgbl(b)
+function reg_bl(b)
 	local typ,x,y=b.typ,b.x8,b.y8
 	local function reg(xx,yy)
 		s(bls,xx,yy,b.al and b)
@@ -2233,7 +2233,7 @@ function dmg(typ,to)
 	end
 end
 
-function ct(u,res)
+function collect(u,res)
 	if u.res and u.res.typ==res then
 		u.res.qty+=1
 	else
@@ -2269,7 +2269,7 @@ function un(t,_x,_y,_p,
 			p([[v=u
 dir=1
 lp=1
-so=0
+sproff=0
 cy=0
 fres=0
 conv=0]],_typ[_p],rnd"60"\1))
@@ -2284,7 +2284,7 @@ conv=0]],_typ[_p],rnd"60"\1))
 	end
 	tot+=1
 	rst(box(u))
-	if (u.bl) rgbl(u)
+	if (u.bl) reg_bl(u)
 	return u
 end
 
@@ -2482,26 +2482,26 @@ function pres(r,x,y,z)
 end
 
 function draw_port(
-	typ,fn,x,y,r,bg,fg,u,c)
+	typ,fn,x,y,r,bg,fg,u,cost)
 	camera(-x,-y)
-	local np,as=
-		c and not can_pay(typ,res1),
-		typ.pf and act>0
+	local nopay,axnsel=
+		cost and not can_pay(typ,res1),
+		typ.portf and act>0
 	rect(0,0,10,9,
 		u and u.pres.col or
-		np and 6 or
-		c and 3 or
-		as and 10 or
-		typ.po or 1
+		nopay and 6 or
+		cost and 3 or
+		axnsel and 10 or
+		typ.porto or 1
 	)
 	rectfill(1,1,9,8,
-		np and 7 or
-		c and c.x and 10 or
-		as and 9 or
-		typ.pf or 6
+		nopay and 7 or
+		cost and cost.x and 10 or
+		axnsel and 9 or
+		typ.portf or 6
 	)
 	pspl(
-		np and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,0,5"
+		nopay and "5,5,5,5,5,6,6,13,6,6,6,6,13,6,0,5"
 		or "1,2,3,4,5,7,7,8,9,10,11,12,13,0")
 	sspr(typ.px,typ.py,
 		unspl"9,8,1,1")
@@ -2510,7 +2510,7 @@ function draw_port(
 	add(fn and btns,{
 		r={x,y,x+10,y+8},
 		fn=fn,
-		costs=c
+		costs=cost
 	})
 
 	if fg then
@@ -2521,7 +2521,7 @@ function draw_port(
 	campal()
 end
 
-function selp(x)
+function sel_ports(x)
 	foreach(sel,function(u)
 		x+=13
 		if x>100 then
@@ -2542,13 +2542,13 @@ function selp(x)
 	end)
 end
 
-function selp1()
+function single()
 	local q=sel1.q
 	if sel1.cost then
 		draw_port(p[[px=72
 py=72
-po=8
-pf=9]],
+porto=8
+portf=9]],
 			function()
 				pay(sel1.cost,-1,res1)
 				sel1.hp=0
@@ -2610,8 +2610,8 @@ pf=9]],
 	if sel1.typ.us then
 		draw_port(p[[px=120
 py=64
-po=15
-pf=15
+porto=15
+portf=15
 ]],function()
 	act+=1
 	act%=2
@@ -2641,12 +2641,12 @@ function draw_menu()
 	end
 
 	if nsel==1 then
-		selp"-10"
-		if (sel1.hu) selp1()
+		sel_ports"-10"
+		if (sel1.hu) single()
 	elseif seltyp and seltyp.ant then
-		selp1()
+		single()
 	else
-		selp"24"
+		sel_ports"24"
 	end
 	if nsel>1 then
 		camera(nsel<10 and -2)
@@ -2663,16 +2663,16 @@ function draw_menu()
 		draw_port(
 			act==2 and p[[px=99
 py=72
-po=2
-pf=13
+porto=2
+portf=13
 ]] or seltyp.ant and p[[px=81
 py=72
-po=2
-pf=13
+porto=2
+portf=13
 ]] or p[[px=90
 py=72
-po=2
-pf=13
+porto=2
+portf=13
 ]],function()
 	act+=1
 	act%=3
@@ -2805,11 +2805,11 @@ antspd=.8
 antsg=1.5
 antbld=.5
 
-acdant=1
-acdqn=.6
-acdspd=1.5
-acdsg=.7
-acdbld=.25
+acidant=1
+acidqn=.6
+acidspd=1.5
+acidsg=.7
+acidbld=.25
 
 spdant=1.5
 spdqn=1.1
@@ -2907,7 +2907,7 @@ function ai(ai)
 		{},{},{},{},0,res[ai.typ]
 
 	local function mr(u,r)
-		u.rs=mnxt(u,r)
+		u.rs=mine_nxt(u,r)
 		if not u.rs and nxt[r] then
 			move(u,unpack(nxt[r]))
 		end
@@ -3045,7 +3045,7 @@ function ai(ai)
 	mvg(ai.p3,hq.x,hq.y,"atk")
 end
 -->8
-cartdata"aoa"
+cartdata"age_of_ants"
 function mode()
 	dset(0,dget"0"%3+1)
 	menuitem(1,
