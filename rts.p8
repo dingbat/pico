@@ -1473,9 +1473,7 @@ function tick(u)
 	if t then
 		if t.dead then
 			u.st.agg=1,
-				u.st.typ or rest(u),
-				typ.ant and t.typ.lady and
-				gogth(u,t.x8,t.y8)
+				u.st.typ or rest(u)
 		elseif int(t.r,u.r,-2) then
 			u.dir,u.st.active,u.st.typ=
 				sgn(t.x-u.x),1
@@ -2095,7 +2093,7 @@ function can_pay(typ,_ENV)
 		g>=typ.g and
 		b>=typ.b and
 		(not typ.unit or p<min(pl,99))
---		and typ.reqs
+		and typ.reqs
 end
 
 function pay(typ,dir,_ENV)
@@ -2727,7 +2725,7 @@ end,20,108)
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
 	sspr(unspl"109,72,19,12,0,0")
 	
-	if hc then-- and hc.reqs then
+	if hc and hc.reqs then
 		local l=pres(hc,0,150)
 		if dget"1"==0 then
 			?hc.txt1,-104,-14
