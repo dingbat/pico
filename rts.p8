@@ -110,11 +110,11 @@ function _update()
 
 	foreach(prj,function(b)
 		local typ=b.typ
-		if norm(b,b,typ.prj_spd)<1
+		if norm(b.p1,b,typ.prj_spd)<1
 		then
 			del(prj,b)
 			for u in all(units) do
-				if u.ap!=b.ap and
+				if u.ap!=b.p1[3] and
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
 					dmg(typ,u)
@@ -1884,13 +1884,12 @@ function atk(u)
 					end
 				else
 					u.dir=sgn(dx)
-					add(prj,typ.prj_s and {
-						e.x,e.y,
-						typ=typ,
-						ap=u.ap,
-						x=u.x-u.dir*typ.prj_xo,
-						y=u.y+typ.prj_yo,
-					} or dmg(typ,e))
+					add(prj,typ.prj_s and p("",
+						typ,
+						u.x-u.dir*typ.prj_xo,
+						u.y+typ.prj_yo,
+						e.x,e.y,u.ap
+					) or dmg(typ,e))
 					if e.conv>=e.max_hp then
 						e.pres.p-=1
 						u.pres.p+=1
