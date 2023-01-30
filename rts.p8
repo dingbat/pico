@@ -1458,7 +1458,9 @@ function tick(u)
 	if t then
 		if t.dead then
 			u.st.agg=1,
-				u.st.typ or rest(u)
+				u.st.typ or rest(u),
+				typ.ant and t.typ.lady and
+					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
 			u.dir,u.st.active,u.st.typ=
 				sgn(t.x-u.x),1
