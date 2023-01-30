@@ -88,9 +88,9 @@ function _update()
 	res1.t+=0x.0888
 
 	if cf%30==19 then
-		for tx=0,mmw do
-		for ty=0,mmh do
-			local x,y=tx*mmwr\8,ty*mmhr\8
+		for tx=0,19 do
+		for ty=0,12 do
+			local x,y=tx*20.21\8,ty*21.33\8
 			sset(109+tx,72+ty,
 				g(exp,x,y) and rescol[
 					g(viz,x,y,"e")..
@@ -103,7 +103,7 @@ function _update()
 		viz,nviz=nviz,{}
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
-			mset(x+mapw,y,viz[k] or
+			mset(x+48,y,viz[k] or
 				mget(x,y))
 		end
 	end
@@ -227,7 +227,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	dm(mapw,15)
+	dm(48,15)
 
 	_pal,pal=pal,max
 	foreach(af,du)
@@ -1485,7 +1485,7 @@ function tick(u)
 				selb={u}
 			end
 		end
-		sset(109+x/mmwr,72+y/mmhr,u.ap)
+		sset(109+x/20.21,72+y/21.33,u.ap)
 	end
 
 	if (u.cn) return
@@ -1520,8 +1520,8 @@ function tick(u)
 
 			foreach(vcache[k],function(t)
 				local k=u.k+t
-				if k<maph<<8 and k>=0 and
-					k%256<mapw then
+				if k<8192 and k>=0 and
+					k%256<48 then
 					if bls[k] then
 						bls[k].dc=1
 					end
@@ -1623,10 +1623,10 @@ function io()
 	end
 
 	if amy>104 and not selx then
-		local dx,dy=amx-mmx,amy-mmy
+		local dx,dy=amx-105,amy-107
 		if min(dx,dy)>=0 and
-			dx<mmw and dy<mmh+1	then
-			local x,y=mmwr*dx,mmhr*dy
+			dx<19 and dy<12+1	then
+			local x,y=20.21*dx,21.33*dy
 			if rc and sel1 then
 				sfx"1"
 				fsel(move,x,y,axn==1)
@@ -2100,7 +2100,7 @@ function surr(fn,x,y,n,na)
 		local xx,yy=x+dx,y+dy
 		if
 			min(xx,yy)>=0 and
-			xx<mapw and yy<maph and
+			xx<48 and yy<32 and
 			(na or acc(xx,yy))
 		then
 			if (dx|dy!=0) e=1
@@ -2226,8 +2226,8 @@ function dmg(typ,to)
 	elseif to.hu and t()-al>10 then
 		sfx"34"
 		hi{
-			mmx+to.x/mmwr,
-			mmy+to.y/mmhr,3,14}
+			105+to.x/20.21,
+			107+to.y/21.33,3,14}
 		al=hlt
 		hlt+=2.5
 	end
@@ -2353,8 +2353,8 @@ g=3
 b=4]][q]
 			if not dmst[q] then
 				dmst[q]={}
-				for x=0,mapw do
-					for y=0,maph do
+				for x=0,48 do
+					for y=0,32 do
 						if fget(mget(x,y),f) then
 							s(dmst[q],x,y,{x,y})
 						end
@@ -2679,7 +2679,7 @@ portf=13
 end,20,108)
 	end
 
-	camera(-mmx,-mmy)
+	camera(-105,-107)
 
 	sspr(
 		add(btns,idl and {
@@ -2707,8 +2707,8 @@ end,20,108)
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
 	sspr(unspl"109,72,19,12,0,0")	
 	camera(
-		-mmx-ceil(cx/mmwr),
-		-mmy-ceil(cy/mmhr)
+		-105-ceil(cx/20.21),
+		-107-ceil(cy/21.33)
 	)
 	rect(unspl"-1,-1,7,7,10")
 	
@@ -2756,8 +2756,6 @@ pspl,rs,unspl,spldeli,campal=
 
 unl,unspr,typs,stp,resk,pcol,
 	hlt,df,act,
-	mmx,mmy,mmw,mmh,
-	mapw,maph,mmhr,mmwr,
 	menu,cx,cy,cvx,cvy
 	=
 	comp(line,unspl),
@@ -2766,7 +2764,7 @@ unl,unspr,typs,stp,resk,pcol,
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,df,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
-	unspl"-10,0,0,105,107,19,12,48,32,21.333,20.21,63,0,30,1,1"
+	unspl"-10,0,0,63,0,30,1,1"
 
 p[[v=rescol
 r=8
