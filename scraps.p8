@@ -329,10 +329,16 @@ x (10 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 - (6 tok) remove constants
 x hunt
 
+
+
+
+
+
 \)([^}|),\].<>\s/\-*%+=^\[\\!])
 ) $1
 
 ^\s+|\s+$
+\n\n([^f]|f[^u]) -> \n$1
 
 --[[
 for source w/whitespace,

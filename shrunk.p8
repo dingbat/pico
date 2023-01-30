@@ -4,14 +4,9 @@ __lua__
 --age of ants
 --eeooty
 
---[[
-for source w/whitespace,
-see /bbs/1230431
-
-credits:
-fast dist - musurca
-a* - morgan3d
-]]
+--for source with whitespace
+--and credits visit:
+--lexaloffle.com/bbs/?tid=50632
 
 music(63,2000)
 
@@ -3384,4 +3379,4 @@ __music__
 
 __meta:title__
 age of ants
-eeootyÿÿÿ
+eeootyÿÿÿÿ

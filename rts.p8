@@ -4,14 +4,9 @@ __lua__
 --age of ants
 --eeooty
 
---[[
-for source w/whitespace,
-see /bbs/1230431
-
-credits:
-fast dist - musurca
-a* - morgan3d
-]]
+--for source with whitespace
+--and credits visit:
+--lexaloffle.com/bbs/?tid=50632
 
 music(63,2000)
 
@@ -3056,7 +3051,6 @@ function ai_frame(ai)
 	mvg(ai.p3,hq.x,hq.y,"atk")
 end
 -->8
-cartdata"age_of_ants"
 function mode()
 	dset(0,dget"0"%3+1)
 	menuitem(1,
@@ -3064,14 +3058,16 @@ function mode()
 		mode)
 	return true
 end
-foreach(split",,",mode)
 
-function txt()
+function help()
 	dset(1,~dget"1")
-	menuitem(2,"▤ toggle help",txt)
+	menuitem(2,"▤ toggle help",help)
 end
-txt()
-txt()
+
+cartdata"age_of_ants"
+foreach(split",,",mode)
+help()
+help()
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
