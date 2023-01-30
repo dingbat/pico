@@ -1584,7 +1584,7 @@ function cam()
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
 		mid(cy+dy,
-			loser and 128 or 149),
+			loser and 128 or 151),
 		mid(amx,126),
 		mid(amy,126)
 
@@ -2631,7 +2631,9 @@ function draw_menu()
 		camera(x)
 		unspr"129,0,104"
 		spr(129,sec-8,104)
-		line(sec-4,unspl"105,3,105,7")
+		fillp"4095"
+		rectfill(sec-4,unspl"104,3,105,117")
+		fillp()
 		rectfill(sec-4,unspl"106,3,108,4")
 		rectfill(sec,unspl"108,0,128")
 		x-=sec
@@ -2639,12 +2641,12 @@ function draw_menu()
 	end
 
 	if nsel==1 then
-		sel_ports(-10)
+		sel_ports"-10"
 		if (sel1.hu) single()
 	elseif seltyp and seltyp.ant then
 		single()
 	else
-		sel_ports(24)
+		sel_ports"24"
 	end
 	if nsel>1 then
 		camera(nsel<10 and -2)
@@ -2703,34 +2705,29 @@ end,20,108)
 		unspl"98,8,6,0,14")
 
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
-	sspr(unspl"109,72,19,12,0,0")
-	
-	resbar()
-
-	if hc then
-		campal()
-		if dget"1"==0 then
-			cursor(1,93)
-			if hc.reqs then
-				?hc.txt
-			else
-				?hc.req
-				goto skip
-			end
-		end
-		local l=pres(hc,0,150)
-		camera(l/2-4-hbtn.r[1],
-			8-hbtn.r[2])
-		pres(hc,2,2)
-		rect(l+2,unspl"0,0,8,1")
-	end
-	::skip::
-	
+	sspr(unspl"109,72,19,12,0,0")	
 	camera(
 		-mmx-ceil(cx/mmwr),
 		-mmy-ceil(cy/mmhr)
 	)
 	rect(unspl"-1,-1,7,7,10")
+	
+	resbar()
+
+	if hc then
+		campal()
+		cursor(dget"1"&0xf000|1,93)
+		if hc.reqs then
+			?hc.txt
+			local l=pres(hc,0,150)
+			camera(l/2-4-hbtn.r[1],
+				8-hbtn.r[2])
+			pres(hc,2,2)
+			rect(l+2,unspl"0,0,8,1")
+		else
+			?hc.req
+		end
+	end
 end
 
 function resbar()
@@ -3131,9 +3128,9 @@ ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454fff2885f8fffff67cccccccccccc76ffff
 fff7ffffffd88fdfffffbffffffbfffffff45ffff4944fffff28181ffffff766cc666cc6667ffffff566555ff53555f6ffffffffffffffffffffffffffffffff
 fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffffffffffff667fff6776fffffffff5555f6ff555fffffffffffffffffffffffffffffffffff
 fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff6fffff5fffffffffffffffffffffffffffffffff
-0000000000000000080000000330000004000000101000000000000000000000000000000000000000000000dd00000000000000008880000000000000000000
-0007700000777700888000003330000044000000101000000d000000000000000000000000000000dd600000060000000888000008e88ee00088800000488000
-0007700007444470888000003300000004000000c1c00000600006600d0000000dd0000000000000005100610510001688e88ee0888e87e0088e880000488880
+0000000005555550080000000330000004000000101000000000000000000000000000000000000000000000dd00000000000000008880000000000000000000
+0007700055777755888000003330000044000000101000000d000000000000000000000000000000dd600000060000000888000008e88ee00088800000488000
+0007700057444475888000003300000004000000c1c00000600006600d0000000dd0000000000000005100610510001688e88ee0888e87e0088e880000488880
 00077000744444470d0000000300000004400000c1c000005100016060000660600006600000000005d100665d1000668e8e87e08e8850000888e8ee00488880
 00077000444444440d0000000300000004000000111000000d16610051166160511661600d000660505d661000d1661088885000885000000505887e00400880
 000000004444444400000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000d1d005001d1050500000500000000000050000400000
