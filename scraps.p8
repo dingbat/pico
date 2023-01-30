@@ -328,6 +328,10 @@ x (10 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 - (4 tok) parseify adding proj
 - hunt
 
+clip(x+3,0,sec-6,128)
+		sspr(unspl"10,64,2,2,0,104,128,2")
+		clip()
+
 memset(0x5f01,1,15)=memset(unspl"24321,1,15")
 
 

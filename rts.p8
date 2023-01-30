@@ -2466,7 +2466,7 @@ function pres(r,x,y,z)
 			oop and r[k] or 0
 		if z and i==3 then
 			newx=-2
-			v..="³g ³c⁶t⁴fᶜ5⁶-#|"
+			v..=" ³c⁶t⁴fᶜ5⁶-#|"
 		end
 		pspl(
 			(i==4 and oop or
