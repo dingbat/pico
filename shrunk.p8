@@ -1,7 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 39
 __lua__
+--age of ants
+--eeooty
+
 music(63,2000)
+
 function _update()
 lclk,rclk,llclk,lrclk=
 llclk and not btn"5",
@@ -95,11 +99,11 @@ end
 end
 foreach(prj,function(b)
 local typ=b.typ
-if norm(b,b,typ.prj_spd)<1
+if norm(b.p1,b,typ.prj_spd)<1
 then
 del(prj,b)
 for u in all(units)do
-if u.ap~=b.ap and
+if u.ap~=b.p1[3]and
 int(u.r,{b.x,b.y,b.x,b.y},
 typ.aoe)then
 dmg(typ,u)
@@ -128,6 +132,7 @@ ai_frame(ais[i])
 end
 end
 end
+
 function bnr(a,t,st,cx)
 camera(cx)
 local s=res1.t\1%60
@@ -136,7 +141,7 @@ unl"6,87,44,87"
 unl"82,87,121,87"
 unl"25,108,105,108"
 line(
-print(split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff])
+?split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff]
 -3,unspl"80,8,80,9")
 ?"⁶jll²9⁴c⁴i ᶜ5⧗³h"..(res1.t<600and"0"or"")..res1.t\60 ..(s<10and":0"or":")..s.." "
 unl"119,80,84,80,9"
@@ -148,10 +153,12 @@ unspl"0,16,8,12,90,32,16")
 ?"⁶jdn⁴h⁶w⁶tᶜa"..t
 campal()
 end
+
 function draw_map(o,y)
 camera(cx%8,cy%8)
 map(cx/8+o,cy/8,0,0,17,y)
 end
+
 function _draw()
 draw_map(0,17)
 if menu then
@@ -277,18 +284,22 @@ can_drop()and 191or
 can_atk()and(seltyp.monk
 and 185or 187))or 186)
 end
+-->8
+--init
+
 function start()
 npl,hq,cx,cy=res1.npl,
 units[1],
 unspl(stp[res1.pos],":")
 qdmaps"d"
 end
+
 function init()
 poke(24365,3)
 reload()
 music(unspl"0,0,7")
-menuitem(2,"⌂ save",save)
-menuitem(3,"∧ resign",
+menuitem(3,"⌂ save",save)
+menuitem(4,"∧ resign",
 function()hq.hp=0end)
 p[[var=res
 r=20
@@ -320,7 +331,7 @@ p[[var=heal
 qty=0x.0036
 ]]
 p[[var=ant
-txt=worker: gathers and builds
+txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
 spd=.286
 los=20
@@ -384,7 +395,7 @@ const=1
 tmap=-1
 d=0]]
 p[[var=beetle
-txt=beetle: good vs buildings
+txt=⁶h²5ᶜ9beetle: ᶜ7slow and melee unit but⁶g⁴mstrong vs buildings.
 idx=2
 spd=.19
 los=20
@@ -430,7 +441,7 @@ dir=1
 tmap=-1
 d=0]]
 p[[var=spider
-txt=spider: good vs ants
+txt=⁶h²5ᶜ9spider: ᶜ7fastest unit, low def.⁶g⁴mbut good vs ants.
 idx=3
 spd=.482
 los=30
@@ -475,7 +486,7 @@ dir=1
 tmap=-1
 d=0]]
 p[[var=archer
-txt=acid-spitting ant: ranged
+txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged unit,⁶g⁴mgood vs spiders.
 idx=4
 spd=.343
 los=33
@@ -525,7 +536,7 @@ prj_s=52
 tmap=-1
 d=0]]
 p[[var=warant
-txt=army ant: well-rounded attacker
+txt=⁶h²5ᶜ9army ant:ᶜ7 basic army unit. good⁶g⁴mvs beetles+catrplrs.
 idx=5
 spd=.33
 los=25
@@ -570,7 +581,7 @@ dir=1
 tmap=-1
 d=0]]
 p[[var=cat
-txt=caterpillar: good vs buildings
+txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
 idx=6
 spd=.2
 los=50
@@ -664,7 +675,7 @@ dir=-1
 tmap=-1
 d=61]]
 p[[var=tower
-txt=guardtower: vision+defense
+txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
 idx=8
 los=30
 hp=352
@@ -711,7 +722,7 @@ dir=-1
 tmap=-1
 d=0]]
 p[[var=mound
-txt=mound: resource drop+population
+txt=⁶h²5ᶜbmound:ᶜ7 drop-off for resources,⁶g⁴m+5 population limit.
 idx=9
 los=5
 hp=100
@@ -747,7 +758,8 @@ dir=-1
 tmap=-1
 d=0]]
 p[[var=den
-txt=nest: train spiders+beetles
+txt=⁶h²5ᶜbnest:ᶜ7 trains spiders and⁶g⁴mbeetles.
+req=⁶h²5ᶜ6nestᶜd⁶g⁴m[requires barracks]
 idx=10
 los=10
 hp=250
@@ -785,7 +797,7 @@ dir=-1
 tmap=-1
 d=0]]
 p[[var=brks
-txt=barracks: train army ants
+txt=⁶h²5ᶜbbarracks:ᶜ7 trains army ants and⁶g⁴mranged ants.
 idx=11
 los=10
 hp=200
@@ -823,7 +835,8 @@ dir=-1
 tmap=-1
 d=0]]
 p[[var=farm
-txt=farm: grow+harvest food
+txt=⁶h²5ᶜbfarm:ᶜ7 grows food for harvesting.⁶g⁴mlimited lifespan.
+req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mound]
 idx=12
 los=1
 hp=48
@@ -866,7 +879,8 @@ g=0
 b=6
 breq=0]]
 p[[var=castle
-txt=castle: strong defense+ctrplrs
+txt=⁶h²5ᶜecastle:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
+req=⁶h²5ᶜ6castleᶜd⁶g⁴m[requires nest+guardtower]
 idx=13
 los=45
 hp=640
@@ -951,7 +965,8 @@ dir=-1
 tmap=-1
 d=61]]
 p[[var=mon
-txt=mantis nest: train mantises
+txt=⁶h²5ᶜbmantis nest:ᶜ7 trains mantises.
+req=⁶h²5ᶜ6mantis nestᶜd⁶g⁴m[requires nest]
 idx=25
 los=25
 hp=300
@@ -988,7 +1003,7 @@ dir=-1
 tmap=-1
 d=0]]
 p[[var=monk
-txt=mantis: convert/heal/pray
+txt=⁶h²5ᶜ9mantis:ᶜ7 converts enemy units,⁶g⁴mheals yours, prays.
 idx=26
 spd=.25
 los=45
@@ -1057,12 +1072,12 @@ breq=0
 tmap=1024
 up=-1
 idx=27
-txt=+hp,+speed,+conversion rate
+txt=⁶h²5ᶜamantis upgr.:ᶜ7 increase mantis⁶g⁴mconversion rate and hp by 25%
 portx=62
 porty=88]],monk,function(_ENV)
 spd=.286
 hp*=1.25
-conv*=1.2
+conv*=1.25
 end)
 }
 queen.prod={
@@ -1076,7 +1091,7 @@ breq=0
 tmap=1
 up=-1
 idx=15
-txt=+worker gather efficiency
+txt=⁶h²5ᶜabaskets:ᶜ7 increase worker⁶g⁴mgathering efficiency.
 portx=24
 porty=80]],ant,function(_ENV)
 cap\=.72
@@ -1090,7 +1105,8 @@ b=10
 breq=2
 tmap=2
 idx=24
-txt=lets mounds create workers
+txt=⁶h²5ᶜaegg deposit:ᶜ7 let mounds⁶g⁴mproduce worker ants.
+req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mound]
 portx=33
 porty=80]],{},function()
 mound.p1.units=
@@ -1109,7 +1125,7 @@ breq=0
 tmap=4
 up=-1
 idx=16
-txt=+atk,+hp for beetle
+txt=⁶h²5ᶜabeetle upgr.:ᶜ7 increase beetle⁶g⁴mattack and hp by 15%
 portx=25
 porty=88]],beetle,function(_ENV)
 atk*=1.15
@@ -1123,7 +1139,7 @@ breq=0
 tmap=8
 up=-1
 idx=17
-txt=+atk,+hp for spider
+txt=⁶h²5ᶜaspider upgr.:ᶜ7 increase spider⁶g⁴mattack and hp by 20%
 portx=16
 porty=88]],spider,function(_ENV)
 atk*=1.2
@@ -1139,7 +1155,7 @@ breq=0
 tmap=16
 up=-1
 idx=18
-txt=+farm grow rate and cycles
+txt=⁶h²5ᶜafarm upgr.:ᶜ7 increase farm growth⁶g⁴mrate and lifespan.
 portx=60
 porty=80]],farm,function(_ENV)
 gr*=1.15
@@ -1156,7 +1172,7 @@ b=0
 breq=0
 tmap=32
 idx=19
-txt=+range for acid-spitting ant
+txt=⁶h²5ᶜaspray:ᶜ7 increase range for acid-⁶g⁴mspitting ants.
 portx=51
 porty=80]],archer,function(_ENV)
 los,range=40,35
@@ -1170,7 +1186,7 @@ breq=0
 tmap=64
 up=-1
 idx=20
-txt=+atk,+vision,+hp for army ant
+txt=⁶h²5ᶜaarmy ant upgr.:ᶜ7 increase army⁶g⁴mant hp+attack by 33%
 portx=43
 porty=88]],warant,function(_ENV)
 atk*=1.333
@@ -1185,30 +1201,15 @@ breq=0
 tmap=128
 up=-1
 idx=21
-txt=+atk,+hp for archer
+txt=⁶h²5ᶜaacid-spitting ant upgr.:ᶜ7⁶g⁴mincrease its hp+attack by 25%
 portx=34
 porty=88]],archer,function(_ENV)
 atk*=1.25
-hp*=1.2
+hp*=1.25
 end)
 }
 castle.prod={
-cat,
-nil,
-p([[t=30
-r=0
-g=25
-b=30
-breq=0
-tmap=2048
-idx=28
-txt=+atk,aOe damage for castle
-portx=78
-porty=80]],castle,function(_ENV)
-aoe,prj_s,atk,atk_freq=
-1,60,2,20
-end),
-nil,nil,
+cat,nil,
 p([[t=40
 r=20
 g=0
@@ -1216,10 +1217,24 @@ b=0
 breq=64
 tmap=256
 idx=22
-txt=units passively heal
+req=⁶h²5ᶜ6regenerationᶜd⁶g⁴m[requires mantis nest]
+txt=⁶h²5ᶜaregeneration:ᶜ7 passively heal⁶g⁴myour units.
 portx=16
 porty=80]],heal,function(_ENV)
 qty+=.00538
+end),nil,nil,
+p([[t=30
+r=0
+g=25
+b=30
+breq=0
+tmap=2048
+idx=28
+txt=⁶h²5ᶜafireball:ᶜ7 increase castle⁶g⁴mattack, hit multiple units.
+portx=78
+porty=80]],castle,function(_ENV)
+aoe,prj_s,atk,atk_freq=
+1,60,2,20
 end),
 p([[t=10
 r=0
@@ -1228,18 +1243,22 @@ b=20
 breq=0
 tmap=512
 idx=23
-txt=+range for castle
+txt=⁴m²5ᶜaspotters:ᶜ7 increase castle range.
 portx=69
 porty=80]],castle,function(_ENV)
 los,range=55,50
 end)
 }
 end
+-->8
+--tick
+
 function rest(u)
 u.st=p[[t=rest
 agg=1
 idl=1]]
 end
+
 function mvg(units,x,y,agg,frc)
 local l=999
 foreach(units,function(u)
@@ -1251,11 +1270,13 @@ end)
 foreach(units,function(_ENV)
 st.spd,grp=l,agg end)
 end
+
 function move(u,x,y,agg)
 u.st=p([[t=move
 move=1]],path(u,x,y,0))
 u.st.agg=agg
 end
+
 function gobld(u,b)
 if u.st.farm and b.typ.farm then
 return
@@ -1264,6 +1285,7 @@ u.st,u.res=p([[t=bld
 in_bld=1
 ]],path(u,b.x,b.y),b)
 end
+
 function gogth(u,tx,ty,wp)
 local t=tile_unit(tx,ty)
 u.st=p("t=gth",
@@ -1273,6 +1295,7 @@ t,p[[7=r
 19=b
 39=r]][fget(mget(tx,ty))],tx,ty)
 end
+
 function godrop(u,nxt_res,dropu)
 local wayp
 if not dropu then
@@ -1287,6 +1310,7 @@ path(u,dropu.x,dropu.y),
 dropu or tile_unit(x,y),
 nxt_res)
 end
+
 function goatk(u,e)
 if u.typ.atk and e then
 u.st,u.disc,u.res=
@@ -1296,6 +1320,7 @@ active=1]],path(u,e.x,e.y),e),
 e.hu and u.bldg
 end
 end
+
 function gofarm(u,f)
 f.farmer,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
@@ -1303,6 +1328,7 @@ f.x+rndspl"-2,-1,0,1,2",
 f.y+rndspl"-2,-1,0,1,2"))
 u.st.farm=f
 end
+
 function tick(u)
 typ,u.onscr,u.upd,x8,y8=
 u.typ,
@@ -1363,9 +1389,7 @@ if(typ.farm)update_farm(u)
 if t then
 if t.dead then
 u.st.agg=1,
-u.st.typ or rest(u),
-typ.ant and t.typ.lady and
-gogth(u,t.x8,t.y8)
+u.st.typ or rest(u)
 elseif int(t.r,u.r,-2)then
 u.dir,u.st.active,u.st.typ=
 sgn(t.x-u.x),1
@@ -1470,6 +1494,9 @@ u.st.typ,u.st.adj=adj,adj
 s(pos,x\4,y\4,1)
 end
 end
+-->8
+--input
+
 function cam()
 local b=btn()
 if(b>255)b>>=8
@@ -1485,17 +1512,19 @@ end
 cx,cy,amx,amy=
 mid(cx+dx,256),
 mid(cy+dy,
-loser and 128or 149),
+loser and 128or 151),
 mid(amx,126),
 mid(amy,126)
 mx,my,hbtn=amx+cx,amy+cy
 mx8,my8=mx\8,my\8
 end
+
 function fsel(func,...)
 for u in all(sel)do
 func(u,...)
 end
 end
+
 function input()
 cam()
 foreach(btns,function(b)
@@ -1539,10 +1568,10 @@ local b=unit(
 to_bld,
 mx8*8+to_bld.w\2,
 my8*8+to_bld.h\2,
-unspl"1,1,1")
+unspl"1")
 fsel(gobld,b)
 pay(to_bld,1,res1)
-b.cost,to_bld,selx=to_bld
+b.cost,to_bld,selx=nil
 end
 return
 end
@@ -1620,6 +1649,9 @@ selx=nil
 end
 end
 end
+-->8
+--unit
+
 function draw_unit(u)
 local typ,st,r=
 u.typ,u.st,
@@ -1654,7 +1686,7 @@ pal{
 selc or u.pres.col,
 [14]=pal(typ.farm and 5,selc or 5)
 }
-sspr(sx,sy,w,h,0,0,w,h,
+sspr(sx,sy,w,h,1,1,w,h,
 not typ.fire and u.dir==typ.dir)
 pal()
 if u.alive and ihp>=2then
@@ -1665,6 +1697,7 @@ line(w,unspl"-1,0,-1,8")
 line(w\ihp,-1,11)
 end
 end
+
 function drop(u)
 if u.res then
 u.pres[u.res.typ]+=u.res.qty/u.typ.gr
@@ -1678,6 +1711,7 @@ else
 rest(u)
 end
 end
+
 function update_farm(_ENV)
 if not farmer or
 farmer.st.farm~=_ENV
@@ -1690,6 +1724,7 @@ sproff+=typ.gr*2
 ready=fres>=9
 end
 end
+
 function frm(u)
 local _ENV,g=u.st.farm,_ENV
 if not farmer then
@@ -1712,6 +1747,7 @@ end
 u.st.farm=_ENV
 end
 end
+
 function atk(u)
 local typ,e=u.typ,u.st.x
 if u.upd then
@@ -1734,16 +1770,13 @@ rest(u)
 end
 else
 u.dir=sgn(dx)
-add(prj,typ.prj_s and{
-e.x,e.y,
-typ=typ,
-ap=u.ap,
-x=u.x-u.dir*typ.prj_xo,
-y=u.y+typ.prj_yo
-}or dmg(typ,e))
+add(prj,typ.prj_s and p("",
+typ,
+u.x-u.dir*typ.prj_xo,
+u.y+typ.prj_yo,
+e.x,e.y,u.ap
+)or dmg(typ,e))
 if e.conv>=e.max_hp then
-e.pres.p-=1
-u.pres.p+=1
 e.p,e.conv=u.p,0
 del(e.sqd,e)
 sfx"38"
@@ -1761,6 +1794,7 @@ end
 end
 end
 end
+
 function bld(u)
 if cf%30==0then
 local _ENV,g=u.st.x,_ENV
@@ -1793,6 +1827,7 @@ end,x8,y8,4)
 end
 end
 end
+
 function gth(u)
 if u.typ.monk then
 res1.g+=.00318
@@ -1827,6 +1862,7 @@ end
 s(restiles,x,y,n-1)
 end
 end
+
 function produce(u)
 local _ENV,gl=u,_ENV
 local bld=q.typ
@@ -1873,6 +1909,9 @@ gogth(u,x,y,wp)
 return res
 end
 end
+-->8
+--utils
+
 function p(str,typ,x,y,...)
 local p1,p2,p3={...},{},{}
 local obj={p1,p2,p3,p2,
@@ -1889,21 +1928,26 @@ typs[obj.idx or""],
 _ENV[obj.var or""]=obj,obj
 return obj
 end
+
 function g(a,x,y,def)
 return a[x|y<<8]or def
 end
+
 function s(a,x,y,v)
 a[x|y<<8]=v
 end
+
 function hilite(v)
 hlt,hlv=t(),v
 end
+
 function int(r1,r2,e)
 return r1[1]-e<r2[3]and
 r1[3]+e>r2[1]and
 r1[2]-e<r2[4]and
 r1[4]+e>r2[2]
 end
+
 function tile_unit(tx,ty)
 return box(p([[p=0
 ais=
@@ -1912,6 +1956,7 @@ max_hp=0
 const=1]],p[[w=8
 h=8]],tx*8+4,ty*8+4))
 end
+
 function box(u)
 local _ENV,ais,rz=u,ais,res
 local w2,h2=typ.w/2,typ.h/2
@@ -1927,13 +1972,16 @@ max_hp=typ.hp
 end
 return u
 end
+
 function can_pay(typ,_ENV)
+typ.reqs=reqs|typ.breq==reqs
 return r>=typ.r and
 g>=typ.g and
 b>=typ.b and
 (not typ.unit or p<min(pl,99))
-and reqs|typ.breq==reqs
+and typ.reqs
 end
+
 function pay(typ,dir,_ENV)
 r-=typ.r*dir
 g-=typ.g*dir
@@ -1942,6 +1990,7 @@ if typ.unit then
 p+=dir
 end
 end
+
 function dist(dx,dy)
 local x,y=dx>>31,dy>>31
 local a0,b0=dx+x^^x,dy+y^^y
@@ -1949,6 +1998,7 @@ return a0>b0 and
 a0*.9609+b0*.3984or
 b0*.9609+a0*.3984
 end
+
 function surr(fn,x,y,n,na)
 local n,e=n or 1
 for dx=-n,n do
@@ -1972,12 +2022,14 @@ end
 end
 return e
 end
+
 function avail_farm()
 local _ENV=hbld
 return typ and typ.farm and
 not exp and not farmer and
 not const
 end
+
 function can_gth()
 local f=fget(mget(mx8,my8))
 return(seltyp.ant and
@@ -1986,6 +2038,7 @@ or seltyp.monk==f)
 and g(exp,mx8,my8)
 and surr(nil,mx8,my8)
 end
+
 function can_atk()
 return sel1.typ.atk
 and hunit
@@ -1995,11 +2048,13 @@ hunit.dmgd and not
 hunit.bldg)
 and g(viz,mx8,my8,hunit.disc)
 end
+
 function can_bld()
 return hbld.hu and
 hbld.hp<hbld.typ.hp and
 seltyp.ant
 end
+
 function norm(it,nt,f)
 local dx,dy=
 it[1]-nt.x,it[2]-nt.y
@@ -2009,12 +2064,14 @@ nt.x+=dx*f/d
 nt.y+=dy*f/d
 return d
 end
+
 function acc(x,y,strict)
 local _ENV=g(bldgs,x,y)
 return not fget(mget(x,y),0)
 and(not _ENV or not strict
 and(const or typ.farm))
 end
+
 function bldable()
 return acc(mx8,my8,1)and
 (to_bld.h8 or
@@ -2023,6 +2080,7 @@ acc(mx8,my8+1,1))and
 acc(mx8+1,my8,1)and
 acc(mx8+1,my8+1,1))
 end
+
 function reg_bldg(b)
 local typ,x,y=b.typ,b.x8,b.y8
 local function reg(xx,yy)
@@ -2047,12 +2105,14 @@ qdmaps"d"
 b.pres.reqs|=typ.bmap
 end
 end
+
 function wander(u)
 move(u,
 u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
 u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
 1)
 end
+
 function dmg(typ,to)
 to.hp-=typ.atk*dmg_mult[
 typ.atk_typ..to.typ.def]
@@ -2078,6 +2138,7 @@ alert=hlt
 hlt+=2.5
 end
 end
+
 function collect(u,res)
 if u.res and u.res.typ==res then
 u.res.qty+=1
@@ -2088,6 +2149,7 @@ if u.res.qty>=u.typ.cap then
 godrop(u,res)
 end
 end
+
 function can_drop()
 for u in all(sel)do
 if u.res then
@@ -2096,6 +2158,7 @@ hbld.typ.drop
 end
 end
 end
+
 function can_renew(t)
 if hbld.exp and seltyp.ant then
 pres(renew,10,2)
@@ -2103,6 +2166,7 @@ rect(unspl"8,0,18,8,4")
 return can_pay(renew,res1)or t
 end
 end
+
 function unit(t,_x,_y,_p,
 _const,_disc,_hp)
 local _typ=typs[t]or t
@@ -2129,6 +2193,7 @@ rest(box(u))
 if(u.bldg)reg_bldg(u)
 return u
 end
+
 function prod(u,b,m)
 pay(b,1,u.pres)
 if u.q then
@@ -2137,6 +2202,9 @@ else
 u.q=p("qty=1",b,b.t*m)
 end
 end
+-->8
+--paths
+
 function dpath(u,k)
 local x,y,tk,dmap,p,l=
 u.x8,u.y8,u.k,dmaps[k]or{},
@@ -2157,12 +2225,14 @@ add(p,{x*8+3,y*8+3})
 end
 return p,x,y
 end
+
 function qdmaps(r)
 dq,asc=split(p[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
 d=d,r,g,b]][r]),{}
 end
+
 function dmap()
 local q=dq[1]
 if q then
@@ -2206,6 +2276,7 @@ dq[1]=p("c=0",o,q)
 end
 end
 end
+
 function path(u,x,y,tol)
 local function nearest(gx,gy)
 for n=0,16do
@@ -2233,6 +2304,7 @@ end
 return#wayp>0and wayp
 end
 end
+
 function as(st,g)
 local k=st.k|g.k>>16
 local c=asc[k]
@@ -2286,6 +2358,9 @@ end,unpack(pt))
 end
 return path(cl)
 end
+-->8
+--menu
+
 function pres(r,x,y,z)
 local oop=res1.p>=res1.pl
 for i,k in inext,split"r,g,b,p"do
@@ -2296,20 +2371,21 @@ min(r[k]\1,99)or z and
 oop and r[k]or 0
 if z and i==3then
 newx=-2
-v..="³g ³c⁶t⁴fᶜ5⁶-#|"
+v..=" ³c⁶t⁴fᶜ5⁶-#|"
 end
 pspl(
 (i==4and oop or
 res1[k]<flr(v))
 and"1,2,3,4,5,6,10")
 if v~=0or z then
-newx+=print("²7 "..v,x,y,rescol[k])
+newx+=?"²7 "..v,x,y,rescol[k]
 spr(129+i,x,y)
 x=newx+(z or 1)
 end
 end
 return x-1
 end
+
 function draw_port(
 typ,fn,x,y,r,bg,fg,u,cost)
 camera(-x,-y)
@@ -2347,6 +2423,7 @@ line(10*r,11,fg)
 end
 campal()
 end
+
 function sel_ports(x)
 foreach(sel,function(u)
 x+=13
@@ -2367,6 +2444,7 @@ max(u.hp)/u.max_hp,8,11,u
 end
 end)
 end
+
 function single()
 local q=sel1.q
 if sel1.cost then
@@ -2425,7 +2503,7 @@ end
 sfx"18"
 end,
 b.x and 24or
-print("ᶜ7⁶j8r⁴iX"..q.qty)
+?"ᶜ7⁶j8r⁴iX"..q.qty
 and 20,
 107,
 q.x/b.t,5,12
@@ -2442,8 +2520,9 @@ act%=2
 end,42,108)
 end
 end
+
 function draw_menu()
-local x=0
+local x,hc=0,hbtn and hbtn.costs
 for i,sec in inext,split(
 sel1 and sel1.hu and
 (sel1.bldg and
@@ -2454,19 +2533,21 @@ pspl(i%2~=0and"1,2,3,15")
 camera(x)
 unspr"129,0,104"
 spr(129,sec-8,104)
-line(sec-4,unspl"105,3,105,7")
+fillp"4095"
+rectfill(sec-4,unspl"104,3,105,117")
+fillp()
 rectfill(sec-4,unspl"106,3,108,4")
 rectfill(sec,unspl"108,0,128")
 x-=sec
 pal()
 end
 if nsel==1then
-sel_ports(-10)
+sel_ports"-10"
 if(sel1.hu)single()
 elseif seltyp and seltyp.ant then
 single()
 else
-sel_ports(24)
+sel_ports"24"
 end
 if nsel>1then
 camera(nsel<10and-2)
@@ -2527,16 +2608,22 @@ camera(
 )
 rect(unspl"-1,-1,7,7,10")
 resbar()
-if hbtn and hbtn.costs and
-res1.reqs|hbtn.costs.breq==
-res1.reqs then
-local l=pres(hbtn.costs,0,150)
+if hc then
+campal()
+cursor(dget"1"&61440|1,93)
+if hc.reqs then
+?hc.txt
+local l=pres(hc,0,150)
 camera(l/2-4-hbtn.r[1],
 8-hbtn.r[2])
-pres(hbtn.costs,2,2)
+pres(hc,2,2)
 rect(l+2,unspl"0,0,8,1")
+else
+?hc.req
 end
 end
+end
+
 function resbar()
 camera()
 rectfill(unspl"0,120,30,128,7")
@@ -2545,6 +2632,9 @@ unspl"1,122,2"))
 unl"-4,120,-128,120,5"
 pset(-3,121)
 end
+-->8
+--const
+
 function comp(f,g)
 return function(...)
 return f(g(...))
@@ -2628,6 +2718,9 @@ bldqueen=.75
 bldspider=1.25
 bldsg=.9
 bldbld=.1]]
+-->8
+--save
+
 function save()
 local ptr,foreach=0,foreach
 bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")
@@ -2656,6 +2749,7 @@ max(disc),hp},draw)
 end)
 extcmd("screen",1)
 end
+
 function loadgame()
 init()
 pal()
@@ -2693,6 +2787,9 @@ end
 end)
 start()
 end
+-->8
+--ai
+
 function ai_frame(ai)
 if(t6)ai.safe=1
 local avail,nxt,miners,aiu,
@@ -2831,7 +2928,9 @@ ai.p3,ai.p2=ai.p2,{}
 end
 mvg(ai.p3,hq.x,hq.y,"atk")
 end
+-->8
 cartdata"age_of_ants"
+
 function mode()
 dset(0,dget"0"%3+1)
 menuitem(1,
@@ -2839,7 +2938,15 @@ split"● mode:touch,● mode:handheld,● mode:desktop"[dget"0"],
 mode)
 return true
 end
+
+function txt()
+dset(1,~dget"1")
+menuitem(2,"▤ toggle help",txt)
+end
+
 foreach(split",,",mode)
+txt()
+txt()
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
@@ -2905,9 +3012,9 @@ ffff7ffffdff8ffffffbbfffffffbbfffff44fffff4454fff2885f8fffff67cccccccccccc76ffff
 fff7ffffffd88fdfffffbffffffbfffffff45ffff4944fffff28181ffffff766cc666cc6667ffffff566555ff53555f6ffffffffffffffffffffffffffffffff
 fff7ffffffdfdfffffffbffffffbfffffff4ffffff4ffffffffffffffffffff667fff6776fffffffff5555f6ff555fffffffffffffffffffffffffffffffffff
 fff77fffffffffffffffbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6ffffff6fffff5fffffffffffffffffffffffffffffffff
-0000000000000000080000000330000004000000101000000000000000000000000000000000000000000000dd00000000000000008880000000000000000000
-0007700000777700888000003330000044000000101000000d000000000000000000000000000000dd600000060000000888000008e88ee00088800000488000
-0007700007444470888000003300000004000000c1c00000600006600d0000000dd0000000000000005100610510001688e88ee0888e87e0088e880000488880
+0000000005555550080000000330000004000000101000000000000000000000000000000000000000000000dd00000000000000008880000000000000000000
+0007700055777755888000003330000044000000101000000d000000000000000000000000000000dd600000060000000888000008e88ee00088800000488000
+0007700057444475888000003300000004000000c1c00000600006600d0000000dd0000000000000005100610510001688e88ee0888e87e0088e880000488880
 00077000744444470d0000000300000004400000c1c000005100016060000660600006600000000005d100665d1000668e8e87e08e8850000888e8ee00488880
 00077000444444440d0000000300000004000000111000000d16610051166160511661600d000660505d661000d1661088885000885000000505887e00400880
 000000004444444400000000000000000000000000000000001d1d000d1d1d0001d1d1d061d6d1600000d1d005001d1050500000500000000000050000400000
@@ -2969,6 +3076,139 @@ fff77fffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 455b3453b0b0044045334533453375334537753345374533455334530a889000098890000a899000044444111444540005004411144044000444451115445400
 454445b3b04b40005334533453347334534773345347733445444533009200000029000000280000044544111444440004404411144044000445451115444400
 05335540030033b03345334533453345335333453353334505035540000000000000000000000000000000000000000000000000000000000000000000000000
+__label__
+fffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff67777777f7fffff6ffff7ffff6fffffffffffffffffff
+fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6677aa577fffff7fffff6ff7f6fffff7fffffffffff
+fffffffffffffff5fffff5ffffffffffffffffffffff7fffffdffffafffff7ffffffffff7ffffbfffffffff66777757ffffff6ffffffffffffffffffffffffff
+ffff7fdfffffff5f5fff5f5fffffffffff7ffffffffffffffdadffffffffffffffffffffffffbf3fffffff7f66a6776766f77ff6ff76ffffffffffffffffffff
+fffdffdffdffff5f55555f5ffffffaffffffffffffffffffffd3ffffffffffffffffffffff3fb3ffffffffff7656566576656ff656561f11ffffd11ffff11f11
+ffffd777dfaffff5505055fffffffffffffffbfffffffffffff33ffffffffffffffffffffaf3b3faffffffff776565a666a656ff6a646f44ffff511111f55f55
+ffff75557fffff5f55555f5fffffffffffffafbf37fffffffff3ffffffffaffffff7fffffff3b3fffffffffff766a656a66655656965af44ffff511111f44f44
+fdff54445fffff565666565ffffffffffffff3b3ff5111affffffffffffff11111111111ffff111111111111111165a56566655a9a5a4f44ffff5ff111f44444
+d7df40404ffff65665656656ffff7ffffffff3b3501d91fffffffffff5111d999999999d1f50199999999999999d1559aa5665aaaa564444ffff5ffffff44444
+4444f444fffff66566666566fffffffffffffff501d99d1ffffffff501d9999999999999d1001d99999999999999165aaaa566a99a595454ffff5ffffff44444
+565656465fffff666666666ffffffffffffffff01d99991fffffff501d9999d111111d9991000111199111111d991565598aaaa9aa96a54fffffbbffffff4444
+6666666666fffffffffffffffffff5fff5ff7f50199999d1fffff501d9999d100000011d910000001991000001d917765aa999899a9594fffffbbbbffffff444
+666666666fffffff7fffffffffffff5f5fffff0019999991ff7ff00d9999d10000000001915000001991000000191f6759aa99a998a6a5fffffbbb3fffffff44
+fffffffffaffffffffffffffff22225f5fffff01d99d999dffff501d999d1fffff50000111ffff001991fff500111ff6665aa998a9aa96ffffbbb3335fffff44
+fffffffffffffffffffffffff2622ddddffff50199d1999d1fff001999d1ffffffff5000ffffff001991ffff111ffffff669aa988999a6fffbbb333b35ffff44
+ffffffbffffffffffffffffff2266d0d0ffff0019911d9991fff001999dffffffffff500ffffff001991fff0191fffffff668a888899a96fbbb333b33b5fff44
+fffffffbf3fffffffffffffff2222ddddfff501d99101999d1ff0019991fffffffffffff7fffff0019911111d91ffffffff6699822289a6bbbb33b33b335ff44
+fffff33b3fffffddffffddff656565656fff50199d001d9991ff0019991ffffffffff7ffffffff0019999999991ffafffffff69822289abbbb333b33b3355f44
+ffff7f3b3fffffffdffdffff666666666fff00d9910001999d1f0019991fffffffffffffffffaf0019999999991ffffffffff6698228aabbb333111b33335544
+ffffffffffffffff3333fffff6666666fff50199911111d9991f001999dfff7ff11111111111ff0019911111d91fffff7ffff46a9888a63bb331111133335544
+ffffffffffffffffb33bf7fffffffffffff01d999999999999d1001999d1fff0019999999991ff0019910000191f7ffffffff446a99a6ff55511111115555f44
+ff311331133113313333ffffffffffafff50199999999999999100199991fff0011d999999d1ff0019910000111ffffffffff4456aa64ff5551111111555ff44
+f33113311331133111ffffffffffffffff00d999d111111d999d100d999d1ff000011d999d1fff001991ff500ffffffffffff444114445555555111555555f44
+f66565665656656566fffffffff7fffff501d99d10000001999910019999d17f5000019991ffff001991ffffff111ffffffff444114445554555545555455544
+f66666666666666666fffffffffffffff00d999100000001d9991001d9999d11ff00019991ffff001991fffff1d91ffffffff444114445544455444554445544
+fff6666666666666ffffffffffffffff501d9991ffff5001d999d1101d99999d11111d9991ff5011199111111d991aff7ffff444554445541455414554145544
+ffffff7fffffffffffffffffffffff511dd9999d11fff11d999999d101d9999999999999d1ff01d99999999999991ffffffff444444445541455414554145544
+ffffffffffffffffffff7ffffffff5019999999991f50199999999910011d999999999d11111119999999999999d1ffffffff444444444445444454444544444
+ffff2ffffffffffffffffffffffff0011111111111f0011111111111000011111111111d99999111111111111111fffffffff554444444444444444444444444
+f7f292fffffdddfffdddfffffffff000000000005ff00000000000f5000000000000011995599100000000000005fffffffff444444554444444555444444444
+fbf32fffffffffdfdffffffffffff50000000005fff50000000005fff500000000001d995111110000000000005ffffffffff444444444444445595544444444
+ffb3fffffffff2232fffaffffffffffffffffffffffffffffffffffffff11111ff0119951ffffffffffffffffffffffffff7f444444444444455999554444445
+ffb3ffffffffb2232fffffff333fffffffffffffffffffffffffffff111d9995111d995111f7fffffffffffff7fffffffffff444554444444551111155444445
+fffffffffffb5333fffffff33333ffffffffffffffffffff7fffff01d99999999119999991ffffffffffaffffffffffffffff444444444445591515195544445
+ffffffffffb35bbfbbff7f3399933ffafffffffffffafffffffff501999d1159959991111ffffffffffffffffffffffffffdd444444444445511111115544444
+fffffffffb333fb3fb3fff3999993ffffffffffffffffffffffff00199d11999599951fffffffffffffffffffffaffff7cdcd554444444455511515115554444
+fffffaffb335ffb3fb3fff33aaa33ffff2ffffffffffffffffaff001d999991199951fffffaffffffffbfffffffffffdcd6d1554444444455591111195554444
+fffb5b5b53556b33b33fffb3aaa3bfff292fffaffffffffffffff000111111599911ffffffffffffff37bfffffffffdc11111444445544455511515115554444
+fd3353535356b36b37ffff3baaab3ffff23fbfffff7ffffffffff50000001599951ffff7fffffffffff3bf3fffffffdc11176444445544455511111115554444
+66656565656666666fffffbbbbbbbfffff31111fffffffffffffff500001599511fffffffffffffafff3b3fff111111111111444444444455591515195554444
+66666666666666666ffff3b99999b3fff001991ffffffafff111111ff50011111111111111111111111113501d9999999999d1d4444444455999111999554444
+ff6666666666666fffff63bbbbbbb36f501d99d1fffffff0019999d1ff001999999119999999999999991501d9999999999991cdddddddddd22566525ddddddd
+ffffffffffffffffffff63333333336501d99991fffffff001d99991ff0011999d11199d1d99999d1d99101d999d11111d999117c7c7c7c7c26655225ddddddd
+f333ff33ffff7fffffff6333333333600199999d1ffffff5001d999d1ff00199d100199101d999d101d9101999d0000000d991c11111111122566625c7c7c7c7
+33bbfbb3f33fffffffff6666666666501d9999991ffff7ff5001999911f00199100019d100199910001911d999d05f50001d91ddc7cc7c11266552251c1c1c1c
+fbbbbbbff3b33ff33ffff6666666660019999999d1fffffff0019999d1f001991f00191000199910001111999915fff5000191ffddddddc22566625c11111111
+ffbbbffff3bbb3bbbffffffffffff501d99dd99991fffffff0019999911001991f001115001999150000019999d1ffff500111fffffaffd266552257c1c11116
+33ff33333ff33bbffffffffafffff001999119999dfffffff00199999d1001991f0005ff0019991f50000199999d1ffff5000fffffafa944446625717c1c116d
+bb3bb33bbfbb3bfaffffffffffff501d99d11d999d1fff7ff00199d999d101991f005faf0019991fffff01d99999d15fff505ffffffa944f4444257717c1c11d
+3bbb33bbbbbbfbfffaffffffffff501d99d00d99991ffffff001991d999111991fffffff0019991fffff001d99999d11ffffffffffa9444444445567777c1c11
+34b3345bbb538853fff7ffffffff00d99910019999d1affff0019911999d11991fffffff0019991fffff5001d999999d1ffffffaff94f4433344337767ccc1c1
+45b345334b88788843ff33fffff500d99d1001d99991fffff0019911d999d1991f7fffff0019991fffff50001d999999d15ffffffa444433bb4bb377c7cc1c11
+53345334587887878bffbb3ffff501d99df000d9999d1ffff00199101d9991991fffffff0019991fff7ff50001d999999d11ffffff94444bbbbbb7677cccc111
+334333453887887883bbbbb33ff0019991f0001d999d1ff7f001991001999d991fffffff0019991fffffff50001d9999999d1ffffa444887bbbdd677c7cc1c11
+3431133333117753345bbbbb7f500d99d111111d9999dffff001991000d999991fffff7f0019991ffffffff50001d9999999d1ffff98787878bd66777cccc111
+4533313331377773453fffffff501d99999999999999d1fff0019910001d99991ffaffff0019991fffffffff5000059999999d5fa948878888bdd677c7cc1c11
+5333331313337734533bfaffff00199999999999999991fff0019910000199991fffffff0019991ffffffffff500001d9999991ffa44433744dd66777cccc111
+33333444433d77d5334bfffff501d999d1111111d9999dfaf01d99150000d9991fffffff01d999d1ffffffffff500001d999991ff94443b334d33677c7cc1c11
+11333414133dddd3333333b33001999d100000001d999d1f11d9991110001d9917fffff11d99999d11fff111fff500001999991fa44943bbb3bbb6777cc1c111
+11144444433345334bbb3bb3501d99910000000001999d1019999999150001991ffff5019999999991f50191ffff50001999991fa9444773bbbd6777c7cc111d
+11145d9493345334533bbb3f0019991dfffff500019999d1111111111f0001111ffff0011111111111f0019d1ffff50019999d1fa44444444bd667777cc1c11d
+d5d5d5a9a84533453345bfff00d9991fffffff5001d999910000000fff50000ffffff00000000000fff0019d1ffff501d999913a94449444db6d6777cccc111d
+d5d5ddd8785338873453faf51d9999d1fffffff001d9999d110005fffff5005ffffff50000000005fff00199d11111d99999d14a44444444d6d6677c7cc11111
+dddddd38453387888533ff11d999999d11fffff11d9999999d1ffffffffffffffffffffffffffffffff0019999999999999d1fff8883344dd6677777cc1c1111
+5334533453347888733450199999999991fff50199999999991fffffffffffffffaffffffffffffffff001d99999999999d13ff8803bbb3b3367777cccc11111
+3345334533453777334300111111111111fff00111111111111fffffffffffffdffffffffffffffffff0001111111111111335008883bbbbb37777cccc1c111d
+345788783453d777d453000000000000fffff000000000000ffffffffffffffdadfffffffffffffffff5000000000000005ff007808008bd6677c7ccccc111d6
+458878887533ddddd533500000000005fffff500000000005fffffffffffffffdbfffffffffffbffffff50000000000005fff007888888b6677c7ccccc1111d6
+578788878834533453345fbfffffffffffffffffffffffffffffff3ffbfffffffbffffffffffafbf3fffffffffffffffffffffd5d5bbd5bd6777c7ccc1c111d6
+33457775334533433345333ff333fffffffffffffffffffffffffbf3bffffffffbffffffffffffb3fffffffffffffffffffffffddbbbbdd66777c7cccc1111d6
+3457777734533433bb5333fbbb33ffffffffffffffffffffffffffb3bffffffffff7ffffffffffb3ffffffffffffffffffffffff9b33bbdd677c7cccccc111dd
+453377734533453bbbbb4fbbbbbfffffffffffffffffffffffffffb3bfffffffffffffffffffffffffffffffffffffffffffefffabb33bb6d7777ccccc11111d
+533d777d87845334b3bb5bb333bfffffffffff3ffffffafffffffffffffffffffffffffffffffffffffffffffffffffffffe7eff94bb33b88777c7ccc1c11111
+334ddddd88853345bb3bbb33bbbffffff7fffff3fbffffffffffffffffffffffffffffffffffffffffffffffffffffaffffbefffa44bb88788877ccccc111111
+34533453d7d3b4533bb3bbbbbbfffffffffffff3bffff111ffffafffff111fffff222ffffafffff222faffff7fffffffffbbfffff94487887878c7ccccc11111
+45334533dddb3bbb45bbbbffffffffaffffffff3bffff11111fffffff1111ffaff2222fffffff22222fffffffffff7fffffbfffffa4488788788bbb3bc1c1111
+53378334533bb33bb3bb3afffffffffffffffaffffffffff1111fff111fffffffffff222fff2222ffffffffffffffffffffbff7fffa944477d6bb33bbcc1cc11
+338888453345bb33b3bb3fafffffffffffffffffffffffffff11ff111fffffffffffff222ff22fffffff7ffffffffffffaffffffffa4447777b33bbbccccc1c1
+3457745334533bbb88808afffff7fffff111ffffff7ffffff4444444fffffffff7fffff4444444fffffffffffaf222fffffffffffff9444776bbbbb7ccccccc1
+45d7333333334338808888fffffffff111111fffffffffff44444444f7fffffffffffff44444444fffffffffff222222ffffffffffaf94d77db677b3bccccccc
+533d3d3453333500888008affffff111111111fff1111fff44d144d1fffffefffffffffd244d244fff2222fff222222222fffffafffa44ddddb66b3333cbbbbc
+333533333bbb4007808008afafff1111111111ff111111f444114411ffffe7efffaffff224422444f222222ff2222222222ff7ffffff944444dd67bbbb7b33bb
+34bb3344bb3b40078888884affff111111f1114441111144f4444444ffffbefffffffff4444444f4422222444222f222222fffffffaf8088844dd67bb7cb3b33
+4b3bb494bb3b4445d5d5d53bfaff111111ff114444111144fff94449fffbbffffffffff94449fff442222444422ff222222ffffffff888808844b33bbbbbbb3b
+4bb3bb44b3b4334ddddddd33afff11111ff5554444ff55ff55fa949affffbfffffdffffa949af55ff55ff4444555ff22222ffffffaf800888005bbb6b33bbbbb
+44bb3b44bbb43b333d3333b3bfaff111ff55ff55fff5f5fff5ffffffffffbffffdadfffffffff5fff5f5fff55ff55ff222ffffffffb80080870043b3bb3b33bb
+44b4b4494b443bbb3bbb33333affffffff5dddd5dd5ddd5dd5ffffffffffffffffdbf3fffffff5dd5ddd5dd5dddd5ffffffffffafab88888870094bbd6bbb77b
+94b444444b44943bbb333b3b3bfaffff6d5dddd5dd5ddd5ddd5d6fffffffffff7ffb3fffff6d5ddd5ddd5dd5dddd5d6fffffffffabd5d5d5d5d344b4dddbbbbb
+44b4333443344433b333333333afaff6d6ddddddddddddddddd6d6ffffbfffff7ffb3ffff6d6ddddddddddddddddd6d6fffffafab3bddddddd3344b944dbbb7b
+44433bb3bb344333b333333b3b3afaf66d6d6d6d6d6d6d6d6d6d66fffffbf3fffffffffff66d6d6d6d6d6d6d6d6d6d66ffffffab3b33333333333444444ddb7b
+b44bbbbbbb44333333b33b3333b3afaf6666d6d6d6d6d6d6d6666ffffffb3fffffffffffff6666d6d6d6d6d6d6d6666ffffafa53b33b36333b3333444444db6b
+bb434bbb44333333333333333333bafaff66666666666666666fffafafab3ffafafaffffffff66666666666666666fffffffa3b3333333333333333449444bd6
+3bb4444b4333333333333333b3b33bafafff6666666666666ffafafafafafaafafafafffffffff6666666666666fafafafab3b333b3353333333b33334449bdd
+33bb444b333b333333333333333333bafafafafafafafafaffafabb3b3b3b33b3b3b3baffafafafffaffafaffafafafa3b33563533333363333333333344444d
+b33b443333333333333b3333333b3333b3afafafafafafafaa3bb3333b334443b3b3333bafafafafafaa3b3b3bb3b3b3b3333356533633333333333333344444
+bbbbb333333333333333344433333b333bb33b3b3b3b333b33b33333333444443333b333bb3b3b3bb3b3b3b3b33b3b3333363633633536333b33333333334494
+444bb34444333b333333444443333333333333b3394333333333b3334344445433b3333b33b3b3b3b33b33333333333b63633565365635333333333333333444
+4944b3444433333334344445433333333b3333333443334443333333344445443333333333333333333333b33b33b33356565353533356533333b33333b33334
+4443b34995333333334444544333333344433334444434444433333349995443333333333b333b33b33b3333333333353555a335336363333333333333333333
+43333444943333333499954433333334444433b3594434544443433349994433b333333333333333333333333333333a3aaaaa3aa3a33a333333333333333333
+433334444433b33334999443333333345444434399453445444433334994433333333333333333333333333b333333a9aa9a99a99a95a9a533333333b3333333
+33b3335544433333349944333333b334454444334445334454994333344433333333b3333333333333b3333333333598998989989989989553333333333b3333
+333333994443333b3344433334433333445994433333333449994333333333b3444333333333b3333333333333355282228882882282828225333b3333333333
+333333994553333333333333444433b334499943344443334499433833333334444433333333333333333333335355222222222222222225535333333b33b333
+3333b3444533333333334333449543333344994334444333344433888333833454444343333333333b3333b33335355555555555555555553533333333333333
+33333333333333333354443334994333333444333594433b333333888338883445444433333333333333333333335353535353535353535353333333333b3b3b
+33333333b3333443355444334444444333b3333334944433333333363838883344599443333333333333333333333535353535353535353533333b3333b3bfaf
+b334443333334444344455333445444333333333344444333444433688836333344999433b33333333333333b33333333333333333333b3b3b3b333b3bfafafa
+33454433b34449443444444333544453344443b34445533334444336888663333344994333333333333333333333333333b33333b3b3b3b3b3b3b3b3bfafafff
+334544433334995433449443b3394453344443334449433b34445333363633333334443333333b3333333333333b33b3333333b33bfafafbfafafafafaaff5ff
+334544333355444333349943333443333449533355444333444443333633344443333333333333333b3333b3333333333b3b3333bfafafaaafaaafffffffff55
+344544333994443333354443333333334499433b354443334444433b36333444433333b3333311333333331133333333b3b3bb3baaf5556ffffffffff7ff5666
+34994433344444333b3444433b3333b3444443333333333335544433333334495333311333b31333333311111b33b33bfbfbfaffaf555555fff7ffaff7ff5666
+3499934334454333333333433333333335544433333338333994443333334449433b33311331333333311111133b3bbfafafaffffff56655ffffffffffff5655
+34994333333333b333444333333b3333344444338333888339445533b333444443333333344443111444111dddb3bffaffffff7fffff555f65ffffff5ff55555
+3344333b33333333344444443335444334445538883388833444533333333554443333333141444114445dddd33bfafffffffffff5fff7ffff555555ff655555
+333333333b33333344544944435549933444533888383633333333333383349444333333344445315d5d55dd3bffaffff6f55555fffffff5f53335555fff5555
+3b333333334443333444544443444993333333336388863333333833388834445533b33339495ddd5d5ddd33bfafffff5f5555555ff5fffff53355555ffffff5
+333444333444443333444444334445533333333366888634444388833888344453333333889a5dd5dddd333bfaffafffff55555655fffffff53555555ff5ffff
+3344443334544443433333333334444433b3554336363334444388838363333333333338888ddddddd3333bfafffff7fff56555555ffaffff55555355fffffff
+3344943b34454444333b34443334944433344444333633344953363888633b333333b3366833dddddb333bfaffffffffff56655555fffff5f5555555ff555f5f
+33444433334454994333344543354443333444443336334449433668886333333b3336663333b333333bffffff555555ff56665555ffffff6f55555ff55555ff
+3344444333344999433344454334444333344544433333444443336363333333333336333333333b33bfaff5f56665555ff555555ff6555fffffffff5555335f
+b3359443b3334444433b344543344443333334495433333554443333633333b33333b33333b333333bfafffff56655555f5ffffff5ff555555fff5f55555335f
+333994533b33344433333445443333333b3334444433b334944433b3633b333333333333333333b3faff7faff56555555ffffff7fff5655555ff5ff555555355
+33344453333333333333344994333333333334444433333444553333333333333b33333333333333aafffffff555556556fffaff5f5565555555fff553555555
+3b3333333333333333b3439994333b3333333334433333b4445333333333b3333333333333b333bfffffaff5f5555555fff7ffffff5665555555f7ff5555555f
+33333333333b3333333333499433333b3333b33333333333333333333333333333333333333333faffffffff6f55555f5ffffffffff56555555fffff555555ff
+
+__gff__
+0000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041a1a10000000007070b0b13132701210121210000000007070b0b13132721a12121210000000007070b0b131327012101010100000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 7f5454547f4e5c4c6e4c52534d545455557a7b7a7a7a7a7a7a67686868695554545455555c4d6c4f7e55545454545454434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343000a000a000a000a000a000a000a000a00620062006200620062006200670067
 5455545455545c5c47525353534c555454557b7b7a7b7b7b576b68685a7952515555555d4e5f5e5f5c7e5454545154554343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343430067006700670067000f00160014001500100011001b00120501080108030b01
@@ -3002,8 +3242,6 @@ __map__
 5454515454555d5e5f7f52535052537d7e7f7d525357586b684b6a595252535d5e7d7e7f4e4f5e5c5d5e55545451545443434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434303010201030102010301020103010200081b051f081203000000000000000000
 5454545554556d6e6f6d52535352526f6c6d5052576b68684a68686952505d6d6e4c5353534e5d486d6e5454555454544343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343430000000000000000000000000000000000000000000000000000000000000000
 7c555454547c7d7e7f7d7e5252537e7f475758586b6868686868686a58594c7d4652535252536d7c487e7f545554557f4343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343430000000000000000000000000000000000000000000000000000000000000000
-__gff__
-0000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041a1a10000000007070b0b13132701210121210000000007070b0b13132721a12121210000000007070b0b131327012101010100000000
 __sfx__
 0104000026043260431f003200032604326043260432603329003290032800327003250032200320003200031f0031e0031e0031f00320003220032400324003210031d0031b0031900317003170030000300003
 010400002604326043260331770013700127001270012700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700007000070000700
@@ -3134,135 +3372,7 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
-__label__
-fffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff67777777f7fffff6ffff7ffff6fffffffffffffffffff
-fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6677aa577fffff7fffff6ff7f6fffff7fffffffffff
-fffffffffffffff5fffff5ffffffffffffffffffffff7fffffdffffafffff7ffffffffff7ffffbfffffffff66777757ffffff6ffffffffffffffffffffffffff
-ffff7fdfffffff5f5fff5f5fffffffffff7ffffffffffffffdadffffffffffffffffffffffffbf3fffffff7f66a6776766f77ff6ff76ffffffffffffffffffff
-fffdffdffdffff5f55555f5ffffffaffffffffffffffffffffd3ffffffffffffffffffffff3fb3ffffffffff7656566576656ff656561f11ffffd11ffff11f11
-ffffd777dfaffff5505055fffffffffffffffbfffffffffffff33ffffffffffffffffffffaf3b3faffffffff776565a666a656ff6a646f44ffff511111f55f55
-ffff75557fffff5f55555f5fffffffffffffafbf37fffffffff3ffffffffaffffff7fffffff3b3fffffffffff766a656a66655656965af44ffff511111f44f44
-fdff54445fffff565666565ffffffffffffff3b3ff5111affffffffffffff11111111111ffff111111111111111165a56566655a9a5a4f44ffff5ff111f44444
-d7df40404ffff65665656656ffff7ffffffff3b3501d91fffffffffff5111d999999999d1f50199999999999999d1559aa5665aaaa564444ffff5ffffff44444
-4444f444fffff66566666566fffffffffffffff501d99d1ffffffff501d9999999999999d1001d99999999999999165aaaa566a99a595454ffff5ffffff44444
-565656465fffff666666666ffffffffffffffff01d99991fffffff501d9999d111111d9991000111199111111d991565598aaaa9aa96a54fffffbbffffff4444
-6666666666fffffffffffffffffff5fff5ff7f50199999d1fffff501d9999d100000011d910000001991000001d917765aa999899a9594fffffbbbbffffff444
-666666666fffffff7fffffffffffff5f5fffff0019999991ff7ff00d9999d10000000001915000001991000000191f6759aa99a998a6a5fffffbbb3fffffff44
-fffffffffaffffffffffffffff22225f5fffff01d99d999dffff501d999d1fffff50000111ffff001991fff500111ff6665aa998a9aa96ffffbbb3335fffff44
-fffffffffffffffffffffffff2622ddddffff50199d1999d1fff001999d1ffffffff5000ffffff001991ffff111ffffff669aa988999a6fffbbb333b35ffff44
-ffffffbffffffffffffffffff2266d0d0ffff0019911d9991fff001999dffffffffff500ffffff001991fff0191fffffff668a888899a96fbbb333b33b5fff44
-fffffffbf3fffffffffffffff2222ddddfff501d99101999d1ff0019991fffffffffffff7fffff0019911111d91ffffffff6699822289a6bbbb33b33b335ff44
-fffff33b3fffffddffffddff656565656fff50199d001d9991ff0019991ffffffffff7ffffffff0019999999991ffafffffff69822289abbbb333b33b3355f44
-ffff7f3b3fffffffdffdffff666666666fff00d9910001999d1f0019991fffffffffffffffffaf0019999999991ffffffffff6698228aabbb333111b33335544
-ffffffffffffffff3333fffff6666666fff50199911111d9991f001999dfff7ff11111111111ff0019911111d91fffff7ffff46a9888a63bb331111133335544
-ffffffffffffffffb33bf7fffffffffffff01d999999999999d1001999d1fff0019999999991ff0019910000191f7ffffffff446a99a6ff55511111115555f44
-ff311331133113313333ffffffffffafff50199999999999999100199991fff0011d999999d1ff0019910000111ffffffffff4456aa64ff5551111111555ff44
-f33113311331133111ffffffffffffffff00d999d111111d999d100d999d1ff000011d999d1fff001991ff500ffffffffffff444114445555555111555555f44
-f66565665656656566fffffffff7fffff501d99d10000001999910019999d17f5000019991ffff001991ffffff111ffffffff444114445554555545555455544
-f66666666666666666fffffffffffffff00d999100000001d9991001d9999d11ff00019991ffff001991fffff1d91ffffffff444114445544455444554445544
-fff6666666666666ffffffffffffffff501d9991ffff5001d999d1101d99999d11111d9991ff5011199111111d991aff7ffff444554445541455414554145544
-ffffff7fffffffffffffffffffffff511dd9999d11fff11d999999d101d9999999999999d1ff01d99999999999991ffffffff444444445541455414554145544
-ffffffffffffffffffff7ffffffff5019999999991f50199999999910011d999999999d11111119999999999999d1ffffffff444444444445444454444544444
-ffff2ffffffffffffffffffffffff0011111111111f0011111111111000011111111111d99999111111111111111fffffffff554444444444444444444444444
-f7f292fffffdddfffdddfffffffff000000000005ff00000000000f5000000000000011995599100000000000005fffffffff444444554444444555444444444
-fbf32fffffffffdfdffffffffffff50000000005fff50000000005fff500000000001d995111110000000000005ffffffffff444444444444445595544444444
-ffb3fffffffff2232fffaffffffffffffffffffffffffffffffffffffff11111ff0119951ffffffffffffffffffffffffff7f444444444444455999554444445
-ffb3ffffffffb2232fffffff333fffffffffffffffffffffffffffff111d9995111d995111f7fffffffffffff7fffffffffff444554444444551111155444445
-fffffffffffb5333fffffff33333ffffffffffffffffffff7fffff01d99999999119999991ffffffffffaffffffffffffffff444444444445591515195544445
-ffffffffffb35bbfbbff7f3399933ffafffffffffffafffffffff501999d1159959991111ffffffffffffffffffffffffffdd444444444445511111115544444
-fffffffffb333fb3fb3fff3999993ffffffffffffffffffffffff00199d11999599951fffffffffffffffffffffaffff7cdcd554444444455511515115554444
-fffffaffb335ffb3fb3fff33aaa33ffff2ffffffffffffffffaff001d999991199951fffffaffffffffbfffffffffffdcd6d1554444444455591111195554444
-fffb5b5b53556b33b33fffb3aaa3bfff292fffaffffffffffffff000111111599911ffffffffffffff37bfffffffffdc11111444445544455511515115554444
-fd3353535356b36b37ffff3baaab3ffff23fbfffff7ffffffffff50000001599951ffff7fffffffffff3bf3fffffffdc11176444445544455511111115554444
-66656565656666666fffffbbbbbbbfffff31111fffffffffffffff500001599511fffffffffffffafff3b3fff111111111111444444444455591515195554444
-66666666666666666ffff3b99999b3fff001991ffffffafff111111ff50011111111111111111111111113501d9999999999d1d4444444455999111999554444
-ff6666666666666fffff63bbbbbbb36f501d99d1fffffff0019999d1ff001999999119999999999999991501d9999999999991cdddddddddd22566525ddddddd
-ffffffffffffffffffff63333333336501d99991fffffff001d99991ff0011999d11199d1d99999d1d99101d999d11111d999117c7c7c7c7c26655225ddddddd
-f333ff33ffff7fffffff6333333333600199999d1ffffff5001d999d1ff00199d100199101d999d101d9101999d0000000d991c11111111122566625c7c7c7c7
-33bbfbb3f33fffffffff6666666666501d9999991ffff7ff5001999911f00199100019d100199910001911d999d05f50001d91ddc7cc7c11266552251c1c1c1c
-fbbbbbbff3b33ff33ffff6666666660019999999d1fffffff0019999d1f001991f00191000199910001111999915fff5000191ffddddddc22566625c11111111
-ffbbbffff3bbb3bbbffffffffffff501d99dd99991fffffff0019999911001991f001115001999150000019999d1ffff500111fffffaffd266552257c1c11116
-33ff33333ff33bbffffffffafffff001999119999dfffffff00199999d1001991f0005ff0019991f50000199999d1ffff5000fffffafa944446625717c1c116d
-bb3bb33bbfbb3bfaffffffffffff501d99d11d999d1fff7ff00199d999d101991f005faf0019991fffff01d99999d15fff505ffffffa944f4444257717c1c11d
-3bbb33bbbbbbfbfffaffffffffff501d99d00d99991ffffff001991d999111991fffffff0019991fffff001d99999d11ffffffffffa9444444445567777c1c11
-34b3345bbb538853fff7ffffffff00d99910019999d1affff0019911999d11991fffffff0019991fffff5001d999999d1ffffffaff94f4433344337767ccc1c1
-45b345334b88788843ff33fffff500d99d1001d99991fffff0019911d999d1991f7fffff0019991fffff50001d999999d15ffffffa444433bb4bb377c7cc1c11
-53345334587887878bffbb3ffff501d99df000d9999d1ffff00199101d9991991fffffff0019991fff7ff50001d999999d11ffffff94444bbbbbb7677cccc111
-334333453887887883bbbbb33ff0019991f0001d999d1ff7f001991001999d991fffffff0019991fffffff50001d9999999d1ffffa444887bbbdd677c7cc1c11
-3431133333117753345bbbbb7f500d99d111111d9999dffff001991000d999991fffff7f0019991ffffffff50001d9999999d1ffff98787878bd66777cccc111
-4533313331377773453fffffff501d99999999999999d1fff0019910001d99991ffaffff0019991fffffffff5000059999999d5fa948878888bdd677c7cc1c11
-5333331313337734533bfaffff00199999999999999991fff0019910000199991fffffff0019991ffffffffff500001d9999991ffa44433744dd66777cccc111
-33333444433d77d5334bfffff501d999d1111111d9999dfaf01d99150000d9991fffffff01d999d1ffffffffff500001d999991ff94443b334d33677c7cc1c11
-11333414133dddd3333333b33001999d100000001d999d1f11d9991110001d9917fffff11d99999d11fff111fff500001999991fa44943bbb3bbb6777cc1c111
-11144444433345334bbb3bb3501d99910000000001999d1019999999150001991ffff5019999999991f50191ffff50001999991fa9444773bbbd6777c7cc111d
-11145d9493345334533bbb3f0019991dfffff500019999d1111111111f0001111ffff0011111111111f0019d1ffff50019999d1fa44444444bd667777cc1c11d
-d5d5d5a9a84533453345bfff00d9991fffffff5001d999910000000fff50000ffffff00000000000fff0019d1ffff501d999913a94449444db6d6777cccc111d
-d5d5ddd8785338873453faf51d9999d1fffffff001d9999d110005fffff5005ffffff50000000005fff00199d11111d99999d14a44444444d6d6677c7cc11111
-dddddd38453387888533ff11d999999d11fffff11d9999999d1ffffffffffffffffffffffffffffffff0019999999999999d1fff8883344dd6677777cc1c1111
-5334533453347888733450199999999991fff50199999999991fffffffffffffffaffffffffffffffff001d99999999999d13ff8803bbb3b3367777cccc11111
-3345334533453777334300111111111111fff00111111111111fffffffffffffdffffffffffffffffff0001111111111111335008883bbbbb37777cccc1c111d
-345788783453d777d453000000000000fffff000000000000ffffffffffffffdadfffffffffffffffff5000000000000005ff007808008bd6677c7ccccc111d6
-458878887533ddddd533500000000005fffff500000000005fffffffffffffffdbfffffffffffbffffff50000000000005fff007888888b6677c7ccccc1111d6
-578788878834533453345fbfffffffffffffffffffffffffffffff3ffbfffffffbffffffffffafbf3fffffffffffffffffffffd5d5bbd5bd6777c7ccc1c111d6
-33457775334533433345333ff333fffffffffffffffffffffffffbf3bffffffffbffffffffffffb3fffffffffffffffffffffffddbbbbdd66777c7cccc1111d6
-3457777734533433bb5333fbbb33ffffffffffffffffffffffffffb3bffffffffff7ffffffffffb3ffffffffffffffffffffffff9b33bbdd677c7cccccc111dd
-453377734533453bbbbb4fbbbbbfffffffffffffffffffffffffffb3bfffffffffffffffffffffffffffffffffffffffffffefffabb33bb6d7777ccccc11111d
-533d777d87845334b3bb5bb333bfffffffffff3ffffffafffffffffffffffffffffffffffffffffffffffffffffffffffffe7eff94bb33b88777c7ccc1c11111
-334ddddd88853345bb3bbb33bbbffffff7fffff3fbffffffffffffffffffffffffffffffffffffffffffffffffffffaffffbefffa44bb88788877ccccc111111
-34533453d7d3b4533bb3bbbbbbfffffffffffff3bffff111ffffafffff111fffff222ffffafffff222faffff7fffffffffbbfffff94487887878c7ccccc11111
-45334533dddb3bbb45bbbbffffffffaffffffff3bffff11111fffffff1111ffaff2222fffffff22222fffffffffff7fffffbfffffa4488788788bbb3bc1c1111
-53378334533bb33bb3bb3afffffffffffffffaffffffffff1111fff111fffffffffff222fff2222ffffffffffffffffffffbff7fffa944477d6bb33bbcc1cc11
-338888453345bb33b3bb3fafffffffffffffffffffffffffff11ff111fffffffffffff222ff22fffffff7ffffffffffffaffffffffa4447777b33bbbccccc1c1
-3457745334533bbb88808afffff7fffff111ffffff7ffffff4444444fffffffff7fffff4444444fffffffffffaf222fffffffffffff9444776bbbbb7ccccccc1
-45d7333333334338808888fffffffff111111fffffffffff44444444f7fffffffffffff44444444fffffffffff222222ffffffffffaf94d77db677b3bccccccc
-533d3d3453333500888008affffff111111111fff1111fff44d144d1fffffefffffffffd244d244fff2222fff222222222fffffafffa44ddddb66b3333cbbbbc
-333533333bbb4007808008afafff1111111111ff111111f444114411ffffe7efffaffff224422444f222222ff2222222222ff7ffffff944444dd67bbbb7b33bb
-34bb3344bb3b40078888884affff111111f1114441111144f4444444ffffbefffffffff4444444f4422222444222f222222fffffffaf8088844dd67bb7cb3b33
-4b3bb494bb3b4445d5d5d53bfaff111111ff114444111144fff94449fffbbffffffffff94449fff442222444422ff222222ffffffff888808844b33bbbbbbb3b
-4bb3bb44b3b4334ddddddd33afff11111ff5554444ff55ff55fa949affffbfffffdffffa949af55ff55ff4444555ff22222ffffffaf800888005bbb6b33bbbbb
-44bb3b44bbb43b333d3333b3bfaff111ff55ff55fff5f5fff5ffffffffffbffffdadfffffffff5fff5f5fff55ff55ff222ffffffffb80080870043b3bb3b33bb
-44b4b4494b443bbb3bbb33333affffffff5dddd5dd5ddd5dd5ffffffffffffffffdbf3fffffff5dd5ddd5dd5dddd5ffffffffffafab88888870094bbd6bbb77b
-94b444444b44943bbb333b3b3bfaffff6d5dddd5dd5ddd5ddd5d6fffffffffff7ffb3fffff6d5ddd5ddd5dd5dddd5d6fffffffffabd5d5d5d5d344b4dddbbbbb
-44b4333443344433b333333333afaff6d6ddddddddddddddddd6d6ffffbfffff7ffb3ffff6d6ddddddddddddddddd6d6fffffafab3bddddddd3344b944dbbb7b
-44433bb3bb344333b333333b3b3afaf66d6d6d6d6d6d6d6d6d6d66fffffbf3fffffffffff66d6d6d6d6d6d6d6d6d6d66ffffffab3b33333333333444444ddb7b
-b44bbbbbbb44333333b33b3333b3afaf6666d6d6d6d6d6d6d6666ffffffb3fffffffffffff6666d6d6d6d6d6d6d6666ffffafa53b33b36333b3333444444db6b
-bb434bbb44333333333333333333bafaff66666666666666666fffafafab3ffafafaffffffff66666666666666666fffffffa3b3333333333333333449444bd6
-3bb4444b4333333333333333b3b33bafafff6666666666666ffafafafafafaafafafafffffffff6666666666666fafafafab3b333b3353333333b33334449bdd
-33bb444b333b333333333333333333bafafafafafafafafaffafabb3b3b3b33b3b3b3baffafafafffaffafaffafafafa3b33563533333363333333333344444d
-b33b443333333333333b3333333b3333b3afafafafafafafaa3bb3333b334443b3b3333bafafafafafaa3b3b3bb3b3b3b3333356533633333333333333344444
-bbbbb333333333333333344433333b333bb33b3b3b3b333b33b33333333444443333b333bb3b3b3bb3b3b3b3b33b3b3333363633633536333b33333333334494
-444bb34444333b333333444443333333333333b3394333333333b3334344445433b3333b33b3b3b3b33b33333333333b63633565365635333333333333333444
-4944b3444433333334344445433333333b3333333443334443333333344445443333333333333333333333b33b33b33356565353533356533333b33333b33334
-4443b34995333333334444544333333344433334444434444433333349995443333333333b333b33b33b3333333333353555a335336363333333333333333333
-43333444943333333499954433333334444433b3594434544443433349994433b333333333333333333333333333333a3aaaaa3aa3a33a333333333333333333
-433334444433b33334999443333333345444434399453445444433334994433333333333333333333333333b333333a9aa9a99a99a95a9a533333333b3333333
-33b3335544433333349944333333b334454444334445334454994333344433333333b3333333333333b3333333333598998989989989989553333333333b3333
-333333994443333b3344433334433333445994433333333449994333333333b3444333333333b3333333333333355282228882882282828225333b3333333333
-333333994553333333333333444433b334499943344443334499433833333334444433333333333333333333335355222222222222222225535333333b33b333
-3333b3444533333333334333449543333344994334444333344433888333833454444343333333333b3333b33335355555555555555555553533333333333333
-33333333333333333354443334994333333444333594433b333333888338883445444433333333333333333333335353535353535353535353333333333b3b3b
-33333333b3333443355444334444444333b3333334944433333333363838883344599443333333333333333333333535353535353535353533333b3333b3bfaf
-b334443333334444344455333445444333333333344444333444433688836333344999433b33333333333333b33333333333333333333b3b3b3b333b3bfafafa
-33454433b34449443444444333544453344443b34445533334444336888663333344994333333333333333333333333333b33333b3b3b3b3b3b3b3b3bfafafff
-334544433334995433449443b3394453344443334449433b34445333363633333334443333333b3333333333333b33b3333333b33bfafafbfafafafafaaff5ff
-334544333355444333349943333443333449533355444333444443333633344443333333333333333b3333b3333333333b3b3333bfafafaaafaaafffffffff55
-344544333994443333354443333333334499433b354443334444433b36333444433333b3333311333333331133333333b3b3bb3baaf5556ffffffffff7ff5666
-34994433344444333b3444433b3333b3444443333333333335544433333334495333311333b31333333311111b33b33bfbfbfaffaf555555fff7ffaff7ff5666
-3499934334454333333333433333333335544433333338333994443333334449433b33311331333333311111133b3bbfafafaffffff56655ffffffffffff5655
-34994333333333b333444333333b3333344444338333888339445533b333444443333333344443111444111dddb3bffaffffff7fffff555f65ffffff5ff55555
-3344333b33333333344444443335444334445538883388833444533333333554443333333141444114445dddd33bfafffffffffff5fff7ffff555555ff655555
-333333333b33333344544944435549933444533888383633333333333383349444333333344445315d5d55dd3bffaffff6f55555fffffff5f53335555fff5555
-3b333333334443333444544443444993333333336388863333333833388834445533b33339495ddd5d5ddd33bfafffff5f5555555ff5fffff53355555ffffff5
-333444333444443333444444334445533333333366888634444388833888344453333333889a5dd5dddd333bfaffafffff55555655fffffff53555555ff5ffff
-3344443334544443433333333334444433b3554336363334444388838363333333333338888ddddddd3333bfafffff7fff56555555ffaffff55555355fffffff
-3344943b34454444333b34443334944433344444333633344953363888633b333333b3366833dddddb333bfaffffffffff56655555fffff5f5555555ff555f5f
-33444433334454994333344543354443333444443336334449433668886333333b3336663333b333333bffffff555555ff56665555ffffff6f55555ff55555ff
-3344444333344999433344454334444333344544433333444443336363333333333336333333333b33bfaff5f56665555ff555555ff6555fffffffff5555335f
-b3359443b3334444433b344543344443333334495433333554443333633333b33333b33333b333333bfafffff56655555f5ffffff5ff555555fff5f55555335f
-333994533b33344433333445443333333b3334444433b334944433b3633b333333333333333333b3faff7faff56555555ffffff7fff5655555ff5ff555555355
-33344453333333333333344994333333333334444433333444553333333333333b33333333333333aafffffff555556556fffaff5f5565555555fff553555555
-3b3333333333333333b3439994333b3333333334433333b4445333333333b3333333333333b333bfffffaff5f5555555fff7ffffff5665555555f7ff5555555f
-33333333333b3333333333499433333b3333b33333333333333333333333333333333333333333faffffffff6f55555f5ffffffffff56555555fffff555555ff
+
 __meta:title__
 age of ants
-eeooty
+eeooty��
