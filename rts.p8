@@ -93,13 +93,14 @@ function _update()
 
 	if cf%30==19 then
 		for tx=0,19 do
-		for ty=0,12 do
-			local x,y=tx*20.21\8,ty*21.33\8
-			sset(109+tx,72+ty,
-				g(exp,x,y) and rescol[
-					g(viz,x,y,"e")..
-					fget(mget(x,y))] or 14)
-		end
+			for ty=0,12 do
+				local x,y=tx\0x.6556,
+					ty\0x.6003
+				sset(109+tx,72+ty,
+					g(exp,x,y) and rescol[
+						g(viz,x,y,"e")..
+						fget(mget(x,y))] or 14)
+			end
 		end
 	end
 
@@ -1524,7 +1525,7 @@ function tick(u)
 
 			foreach(vcache[k],function(t)
 				local k=u.k+t
-				if k<32<<8 and k>=0 and
+				if k<8192 and k>=0 and
 					k%256<48 then
 					if bldgs[k] then
 						bldgs[k].disc=1
@@ -1629,7 +1630,7 @@ function input()
 	if amy>104 and not selx then
 		local dx,dy=amx-105,amy-107
 		if min(dx,dy)>=0 and
-			dx<19 and dy<12+1 then
+			dx<19 and dy<13 then
 			local x,y=20.21*dx,21.33*dy
 			if rclk and sel1 then
 				sfx"1"
