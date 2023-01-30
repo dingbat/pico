@@ -2069,11 +2069,12 @@ function box(u)
 end
 
 function can_pay(typ,_ENV)
+	typ.reqs=reqs|typ.breq==reqs
 	return r>=typ.r and
 		g>=typ.g and
 		b>=typ.b and
 		(not typ.unit or p<min(pl,99))
-		and reqs|typ.breq==reqs
+		and typ.reqs
 end
 
 function pay(typ,dir,_ENV)
@@ -2620,7 +2621,7 @@ end,42,108)
 end
 
 function draw_menu()
-	local x=0
+	local x,hc=0,hbtn and hbtn.costs
 	for i,sec in inext,split(
 		sel1 and sel1.hu and
 		(sel1.bldg and
@@ -2712,13 +2713,11 @@ end,20,108)
 
 	resbar()
 
-	if hbtn and hbtn.costs and
-		res1.reqs|hbtn.costs.breq==
-			res1.reqs then
-		local l=pres(hbtn.costs,0,150)
+	if hc and hc.reqs then
+		local l=pres(hc,0,150)
 		camera(l/2-4-hbtn.r[1],
 			8-hbtn.r[2])
-		pres(hbtn.costs,2,2)
+		pres(hc,2,2)
 		rect(l+2,unspl"0,0,8,1")
 	end
 end
