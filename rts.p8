@@ -329,8 +329,8 @@ function init()
 	reload()
 	
 	music(unspl"0,0,7")
-	menuitem(2,"⌂ save",save)
-	menuitem(3,"∧ resign",
+	menuitem(3,"⌂ save",save)
+	menuitem(4,"∧ resign",
 		function()	hq.hp=0	end)
 
 	p[[var=res
@@ -2732,8 +2732,10 @@ end,20,108)
 	
 	if hc then-- and hc.reqs then
 		local l=pres(hc,0,150)
-		?hc.txt1,-104,-14
-		?hc.txt2
+		if dget"1"==0 then
+			?hc.txt1,-104,-14
+			?hc.txt2
+		end
 		camera(l/2-4-hbtn.r[1],
 			8-hbtn.r[2])
 		pres(hc,2,2)
@@ -3075,6 +3077,13 @@ function mode()
 	return true
 end
 foreach(split",,",mode)
+
+function txt()
+	dset(1,~dget"1")
+	menuitem(2,"▤ toggle help",txt)
+end
+txt()
+txt()
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
