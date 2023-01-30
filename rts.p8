@@ -2725,12 +2725,15 @@ end,20,108)
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
 	sspr(unspl"109,72,19,12,0,0")
 	
+	resbar()
+
 	if hc and hc.reqs then
-		local l=pres(hc,0,150)
+		campal()
 		if dget"1"==0 then
-			?hc.txt1,-104,-14
+			?hc.txt1,1,93
 			?hc.txt2
 		end
+		local l=pres(hc,0,150)
 		camera(l/2-4-hbtn.r[1],
 			8-hbtn.r[2])
 		pres(hc,2,2)
@@ -2742,8 +2745,6 @@ end,20,108)
 		-mmy-ceil(cy/mmhr)
 	)
 	rect(unspl"-1,-1,7,7,10")
-
-	resbar()
 end
 
 function resbar()
