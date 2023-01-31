@@ -1681,7 +1681,7 @@ function input()
 		sel,selx={}
 		foreach(units,function(u)
 			add(u.onscr and
-				hunit.hu and
+				u.hu and
 				u.typ.idx==hunit.typ.idx and
 				sel,u)
 		end)
