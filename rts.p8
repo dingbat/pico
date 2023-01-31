@@ -1947,7 +1947,7 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
---		if (u.ai) f+=res1.diff\3*10
+		if (u.ai) f+=res1.diff\3*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
 		if t<112 and
