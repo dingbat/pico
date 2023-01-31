@@ -3071,16 +3071,28 @@ foreach(split",,",mode)
 tostr[[[[]]
 srand"18"
 _dr=_draw
+
+function palp(k,p)
+	pal()
+	if (btn(k,p)) pal(5,9)
+end
+
 function _draw()
 	_dr()
 	campal()
 	if mound then
 		mound.portx=-1
 		mound.porty=103
+		mound.rest_x=16
+		mound.rest_y=96
+		mound.p1.rest_x=16
+		mound.p1.rest_y=96
 		brks.portx=7
 		brks.porty=104
 		mon.portx=15
 		mon.porty=103
+	else
+		return
 	end
 	
 	local mx,my=
@@ -3091,8 +3103,29 @@ function _draw()
 		local s=202
 		if (btn"5") s=204
 		if (btn"4") s=206
-		spr(200,112+mx,4+my,2,2)
-		spr(s,112+mx,10+my,2,2)
+		spr(200,115+mx,4+my,2,2)
+		spr(s,115+mx,10+my,2,2)
+		
+		palp(⬆️,1)
+		spr(196,98,19)
+		palp(⬆️)
+		?"⬆️",98,5,5
+		
+		palp(⬅️,1)
+		spr(197,90,25)
+		palp(⬅️)
+		?"⬅️",90,11,5
+		
+		palp(⬇️,1)
+		spr(212,98,25)
+		palp(⬇️)
+		?"⬇️",98,11,5
+		
+		palp(➡️,1)
+		spr(213,106,25)
+		palp(➡️)
+		?"➡️",106,11,5
+		pal()
 	end
 	if c==2 then
 		local dx,dy=0,0
@@ -3100,8 +3133,13 @@ function _draw()
 		if (btn(➡️)) dx=1
 		if (btn(⬆️)) dy=-1
 		if (btn(⬇️)) dy=1
-		spr(234,108,5,2,2)
-		spr(236,108+dx,5+dy,2,2)
+		spr(234,108,1,2,2)
+		spr(236,108+dx,1+dy,2,2)
+		palp(❎)
+		?"❎",109,23,5
+		palp(🅾️)
+		?"🅾️",115,18,5
+		pal()
 	end
 	if c==1 then
 		local s,fs=48,228
@@ -3118,17 +3156,29 @@ function _draw()
 	
 	cursor(3,5,7)
 	
-	if sel1 and sel1.st.t=="move" then
+	if sel1 and sel1.st.move then
 		moved=true
 	end
+	if cy==151 then
+		done_pan=true
+	end
+	if res1.b<20 then
+		built=true
+	end
 	
-	if false then
+	if not done_pan then
 		if c==3 then
-			?"use arrow keys or esdf"
+			?"use ⬅️➡️⬆️⬇️ (arrows)"
+			?"or          (esdf)"
 			?"to pan around the map"
+			pal(5,7)
+			spr(196,15,11)
+			spr(197,23,11)
+			spr(212,31,11)
+			spr(213,39,11)
 		elseif c==2 then
 			?"move the cursor with the"
-			?"dpad to the screen edges"
+			?"\f9dpad\f7 to the screen edges"
 			?"to pan around the map"
 		elseif c==1 then
 			?"use the dpad to pan"
@@ -3137,7 +3187,7 @@ function _draw()
 	elseif nsel==1 and seltyp.idx==5 then
 		if c==3 then
 			?"with a unit selected,"
-			?"right-click to attack"
+			?"\9right-click\7 to attack"
 			?"an enemy (or wild) unit"
 		elseif c==2 then
 			?"with a unit selected,"
@@ -3169,12 +3219,13 @@ function _draw()
 		end
 	elseif nsel==3 and moved then
 		if c==3 then
-			?"with worker ants selected,"
-			?"right-click on a resource"
-			?"to begin gathering it"
+			?"with worker ants"
+			?"selected, \f9right-click"
+			?"on a resource to",7
+			?"begin gathering it"
 		elseif c==2 then
 			?"with worker ants selected,"
-			?"press 🅾️ on a resource"
+			?"press \f9🅾️\f7 on a resource"
 			?"to begin gathering it"
 		elseif c==1 then
 			if (act>0) color(6)
@@ -3188,10 +3239,10 @@ function _draw()
 		end
 	elseif nsel==3 then
 		if c==3 then
-			?"right-click to move"
+			?"\f9right-click\f7 to move"
 			?"the selected units"
 		elseif c==2 then
-			?"press 🅾️ to move the"
+			?"press \f9🅾️\f7 to move the"
 			?"selected units"
 		elseif c==1 then
 			if (act>0) color(6)
@@ -3203,7 +3254,7 @@ function _draw()
 				?"move them"
 			end
 		end
-	else
+	elseif not moved then
 		if c==3 then
 			?"left-click and drag to"
 			?"draw a selection box"
@@ -3215,6 +3266,14 @@ function _draw()
 		elseif c==1 then
 			?"drag a selection box"
 			?"around your units"
+		end
+	elseif built then
+		if c==3 then
+			?"to build a unit,"
+		elseif c==2 then
+			?"to build a unit,"
+		elseif c==1 then
+			?"to build a unit,"
 		end
 	end
 end
@@ -3319,11 +3378,11 @@ fff77fffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0000ccc00001ccc100000000000000000000b00000000000000034222253400bb0bb000000300000000500000000005000055500000000500000005005555550
 000000000000000000000000000000000555550005555500509030b0505599880000006000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000550005505550055000000000550599880000060000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000550055505550555009999990055555500000060000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000550005505500555099799799556556550000060000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000055555000555550097d77d79565665650000006000000000000007777700000000000777770000000000077777000000
-00000000000000000000000000000000000000000000000099411499554114550000000600000000000076676670000000007997667000000000766799700000
-00000000000000000000000000000000000000000000000099444499554444550000000600000000000766676665000000079997666500000007666799950000
+00000000000000000004000000000000550055505550555009999990055555500000060000000000000000000000000000000000000000000000000000000000
+00040000000000000041100000000000550005505500555099799799556556550000060000000000000000000000000000000000000000000000000000000000
+00411000000400000451140000000000055555000555550097d77d79565665650000006000000000000007777700000000000777770000000000077777000000
+04511400004110004554454000000000000000000000000099411499554114550000000600000000000076676670000000007997667000000000766799700000
+45544540045114005454545000000000000000000000000099444499554444550000000600000000000766676665000000079997666500000007666799950000
 00000000000000000000000000000000000000000000000009999990055555500000006000000000000766676665000000079997666500000007666799950000
 00000000000000000000000000000000055555000555550000000000000000000000006000000000000766676665000000079997666500000007666799950000
 00000000050005000b030b0000000000550055505500055009999990055555500000000600000000000777777775000000077777777500000007777777750000
