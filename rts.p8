@@ -83,11 +83,12 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	upc,pos,hbld,t6,sele,selh,selb,
+	upc,pos,hbld,t6,asc,
+	sele,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8,{}),
-		t()%6<1,{}
+		t()%6<1,{},{}
 
 	res1.t+=0x.0888
 
@@ -2159,6 +2160,14 @@ function can_bld()
 end
 
 function norm(it,nt,f)
+	tostr[[[[]]
+	if not it[1] or not it[2] or
+		not nt.x or not nt.y then
+		git=it
+		gnt=nt
+		stop()
+	end
+	--]]
 	local dx,dy=
 		it[1]-nt.x,it[2]-nt.y
 	d,nt.dir=dist(dx,dy)+.0001,
@@ -2330,10 +2339,10 @@ function dpath(u,k)
 end
 
 function qdmaps(r)
-	dq,asc=split(p[[r=r,g,b,d
+	dq=split(p[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
-d=d,r,g,b]][r]),{}
+d=d,r,g,b]][r])
 end
 
 function dmap()
@@ -2397,38 +2406,33 @@ function path(u,x,y,tol)
 	end
 	if u.typ.unit then
 		local dest,dest_d=nearest(x,y)
+		tostr[[[[]]
 		local m=stat"1"
 		local wayp,e=as(
 			nearest(u.x,u.y),dest)
-		tostr[[[[]]
-		printh(stat"1"-m,"log")
+		printh(stat"1"-m.." #"..#wayp,"log")
+		--]]
 		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
 			add(wayp,{x,y})
 		end
-		--]]
 		return #wayp>0 and wayp
 	end
 end
 
 function as(st,g)
---	local c=asc[k]
---	if c then
---		return {unpack(c)},c.e
---	end
-
-	local gk,sh,t,f=g.k>>16,
-		{y=0,l=st,u=32767},{},{}
+	local gk,sh,t=g.k>>16,
+		{y=0,l=st,u=32767},{}
 	t[st.k]=sh
-	local function path(s)
+	local function path(s,f,e)
 		while s.l!=st do
 			add(f,{s.l[1]*8+4,
 				s.l[2]*8+4},1)
 			s=t[s.p.k]
 		end
 		asc[st.k|gk]=f
-		return f,f.e
+		return f,e
 	end
 	local fr,frl,cl={sh},1,sh
 	while frl>0 do
@@ -2441,14 +2445,11 @@ function as(st,g)
 		fr[m],sh.d=fr[frl],1
 		frl-=1
 		local pt=sh.l
-		if pt.k==g.k then
-			f.e=1
-			return path(sh)
-		end
-		local c=asc[pt.k|gk]
-		if c then
-			f={unpack(c)}
-			return path(sh)
+		local f=asc[pt.k|gk] or
+			pt.k==g.k and {e=1}
+		if f then
+			return path(
+				sh,{unpack(f)},f.e)
 		end
 		surr(function(n)
 			local ob,x=t[n.k],sh.y+n.d
@@ -2468,7 +2469,7 @@ function as(st,g)
 			end
 		end,unpack(pt))
 	end
-	return path(cl)
+	return path(cl,{})
 end
 -->8
 --menu
