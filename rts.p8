@@ -83,11 +83,12 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	upc,pos,hbld,t6,sele,selh,selb,
+	upc,pos,hbld,t6,asc,
+		sele,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8,{}),
-		t()%6<1,{}
+		t()%6<1,{},{}
 
 	res1.t+=0x.0888
 
@@ -2330,10 +2331,10 @@ function dpath(u,k)
 end
 
 function qdmaps(r)
-	dq,asc=split(p[[r=r,g,b,d
+	dq=split(p[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
-d=d,r,g,b]][r]),{}
+d=d,r,g,b]][r])
 end
 
 function dmap()
