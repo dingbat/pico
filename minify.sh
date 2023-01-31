@@ -8,6 +8,7 @@ cp rts.p8 rts_print.p8
 sed -i -E "s/\+=\?(.*)/+=print(\1)/" rts_print.p8
 sed -i -E "s/\?(.*q\.qty)/print(\1)/" rts_print.p8
 sed -i -E "s/\?(split.*)/print(\1)/" rts_print.p8
+sed -i -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 
 header="\n--age of ants\n--eeooty\n\n--for source with whitespace\n--and credits visit:\n--\n"
 python3 ~/shrinko8-main/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
