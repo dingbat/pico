@@ -83,12 +83,12 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	upc,pos,hbld,t6,asc,
-		sele,selh,selb,
+	aspl"pos,asc,sele"
+	upc,hbld,t6,selh,selb,
 		hunit,idl,idlm=
-		cf%upcycle,{},
+		cf%upcycle,
 		g(bldgs,mx8,my8,{}),
-		t()%6<1,{},{}
+		t()%6<1
 
 	res1.t+=0x.0888
 
@@ -357,18 +357,14 @@ techs=0
 t=0
 npl=0]]
 
-	res1,dq,exp,vcache,dmaps,
-	units,restiles,sel,prj,
-		bldgs,nviz,typs,ais,dmst,
-		posidx,cf,selt,alert,ban,
-		amx,amy,tot,
+	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmst"
+	res1,dmst.d,posidx,
+		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
-		res.p1,
-		{},{},{},{},{},{},{},
-		{},{},{},{},{},{d={}},
+		res.p1,{},
 		split"1,2,3,4",
 		unspl"59,0,0,0,64,64,50"
-
+	
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
@@ -2026,7 +2022,8 @@ end
 --utils
 
 function p(str,typ,x,y,...)
-	local p1,p2,p3={...},{},{}
+	local p1={...}
+	aspl"p2,p3"
 	local obj={p1,p2,p3,p2,
 		p1=p1,p2=p2,p3=p3,typ=typ,
 		x=x,y=y}
@@ -2761,12 +2758,18 @@ function comp(f,g)
 	end
 end
 
-pspl,rndspl,unspl,spldeli,campal=
+function arrs(v,...)
+	_ENV[v]={},... and arrs(...)
+end
+
+pspl,rndspl,unspl,spldeli,
+	campal,aspl=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(split,deli),
-	comp(camera,pal)
+	comp(camera,pal),
+	comp(arrs,split)
 
 unl,unspr,typs,stp,resk,pcol,
 	hlt,diff,act,
