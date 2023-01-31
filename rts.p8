@@ -83,12 +83,11 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	upc,pos,hbld,t6,asc,
-	sele,selh,selb,
+	upc,pos,hbld,t6,sele,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,{},
 		g(bldgs,mx8,my8,{}),
-		t()%6<1,{},{}
+		t()%6<1,{}
 
 	res1.t+=0x.0888
 
@@ -2339,10 +2338,10 @@ function dpath(u,k)
 end
 
 function qdmaps(r)
-	dq=split(p[[r=r,g,b,d
+	dq,asc=split(p[[r=r,g,b,d
 g=g,r,b,d
 b=b,g,r,d
-d=d,r,g,b]][r])
+d=d,r,g,b]][r]),{}
 end
 
 function dmap()
@@ -2429,9 +2428,10 @@ function as(st,g)
 		while s.l!=st do
 			add(f,{s.l[1]*8+4,
 				s.l[2]*8+4},1)
+			asc[s.l.k|gk]={e=1,unpack(f)}
 			s=t[s.p.k]
 		end
-		asc[st.k|gk]=f
+		f.e=e
 		return f,e
 	end
 	local fr,frl,cl={sh},1,sh
