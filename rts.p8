@@ -147,7 +147,7 @@ c=13]],b.x,b.y))
 
 	for i=2,npl do
 		if upc==i and units[i].alive then
-			ai_frame(ais[i])
+--			ai_frame(ais[i])
 		end
 	end
 end
@@ -2397,26 +2397,29 @@ function path(u,x,y,tol)
 	end
 	if u.typ.unit then
 		local dest,dest_d=nearest(x,y)
+		local m=stat"1"
 		local wayp,e=as(
 			nearest(u.x,u.y),dest)
+		tostr[[[[]]
+		printh(stat"1"-m,"log")
 		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
 			add(wayp,{x,y})
 		end
+		--]]
 		return #wayp>0 and wayp
 	end
 end
 
 function as(st,g)
-	local k=st.k|g.k>>16
-	local c=asc[k]
-	if c then
-		return {unpack(c)},c.e
-	end
+--	local c=asc[k]
+--	if c then
+--		return {unpack(c)},c.e
+--	end
 
-	local sh,t,f={y=0,
-		l=st,u=32767},{},{}
+	local gk,sh,t,f=g.k>>16,
+		{y=0,l=st,u=32767},{},{}
 	t[st.k]=sh
 	local function path(s)
 		while s.l!=st do
@@ -2424,15 +2427,15 @@ function as(st,g)
 				s.l[2]*8+4},1)
 			s=t[s.p.k]
 		end
-		asc[k]=f
-		return f
+		asc[st.k|gk]=f
+		return f,f.e
 	end
 	local fr,frl,cl={sh},1,sh
 	while frl>0 do
 		local c,m=32767
 		for i=1,frl do
-			local t=fr[i].y+fr[i].u
-			if (t<=c) m,c=i,t
+			local q=fr[i].y+fr[i].u
+			if (q<=c) m,c=i,q
 		end
 		sh=fr[m]
 		fr[m],sh.d=fr[frl],1
@@ -2440,7 +2443,12 @@ function as(st,g)
 		local pt=sh.l
 		if pt.k==g.k then
 			f.e=1
-			return path(sh),1
+			return path(sh)
+		end
+		local c=asc[pt.k|gk]
+		if c then
+			f={unpack(c)}
+			return path(sh)
 		end
 		surr(function(n)
 			local ob,x=t[n.k],sh.y+n.d
@@ -3276,6 +3284,8 @@ function _draw()
 			?"to build a unit,"
 		end
 	end
+	
+	pal()
 end
 
 --]]
