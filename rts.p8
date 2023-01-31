@@ -83,7 +83,7 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	aspl"pos,asc,sele"
+	aspl"pos,asc,sele,bfog,afog"
 	upc,hbld,t6,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
@@ -200,8 +200,7 @@ function _draw()
 		return
 	end
 
-	local bf,af,prj_so={},{},
-		cf\5%2*2
+	local prj_so=cf\5%2*2
 	for u in all(units) do
 		if u.onscr or loser then
 			if
@@ -209,16 +208,16 @@ function _draw()
 				not g(viz,u.x8,u.y8)
 				and u.disc
 			then
-				add(af,u)
+				add(afog,u)
 			elseif u.bldg or u.dead then
 				draw_unit(u)
 			else
-				add(bf,u)
+				add(bfog,u)
 			end
 		end
 	end
 
-	foreach(bf,draw_unit)
+	foreach(bfog,draw_unit)
 	camera(cx,cy)
 	foreach(prj,function(_ENV)
 		sspr(
@@ -239,7 +238,7 @@ function _draw()
 	draw_map(48,15)
 
 	_pal,pal=pal,max
-	foreach(af,draw_unit)
+	foreach(afog,draw_unit)
 	pal,btns=_pal,{}
 	pal()
 
@@ -2763,20 +2762,21 @@ function arrs(v,...)
 end
 
 pspl,rndspl,unspl,spldeli,
-	campal,aspl=
+	campal=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(split,deli),
-	comp(camera,pal),
-	comp(arrs,split)
-
-unl,unspr,typs,stp,resk,pcol,
+	comp(camera,pal)
+	
+unl,unspr,aspl,
+	typs,stp,resk,pcol,
 	hlt,diff,act,
 	menu,cx,cy,cvx,cvy
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
+	comp(arrs,unspl),
 	{},
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
@@ -2920,9 +2920,9 @@ end
 
 function ai_frame(ai)
 	if (t6) ai.safe=1
-	local avail,nxt,miners,aiu,
-		ants,res,hold=
-		{},{},{},{},0,res[ai.typ]
+	aspl"avail,nxt,miners,aiu"
+	local ants,res,hold=
+		0,res[ai.typ]
 
 	local function miner(u,r)
 		u.rs=mine_nxt(u,r)
