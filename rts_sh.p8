@@ -2795,7 +2795,7 @@ end
 local techs=res1.techs
 foreach(typs,function(_ENV)
 if techs|tmap==techs then
-x(y.p1)
+x(typ.p1)
 up,done=up and 0,not up
 end
 end)
@@ -3386,4 +3386,4 @@ __music__
 
 __meta:title__
 age of ants
-eeootyÿ
+eeootyÿÿ
