@@ -1412,6 +1412,12 @@ function tick(u)
 			u.onscr and
 				sfx(typ.bldg and 17 or 62)
 		if typ.lady then
+			if not acc(x8,y8,true) then
+				surr(function(t)
+					x8,y8=unpack(t)
+				end,x8,y8)
+				u.x,u.y=x8*8+3,y8*8+3
+			end
 			s(ladys,x8,y8,u)
 			mset(x8,y8,86)
 			s(dmst.r or {},x8,y8,
@@ -3062,6 +3068,7 @@ end
 
 menuitem(2,"▤ toggle help",
 function() dset(1,~dget"1") end)
+
 
 cartdata"age_of_ants"
 foreach(split",,",mode)
