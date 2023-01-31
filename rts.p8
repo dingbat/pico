@@ -147,7 +147,7 @@ c=13]],b.x,b.y))
 
 	for i=2,npl do
 		if upc==i and units[i].alive then
---			ai_frame(ais[i])
+			ai_frame(ais[i])
 		end
 	end
 end
@@ -2409,14 +2409,15 @@ function path(u,x,y,tol)
 end
 
 function as(st,g)
-	local gk,sh,t=g.k>>16,
-		{y=0,l=st,u=32767},{}
-	t[st.k]=sh
+	local gk,t=g.k>>16,
+		{[st.k]=p([[var=sh
+y=0
+u=32767]],st)}
 	local function path(s,f,e)
-		while s.l!=st do
-			add(f,{s.l[1]*8+4,
-				s.l[2]*8+4},1)
-			asc[s.l.k|gk],s=
+		while s.typ!=st do
+			add(f,{s.typ[1]*8+4,
+				s.typ[2]*8+4},1)
+			asc[s.typ.k|gk],s=
 				{e=e,unpack(f)},t[s.p.k]
 		end
 		return f,e
@@ -2431,7 +2432,7 @@ function as(st,g)
 		sh=fr[m]
 		fr[m],sh.d=fr[frl],1
 		frl-=1
-		local pt=sh.l
+		local pt=sh.typ
 		local f=asc[pt.k|gk] or
 			pt.k==g.k and {e=1}
 		if f then
@@ -2442,7 +2443,7 @@ function as(st,g)
 			local ob,x=t[n.k],sh.y+n.d
 			if not ob then
 				ob={
-					y=32767,l=n,
+					y=32767,typ=n,
 					u=dist(n[1]-g[1],n[2]-g[2])
 				}
 				frl+=1
