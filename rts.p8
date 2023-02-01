@@ -1816,7 +1816,7 @@ function drop(u)
 	if u.res then
 		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
 	end
-	u.st.idl,u.res=1
+	u.st.idl,u.res=10
 	if u.st.farm then
 		gofarm(u,u.st.farm)
 	elseif u.st.y then
