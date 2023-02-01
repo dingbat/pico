@@ -4,9 +4,7 @@ __lua__
 --age of ants
 --eeooty
 
---for source with whitespace
---and credits visit:
---lexaloffle.com/bbs/?tid=50632
+--see bbs for full credits
 
 music(63,2000)
 
@@ -1534,12 +1532,6 @@ function tick(u)
 
 			foreach(vcache[k],function(t)
 				local k=u.k+t
-				-- <8192 (32*256) means
-				--       less than y max
-				-- >=0   means greater than
-				--       x+y min
-				-- %256<48 means less than
-				--         x max			
 				if k<8192 and k>=0 and
 					k%256<48 then
 					if bldgs[k] then
@@ -3109,6 +3101,7 @@ function _draw()
 		brks.porty=104
 		mon.portx=15
 		mon.porty=103
+		warant.p1.los=35
 	else
 		return
 	end
@@ -3125,22 +3118,22 @@ function _draw()
 		spr(s,115+mx,10+my,2,2)
 		
 		palp(⬆️,1)
-		spr(196,98,19)
+		if (esdf) spr(196,98,19)
 		palp(⬆️)
 		?"⬆️",98,5,5
 		
 		palp(⬅️,1)
-		spr(197,90,25)
+		if (esdf) spr(197,90,25)
 		palp(⬅️)
 		?"⬅️",90,11,5
 		
 		palp(⬇️,1)
-		spr(212,98,25)
+		if (esdf) spr(212,98,25)
 		palp(⬇️)
 		?"⬇️",98,11,5
 		
 		palp(➡️,1)
-		spr(213,106,25)
+		if (esdf) spr(213,106,25)
 		palp(➡️)
 		?"➡️",106,11,5
 		pal()
@@ -3162,10 +3155,10 @@ function _draw()
 	if c==1 then
 		local s,fs=48,228
 		if (btn"5") s,fs=64,226
-		if (btn(⬅️)) mx,my=-2,2
-		if (btn(➡️)) mx,my=0,2
-		if (btn(⬆️)) mx,my=-1,1
-		if (btn(⬇️)) mx,my=-1,3
+		if (btn(⬅️) or btn(⬅️,1)) mx,my=-2,2
+		if (btn(➡️) or btn(➡️,1)) mx,my=0,2
+		if (btn(⬆️) or btn(⬆️,1)) mx,my=-1,1
+		if (btn(⬇️) or btn(⬇️,1)) mx,my=-1,3
 		spr(224,105,5,2,2)
 		spr(fs,107+mx*2,7+my*2,2,2)
 		sspr(s,112,16,16,
@@ -3174,26 +3167,54 @@ function _draw()
 	
 	cursor(3,5,7)
 	
-	if sel1 and sel1.st.move then
+	if sel1 and sel1.st.move then 
+		moving=true
+	end
+	if nsel==2 and moving and 
+		sel1.st.idl and sel[2].st.idl
+	then
 		moved=true
 	end
-	if cy==151 then
+	if cy>(lcy or 9999) then
 		done_pan=true
 	end
+	lcy=cy
 	if res1.b<20 then
 		built=true
 	end
+	if btnp(⬅️,1) or btnp(➡️,1)
+		or btnp(⬆️,1) or btnp(⬇️,1)
+	then
+		esdf=true
+	end
+	if sel1 and sel1.st.atk then
+		atkd=true
+	end
+	if sel1 and atkd and sel1.st.idl then
+		done=true
+	end
+	local w=units[9]
+	foreach(units,function(u)
+		if u.p==4 and
+			dist(u.x-w.x,u.y-w.y)<40 then
+			bug=true
+		end
+	end)
 	
-	if not done_pan then
+	done=true
+	if done then
+		?"\^tgood luck, and",11
+		?"\^whave fun!"
+	elseif not done_pan then
 		if c==3 then
+			if (esdf) pal(7,6)
 			?"use ⬅️➡️⬆️⬇️ (arrows)"
-			?"or          (esdf)"
 			?"to pan around the map"
-			pal(5,7)
-			spr(196,15,11)
-			spr(197,23,11)
-			spr(212,31,11)
-			spr(213,39,11)
+			pal()
+			if esdf then
+				?"esdf work too!",3,19
+				pal()
+			end
 		elseif c==2 then
 			?"move the cursor with the"
 			?"\f9dpad\f7 to the screen edges"
@@ -3203,39 +3224,91 @@ function _draw()
 			?"around the map"
 		end
 	elseif nsel==1 and seltyp.idx==5 then
-		if c==3 then
-			?"with a unit selected,"
-			?"\9right-click\7 to attack"
-			?"an enemy (or wild) unit"
-		elseif c==2 then
-			?"with a unit selected,"
-			?"press 🅾️ to attack"
-			?"an enemy (or wild) unit"
-		elseif c==1 then
-			if (act>0) color(6)
-			?"with a unit selected,"
-			?"tap the action button,"
-			if act>0 then
-				color(7)
-				?"then tap an enemy (or"
-				?"wild) unit to attack"
+		if bug then
+			if c==3 then
+				?"\f9right-click\f7 on"
+				?"an enemy (or wild)"
+				?"unit to attack it!"
+			elseif c==2 then
+				?"press \f9🅾️\f7 on an"
+				?"an enemy (or wild) unit"
+				?"to attack it!"
+			elseif c==1 then
+				if act>0 or atking then
+					atking=true
+				 color(6)
+				end
+				?"to attack an enemy (or"
+				?"wild) unit, tap the"
+				?"action button..."
+				if atking then
+					color(7)
+					?"then tap the unit!"
+				end
 			end
+		else
+			?"explore the map"
+			?"for more resources"
+			?"and the enemy base!"
 		end
-	elseif nsel==2 and amy>90 or to_bld then
+	elseif sel1 and sel1.typ.bldg then
+		if sel1.q then
+--			res1.r=100
+			if res1.p==res1.pl then
+				?"keep an eye on"
+				?"your population   !"
+				spr(195,66,10)
+				?"build \fbmounds\f7 to"
+				?"increase it"
+			elseif sel1.q.qty>=2 then
+				if c==3 then
+					?"\f9right-click\f7 to"
+					?"set a rally point for"
+					?"the new units"
+				elseif c==2 then
+					?"press \f9❎\f7 to"
+					?"set a rally point for"
+					?"the new units"
+				elseif c==1 then
+					?"\f9tap\f7 the flag to"
+					?"set a rally point for"
+					?"the new units"
+				end
+			else
+				?"you can \f9queue\f7 up"
+				?"to 9 units of the"
+				?"same type"
+			end
+		else
 		if c==3 then
-			?"to build, click on a"
-			?"building and click"
-			?"somewhere to place it"
+			?"see a unit's cost by"
+			?"hovering over its"
+			?"icon. \f9click\f7 on it to"
+			?"start training it."
 		elseif c==2 then
-			?"to build, press ❎ on"
-			?"a building and press ❎"
-			?"somewhere to place it"
+			?"see a unit's cost by"
+			?"hovering over its icon."
+			?"press \f9❎\f7 over it to"
+			?"to start training it."
 		elseif c==1 then
-			?"to build, tap on a"
-			?"building, then tap"
-			?"somewhere to place it"
+			?"to train a unit,"
+			?"tap its icon. check"
+			?"its cost by tapping"
+			?"and holding on it"
 		end
-	elseif nsel==3 and moved then
+		end
+	elseif res1.p==res1.pl and not built then
+		if nsel==1 then
+			pal(7,6)
+		end
+		?"to build a building,"
+		?"select a worker..."
+		pal()
+		if nsel==1 then
+			?"choose a building"
+			?"and place it"
+		end
+	elseif nsel==2 and moved then
 		if c==3 then
 			?"with worker ants"
 			?"selected, \f9right-click"
@@ -3255,7 +3328,7 @@ function _draw()
 				?"begin gathering it"
 			end
 		end
-	elseif nsel==3 then
+	elseif nsel==2 and not moved then
 		if c==3 then
 			?"\f9right-click\f7 to move"
 			?"the selected units"
@@ -3278,20 +3351,12 @@ function _draw()
 			?"draw a selection box"
 			?"around your units"
 		elseif c==2 then
-			?"press ❎ and use the dpad"
+			?"press \f9❎\f7 and use the dpad"
 			?"to draw a selection box"
 			?"around your units"
 		elseif c==1 then
 			?"drag a selection box"
 			?"around your units"
-		end
-	elseif built then
-		if c==3 then
-			?"to build a unit,"
-		elseif c==2 then
-			?"to build a unit,"
-		elseif c==1 then
-			?"to build a unit,"
 		end
 	end
 	
@@ -3396,13 +3461,13 @@ fff77fffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffff
 0000c0c00011c0c1000500800dddd2282044400b8000444008004537733450bb0bb080003b300300577550000005444057777775575044400577444054944945
 0000c0c00001c0c15050008000505008505b05008b0504050800532772453000b00b800003b30000055750000005044505577750050004450055044554944945
 0000ccc00001ccc100000000000000000000b00000000000000034222253400bb0bb000000300000000500000000005000055500000000500000005005555550
-000000000000000000000000000000000555550005555500509030b0505599880000006000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000550005505550055000000000550599880000060000000000000000000000000000000000000000000000000000000000
-00000000000000000004000000000000550055505550555009999990055555500000060000000000000000000000000000000000000000000000000000000000
-00040000000000000041100000000000550005505500555099799799556556550000060000000000000000000000000000000000000000000000000000000000
-00411000000400000451140000000000055555000555550097d77d79565665650000006000000000000007777700000000000777770000000000077777000000
-04511400004110004554454000000000000000000000000099411499554114550000000600000000000076676670000000007997667000000000766799700000
-45544540045114005454545000000000000000000000000099444499554444550000000600000000000766676665000000079997666500000007666799950000
+0000000000000000000000000aaaaa000555550005555500509030b0505599880000006000000000000000000000000000000000000000000000000000000000
+000000000000000000000000aa1a1aa0550005505550055000000000550599880000060000000000000000000000000000000000000000000000000000000000
+000000000000000000040000aa1a1aa0550055505550555009999990055555500000060000000000000000000000000000000000000000000000000000000000
+000400000000000000411000aac1caa0550005505500555099799799556556550000060000000000000000000000000000000000000000000000000000000000
+004110000004000004511400aac1caa0055555000555550097d77d79565665650000006000000000000007777700000000000777770000000000077777000000
+045114000041100045544540aa111aa0000000000000000099411499554114550000000600000000000076676670000000007997667000000000766799700000
+4554454004511400545454500aaaaa00000000000000000099444499554444550000000600000000000766676665000000079997666500000007666799950000
 00000000000000000000000000000000000000000000000009999990055555500000006000000000000766676665000000079997666500000007666799950000
 00000000000000000000000000000000055555000555550000000000000000000000006000000000000766676665000000079997666500000007666799950000
 00000000050005000b030b0000000000550055505500055009999990055555500000000600000000000777777775000000077777777500000007777777750000
