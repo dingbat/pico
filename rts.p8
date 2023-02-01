@@ -1663,7 +1663,6 @@ function input()
 
 	if to_bld then
 		if clk and bldable() then
-			sfx"1"
 			local b=unit(
 				to_bld,
 				mx8*8+to_bld.w\2,
@@ -1671,7 +1670,7 @@ function input()
 				unspl"1,1,1")
 			fsel(gobld,b)
 			pay(to_bld,1,res1)
-			b.cost,to_bld,selx=to_bld
+			to_bld,selx=sfx"1"
 		end
 		return
 	end
@@ -1918,8 +1917,7 @@ function bld(u)
 			max_hp+=typ.hpr
 			hp+=typ.hpr
 			if const>=typ.const then
-				const,cost=
-					u.hu and g.sfx"26"
+				const=u.hu and g.sfx"26"
 				g.reg_bldg(_ENV)
 				if typ.drop then
 					pres.pl+=5
@@ -2534,7 +2532,7 @@ function draw_port(
 	add(fn and btns,{
 		r={x,y,x+10,y+8},
 		fn=fn,
-		costs=cost
+		cost=cost
 	})
 
 	if fg then
@@ -2568,13 +2566,13 @@ end
 
 function single()
 	local q=sel1.q
-	if sel1.cost then
+	if sel1.const then
 		draw_port(p[[portx=72
 porty=72
 porto=8
 portf=9]],
 			function()
-				pay(sel1.cost,-1,res1)
+				pay(seltyp,-1,res1)
 				sel1.hp=0
 			end,24,107,
 			sel1.const/seltyp.const,
@@ -2643,7 +2641,7 @@ end,42,108)
 end
 
 function draw_menu()
-	local x,hc=0,hbtn and hbtn.costs
+	local x,hc=0,hbtn and hbtn.cost
 	for i,sec in inext,split(
 		sel1 and sel1.hu and
 		(sel1.bldg and
