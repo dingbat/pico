@@ -83,7 +83,7 @@ function _update()
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	aspl"pos,asc,sele,bfog,afog"
+	aspl"pos,asc,sele"
 	upc,hbld,t6,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
@@ -200,7 +200,7 @@ function _draw()
 		return
 	end
 
-	local prj_so=cf\5%2*2
+	aspl"bfog,afog,btns"
 	for u in all(units) do
 		if u.onscr or loser then
 			if
@@ -219,9 +219,10 @@ function _draw()
 
 	foreach(bfog,draw_unit)
 	camera(cx,cy)
+	local cf5=cf\5
 	foreach(prj,function(_ENV)
 		sspr(
-			typ.prj_s+prj_so,
+			typ.prj_s+cf5%2*2,
 			96,2,2,x,y)
 	end)
 	if loser then
@@ -239,7 +240,7 @@ function _draw()
 
 	_pal,pal=pal,max
 	foreach(afog,draw_unit)
-	pal,btns=_pal,{}
+	pal=_pal
 	pal()
 
 	fillp"23130.5"
@@ -270,7 +271,7 @@ function _draw()
 	fillp()
 
 	if sel1 and sel1.rx then
-		spr(64+cf\5%3,
+		spr(64+cf5%3,
 			sel1.rx-2,sel1.ry-5)
 	end
 
@@ -2757,8 +2758,8 @@ function comp(f,g)
 	end
 end
 
-function arrs(v,...)
-	_ENV[v]={},... and arrs(...)
+function a(v,...)
+	_ENV[v]={},... and a(...)
 end
 
 pspl,rndspl,unspl,campal=
@@ -2774,7 +2775,7 @@ unl,unspr,aspl,
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
-	comp(arrs,unspl),
+	comp(a,unspl),
 	{},
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",

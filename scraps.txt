@@ -331,7 +331,8 @@ x (10 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
 x hunt
 
 
-
+vars to rename:
+dmst
 
 
 
