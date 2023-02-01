@@ -293,14 +293,14 @@ function _draw()
 	if to_bld then
 		camera(cx-mx8*8,cy-my8*8)
 		pspl(bldable() or
-		"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
+			"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
 			camera(4-amx,4-amy)
 		else
 			fillp"23130.5"
 			rect(to_bld.fw,to_bld.fh,
-			unspl"-1,-1,3")
+				unspl"-1,-1,3")
 			fillp()
 		end
 		local _ENV=to_bld
@@ -2761,12 +2761,10 @@ function arrs(v,...)
 	_ENV[v]={},... and arrs(...)
 end
 
-pspl,rndspl,unspl,spldeli,
-	campal=
+pspl,rndspl,unspl,campal=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
-	comp(split,deli),
 	comp(camera,pal)
 	
 unl,unspr,aspl,
