@@ -435,6 +435,7 @@ ant=1
 sfx=10
 const=1
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=beetle
@@ -482,6 +483,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=spider
@@ -528,6 +530,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=archer
@@ -579,6 +582,7 @@ prj_xo=-2
 prj_yo=0
 prj_s=52
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=warant
@@ -625,6 +629,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=cat
@@ -677,6 +682,7 @@ prj_xo=1
 prj_yo=-4
 prj_s=56
 tmap=-1
+hl=1
 d=0]]
 
 p[[var=queen
@@ -721,6 +727,7 @@ units=1
 queen=1
 dir=-1
 tmap=-1
+hl=1
 d=61]]
 
 p[[var=tower
@@ -876,7 +883,7 @@ dead_y=104
 dead_fr=8
 dead_fps=7.5
 portx=15
-porty=112
+porty=111
 bldg=1
 bldrs=1
 bmap=8
@@ -1473,7 +1480,7 @@ function tick(u)
 		_ENV[u.st.t](u)
 	end
 
-	if not u.fire and u.dmgd then
+	if u.hl and u.dmgd then
 		u.hp+=heal[u.p].qty
 	end
 
@@ -1664,7 +1671,7 @@ function input()
 				unspl"1,1,1")
 			fsel(gobld,b)
 			pay(to_bld,1,res1)
-			b.cost,to_bld,selx=nil
+			b.cost,to_bld,selx=to_bld
 		end
 		return
 	end
@@ -3077,293 +3084,6 @@ function() dset(1,~dget"1") end)
 cartdata"age_of_ants"
 foreach(split",,",mode)
 
--->8
-tostr[[[[]]
-srand"18"
-_dr=_draw
-
-function palp(k,p)
-	pal()
-	if (btn(k,p)) pal(5,9)
-end
-
-function _draw()
-	_dr()
-	campal()
-	if mound then
-		mound.portx=-1
-		mound.porty=103
-		mound.rest_x=16
-		mound.rest_y=96
-		mound.p1.rest_x=16
-		mound.p1.rest_y=96
-		brks.portx=7
-		brks.porty=104
-		mon.portx=15
-		mon.porty=103
-		warant.p1.los=35
-	else
-		return
-	end
-	
-	local mx,my=
-		max(amx)/42-1,
-		max(amy)/42-1
-	local c=dget"0"
-	if c==3 then
-		local s=202
-		if (btn"5") s=204
-		if (btn"4") s=206
-		spr(200,115+mx,4+my,2,2)
-		spr(s,115+mx,10+my,2,2)
-		
-		palp(⬆️,1)
-		if (esdf) spr(196,98,19)
-		palp(⬆️)
-		?"⬆️",98,5,5
-		
-		palp(⬅️,1)
-		if (esdf) spr(197,90,25)
-		palp(⬅️)
-		?"⬅️",90,11,5
-		
-		palp(⬇️,1)
-		if (esdf) spr(212,98,25)
-		palp(⬇️)
-		?"⬇️",98,11,5
-		
-		palp(➡️,1)
-		if (esdf) spr(213,106,25)
-		palp(➡️)
-		?"➡️",106,11,5
-		pal()
-	end
-	if c==2 then
-		local dx,dy=0,0
-		if (btn(⬅️)) dx=-1
-		if (btn(➡️)) dx=1
-		if (btn(⬆️)) dy=-1
-		if (btn(⬇️)) dy=1
-		spr(234,108,1,2,2)
-		spr(236,108+dx,1+dy,2,2)
-		palp(❎)
-		?"❎",109,23,5
-		palp(🅾️)
-		?"🅾️",115,18,5
-		pal()
-	end
-	if c==1 then
-		local s,fs=48,228
-		if (btn"5") s,fs=64,226
-		if (btn(⬅️) or btn(⬅️,1)) mx,my=-2,2
-		if (btn(➡️) or btn(➡️,1)) mx,my=0,2
-		if (btn(⬆️) or btn(⬆️,1)) mx,my=-1,1
-		if (btn(⬇️) or btn(⬇️,1)) mx,my=-1,3
-		spr(224,105,5,2,2)
-		spr(fs,107+mx*2,7+my*2,2,2)
-		sspr(s,112,16,16,
-			max(amx)-10,max(amy)-10,20,20)
-	end
-	
-	cursor(3,5,7)
-	
-	if sel1 and sel1.st.move then 
-		moving=true
-	end
-	if nsel==2 and moving and 
-		sel1.st.idl and sel[2].st.idl
-	then
-		moved=true
-	end
-	if cy>(lcy or 9999) then
-		done_pan=true
-	end
-	lcy=cy
-	if res1.b<20 then
-		built=true
-	end
-	if btnp(⬅️,1) or btnp(➡️,1)
-		or btnp(⬆️,1) or btnp(⬇️,1)
-	then
-		esdf=true
-	end
-	if sel1 and sel1.st.atk then
-		atkd=true
-	end
-	if sel1 and atkd and sel1.st.idl then
-		done=true
-	end
-	local w=units[9]
-	foreach(units,function(u)
-		if u.p==4 and
-			dist(u.x-w.x,u.y-w.y)<40 then
-			bug=true
-		end
-	end)
-	
-	done=true
-	if done then
-		?"\^tgood luck, and",11
-		?"\^whave fun!"
-	elseif not done_pan then
-		if c==3 then
-			if (esdf) pal(7,6)
-			?"use ⬅️➡️⬆️⬇️ (arrows)"
-			?"to pan around the map"
-			pal()
-			if esdf then
-				?"esdf work too!",3,19
-				pal()
-			end
-		elseif c==2 then
-			?"move the cursor with the"
-			?"\f9dpad\f7 to the screen edges"
-			?"to pan around the map"
-		elseif c==1 then
-			?"use the dpad to pan"
-			?"around the map"
-		end
-	elseif nsel==1 and seltyp.idx==5 then
-		if bug then
-			if c==3 then
-				?"\f9right-click\f7 on"
-				?"an enemy (or wild)"
-				?"unit to attack it!"
-			elseif c==2 then
-				?"press \f9🅾️\f7 on an"
-				?"an enemy (or wild) unit"
-				?"to attack it!"
-			elseif c==1 then
-				if act>0 or atking then
-					atking=true
-				 color(6)
-				end
-				?"to attack an enemy (or"
-				?"wild) unit, tap the"
-				?"action button..."
-				if atking then
-					color(7)
-					?"then tap the unit!"
-				end
-			end
-		else
-			?"explore the map"
-			?"for more resources"
-			?"and the enemy base!"
-		end
-	elseif sel1 and sel1.typ.bldg then
-		if sel1.q then
---			res1.r=100
-			if res1.p==res1.pl then
-				?"keep an eye on"
-				?"your population   !"
-				spr(195,66,10)
-				?"build \fbmounds\f7 to"
-				?"increase it"
-			elseif sel1.q.qty>=2 then
-				if c==3 then
-					?"\f9right-click\f7 to"
-					?"set a rally point for"
-					?"the new units"
-				elseif c==2 then
-					?"press \f9❎\f7 to"
-					?"set a rally point for"
-					?"the new units"
-				elseif c==1 then
-					?"\f9tap\f7 the flag to"
-					?"set a rally point for"
-					?"the new units"
-				end
-			else
-				?"you can \f9queue\f7 up"
-				?"to 9 units of the"
-				?"same type"
-			end
-		else
-		if c==3 then
-			?"see a unit's cost by"
-			?"hovering over its"
-			?"icon. \f9click\f7 on it to"
-			?"start training it."
-		elseif c==2 then
-			?"see a unit's cost by"
-			?"hovering over its icon."
-			?"press \f9❎\f7 over it to"
-			?"to start training it."
-		elseif c==1 then
-			?"to train a unit,"
-			?"tap its icon. check"
-			?"its cost by tapping"
-			?"and holding on it"
-		end
-		end
-	elseif res1.p==res1.pl and not built then
-		if nsel==1 then
-			pal(7,6)
-		end
-		?"to build a building,"
-		?"select a worker..."
-		pal()
-		if nsel==1 then
-			?"choose a building"
-			?"and place it"
-		end
-	elseif nsel==2 and moved then
-		if c==3 then
-			?"with worker ants"
-			?"selected, \f9right-click"
-			?"on a resource to",7
-			?"begin gathering it"
-		elseif c==2 then
-			?"with worker ants selected,"
-			?"press \f9🅾️\f7 on a resource"
-			?"to begin gathering it"
-		elseif c==1 then
-			if (act>0) color(6)
-			?"with worker ants selected,"
-			?"tap the action button,"
-			if act>0 then
-				color(7)
-				?"then tap a resource to"
-				?"begin gathering it"
-			end
-		end
-	elseif nsel==2 and not moved then
-		if c==3 then
-			?"\f9right-click\f7 to move"
-			?"the selected units"
-		elseif c==2 then
-			?"press \f9🅾️\f7 to move the"
-			?"selected units"
-		elseif c==1 then
-			if (act>0) color(6)
-			?"with units selected,"
-			?"tap the action button,"
-			if act>0 then
-				color(7)
-				?"then tap somewhere to"
-				?"move them"
-			end
-		end
-	elseif not moved then
-		if c==3 then
-			?"left-click and drag to"
-			?"draw a selection box"
-			?"around your units"
-		elseif c==2 then
-			?"press \f9❎\f7 and use the dpad"
-			?"to draw a selection box"
-			?"around your units"
-		elseif c==1 then
-			?"drag a selection box"
-			?"around your units"
-		end
-	end
-	
-	pal()
-end
-
---]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
@@ -3477,14 +3197,14 @@ fff77fffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffff
 04511400004110004554454000414000004040000041400099444499554444550a9aa9a50a99a9950a95a9a5059a59a505a65a65007505000075050000750500
 45544540045114005454545000000000000000000000000009999990055555505989989559899895598998955a89a895569a69a5057657600576576005765760
 00000000000000000000000000000000000000000000000000000000000000002822282228828822228282822522852255285252565765755657657556576575
-00000000000000000000000000000000000000000000000000000d0d000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000500050000000000000000000b030b0000000d0d00000d0d0000000000000000000000000000000000000000000000000000000000000000
-0000000000000000575057500000000000000000b03330b00001325200000d0d0000d0d000000000000000000000000000000000000000005050500000505050
-0500050000000000747074700b030b0000000000b11311b0001330500011325200000d0d00000000000000000000000000000000000000004040400000404040
-04000400000000000400040004111400000b0000041114000133bb00013330500113325200000000005000000000000000000000000000000444000b00044400
-01111100001110004111114040111040001110004011104013300b001333b0001333305001113d0d05150000000000000000000000000000041400b350041400
-44111440501110504d111d404040404004404400404040401350b00013500b003535b0000353b2520414000300000000000000000000000004140b3335041400
-40404040404040404d404d40000000000000000000000000350500003505bb00505bb000353bb050044403313300000000000000000000000444b33133544400
+00000000000000000500050000000000000000000000000000000d0d000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000005750575000000000000000000b030b0000000d0d00000d0d0000000000000000000000000000000000000000000000000000000000000000
+0500050000000000747074700000000000000000b03330b00001325200000d0d0000d0d000000000000000000000000000000000000000005050500000505050
+0400040000000000040004000b030b0000000000b11311b0001330500011325200000d0d00000000000000000000000000000000000000004040400000404040
+01111100001110004111114004111400000b0000041114000133bb00013330500113325200000000005000000000000000000000000000000444000b00044400
+4d111d40501110504d111d4040111040001110004011104013300b001333b0001333305001113d0d05150000000000000000000000000000041400b350041400
+4d404d40404040404d404d404040404004404400404040401350b00013500b003535b0000353b2520414000300000000000000000000000004140b3335041400
+000000000000000000000000000000000000000000000000350500003505bb00505bb000353bb050044403313300000000000000000000000444b33133544400
 00000000000000003453345334533453345334533453345303033450000600000006050000050006041405111505000000000000000000000414051115041400
 434b4043434040b04533453345334533453875334533453343434345000006000005606000006050041455555554050000000000000000000414555555541400
 554355b343b300005334533453345334587887845338733455435533000060000050500000a00000044454545454440000000505050000000444545454544400

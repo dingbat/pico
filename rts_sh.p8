@@ -346,7 +346,7 @@ los=20
 hp=6
 range=0
 atk_freq=30
-atk=.2
+atk=.38
 conv=0
 def=ant
 atk_typ=ant
@@ -401,6 +401,7 @@ ant=1
 sfx=10
 const=1
 tmap=-1
+hl=1
 d=0]]
 p[[var=beetle
 txt=⁶h²5ᶜ9beetle: ᶜ7slow and melee unit but⁶g⁴mstrong vs buildings.
@@ -447,6 +448,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 p[[var=spider
 txt=⁶h²5ᶜ9spider: ᶜ7fastest unit, low def.⁶g⁴mbut good vs ants.
@@ -492,6 +494,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 p[[var=archer
 txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged unit,⁶g⁴mgood vs spiders.
@@ -542,6 +545,7 @@ prj_xo=-2
 prj_yo=0
 prj_s=52
 tmap=-1
+hl=1
 d=0]]
 p[[var=warant
 txt=⁶h²5ᶜ9army ant:ᶜ7 basic army unit. good⁶g⁴mvs beetles+catrplrs.
@@ -587,6 +591,7 @@ unit=1
 sfx=10
 dir=1
 tmap=-1
+hl=1
 d=0]]
 p[[var=cat
 txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
@@ -638,6 +643,7 @@ prj_xo=1
 prj_yo=-4
 prj_s=56
 tmap=-1
+hl=1
 d=0]]
 p[[var=queen
 idx=7
@@ -681,6 +687,7 @@ units=1
 queen=1
 dir=-1
 tmap=-1
+hl=1
 d=61]]
 p[[var=tower
 txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
@@ -1411,7 +1418,7 @@ end
 if u.st.active then
 _ENV[u.st.t](u)
 end
-if not u.fire and u.dmgd then
+if u.hl and u.dmgd then
 u.hp+=heal[u.p].qty
 end
 if int(u.r,{mx,my,mx,my},1)
