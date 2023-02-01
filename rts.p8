@@ -124,7 +124,9 @@ function _update()
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
 					dmg(typ,u)
-					if (typ.aoe==0) break
+					if typ.aoe==0 then
+						break
+					end
 					if hlv.var then
 						hilite(p([[f=2
 c=13]],b.x,b.y))
@@ -357,8 +359,8 @@ techs=0
 t=0
 npl=0]]
 
-	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmst"
-	res1,dmst.d,posidx,
+	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"
+	res1,dmap_st.d,posidx,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
 		res.p1,{},
@@ -370,8 +372,7 @@ npl=0]]
 	end
 
 p[[var=heal
-qty=0x.0036
-]]
+qty=.00083]]
 
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
@@ -898,7 +899,7 @@ const=8
 hpr=8
 def=bld
 cycles=5
-gr=0x.0222
+gr=.00834
 
 r=0
 g=3
@@ -1346,8 +1347,7 @@ function gobld(u,b)
 		return
 	end
 	u.st,u.res=p([[t=bld
-in_bld=1
-]],path(u,b.x,b.y),b)
+in_bld=1]],path(u,b.x,b.y),b)
 end
 
 function gogth(u,tx,ty,wp)
@@ -1415,7 +1415,7 @@ function tick(u)
 				end,x8,y8)
 		if typ.lady then
 			mset(x8,y8,82+u.dir)
-			s(dmst.r or {},x8,y8,
+			s(dmap_st.r or {},x8,y8,
 				{x8,y8})
 			qdmaps"r"
 		elseif typ.queen then
@@ -1456,7 +1456,9 @@ function tick(u)
 	local x,y,t,agg_d,agg_u,adj=
 		u.x,u.y,u.st.x,9999
 
-	if (u.q) produce(u)
+	if u.q then
+		produce(u)
+	end
 	if (typ.farm) update_farm(u)
 	if t then
 		if t.dead then
@@ -1503,7 +1505,9 @@ function tick(u)
 		if (typ.lady and t6)	wander(u)
 		if u.hu then
 			if typ.ant then
-				if (u.st.idl>10) idl=u
+				if u.st.idl>10 then
+					idl=u
+				end
 				u.st.idl+=1
 			elseif typ.idl and not u.q then
 				idlm=u
@@ -1652,7 +1656,9 @@ function input()
 				cam()
 			end
 		end
-		if (clk) to_bld=nil
+		if clk then
+			to_bld=nil
+		end
 		return
 	end
 
@@ -1786,7 +1792,9 @@ function draw_unit(u)
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
 		sx-=fw*ceil(p*2)
-		if (p<=.15) return
+		if p<=.15 then
+			return
+		end
 	elseif ufps then
 		sx+=f\ufps%fr*fw
 	end
@@ -1962,7 +1970,7 @@ function gth(u)
 			mset(x,y,t+16)
 		elseif n==1 then
 			mset(x,y,68)
-			s(dmst[r],x,y)
+			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y,.55)
 			qdmaps(r)
 		end
@@ -2197,12 +2205,12 @@ function reg_bldg(b)
 		s(bldgs,xx,yy,b.alive and b)
 		if b.dead then
 			s(exp,xx,yy,1)
-			s(dmst.d,xx,yy)
+			s(dmap_st.d,xx,yy)
 			if typ.fire and y==yy then
 				mset(xx,yy,69)
 			end
 		elseif	typ.drop then
-			s(dmst.d,xx,yy,{xx,yy})
+			s(dmap_st.d,xx,yy,{xx,yy})
 		end
 	end
 	reg(x,y,typ.h8 or reg(x,y-1))
@@ -2300,7 +2308,9 @@ conv=0]],_typ[_p],rnd"60"\1))
 	end
 	tot+=1
 	rest(box(u))
-	if (u.bldg) reg_bldg(u)
+	if u.bldg then
+		reg_bldg(u)
+	end
 	return u
 end
 
@@ -2348,7 +2358,9 @@ function dmap()
 	if q then
 		if q.c then
 			for i=1,#q.typ do
-				if (i>20) return
+				if i>20 then
+					return
+				end
 				local pt=deli(q.typ)
 				q.p1[pt.k]=q.c
 				if q.c<8 then
@@ -2367,17 +2379,17 @@ function dmap()
 			local o,f={},p[[r=2
 g=3
 b=4]][q]
-			if not dmst[q] then
-				dmst[q]={}
+			if not dmap_st[q] then
+				dmap_st[q]={}
 				for x=0,48 do
 					for y=0,32 do
 						if fget(mget(x,y),f) then
-							s(dmst[q],x,y,{x,y})
+							s(dmap_st[q],x,y,{x,y})
 						end
 					end
 				end
 			end
-			for i,t in next,dmst[q] do
+			for i,t in next,dmap_st[q] do
 				if surr(nil,unpack(t)) then
 					add(o,t).k=i
 				end
@@ -2624,8 +2636,7 @@ portf=9]],
 		draw_port(p[[portx=120
 porty=64
 porto=15
-portf=15
-]],function()
+portf=15]],function()
 	act+=1
 	act%=2
 end,42,108)
@@ -2678,16 +2689,13 @@ function draw_menu()
 			act==2 and p[[portx=99
 porty=72
 porto=2
-portf=13
-]] or seltyp.ant and p[[portx=81
+portf=13]] or seltyp.ant and p[[portx=81
 porty=72
 porto=2
-portf=13
-]] or p[[portx=90
+portf=13]] or p[[portx=90
 porty=72
 porto=2
-portf=13
-]],function()
+portf=13]],function()
 	act+=1
 	act%=3
 end,20,108)

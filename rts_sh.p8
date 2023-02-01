@@ -4,9 +4,8 @@ __lua__
 --age of ants
 --eeooty
 
---for source with spaces
---and credits visit:
---
+--credits & code with spaces
+--on bbs!
 
 music(63,2000)
 
@@ -69,14 +68,14 @@ menu,cx,cy=unspl"63,5,35"
 music"63"
 end
 if rclk then
-ban^^=0xf0
+ban^^=240
 end
 return
 end
 dmap()
 upcycle=
 split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
-aspl"pos,asc,sele,bfog,afog"
+aspl"pos,asc,sele"
 upc,hbld,t6,selh,selb,
 hunit,idl,idlm=
 cf%upcycle,
@@ -113,7 +112,9 @@ if u.ap!=b.p1[3]and
 int(u.r,{b.x,b.y,b.x,b.y},
 typ.aoe)then
 dmg(typ,u)
-if(typ.aoe==0)break
+if typ.aoe==0then
+break
+end
 if hlv.var then
 hilite(p([[f=2
 c=13]],b.x,b.y))
@@ -183,7 +184,7 @@ camera(split"8,12,8,18,14"[diff+1])
 ?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 return
 end
-local prj_so=cf\5%2*2
+aspl"bfog,afog,btns"
 for u in all(units)do
 if u.onscr or loser then
 if
@@ -201,9 +202,10 @@ end
 end
 foreach(bfog,draw_unit)
 camera(cx,cy)
+local cf5=cf\5
 foreach(prj,function(_ENV)
 sspr(
-typ.prj_s+prj_so,
+typ.prj_s+cf5%2*2,
 96,2,2,x,y)
 end)
 if loser then
@@ -219,7 +221,7 @@ pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 draw_map(48,15)
 _pal,pal=pal,max
 foreach(afog,draw_unit)
-pal,btns=_pal,{}
+pal=_pal
 pal()
 fillp"23130.5"
 for x=cx\8,cx\8+16do
@@ -244,7 +246,7 @@ camera(cx,cy)
 if(selx)rect(unpack(selbox))
 fillp()
 if sel1 and sel1.rx then
-spr(64+cf\5%3,
+spr(64+cf5%3,
 sel1.rx-2,sel1.ry-5)
 end
 local dt=t()-hlt
@@ -324,8 +326,8 @@ diff=0
 techs=0
 t=0
 npl=0]]
-aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmst"
-res1,dmst.d,posidx,
+aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"
+res1,dmap_st.d,posidx,
 cf,selt,alert,ban,amx,amy,tot,
 loser,menu=
 res.p1,{},
@@ -335,8 +337,7 @@ for i=2,4do
 ais[i]=p("boi=0",i)
 end
 p[[var=heal
-qty=0x.0036
-]]
+qty=.00083]]
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
@@ -851,7 +852,7 @@ const=8
 hpr=8
 def=bld
 cycles=5
-gr=0x.0222
+gr=.00834
 
 r=0
 g=3
@@ -1288,8 +1289,7 @@ if u.st.farm and b.typ.farm then
 return
 end
 u.st,u.res=p([[t=bld
-in_bld=1
-]],path(u,b.x,b.y),b)
+in_bld=1]],path(u,b.x,b.y),b)
 end
 
 function gogth(u,tx,ty,wp)
@@ -1356,7 +1356,7 @@ x8,y8=unpack(t)
 end,x8,y8)
 if typ.lady then
 mset(x8,y8,82+u.dir)
-s(dmst.r or{},x8,y8,
+s(dmap_st.r or{},x8,y8,
 {x8,y8})
 qdmaps"r"
 elseif typ.queen then
@@ -1393,7 +1393,9 @@ u.st.active=1
 end
 local x,y,t,agg_d,agg_u,adj=
 u.x,u.y,u.st.x,9999
-if(u.q)produce(u)
+if u.q then
+produce(u)
+end
 if(typ.farm)update_farm(u)
 if t then
 if t.dead then
@@ -1436,7 +1438,9 @@ if u.st.idl then
 if(typ.lady and t6)wander(u)
 if u.hu then
 if typ.ant then
-if(u.st.idl>10)idl=u
+if u.st.idl>10then
+idl=u
+end
 u.st.idl+=1
 elseif typ.idl and not u.q then
 idlm=u
@@ -1570,7 +1574,9 @@ cx,cy=x-64,y-64
 cam()
 end
 end
-if(clk)to_bld=nil
+if clk then
+to_bld=nil
+end
 return
 end
 if to_bld then
@@ -1691,7 +1697,9 @@ local p=u.const/typ.const
 line(fw-1,unspl"0,0,0,5")
 line(fw*p,0,14)
 sx-=fw*ceil(p*2)
-if(p<=.15)return
+if p<=.15then
+return
+end
 elseif ufps then
 sx+=f\ufps%fr*fw
 end
@@ -1867,7 +1875,7 @@ then
 mset(x,y,t+16)
 elseif n==1then
 mset(x,y,68)
-s(dmst[r],x,y)
+s(dmap_st[r],x,y)
 s(dmaps[r],x,y,.55)
 qdmaps(r)
 end
@@ -2102,12 +2110,12 @@ local function reg(xx,yy)
 s(bldgs,xx,yy,b.alive and b)
 if b.dead then
 s(exp,xx,yy,1)
-s(dmst.d,xx,yy)
+s(dmap_st.d,xx,yy)
 if typ.fire and y==yy then
 mset(xx,yy,69)
 end
 elseif typ.drop then
-s(dmst.d,xx,yy,{xx,yy})
+s(dmap_st.d,xx,yy,{xx,yy})
 end
 end
 reg(x,y,typ.h8 or reg(x,y-1))
@@ -2205,7 +2213,9 @@ _typ.prod or{},typ.bldg
 end
 tot+=1
 rest(box(u))
-if(u.bldg)reg_bldg(u)
+if u.bldg then
+reg_bldg(u)
+end
 return u
 end
 
@@ -2254,7 +2264,9 @@ local q=dq[1]
 if q then
 if q.c then
 for i=1,#q.typ do
-if(i>20)return
+if i>20then
+return
+end
 local pt=deli(q.typ)
 q.p1[pt.k]=q.c
 if q.c<8then
@@ -2273,17 +2285,17 @@ else
 local o,f={},p[[r=2
 g=3
 b=4]][q]
-if not dmst[q]then
-dmst[q]={}
+if not dmap_st[q]then
+dmap_st[q]={}
 for x=0,48do
 for y=0,32do
 if fget(mget(x,y),f)then
-s(dmst[q],x,y,{x,y})
+s(dmap_st[q],x,y,{x,y})
 end
 end
 end
 end
-for i,t in next,dmst[q]do
+for i,t in next,dmap_st[q]do
 if surr(nil,unpack(t))then
 add(o,t).k=i
 end
@@ -2528,8 +2540,7 @@ if sel1.typ.units then
 draw_port(p[[portx=120
 porty=64
 porto=15
-portf=15
-]],function()
+portf=15]],function()
 act+=1
 act%=2
 end,42,108)
@@ -2580,16 +2591,13 @@ draw_port(
 act==2and p[[portx=99
 porty=72
 porto=2
-portf=13
-]]or seltyp.ant and p[[portx=81
+portf=13]]or seltyp.ant and p[[portx=81
 porty=72
 porto=2
-portf=13
-]]or p[[portx=90
+portf=13]]or p[[portx=90
 porty=72
 porto=2
-portf=13
-]],function()
+portf=13]],function()
 act+=1
 act%=3
 end,20,108)
@@ -2623,7 +2631,7 @@ rect(unspl"104,106,112,114,10")
 resbar()
 if hc then
 campal()
-cursor(dget"1"&0xf000|1,93)
+cursor(dget"1"&61440|1,93)
 if hc.reqs then
 ?hc.txt
 local l=pres(hc,0,150)

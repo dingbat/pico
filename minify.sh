@@ -10,16 +10,16 @@ sed -i -E "s/\?(.*q\.qty)/print(\1)/" rts_print.p8
 sed -i -E "s/\?(split.*)/print(\1)/" rts_print.p8
 sed -i -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 
-header="\n--age of ants\n--eeooty\n\n--for source with spaces\n--and credits visit:\n--\n"
+header="\n--age of ants\n--eeooty\n\n--credits \& code with spaces\n--on bbs!\n"
 python3 ~/shrinko8-main/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
 sed -i -E "s/print\((.*)\)/?\1/" rts_sh.p8
 sed -i -E "s/^function /\nfunction /" rts_sh.p8
 sed -i -E "s/^__lua__/__lua__$header/" rts_sh.p8
-sed -i -E "s/=240$/=0xf0/" rts_sh.p8
+# sed -i -E "s/=240$/=0xf0/" rts_sh.p8
 sed -i -E "s/~=/!=/" rts_sh.p8
 sed -i -E "s/24365/0x5f2d/" rts_sh.p8
 sed -i -E "s/13480/0x34a8/" rts_sh.p8
-sed -i -E "s/61440/0xf000/" rts_sh.p8
+# sed -i -E "s/61440/0xf000/" rts_sh.p8
 sed -i -E "s/36868/0x9004/" rts_sh.p8
 tab start init
 tab rest tick

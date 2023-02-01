@@ -332,8 +332,6 @@ x hunt
 
 
 vars to rename:
-dmst
-
 
 
 \)([^}|),\].<>\s/\-*%+=^\[\\!])
