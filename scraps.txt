@@ -5,6 +5,7 @@ credits:
 - carlc27843's pxaviz https://carlc27843.itch.io/pico-8-source-compression-visualizer
 - siege engineers' [aoe2techtree.net]https://aoe2techtree.net/
 - thisismypassport [shrinko8](https://github.com/thisismypassport/shrinko8) for whitespace removal
+- wolfe3d for savefile idea 
 
 1; touch
 2; handheld

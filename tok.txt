@@ -1,18 +1,22 @@
 Tokens
 
+⁃ (2) `flr(a/b)` -> `a\b`
 ⁃ (1) sfx"", stat"", rnd"", btnp"", fillp"" (lots of apis can be called with strings)
+⁃ (1) `foreach(a, function(x) end)` saves a token over `for x in all(a) do` at the cost of perf, wouldn't do this with huge arrays
+⁃ (2 per arg) if a function is only used by one other function, you can define it inside the other (locally) and remove any arguments already in scope
+⁃ (1) use next,tbl instead of pairs(tbl)
+
 ⁃ (1) if statement whose body is a single function call:
  ⁃ if function is add,del,deli, you can do: `if (x) add(arr, i)` -> `add(x and arr,i)`. in turn, these will only return true if it actually happened, so this can be used to chain other statements
  ⁃ if function is setting camera X: `if (b) camera(x)` -> `camera(b and x)`, note that this resets the camera if not b
  ⁃ for any other function, if there is assignment (or a function call that can take an extra argument) nearby: `k=v; if (x) f()` -> `k=v,x and f()` OR `if (x) f(); g(1,2)` -> `g(1,2,x and f())`
  ⁃ note that if you need to do "not X and", you can usually just do "X or"
 ⁃ (1) use return of add(), del() and deli(): `add(a,b) b.x=y` -> `add(a,b).x=y`
-⁃ (2) `flr(a/b)` -> `a\b`
+
 ⁃ of course _env; remember you can assign _env without `do/end` blocks if at the end of a function
-⁃ (2 per arg) if a function is only used by one other function, you can define it inside the other (locally) and remove any arguments already in scope
 ⁃ (1) if you call any of your own functions with a single truthy value, can do fn"1"
+
 ⁃ a LOT can be done with control codes, large topic but if you are printing to the screen you generally don't ever need to pass args to print since you can move the cursor with \^j, \^| and \^- and you can set color with \F
-⁃ (1) `foreach(a, function(x) end)` saves a token over `for x in all(a) do` at the cost of perf, wouldn't do this with huge arrays
 ⁃ (1) extremely specific, but if you're using pal on color 1: pal(1,x) -> pal{x}
 ⁃ (1) you can use max()/min() (note they have different behavior) to coerce a potentially non-number value into 0: (bool_or_num or 0) -> max(bool), saves a token because you usually need parens around the first one. There's a bunch of other more general uses of this
 ⁃ Highly specific, but sometimes bit ops are useful:
@@ -20,7 +24,217 @@ Tokens
  ⁃ x==0 and y==0 -> x|y==0
  ⁃ x^^=0xf0 if x starts at 0 toggles between 0 and a high number, if passed into camera can be used to toggle showing/hiding something
 ⁃ (2) check if you actually need cls() (i didn't lol, if you fill the whole screen each frame with e.g. a map you might not)
-⁃ (1) use next,tbl instead of pairs(tbl)
 
 
 99.86
+
+
+here's a list of (fairly) generalizable token saving tricks i've compiled while working on my upcoming game, in case it might be helpful to anyone. some of these may be pretty basic, but i thought it'd be worth documenting them anyway!
+
+this does not include `unpack(split())` tricks, or `_ENV` tricks, which can both have enormous token windfalls. also, 
+
+### 2 tokens: flr to \
+
+this one is basic but it took me a while to learn about `\`. `flr(a/b)` can be written as `a\b`, saving 2 tokens. if flooring the result of a multiplication, assuming that one side is a constant, you can just invert: `flr(a*2.5)` to `a\0.4`
+
+### 1 token: calling apis with string params
+
+since lua lets you call functions without parens if the only argument is a string/table literal, you can save a token on many standard api calls, e.g. `sfx(5)` to `sfx"5"`, `stat""`, `rnd""`, btnp"", btn"", dget"", fillp"" (for this one, see the decimal value for your pattern in the console e.g. `fillp"23130.5"` for `fillp(▒)`), or even `poke""` if you want to set that value to 0.
+
+also keep in mind that this will work on your own functions too! if you call functions with a single truthy value, you can do `fn"1"` instead of `fn(true)`, you can even do this if you call a function with a single numeric argument, but keep in mind this won't work if you do any comparisons with that argument. `"3"+3` is allowed in lua, but not `"3">3`!
+
+### 1 token: foreach
+
+`foreach(a, function(x) end)` saves a token over `for x in all(a) do`. note that this means you can't `break` or `return` early, and it does come at the cost of performance (since you are introducing the overhead of function calls), wouldn't do this with huge arrays
+
+### 1 token: next, inext
+
+easy one:
+```
+for k,v in pairs(tbl) do
+end
+
+to:
+
+--unordered
+for k,v in next,tbl do
+end
+
+--ordered but only monotonically increasing past 1 are guaranteed:
+for k,v in inext,tbl do
+end
+```
+
+### 1 token: use return value of add/del/deli
+
+if you can guarantee that the item being added/removed is present, you can replace a reference with the function: `add(a,b); b.x=y` -> `add(a,b).x=y`
+
+### 1 token: hacking if statements
+
+this is a fun one, there are a bunch of cases to cover:
+
+**add/del/deli**
+
+if you call `add`, `del`, or `deli`, the call will only "go through" if the first argument (the list) is a list. if it's falsey, it's a no-op. so you can save a token with `if (x) add(arr, i)` to `add(x and arr,i)`. in turn, these will only return a truthy value if it actually happened, which can be used to chain other statements that depend on the same condition:
+```
+if x then
+ add(arr,i)
+ blah
+ blah
+end
+```
+to:
+```
+if add(x and arr,i) then
+ blah
+ blah
+end
+```
+
+**camera**
+if you want to call `camera` with `x` under condition `c`, save a token with `if (c) camera(x)` to `camera(c and x)`, note that this resets the camera if not `c`, which is sometimes what you want!
+
+**function call next to assignment**
+if you want to call any function under condition `c`, if there is assignment (or a function call that can take an extra argument) nearby, you can remove the if and save a token:
+```
+if (x) f()
+k=v
+```
+to:
+```
+k=v,x and f()
+```
+note that in this case the order matters! if it was the other way around:
+```
+k=v
+if (x) f()
+```
+you can't make the same conversion if `f()` relies on the new value of `k`.
+
+note that this same trick works if you are calling another function nearby with all of its parameters passed:
+```
+if (x) f()
+pset(50,50,9)
+```
+to:
+```
+pset(50,50,9,x and f())
+```
+same caveat applies here with ordering - `f()` will be called before `pset()`
+
+essentially we are forcing lua to have a floating expression without an assignment.
+
+**not**
+
+in all of the above cases, if your condition `x` is of the form `not y`, you can usually do `or y` instead of `and not y`!
+
+### 1 token: max to coerce to num
+
+you can use `max()` to coerce a potentially non-number value into 0, because: `max(nil)=>0; max(false)=>0; max(5)=>5`. this saves a token over `x or 0` because if you are doing math, e.g. `5+(x or 0)`, you will pay an extra token for the parens. it does have limits: be aware that `max(true)=>0`, and `max("5")=>5`
+
+### 2 tokens per argument: local functions
+
+if a function is only used by one other function, you can define it inside the other (locally) and remove any arguments already in scope:
+
+```
+function g(a,x)
+ ...
+end
+
+function f()
+ local a,b,c=...
+ g(a,b)
+ g(a,c)
+end
+```
+
+to:
+
+```
+
+function f()
+ local a,b,c=...
+ local function g(x)
+  ...
+ end
+ g(b)
+ g(c)
+end
+```
+
+### ??? tokens: practical bit ops
+
+sometimes bit ops can be useful to save a bunch of tokens. pardon the somewhat specific examples, hopefully these get you thinking:
+
+`x!=0 and y!=0` to `x&y!=0` (-2 tokens)
+`x==0 and y==0` to `x|y==0` (-2 tokens)
+
+`x^^=0xf0`: if x starts at 0, this toggles between 0 and a high number. if passed into e.g. `camera(x)`, can be used to toggle showing/hiding something
+
+`0!=~0`, so if you want to toggle something, say a controls option that you want to store in cartdata:
+
+```
+menuitem(1,"toggle foo",function() dset(0,~dget"0") end)
+...
+if dget"1"==0 then
+ --default, since cartdata defaults to 0
+else
+ --toggled
+end
+``` 
+
+### 1 token: pal color 1
+
+another highly specific one, but if you're using pal on color 1, save a token with `pal(1,x)` to `pal{x}`
+
+### 1 token: mid for range-checking
+
+ok one last stupidly specific one, but i thought this was cool:
+```
+dt<.1 or dt>.25
+--to:
+mid(dt,.1,.25)!=dt
+
+--wait it's the same number of tokens...
+--but the first one has an or, so if it
+--needs to be combined with `and`, it needs parens!
+```
+
+### 2 tokens: do you really need cls()?
+
+it's common to add `cls()` when starting a new project, but if you fill the whole screen each frame with e.g. a map you might not need it
+
+### ??? tokens: control codes
+
+a LOT can be done with control codes, this is a large topic. but in general, i've found that if you are printing to the screen you generally don't ever need to pass (constant) args to print (that is, `?`) since you can move the cursor with `\^j` and `\^+`, and set color with `\f`.
+
+moreover, if you are printing a bunch of hard-coded text, e.g. a title screen, you generally only need a single call to print (`?`) since you can jump around on the screen so easily. need a shadow? first print your text in a dark color, then use `\^j` or `\+` to jump backwards and slightly up and re-print your text in the foreground color.
+
+### 1 token: return value of ?
+
+this one is a little hacky, but since `?` is an alias for print that can be called without parens, you can still capture its return value if you need to get the max x-drawn. just make sure you add a newline after the last argument to `?`:
+
+```
+-- line x1 will be max_x-3
+line(
+ ?text_of_unknown_length
+ -3,80,8,80,9)
+
+x+=?text_of_unknown_length
+```
+
+### 1 token: .. operator with numbers
+
+the `..` string concat operator can be weird with numbers. if it's placed directly after a number, the parser will complain, expecting a fractional component following the first `.`:
+```
+?"minutes: "..t\60.." seconds: "..t%60
+--malformed number near '60..'
+```
+i thought this meant that you needed parens:
+```
+?"minutes: "..(t\60).." seconds: "..t%60
+```
+but you can save that token if you just add a space!
+```
+?"minutes: "..t\60 .." seconds: "..t%60
+```

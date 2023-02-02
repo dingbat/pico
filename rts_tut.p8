@@ -3106,6 +3106,8 @@ function _draw()
 		return
 	end
 	
+--	rectfill(0,0,128,30,0)
+	
 	local mx,my=
 		max(amx)/42-1,
 		max(amy)/42-1
@@ -3113,29 +3115,32 @@ function _draw()
 	if c==3 then
 		local s=202
 		if (btn"5") s=204
-		if (btn"4") s=206
+		if (btn"4" and done_pan) s=206
 		spr(200,115+mx,4+my,2,2)
 		spr(s,115+mx,10+my,2,2)
 		
+		local xo=92
+		local yo=2
+		local yo2=16
 		palp(⬆️,1)
-		if (esdf) spr(196,98,19)
+		if (esdf) spr(196,xo+8,yo2)
 		palp(⬆️)
-		?"⬆️",98,5,5
+		?"⬆️",xo+8,yo,5
 		
 		palp(⬅️,1)
-		if (esdf) spr(197,90,25)
+		if (esdf) spr(197,xo,yo2+6)
 		palp(⬅️)
-		?"⬅️",90,11,5
+		?"⬅️",xo,yo+6,5
 		
 		palp(⬇️,1)
-		if (esdf) spr(212,98,25)
+		if (esdf) spr(212,xo+8,yo2+6)
 		palp(⬇️)
-		?"⬇️",98,11,5
+		?"⬇️",xo+8,yo+6,5
 		
 		palp(➡️,1)
-		if (esdf) spr(213,106,25)
+		if (esdf) spr(213,xo+16,yo2+6)
 		palp(➡️)
-		?"➡️",106,11,5
+		?"➡️",xo+16,yo+6,5
 		pal()
 	end
 	if c==2 then
@@ -3175,10 +3180,12 @@ function _draw()
 	then
 		moved=true
 	end
-	if cy>(lcy or 9999) then
+	lc,llc=
+		llc and not btn"4",
+		btn"4"
+	if lc then
 		done_pan=true
 	end
-	lcy=cy
 	if res1.b<20 then
 		built=true
 	end
@@ -3201,7 +3208,7 @@ function _draw()
 		end
 	end)
 	
-	done=true
+--	done=false
 	if done then
 		?"\^tgood luck, and",11
 		?"\^whave fun!"
@@ -3227,20 +3234,22 @@ function _draw()
 		if bug then
 			if c==3 then
 				?"\f9right-click\f7 on"
-				?"an enemy (or wild)"
-				?"unit to attack it!"
+				?"an enemy unit (or"
+				?"wild ladybug) to"
+				?"attack it!"
 			elseif c==2 then
 				?"press \f9🅾️\f7 on an"
-				?"an enemy (or wild) unit"
-				?"to attack it!"
+				?"an enemy unit (or"
+				?"wild ladybug) to"
+				?"attack it!"
 			elseif c==1 then
 				if act>0 or atking then
 					atking=true
 				 color(6)
 				end
-				?"to attack an enemy (or"
-				?"wild) unit, tap the"
-				?"action button..."
+				?"to attack an enemy unit"
+				?"(or wild ladybug), tap"
+				?"the action button..."
 				if atking then
 					color(7)
 					?"then tap the unit!"
@@ -3275,15 +3284,15 @@ function _draw()
 					?"the new units"
 				end
 			else
-				?"you can \f9queue\f7 up"
-				?"to 9 units of the"
-				?"same type"
+				?"you can \f9queue\f7 units,"
+				?"up to 9 of the same"
+				?"type at a time"
 			end
 		else
 		if c==3 then
 			?"see a unit's cost by"
 			?"hovering over its"
-			?"icon. \f9click\f7 on it to"
+			?"icon. click on it to"
 			?"start training it."
 		elseif c==2 then
 			?"see a unit's cost by"
@@ -3305,8 +3314,19 @@ function _draw()
 		?"select a worker..."
 		pal()
 		if nsel==1 then
-			?"choose a building"
-			?"and place it"
+			if c==3 then
+				?"then, click on a"
+				?"building, and click"
+				?"somewhere to place it"
+			elseif c==2 then
+				?"then, press on a"
+				?"building, and press"
+				?"somewhere to place it"
+			elseif c==1 then
+				?"then, tap on a"
+				?"building, and tap"
+				?"somewhere to place it"
+			end
 		end
 	elseif nsel==2 and moved then
 		if c==3 then
@@ -3347,7 +3367,7 @@ function _draw()
 		end
 	elseif not moved then
 		if c==3 then
-			?"left-click and drag to"
+			?"\f9left-click\f7 and drag to"
 			?"draw a selection box"
 			?"around your units"
 		elseif c==2 then
