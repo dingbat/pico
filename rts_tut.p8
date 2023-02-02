@@ -1777,8 +1777,10 @@ function draw_unit(u)
 
 	if u.const and u.alive then
 		fillp"23130.5"
-		rect(-1,-1,w,h,
-			u==sel1 and 9 or 12)
+		rect(w,h,
+				unspl"0,0,12")
+--		rect(0,0,w,h,
+--			u==sel1 and 9 or 12)
 		fillp()
 		local p=u.const/typ.const
 		line(fw-1,unspl"0,0,0,5")

@@ -1,0 +1,46 @@
+function p8_close_cart(num)
+	{
+		if (window.confirm("are you sure you want to quit?")) {
+		history.go(num)
+		}
+	}
+
+					<div class="p8_menu_button" style="position:absolute; bottom:165px" id="p8b_close" onClick="p8_close_cart(-1);"></div>					
+
+		<div class="p8_menu_button" id="p8b_close" style="float:right; margin-right:10px" onClick="p8_close_cart(-2);"></div>
+
+
+
+   file=e.dataTransfer.files[0]
+			// read from file
+			reader = new FileReader();
+			reader.onload = function (event)
+			{
+				p8_dropped_cart_name = 'untitled.p8';
+				if (typeof file.name !== 'undefined') p8_dropped_cart_name = file.name;
+				if (typeof file.fileName !== 'undefined') p8_dropped_cart_name = file.fileName;
+				p8_dropped_cart = reader.result;
+				// data:image/png;base64
+				e.stopPropagation();
+				e.preventDefault();
+				codo_command = 9; // read directly from p8_dropped_cart with libb64 decoder
+			};
+			reader.readAsDataURL(file);
+
+
+
+
+html {
+	-webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+
+.p8_start_button img {
+	image-rendering: auto;
+}
+.p8_start_button{
+	image-rendering: pixelated;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
