@@ -1,3 +1,4 @@
 *.p8l
 *.wav
 *.bin
+out/

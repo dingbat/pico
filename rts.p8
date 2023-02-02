@@ -1782,7 +1782,7 @@ function draw_unit(u)
 		local p=u.const/typ.const
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
-		sx+=p\-0.5*fw
+		sx+=p\-.5*fw
 		if p<=.15 then
 			return
 		end

@@ -44,3 +44,15 @@ html {
 	image-rendering: pixelated;
 	image-rendering: -moz-crisp-edges;
 	image-rendering: crisp-edges;
+
+
+
+	<br/>
+<h1>desktop tutorial</h1><p></p><div class="video-container"><video src="https://www.dropbox.com/s/nwxqo5xlbjr2ml7/desktop.mp4?dl=0&raw=1" controls></video></div>
+<br/>
+<h1>touchscreen tutorial</h1><div class="video-container"><video src="https://www.dropbox.com/s/agwgi1f2nn85w3a/mobile.mp4?dl=0&raw=1" controls></video></div>
+<p>note: using the "action button" to move defaults to an "attack-move" (meaning that if the unit sees any enemies while it's moving it will start attacking them).</p>
+<p>this is usually what you want, but not to&nbsp;retreat! to move without attacking, tap the action button twice:<span></span></p>
+<p><img src="https://img.itch.zone/aW1nLzExMjAxNjM5LmdpZg==/original/rZv9ID.gif" alt="non-attack move" title="non-attack move"><br></p>
+<br/>
+<h1>handheld tutorial</h1><div class="video-container"><video src="https://www.dropbox.com/s/bby9n4x6zafrb6h/console.mp4?dl=0&raw=1" controls></video></div>

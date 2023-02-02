@@ -65,15 +65,6 @@ selx,sely,selt=mx,my,t()
 		return
 	end
 
---[[
-the following will not be saved:
-- unit states
-- resource count in resource tiles
-- units in production, along w/
-  the used resources+pop count
-- top-left tree will regrow :-)
-]]
-
 acct={}
 times={}
 function flush_time(str,f)

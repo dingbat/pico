@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 tab () {
@@ -10,8 +12,10 @@ sed -i -E "s/\?(.*q\.qty)/print(\1)/" rts_print.p8
 sed -i -E "s/\?(split.*)/print(\1)/" rts_print.p8
 sed -i -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 
-header="\n--age of ants\n--eeooty\n\n--credits \& code with spaces\n--on bbs!\n"
+echo "shrinking..."
 python3 ~/shrinko8-main/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
+
+header="\n--age of ants\n--eeooty\n\n--credits \& code with spaces\n--on bbs!\n"
 sed -i -E "s/print\((.*)\)/?\1/" rts_sh.p8
 sed -i -E "s/^function /\nfunction /" rts_sh.p8
 sed -i -E "s/^__lua__/__lua__$header/" rts_sh.p8
@@ -34,3 +38,18 @@ tab ai_frame ai
 tab mode mode
 
 rm rts_print.p8
+
+python3 ~/shrinko8-main/shrinko8.py ./rts_sh.p8 --count
+echo
+
+rm -rf out
+~/pico-8/pico8_64 -export "age_of_ants.bin" ./rts_sh.p8
+~/pico-8/pico8_64 -export itch/index.js ./rts_sh.p8
+
+mv age_of_ants.bin out
+~/pico-8/pico8_64 -export "out/age_of_ants.p8.png" ./rts_sh.p8
+mv out/age_of_ants.p8.png "out/age of ants.p8.png"
+
+rm -rf out/windows out/raspi out/linux out/age_of_ants.app
+
+zip out/web.zip itch/*
