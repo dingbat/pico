@@ -1942,19 +1942,14 @@ function bld(u)
 end
 
 function gth(u)
-	if u.typ.monk then
-		res1.g+=0x.00d
-		return
-	end
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
 	local t=mget(x,y)
-	local f=p[[7=45
-11=50
-19=45
-39=60]][fget(t)]
+	local f=resqty[fget(t)]
 	if not f then
-		if not mine_nxt(u,r) then
+		if u.typ.monk then
+			pay(pray,-1,res1)
+		elseif not mine_nxt(u,r) then
 			godrop(u,r)
 		end
 	elseif cf==u.id then
@@ -2786,6 +2781,17 @@ unl,unspr,aspl,
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,0,63,0,30,1,1"
+
+p[[var=resqty
+7=45
+11=50
+19=45
+39=60]]
+
+p[[var=pray
+g=.00318
+b=.00318
+r=0]]
 
 p[[var=rescol
 r=8
