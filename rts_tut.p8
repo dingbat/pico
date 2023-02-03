@@ -3301,7 +3301,7 @@ function _draw()
 					?"set a rally point for"
 					?"the new units"
 				elseif c==2 then
-					?"press \f9❎\f7 to"
+					?"press \f9🅾️\f7 to"
 					?"set a rally point for"
 					?"the new units"
 				elseif c==1 then
