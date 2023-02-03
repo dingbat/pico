@@ -44,27 +44,6 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
@@ -1008,7 +987,7 @@ d=0]]
 p[[idx=14
 spd=.21
 los=18
-hp=800
+hp=8
 range=0
 atk_freq=30
 atk=.47
@@ -1472,7 +1451,7 @@ function tick(u)
 		u.st.active=1
 	end
 
-	local x,y,t,agg_d,agg_u,adj=
+	local x,y,t,agg_d,agg_u=
 		u.x,u.y,u.st.x,9999
 
 	if u.q then
@@ -1589,17 +1568,15 @@ function tick(u)
 	end
 
 	if typ.unit and not u.st.typ then
-		while not u.st.adj and
-			g(pos,x\4,y\4,
+		if not u.st.adj then
+			while g(pos,x\4,y\4,
 				not u.st.in_bld and
 				g(bldgs,x\8,y\8,{}).bldg==1)
-		do
-			x+=rndspl"-1,-.5,0,0,.5,1"
-			y+=rndspl"-1,-.5,0,0,.5,1"
-			adj={{x,y}}
-		end
-		if adj then
-			u.st.typ,u.st.adj=adj,adj
+			do
+				x+=rndspl"-1,-.5,0,0,.5,1"
+				y+=rndspl"-1,-.5,0,0,.5,1"
+				u.st.typ,u.st.adj={{x,y}},1
+			end
 		end
 		s(pos,x\4,y\4,1)
 	end
