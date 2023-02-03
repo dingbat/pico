@@ -52,4 +52,10 @@ mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
 
+version=v1.0
+mv out/age_of_ants_raspi.zip out/age_of_ants_${version}_raspi.zip
+mv out/age_of_ants_osx.zip out/age_of_ants_${version}_osx.zip
+mv out/age_of_ants_windows.zip out/age_of_ants_${version}_windows.zip
+mv out/age_of_ants_linux.zip out/age_of_ants_${version}_linux.zip
+
 zip out/web.zip itch/*

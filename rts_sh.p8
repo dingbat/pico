@@ -1391,7 +1391,7 @@ rest(u)
 elseif u.st.farm then
 u.st.active=1
 end
-local x,y,t,agg_d,agg_u,adj=
+local x,y,t,agg_d,agg_u=
 u.x,u.y,u.st.x,9999
 if u.q then
 produce(u)
@@ -1403,7 +1403,9 @@ u.st.agg=1,
 u.st.typ or rest(u),
 typ.ant and t.typ.lady and
 gogth(u,t.x8,t.y8)
-elseif int(t.r,u.r,-2)then
+elseif
+not u.st.atk and
+int(t.r,u.r,-2)then
 u.dir,u.st.active,u.st.typ=
 sgn(t.x-u.x),1
 end
@@ -1497,15 +1499,16 @@ goatk(u,agg_u)
 end
 end
 if typ.unit and not u.st.typ then
+if not u.st.adj then
 while g(pos,x\4,y\4,
 not u.st.in_bld and
-g(bldgs,x\8,y\8,{}).bldg==1)and
-not u.st.adj do
+g(bldgs,x\8,y\8,{}).bldg==1)
+do
 x+=rndspl"-1,-.5,0,0,.5,1"
 y+=rndspl"-1,-.5,0,0,.5,1"
-adj={{x,y}}
+u.st.typ,u.st.adj={{x,y}},1
 end
-u.st.typ,u.st.adj=adj,adj
+end
 s(pos,x\4,y\4,1)
 end
 end
