@@ -2312,22 +2312,21 @@ function prod(u,b,m)
 end
 -->8
 --paths
---srand"1"
+
 function dpath(u,k)
-	local x,y,tk,dmap,p=
-		u.x8,u.y8,u.k,dmaps[k] or {},
-		{}
-	local l=dmaps[tk] or 9
+	local x,y,dmap,p,l=
+		u.x8,u.y8,dmaps[k] or {},
+		{},9
 	while l>=.5 do
-		local o=1
+		local none=1
 		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<l and (u.ai or exp[t.k]) then
-				l,tk,x,y,o=w,t.k,unpack(t)
+				l,x,y,none=w,unpack(t)
 			end
 		end,x,y,1,1)
-		if o then
-			dmap[tk]=min(l+1,9)
+		if none then
+			s(dmap,x,y,min(l+1,9))
 			return
 		end
 		add(p,{x*8+3,y*8+3})
@@ -2780,7 +2779,7 @@ unl,unspr,aspl,
 	unspl"-10,0,0,63,0,30,1,1"
 
 p[[var=resqty
-7=45
+7=6
 11=50
 19=45
 39=60]]
