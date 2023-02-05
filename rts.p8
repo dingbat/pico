@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --age of ants
 --eeooty
@@ -2927,8 +2927,8 @@ end
 function ai_frame(ai)
 	if (t6) ai.safe=1
 	aspl"avail,nxt,miners,aiu"
-	local ants,res,hold=
-		0,res[ai.typ]
+	local ants,bgrat,res,hold=
+		0,2.75,res[ai.typ]
 
 	local function miner(u,r)
 		u.rs=mine_nxt(u,r)
@@ -2962,7 +2962,10 @@ function ai_frame(ai)
 			end
 		else
 			if pid>90 then
-				if (t) break
+				if t then
+					bgrat=2
+					break
+				end
 				nxt[r]=nxt[r] or
 					g(dmaps[r] or {},x,y) and
 					{ux,uy}
@@ -3014,7 +3017,8 @@ function ai_frame(ai)
 	end
 
 	local bal=
-		(#miners-count(miners,"r"))\2.75
+		(#miners-count(miners,"r"))
+		\bgrat
 		-count(miners,"g")
 
 	for u in all(aiu) do
@@ -3084,6 +3088,82 @@ function() dset(1,~dget"1") end)
 cartdata"age_of_ants"
 foreach(split",,",mode)
 
+-->8
+tostr[[[[]]
+--./pico-8_0.2.5e/pico8_64 -accept_future 1
+
+ai_debug=true
+if ai_debug then
+	--ai in 1,2
+	srand"18"
+	--ai in 2,3
+	--srand"12"
+	
+	_update60=_update
+	_draw_map,_dr,_pr,_resbar=
+		draw_map,_draw,print_res,
+		resbar
+	function draw_map(o,y)
+		if not ai_debug or o==0 then
+			_draw_map(o,y)
+		end
+	end
+	function _draw()
+		if upcycle and not castles then
+			castles=1
+			castle.p1.atk=3
+			castle.p1.aoe=5
+			castle.p1.range=70
+			castle.p1.los=70
+			unit(13,298,204,1)
+			unit(13,318,180,1)
+			unit(13,290,224,1)
+			unit(13,280,206,1)
+			unit(13,300,184,1)
+			unit(13,333,196,1)
+		end
+		
+		_dr()
+		if ai_debug and res1 then
+		camera()
+		local ai=ais[2]
+		local secs=res1.t\1%60
+		?res.p2.diff,60,107,9
+		local b,g=0,0
+		for u in all(units) do
+			if u.ai==ai then
+				if u.typ.ant then
+					if (u.rs=="g") g+=1
+					if (u.rs=="b") b+=1
+				end
+			end
+		end
+		?"\f3"..g.."\f5/\f4"..b,60,114
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
+		local i=ai.boi
+		local off=8288+i%32+i\32*128
+		local p,pid=peek(off,2)
+		local bl={
+			"mnd","farm","bar","den","mon","twr","cstl"
+		}
+		?bl[pid] or pid,80,114,3
+		?":\-e#\-e:"..(i/2+1),80,107,2
+		camera()
+		end
+	end
+	function print_res(...)
+		if (ai_debug) res1=res.p2
+		local x=_pr(...)
+		res1=res[1]
+		return x
+	end
+	function resbar(...)
+		if (ai_debug) res1=res.p2
+		_resbar(...)
+		res1=res[1]
+	end
+end
+--]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000

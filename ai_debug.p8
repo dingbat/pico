@@ -1,4 +1,6 @@
 tostr[[[[]]
+--./pico-8_0.2.5e/pico8_64 -accept_future 1
+
 ai_debug=true
 if ai_debug then
 	--ai in 1,2
@@ -16,7 +18,7 @@ if ai_debug then
 		end
 	end
 	function _draw()
-		if upcycle and castles then
+		if upcycle and not castles then
 			castles=1
 			castle.p1.atk=3
 			castle.p1.aoe=5
