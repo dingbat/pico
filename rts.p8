@@ -1812,7 +1812,7 @@ function drop(u)
 	if u.res then
 		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
 	end
-	u.st.idl,u.res=10
+	u.st.idl,u.res=11
 	if u.st.farm then
 		gofarm(u,u.st.farm)
 	elseif u.st.y then
@@ -2779,7 +2779,7 @@ unl,unspr,aspl,
 	unspl"-10,0,0,63,0,30,1,1"
 
 p[[var=resqty
-7=6
+7=45
 11=50
 19=45
 39=60]]
