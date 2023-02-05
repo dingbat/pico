@@ -1467,8 +1467,11 @@ function tick(u)
 		elseif
 			not u.st.atk and
 			int(t.r,u.r,-2) then
-			u.dir,u.st.active,u.st.typ=
+			u.dir,u.st.active=
 				sgn(t.x-u.x),1
+			if not u.st.adj then
+				u.st.typ=nil
+			end
 		end
 	end
 	if u.st.active then
