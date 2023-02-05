@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -2312,20 +2312,21 @@ function prod(u,b,m)
 end
 -->8
 --paths
-
+--srand"1"
 function dpath(u,k)
-	local x,y,tk,dmap,p,l=
+	local x,y,tk,dmap,p=
 		u.x8,u.y8,u.k,dmaps[k] or {},
-		{},9
+		{}
+	local l=dmaps[tk] or 9
 	while l>=.5 do
-		local o=dmap[tk] or 9
+		local o=1
 		surr(function(t)
 			local w=(dmap[t.k] or 9)+t.d-1
 			if w<l and (u.ai or exp[t.k]) then
-				l,tk,x,y=w,t.k,unpack(t)
+				l,tk,x,y,o=w,t.k,unpack(t)
 			end
 		end,x,y,1,1)
-		if l>=o then
+		if o then
 			dmap[tk]=min(l+1,9)
 			return
 		end

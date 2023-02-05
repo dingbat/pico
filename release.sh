@@ -52,7 +52,7 @@ mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
 
-version=v1.0
+version=v1_0
 mv out/age_of_ants_raspi.zip out/age_of_ants_${version}_raspi.zip
 mv out/age_of_ants_osx.zip out/age_of_ants_${version}_osx.zip
 mv out/age_of_ants_windows.zip out/age_of_ants_${version}_windows.zip
