@@ -1464,11 +1464,9 @@ function tick(u)
 				u.st.typ or rest(u),
 				typ.ant and t.typ.lady and
 					gogth(u,t.x8,t.y8)
-		elseif
-			not u.st.atk and
+		elseif not u.st.atk and
 			int(t.r,u.r,-2) then
-			u.dir,u.st.active=
-				sgn(t.x-u.x),1
+			u.st.active=1
 			halt(u)
 		end
 	end
@@ -1861,15 +1859,14 @@ end
 
 function halt(u)
 	if not u.st.adj then
-		u.st.typ=nil
+		u.dir,u.st.typ=sgn(u.st.x.x-u.x)
 	end
 end
 
 function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
-		local dx=e.x-u.x
-		local d=dist(dx,e.y-u.y)
+		local d=dist(e.x-u.x,e.y-u.y)
 		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
@@ -1884,7 +1881,6 @@ function atk(u)
 						rest(u)
 					end
 				else
-					u.dir=sgn(dx)
 					add(prj,typ.prj_s and p("",
 						typ,
 						u.x-u.dir*typ.prj_xo,
