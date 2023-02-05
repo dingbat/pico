@@ -1671,14 +1671,14 @@ function input()
 		return
 	end
 
-	if btnp"5" and hunit and
-		hunit.typ.unit and
+	if btnp"5" and sel1 and
+		sel1.typ.unit and
 		t()-selt<.2 then
 		sel,selx={}
 		foreach(units,function(u)
 			add(u.onscr and
 				u.hu and
-				u.typ.idx==hunit.typ.idx and
+				u.typ.idx==sel1.typ.idx and
 				sel,u)
 		end)
 		return
