@@ -4,7 +4,7 @@ tostr[[[[]]
 ai_debug=true
 if ai_debug then
 	--ai in 1,2
-	--srand"18"
+	srand"18"
 	--ai in 2,3
 	--srand"12"
 	
