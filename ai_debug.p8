@@ -1,5 +1,5 @@
 tostr[[[[]]
---./pico-8_0.2.5e/pico8_64 -accept_future 1
+--~/pico-8_0.2.5e/pico8_64 -accept_future 1
 
 ai_debug=true
 if ai_debug then
@@ -35,7 +35,7 @@ if ai_debug then
 		camera()
 		local ai=ais[2]
 		local secs=res1.t\1%60
-		?res.p2.diff,60,107,9
+		?res.p2.diff,60,107,8
 		local b,g=0,0
 		for u in all(units) do
 			if u.ai==ai then
@@ -51,7 +51,9 @@ if ai_debug then
 		local off=8288+i%32+i\32*128
 		local p,pid=peek(off,2)
 		local bl={
-			"mnd","farm","bar","den","mon","twr","cstl"
+			"mnd","farm","bar","den",
+			"mon","twr","cstl",
+			[157]="😐"
 		}
 		?bl[pid] or pid,80,114,3
 		?":\-e#\-e:"..(i/2+1),80,107,2
