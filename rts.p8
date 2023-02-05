@@ -1469,9 +1469,7 @@ function tick(u)
 			int(t.r,u.r,-2) then
 			u.dir,u.st.active=
 				sgn(t.x-u.x),1
-			if not u.st.adj then
-				u.st.typ=nil
-			end
+			halt(u)
 		end
 	end
 	if u.st.active then
@@ -1861,6 +1859,12 @@ function frm(u)
 	end
 end
 
+function halt(u)
+	if not u.st.adj then
+		u.st.typ=nil
+	end
+end
+
 function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
@@ -1869,9 +1873,7 @@ function atk(u)
 		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
-			if not u.st.adj then
-				u.st.typ=nil
-			end
+			halt(u)
 			if cf%typ.atk_freq==u.id%
 				typ.atk_freq then
 				if e.ap==u.ap then
