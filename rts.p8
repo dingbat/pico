@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -194,7 +194,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 
-		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.0⁵0fᶜ6V1.0⁶jej³j\0"
+		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.1⁵0fᶜ6V1.1⁶jej³j\0"
 		camera(split"8,12,8,18,14"[diff+1])
 		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 		return
@@ -3087,8 +3087,6 @@ function() dset(1,~dget"1") end)
 
 cartdata"age_of_ants"
 foreach(split",,",mode)
-
--->8
 
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000

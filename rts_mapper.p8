@@ -71,7 +71,7 @@ function _init()
 -- write_self()
 
 --	write_bo_to_rts()
-	write_map_to_rts()
+--	write_map_to_rts()
 
 	print("\ndone.",11)
 end

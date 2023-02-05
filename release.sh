@@ -13,7 +13,7 @@ sed -i -E "s/\?(split.*)/print(\1)/" rts_print.p8
 sed -i -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 
 echo "shrinking..."
-python3 ~/shrinko8-main/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
+python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
 
 header="\n--age of ants\n--eeooty\n\n--credits \& code with spaces\n--on bbs!\n"
 sed -i -E "s/print\((.*)\)/?\1/" rts_sh.p8
@@ -39,7 +39,7 @@ tab mode mode
 
 rm rts_print.p8
 
-python3 ~/shrinko8-main/shrinko8.py ./rts_sh.p8 --count
+python3 ~/shrinko8/shrinko8.py ./rts_sh.p8 --count
 echo
 
 rm -rf out
@@ -52,7 +52,7 @@ mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
 
-version=v1_0
+version=v1_1
 mv out/age_of_ants_raspi.zip out/age_of_ants_${version}_raspi.zip
 mv out/age_of_ants_osx.zip out/age_of_ants_${version}_osx.zip
 mv out/age_of_ants_windows.zip out/age_of_ants_${version}_windows.zip
