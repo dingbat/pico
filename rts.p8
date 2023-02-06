@@ -1469,8 +1469,7 @@ function tick(u)
 				u.st.typ or rest(u),
 				typ.ant and t.typ.lady and
 					gogth(u,t.x8,t.y8)
-		elseif not u.st.atk and
-			int(t.r,u.r,-2) then
+		elseif int(t.r,u.r,-2) then
 			u.st.active=1
 			halt(u)
 		end
@@ -1943,6 +1942,11 @@ end
 function gth(u)
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
+	if not u.st.typ and
+		not int(u.st.x.r,u.r,-2) then
+		gogth(u,x,y)
+		return
+	end
 	local t=mget(x,y)
 	local f=resqty[fget(t)]
 	if not f then
