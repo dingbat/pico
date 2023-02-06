@@ -1422,12 +1422,10 @@ function tick(u)
 				loser,sel=min(u.p,2),{}
 				music"56"
 			end
-		else
-			if typ.drop and not u.const then
-				u.pres.pl-=typ.drop
-			elseif typ.unit then
-				u.pres.p-=1
-			end
+		elseif typ.drop and not u.const then
+			u.pres.pl-=typ.drop
+		elseif typ.unit then
+			u.pres.p-=1
 		end
 	end
 
@@ -1888,7 +1886,11 @@ function atk(u)
 						e.x,e.y,u.ap
 					) or dmg(typ,e))
 					if e.conv>=e.max_hp then
-						e.p,e.conv=u.p,0
+						if e.typ.queen then
+							e.hp=0
+						else
+							e.p,e.conv=u.p,0
+						end
 						del(e.sqd,e)
 						sfx"38"
 					end
