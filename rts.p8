@@ -1136,6 +1136,18 @@ porty=88]],monk,function(_ENV)
 	spd=.286
 	hp*=1.25
 	conv*=1.25
+end),
+p([[t=40
+r=20
+g=0
+b=0
+breq=0
+tmap=256
+idx=22
+txt=⁶h²5ᶜaregeneration:ᶜ7 all your units⁶g⁴mpassively heal.
+portx=16
+porty=80]],heal,function(_ENV)
+	qty=.0062
 end)
 }
 
@@ -1273,19 +1285,7 @@ end)
 
 castle.prod={
 	cat,nil,
-	p([[t=40
-r=20
-g=0
-b=0
-breq=64
-tmap=256
-idx=22
-req=⁶h²5ᶜ6regenerationᶜd⁶g⁴m[requires mantis nest]
-txt=⁶h²5ᶜaregeneration:ᶜ7 passively heal⁶g⁴myour units.
-portx=16
-porty=80]],heal,function(_ENV)
-	qty=.0062
-end),nil,nil,
+	nil,nil,nil,
 	p([[t=30
 r=0
 g=25
