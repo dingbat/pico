@@ -1,5 +1,5 @@
 tostr[[[[]]
---~/pico-8_0.2.5e/pico8_64 -accept_future 1
+-- ~/pico-8_0.2.5e/pico8_64 -accept_future 1
 
 ai_debug=true
 if ai_debug then
