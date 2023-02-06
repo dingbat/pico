@@ -900,7 +900,7 @@ const=8
 hpr=8
 def=bld
 cycles=5
-gr=.00834
+gr=.5
 
 r=0
 g=3
@@ -1221,8 +1221,8 @@ end)
 
 mound.prod={
 	p([[t=12
-r=15
-g=15
+r=12
+g=12
 b=10
 breq=0
 tmap=16
@@ -1455,7 +1455,14 @@ function tick(u)
 	if u.q then
 		produce(u)
 	end
-	if (typ.farm) update_farm(u)
+	if typ.farm then
+		local _ENV=u
+		if farmer and
+			farmer.st.farm!=u
+			or exp then
+			farmer=nil
+		end
+	end
 	if t then
 		if t.dead then
 			u.st.agg=1,
@@ -1819,39 +1826,32 @@ function drop(u)
 	end
 end
 
-function update_farm(_ENV)
-	if not farmer or
-		farmer.st.farm!=_ENV
-		or exp then
-		farmer=nil
-	elseif farmer.st.active and
-		not ready then
-		fres+=typ.gr
-		sproff+=typ.gr*2
-		ready=fres>=9
-	end
-end
-
 function frm(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not farmer then
 		g.rest(u)
-	elseif ready and g.cf==0 then
-		fres-=1
-		sproff+=1
-		g.collect(u,"r")
-		if fres<=0 then
-			g.godrop(u)
-			cycles+=1
-			exp,ready=cycles>=typ.cycles
-			if exp and ai then
-				cycles,exp=0,
-					g.pay(g.renew,1,pres)
+	elseif g.cf==0 then
+		if ready then
+			fres-=1
+			sproff+=1
+			g.collect(u,"r")
+			if fres<1 then
+				g.godrop(u)
+				cycles+=1
+				exp,ready=cycles>=typ.cycles
+				if exp and ai then
+					cycles,exp=0,
+						g.pay(g.renew,1,pres)
+				end
+				sproff=exp and
+					(g.sfx"36" or 32) or 0
 			end
-			sproff=exp and
-				(g.sfx"36" or 32) or 0
+			--reset farm after drop
+			u.st.farm=_ENV
+		else
+			fres+=typ.gr
+			sproff,ready=fres*2,fres>=9
 		end
-		u.st.farm=_ENV
 	end
 end
 
