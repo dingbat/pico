@@ -1894,6 +1894,8 @@ function atk(u)
 						if e.typ.queen then
 							e.hp=0
 						else
+							e.pres.p-=1
+							u.pres.p+=1
 							e.p,e.conv=u.p,0
 						end
 						del(e.sqd,e)
