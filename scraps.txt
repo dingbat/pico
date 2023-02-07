@@ -11,6 +11,9 @@ credits:
 2; handheld
 3; desktop
 
+
+for i=0,20 do unit(1,hq.x,hq.y,1) end
+
 ai:
 - easy: ai's units produce 5x slower
 - normal: ai's techs take no time

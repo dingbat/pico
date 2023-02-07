@@ -236,7 +236,7 @@ function _draw()
 	end
 
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map(48,15)
+	draw_map(48,15) --fogmap
 
 	_pal,pal=pal,max
 	foreach(afog,draw_unit)
@@ -1378,7 +1378,6 @@ function goatk(u,e)
 	if u.typ.atk and e then
 		u.st,u.disc,u.res=
 			p([[t=atk
-atk=1
 active=1]],path(u,e.x,e.y),e),
 			e.hu and u.bldg
 	end
@@ -1475,6 +1474,9 @@ function tick(u)
 			halt(u)
 		elseif u.st.gth and not wayp then
 			gogth(u,t.x8,t.y8)
+		end
+		if not wayp then
+			u.dir=sgn(t.x-u.x)
 		end
 	end
 	if u.st.active then
@@ -1859,7 +1861,7 @@ end
 
 function halt(u)
 	if not u.st.adj then
-		u.dir,u.st.typ=sgn(u.st.x.x-u.x)
+		u.st.typ=nil
 	end
 end
 
