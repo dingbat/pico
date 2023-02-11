@@ -43,7 +43,7 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-3,61,76]],"\n"),function(s)
+5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
@@ -371,6 +371,12 @@ npl=0]]
 p[[var=heal
 qty=.00083]]
 
+p[[var=renew
+r=0
+g=0
+b=6
+breq=0]]
+
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
@@ -535,7 +541,43 @@ sfx=10
 dir=1
 tmap=-1
 hl=1
+d=0]].prod={
+p[[var=web
+txt=⁶h²5ᶜbspider web:ᶜ7 a wall that your⁶g⁴mspiders can cross.
+idx=29
+los=5
+hp=50
+const=5
+hpr=10
+def=bld
+
+r=0
+g=3
+b=0
+breq=0
+
+w=8
+fw=8
+h=8
+w8=1
+h8=1
+rest_x=0
+rest_y=64
+fire=1
+dead_x=64
+dead_y=104
+dead_fr=8
+dead_fps=7.5
+portx=96
+porty=80
+bldg=1
+bldrs=1
+bmap=128
+dir=-1
+tmap=-1
+web=1
 d=0]]
+}
 
 p[[var=archer
 txt=⁶h²5ᶜ9acid-spitting ant: ᶜ7ranged unit,⁶g⁴mgood vs spiders.
@@ -636,59 +678,6 @@ tmap=-1
 hl=1
 d=0]]
 
-p[[var=cat
-txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
-idx=6
-spd=.2
-los=50
-hp=15
-range=50
-atk=1.5
-conv=0
-atk_freq=60
-aoe=2
-prj_spd=.72
-def=sg
-atk_typ=sg
-sg=1
-
-t=18
-r=2
-g=14
-b=14
-breq=0
-p=
-
-const=1
-w=16
-fw=16
-h=8
-rest_x=48
-rest_y=24
-rest_fr=2
-rest_fps=30
-move_x=64
-move_y=24
-move_fr=4
-move_fps=7.5
-atk_x=64
-atk_y=8
-atk_fr=4
-atk_fps=15
-dead_x=112
-dead_y=16
-portx=54
-porty=72
-unit=1
-sfx=10
-dir=1
-prj_xo=1
-prj_yo=-4
-prj_s=56
-tmap=-1
-hl=1
-d=0]]
-
 p[[var=queen
 idx=7
 los=25
@@ -732,261 +721,39 @@ queen=1
 dir=-1
 tmap=-1
 hl=1
-d=61]]
-
-p[[var=tower
-txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
-idx=8
-los=30
-hp=352
-const=32
-hpr=11
-range=30
-atk=1.2
-conv=0
-atk_freq=30
-aoe=0
-prj_spd=.9
-atk_typ=bld
-def=bld
-
-r=0
-g=5
-b=15
-breq=0
-
-w=8
-w8=1
-fw=8
-h=16
-rest_x=40
-rest_y=96
-atk_x=40
-atk_y=96
-fire=1
-dead_x=64
-dead_y=96
-dead_fr=8
-dead_fps=7.5
-portx=-1
-porty=0
-bldg=1
-bldrs=2
-sfx=10
-prj_yo=-2
-prj_xo=-1
-prj_s=48
-bmap=1
-dir=-1
-tmap=-1
-d=0]]
-
-p[[var=mound
-txt=⁶h²5ᶜbmound:ᶜ7 drop-off for resources,⁶g⁴m+5 population limit.
-idx=9
-los=5
-hp=100
-const=10
-hpr=10
-def=bld
-
-r=0
+d=61]].prod={
+	ant,
+	nil,nil,nil,nil,
+	p([[t=25
+r=20
 g=0
-b=6
-breq=0
-
-w=8
-fw=8
-h=8
-w8=1
-h8=1
-rest_x=16
-rest_y=104
-portx=15
-porty=103
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-bldg=1
-bldrs=1
-drop=5
-bmap=2
-dir=-1
-tmap=-1
-d=0]]
-
-p[[var=den
-txt=⁶h²5ᶜbnest:ᶜ7 trains spiders and⁶g⁴mbeetles.
-req=⁶h²5ᶜ6nestᶜd⁶g⁴m[requires barracks]
-idx=10
-los=10
-hp=250
-const=25
-hpr=10
-def=bld
-
-r=0
-g=4
 b=20
-breq=8
-
-w=8
-fw=8
-h=8
-w8=1
-h8=1
-rest_x=16
-rest_y=96
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=99
-porty=72
-bldg=1
-bldrs=2
-bmap=4
-units=2
-idl=1
-mil=1
-dir=-1
-tmap=-1
-d=0]]
-
-p[[var=brks
-txt=⁶h²5ᶜbbarracks:ᶜ7 trains army ants and⁶g⁴mranged ants.
-idx=11
-los=10
-hp=200
-const=20
-hpr=10
-def=bld
-
-r=0
-g=4
-b=15
 breq=0
-
-w=8
-fw=8
-h=8
-w8=1
-h8=1
-rest_x=16
-rest_y=112
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=15
-porty=111
-bldg=1
-bldrs=1
-bmap=8
-units=2
-idl=1
-mil=1
-dir=-1
-tmap=-1
-d=0]]
-
-p[[var=farm
-txt=⁶h²5ᶜbfarm:ᶜ7 grows food for harvesting.⁶g⁴mlimited lifespan.
-req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mound]
-idx=12
-los=1
-hp=48
-const=8
-hpr=8
-def=bld
-cycles=5
-gr=.5
-
-r=0
-g=3
-b=3
+tmap=1
+up=-1
+idx=15
+txt=⁶h²5ᶜabaskets:ᶜ7 increase worker⁶g⁴mgathering efficiency.
+portx=24
+porty=80]],ant,function(_ENV)
+	cap\=.72
+	spd*=1.12
+	gr*=.9
+end),
+	p([[t=20
+r=10
+g=10
+b=10
 breq=2
-
-w=8
-fw=8
-h=8
-w8=1
-h8=1
-rest_x=16
-rest_y=120
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=52
-porty=88
-farm=1
-bldg=farm
-bldrs=1
-bmap=16
-dir=-1
-tmap=-1
-d=0]]
-
-p[[var=renew
-r=0
-g=0
-b=6
-breq=0]]
-
-p[[var=castle
-txt=⁶h²5ᶜecastle:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
-req=⁶h²5ᶜ6castleᶜd⁶g⁴m[requires nest+guardtower]
-idx=13
-los=45
-hp=640
-const=80
-hpr=8
-range=40
-atk=1.8
-conv=0
-atk_freq=15
-aoe=0
-prj_spd=.8
-atk_typ=bld
-def=bld
-
-r=0
-g=25
-b=60
-breq=13
-
-w=15
-fw=16
-h=16
-rest_x=112
-rest_y=113
-atk_x=112
-atk_y=113
-fire=1
-dead_x=64
-dead_y=97
-dead_fr=4
-dead_fps=15
-portx=42
-porty=80
-bldg=1
-bldrs=3
-sfx=10
-prj_yo=0
-prj_xo=0
-prj_s=48
-bmap=32
-units=1
-mil=1
-dir=-1
-tmap=-1
-d=0]]
+tmap=2
+idx=24
+txt=⁶h²5ᶜaegg deposit:ᶜ7 let mounds⁶g⁴mproduce worker ants.
+req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mound]
+portx=33
+porty=80]],{},function()
+	mound.p1.units=
+		add(mound.prod,ant)
+end)
+}
 
 p[[idx=14
 spd=.21
@@ -1023,44 +790,6 @@ sfx=10
 dir=-1
 tmap=-1
 d=59]]
-
-p[[var=mon
-txt=⁶h²5ᶜbmantis nest:ᶜ7 trains mantises.
-req=⁶h²5ᶜ6mantis nestᶜd⁶g⁴m[requires nest]
-idx=25
-los=25
-hp=300
-const=16
-hpr=8
-def=bld
-
-r=0
-g=10
-b=15
-breq=4
-
-w=8
-fw=8
-h=8
-w8=1
-h8=1
-rest_x=40
-rest_y=112
-fire=1
-dead_x=64
-dead_y=104
-dead_fr=8
-dead_fps=7.5
-portx=39
-porty=111
-bldg=1
-bldrs=2
-units=1
-bmap=64
-mil=1
-dir=-1
-tmap=-1
-d=0]]
 
 p[[var=monk
 txt=⁶h²5ᶜ9mantis:ᶜ7 converts enemy units,⁶g⁴mheals yours, prays.
@@ -1113,19 +842,19 @@ dir=-1
 tmap=-1
 d=0]]
 
-spider.prod={
-p[[var=web
-txt=⁶h²5ᶜbspider web:ᶜ7 blah.
-idx=29
+ant.prod={
+	p[[var=mound
+txt=⁶h²5ᶜbmound:ᶜ7 drop-off for resources,⁶g⁴m+5 population limit.
+idx=9
 los=5
-hp=50
-const=5
+hp=100
+const=10
 hpr=10
 def=bld
 
 r=0
-g=3
-b=0
+g=0
+b=6
 breq=0
 
 w=8
@@ -1133,32 +862,266 @@ fw=8
 h=8
 w8=1
 h8=1
-rest_x=0
-rest_y=64
+rest_x=16
+rest_y=104
+portx=15
+porty=103
 fire=1
 dead_x=64
 dead_y=104
 dead_fr=8
 dead_fps=7.5
-portx=96
-porty=80
 bldg=1
 bldrs=1
-bmap=128
+drop=5
+bmap=2
 dir=-1
 tmap=-1
-web=1
-d=0]]
-}
+d=0]],
+	p[[var=farm
+txt=⁶h²5ᶜbfarm:ᶜ7 grows food for harvesting.⁶g⁴mlimited lifespan.
+req=⁶h²5ᶜ6farmᶜd⁶g⁴m[requires mound]
+idx=12
+los=1
+hp=48
+const=8
+hpr=8
+def=bld
+cycles=5
+gr=.5
 
-ant.prod={
-	mound,
-	farm,
-	brks,
-	den,
-	mon,
-	tower,
-	castle
+r=0
+g=3
+b=3
+breq=2
+
+w=8
+fw=8
+h=8
+w8=1
+h8=1
+rest_x=16
+rest_y=120
+fire=1
+dead_x=64
+dead_y=104
+dead_fr=8
+dead_fps=7.5
+portx=52
+porty=88
+farm=1
+bldg=farm
+bldrs=1
+bmap=16
+dir=-1
+tmap=-1
+d=0]],
+	p[[var=brks
+txt=⁶h²5ᶜbbarracks:ᶜ7 trains army ants and⁶g⁴mranged ants.
+idx=11
+los=10
+hp=200
+const=20
+hpr=10
+def=bld
+
+r=0
+g=4
+b=15
+breq=0
+
+w=8
+fw=8
+h=8
+w8=1
+h8=1
+rest_x=16
+rest_y=112
+fire=1
+dead_x=64
+dead_y=104
+dead_fr=8
+dead_fps=7.5
+portx=15
+porty=111
+bldg=1
+bldrs=1
+bmap=8
+units=2
+idl=1
+mil=1
+dir=-1
+tmap=-1
+d=0]],
+	p[[var=den
+txt=⁶h²5ᶜbnest:ᶜ7 trains spiders and⁶g⁴mbeetles.
+req=⁶h²5ᶜ6nestᶜd⁶g⁴m[requires barracks]
+idx=10
+los=10
+hp=250
+const=25
+hpr=10
+def=bld
+
+r=0
+g=4
+b=20
+breq=8
+
+w=8
+fw=8
+h=8
+w8=1
+h8=1
+rest_x=16
+rest_y=96
+fire=1
+dead_x=64
+dead_y=104
+dead_fr=8
+dead_fps=7.5
+portx=99
+porty=72
+bldg=1
+bldrs=2
+bmap=4
+units=2
+idl=1
+mil=1
+dir=-1
+tmap=-1
+d=0]],
+	p[[var=mon
+txt=⁶h²5ᶜbmantis nest:ᶜ7 trains mantises.
+req=⁶h²5ᶜ6mantis nestᶜd⁶g⁴m[requires nest]
+idx=25
+los=25
+hp=300
+const=16
+hpr=8
+def=bld
+
+r=0
+g=10
+b=15
+breq=4
+
+w=8
+fw=8
+h=8
+w8=1
+h8=1
+rest_x=40
+rest_y=112
+fire=1
+dead_x=64
+dead_y=104
+dead_fr=8
+dead_fps=7.5
+portx=39
+porty=111
+bldg=1
+bldrs=2
+units=1
+bmap=64
+mil=1
+dir=-1
+tmap=-1
+d=0]],
+	p[[var=tower
+txt=⁶h²5ᶜeguardtower:ᶜ7 basic defensive⁶g⁴mstructure with good vision.
+idx=8
+los=30
+hp=352
+const=32
+hpr=11
+range=30
+atk=1.2
+conv=0
+atk_freq=30
+aoe=0
+prj_spd=.9
+atk_typ=bld
+def=bld
+
+r=0
+g=5
+b=15
+breq=0
+
+w=8
+w8=1
+fw=8
+h=16
+rest_x=40
+rest_y=96
+atk_x=40
+atk_y=96
+fire=1
+dead_x=64
+dead_y=96
+dead_fr=8
+dead_fps=7.5
+portx=-1
+porty=0
+bldg=1
+bldrs=2
+sfx=10
+prj_yo=-2
+prj_xo=-1
+prj_s=48
+bmap=1
+dir=-1
+tmap=-1
+d=0]],
+	p[[var=castle
+txt=⁶h²5ᶜecastle:ᶜ7 very defensive building,⁶g⁴mtrains caterpillars.
+req=⁶h²5ᶜ6castleᶜd⁶g⁴m[requires nest+guardtower]
+idx=13
+los=45
+hp=640
+const=80
+hpr=8
+range=40
+atk=1.8
+conv=0
+atk_freq=15
+aoe=0
+prj_spd=.8
+atk_typ=bld
+def=bld
+
+r=0
+g=25
+b=60
+breq=13
+
+w=15
+fw=16
+h=16
+rest_x=112
+rest_y=113
+atk_x=112
+atk_y=113
+fire=1
+dead_x=64
+dead_y=97
+dead_fr=4
+dead_fps=15
+portx=42
+porty=80
+bldg=1
+bldrs=3
+sfx=10
+prj_yo=0
+prj_xo=0
+prj_s=48
+bmap=32
+units=1
+mil=1
+dir=-1
+tmap=-1
+d=0]]
 }
 
 mon.prod={
@@ -1190,40 +1153,6 @@ txt=⁶h²5ᶜaregeneration:ᶜ7 all your units⁶g⁴mpassively heal.
 portx=16
 porty=80]],heal,function(_ENV)
 	qty=.0062
-end)
-}
-
-queen.prod={
-	ant,
-	nil,nil,nil,nil,
-	p([[t=25
-r=20
-g=0
-b=20
-breq=0
-tmap=1
-up=-1
-idx=15
-txt=⁶h²5ᶜabaskets:ᶜ7 increase worker⁶g⁴mgathering efficiency.
-portx=24
-porty=80]],ant,function(_ENV)
-	cap\=.72
-	spd*=1.12
-	gr*=.9
-end),
-	p([[t=20
-r=10
-g=10
-b=10
-breq=2
-tmap=2
-idx=24
-txt=⁶h²5ᶜaegg deposit:ᶜ7 let mounds⁶g⁴mproduce worker ants.
-req=⁶h²5ᶜ6egg depositᶜd⁶g⁴m[requires mound]
-portx=33
-porty=80]],{},function()
-	mound.p1.units=
-		add(mound.prod,ant)
 end)
 }
 
@@ -1326,7 +1255,58 @@ end)
 }
 
 castle.prod={
-	cat,nil,
+	p[[var=cat
+txt=⁶h²5ᶜ9caterpillar: ᶜ7ranged unit, very⁶g⁴mgood vs buildings.
+idx=6
+spd=.2
+los=50
+hp=15
+range=50
+atk=1.5
+conv=0
+atk_freq=60
+aoe=2
+prj_spd=.72
+def=sg
+atk_typ=sg
+sg=1
+
+t=18
+r=2
+g=14
+b=14
+breq=0
+p=
+
+const=1
+w=16
+fw=16
+h=8
+rest_x=48
+rest_y=24
+rest_fr=2
+rest_fps=30
+move_x=64
+move_y=24
+move_fr=4
+move_fps=7.5
+atk_x=64
+atk_y=8
+atk_fr=4
+atk_fps=15
+dead_x=112
+dead_y=16
+portx=54
+porty=72
+unit=1
+sfx=10
+dir=1
+prj_xo=1
+prj_yo=-4
+prj_s=56
+tmap=-1
+hl=1
+d=0]],nil,
 	nil,nil,nil,
 	p([[t=30
 r=0
