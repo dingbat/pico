@@ -34,11 +34,10 @@ function _update()
 			llclk=init()
 			for k=1,3 do
 				local r=res[k]
-				r.pos,r.npl,r.diff,r.col=
+				r.pos,r.col,r.npl,r.diff=
 					del(posidx,rnd(posidx)),
-					2+diff\3,
-					split"1,2,3,2,3"[diff+1],
-					pcol[k]
+					pcol[k],
+					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 			foreach(split([[7,64,64
 1,49,64
@@ -114,7 +113,7 @@ function _update()
 
 	foreach(prj,function(b)
 		local typ=b.typ
-		if norm(b.p1,b,typ.prj_spd)<1
+		if norm(b.p1,b,typ.prj_spd)
 		then
 			del(prj,b)
 			for u in all(units) do
@@ -1481,7 +1480,7 @@ function tick(u)
 	local wayp=u.st.typ
 	if wayp then
 		if norm(wayp[1],u,
-			u.st.spd or typ.spd)<.5
+			u.st.spd or typ.spd)
 		then
 			deli(wayp,1)
 			u.st.typ=#wayp>0 and wayp
@@ -2227,7 +2226,7 @@ function norm(it,nt,f)
 		sgn(dx)
 	nt.x+=dx*f/d
 	nt.y+=dy*f/d
-	return	d
+	return	d<1
 end
 
 function acc(x,y,strict)
@@ -2264,8 +2263,8 @@ function reg_bldg(b)
 	end
 	reg(x,y,typ.h8 or reg(x,y-1))
 	if not typ.w8 then
-		reg(x+1,y,
-			typ.h8 or reg(x+1,y-1))
+		reg(x+1,y)
+		reg(x+1,y-1)
 	end
 	if not b.const and not typ.farm then
 		qdmaps"d"
