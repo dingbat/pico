@@ -1383,7 +1383,7 @@ move=1]],path(u,x,y,0))
 end
 
 function gobld(u,b)
-	if u.st.farm and b.typ.farm then
+	if u.st.farm and b.farm then
 		return
 	end
 	u.st,u.res=p([[t=bld
@@ -1972,7 +1972,7 @@ function bld(u)
 				g.reg_bldg(_ENV)
 				if typ.drop then
 					pres.pl+=5
-				elseif typ.farm then
+				elseif farm then
 					g.gofarm(u,_ENV)
 				end
 			end
@@ -2188,7 +2188,7 @@ end
 
 function avail_farm()
 	local _ENV=hbld
-	return typ and typ.farm and
+	return farm and
 		not exp and not farmer and
 		not const
 end
@@ -2235,7 +2235,7 @@ function acc(x,y,strict)
 		and (not _ENV or
 			typ.web and s or
 			not strict
-			and (const or typ.farm))
+			and (const or farm))
 end
 
 function bldable()
@@ -2347,12 +2347,13 @@ fres=0
 conv=0]],_typ[_p],rnd"60"\1))
 		max_hp=typ.hp/typ.const
 		id,x,y,p,hp,const,
-			disc,alive,prod,bldg=
+			disc,alive,prod,bldg,farm=
 			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,1,
-			_typ.prod or {},typ.bldg
+			_typ.prod or {},typ.bldg,
+			typ.farm
 	end
 	tot+=1
 	rest(box(u))
@@ -2634,7 +2635,7 @@ portf=9]],
 		return
 	end
 
-	if sel1.typ.farm then
+	if sel1.farm then
 		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
