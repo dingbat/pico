@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 -- cpu cycle profiler v1.1
 --  by pancelor
@@ -48,7 +48,7 @@ function dist2(dx,dy)
 end
 
 a={}
-for i=0,3 do
+for i=0,20 do
 	add(a,2)
 end
 
@@ -66,13 +66,12 @@ end
 
 cartdata"abc"
 function analyze()
-  profile("dist1", function()
-  	fsel(a,xx)
+  profile("inext", function()
+  	for _,u in inext,a do
+  		xx(u)
+			end
   end)
-  profile("dist2", function()
-  	foreach(a,xx)
-  end)
-  profile("dist2", function()
+  profile("all()", function()
   	for u in all(a) do
   		xx(u)
 			end
