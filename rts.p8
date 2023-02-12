@@ -39,16 +39,14 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
---			unit(9,115,60,2)
+			tostr[[[[]]
+			unit(9,115,60,2)
+			--]]
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
 1,59,52
-4,64,64
-4,64,64
-4,64,64
-4,64,64
-3,61,76]],"\n"),function(s)
+4,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
@@ -2610,21 +2608,6 @@ end
 
 function single()
 	local q=sel1.q
---	if sel1.const then
---		draw_port(p[[portx=72
---porty=72
---porto=8
---portf=9]],
---			function()
---				pay(seltyp,-1,res1)
---				sel1.hp=0
---			end,24,107,
---			sel1.const/seltyp.const,
---			5,12
---		)
---		return
---	end
-
 	if sel1.farm then
 		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 	end
@@ -2707,7 +2690,21 @@ function draw_menu()
 
 	if nsel==1 then
 		sel_ports"-10"
-		if (sel1.hu) single()
+		if sel1.const then
+			draw_port(p[[portx=72
+porty=72
+porto=8
+portf=9]],
+				function()
+					pay(seltyp,-1,res1)
+					sel1.hp=0
+				end,24,107,
+				sel1.const/seltyp.const,
+				5,12
+			)
+		elseif sel1.hu then
+			single()
+		end
 	elseif seltyp and seltyp.ant then
 		single()
 	else
@@ -2789,8 +2786,8 @@ function resbar()
 	rectfill(unspl"0,120,30,128,7")
 	camera(-pres(res1,
 		unspl"1,122,2"))
-	unl"-4,120,-128,120,5"
-	pset(-3,121)
+	unl"-128,120,-4,120,5"
+	unl"-3,121"
 end
 -->8
 --const
