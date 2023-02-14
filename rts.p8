@@ -1627,21 +1627,26 @@ function tick(u)
 	end
 
 	if typ.unit and not u.st.typ then
-		if not u.st.adj then
-			while g(pos,x\4,y\4,
-				not u.st.in_bld and
-				g(bldgs,x\8,y\8,{}).bldg==1)
-			do
-				x+=rndspl"-1,-.5,0,0,.5,1"
-				y+=rndspl"-1,-.5,0,0,.5,1"
-				if not u.st.in_bld and
-				g(bldgs,x\8,y\8,{}).bldg==1
-				then
-					x,y=u.x,u.y
+		if not u.st.adj and g(pos,x\4,y\4) then
+			local fr={{x8,y8}}
+			for p in all(fr) do
+				local px,py=unpack(p)
+				for xo=1,7 do
+					for yo=1,7 do
+						x,y=px*8+xo,py*8+yo
+						if not g(pos,x\4,y\4) then
+							u.st.typ,u.st.adj=
+								{{x,y}},1
+							goto done
+						end
+					end
 				end
-				u.st.typ,u.st.adj={{x,y}},1
+				surr(function(t)
+					add(fr,t)
+				end,px,py,1,u.st.in_bld)
 			end
 		end
+		::done::
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1997,15 +2002,15 @@ function bld(u)
 			hp+=2
 			pres.b-=.1
 		else
-			g.rest(u)
-			g.surr(function(t)
-				local _ENV=g.bldgs[t.k]
-				if _ENV and hu and const
-					and (u.typ.ant or typ.web)
-				then
-					g.gobld(u,_ENV)
-				end
-			end,x8,y8,4)
+--			g.rest(u)
+--			g.surr(function(t)
+--				local _ENV=g.bldgs[t.k]
+--				if _ENV and hu and const
+--					and (u.typ.ant or typ.web)
+--				then
+--					g.gobld(u,_ENV)
+--				end
+--			end,x8,y8,4)
 		end
 	end
 end
