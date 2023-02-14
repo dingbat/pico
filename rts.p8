@@ -1625,24 +1625,20 @@ function tick(u)
 			goatk(u,agg_u)
 		end
 	end
-	
+
 	if typ.unit and not u.st.typ then
 		if not u.st.adj then
-			local function b(xo,yo)
-				return not u.st.in_bld and
-						g(bldgs,x\8+xo,y\8+yo,
-							{}).bldg==1
-			end
-			while g(pos,x\4,y\4,b(0,0))
+			while g(pos,x\4,y\4,
+				not u.st.in_bld and
+				g(bldgs,x\8,y\8,{}).bldg==1)
 			do
-				x+=rnd{
-					b(1,0) and 0 or 1,
-					b(-1,0) and 0 or -1,
-				}
-				y+=rnd{
-					b(0,1) and 0 or 1,
-					b(0,-1) and 0 or -1,
-				}
+				x+=rndspl"-1,-.5,0,0,.5,1"
+				y+=rndspl"-1,-.5,0,0,.5,1"
+				if not u.st.in_bld and
+				g(bldgs,x\8,y\8,{}).bldg==1
+				then
+					x,y=u.x,u.y
+				end
 				u.st.typ,u.st.adj={{x,y}},1
 			end
 		end
@@ -2001,15 +1997,15 @@ function bld(u)
 			hp+=2
 			pres.b-=.1
 		else
---			g.rest(u)
---			g.surr(function(t)
---				local _ENV=g.bldgs[t.k]
---				if _ENV and hu and const
---					and (u.typ.ant or typ.web)
---				then
---					g.gobld(u,_ENV)
---				end
---			end,x8,y8,4)
+			g.rest(u)
+			g.surr(function(t)
+				local _ENV=g.bldgs[t.k]
+				if _ENV and hu and const
+					and (u.typ.ant or typ.web)
+				then
+					g.gobld(u,_ENV)
+				end
+			end,x8,y8,4)
 		end
 	end
 end
