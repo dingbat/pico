@@ -39,6 +39,9 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
+			tostr[[[[]]
+			unit(9,115,60,2)
+			 --]]
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
@@ -1398,7 +1401,7 @@ in_bld=1]],
 end
 
 function goatk(u,e)
-	if u.typ.atk and e then
+	if e then
 		u.st,u.disc,u.res=
 			p([[t=atk
 active=1]],
@@ -1791,7 +1794,7 @@ c=8]],mx,my))
 	end
 end
 -->8
---unit
+f--unit
 
 function draw_unit(u)
 	local typ,st,r=
