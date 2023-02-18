@@ -7,7 +7,6 @@ __lua__
 --see bbs for full credits
 
 music(63,2000)
-srand"6"
 function _update()
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
@@ -33,6 +32,7 @@ function _update()
 		if llclk then
 			llclk=init()
 			tostr[[[[]]
+			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -41,9 +41,9 @@ function _update()
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 			unit(9,115,60,2)
-			typs[14][4].lady=nil
-			typs[14][4].atk=nil
-			typs[14][4].hp=800
+--			typs[14][4].lady=nil
+--			typs[14][4].atk=nil
+--			typs[14][4].hp=800
 			for y=3,8 do
 			 unit(29,13*8+4,y*8+4,1)
 			end
@@ -1430,12 +1430,10 @@ in_bld=1]],path(u,
 end
 
 function tick(u)
-	typ,u.onscr,u.upd,x8,y8=
+	typ,u.onscr,u.upd=
 		u.typ,
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
-		u.id%upcycle==upc,
-		u.x8,u.y8
-
+		u.id%upcycle==upc
 	if u.hp<=0 and u.alive then
 		del(sel,u)
 		tot-=1
@@ -1444,15 +1442,12 @@ function tick(u)
 			p"t=dead",
 			typ.bldg and reg_bldg(u),
 			u.onscr and
-				sfx(typ.bldg and 17 or 62),
-			acc(x8,y8,1) or
-				surr(function(t)
-					x8,y8=unpack(t)
-				end,x8,y8)
+				sfx(typ.bldg and 17 or 62)
 		if typ.lady then
+			local b=nearest(u.x,u.y)
+			local x8,y8=unpack(b)
 			mset(x8,y8,82+u.dir)
-			s(dmap_st.r or {},x8,y8,
-				{x8,y8})
+			s(dmap_st.r or {},x8,y8,b)
 			qdmaps"r"
 		elseif typ.queen then
 			npl-=1
@@ -1531,7 +1526,7 @@ function tick(u)
 		hunit=u
 	end
 
-	if g(viz,x8,y8,u.disc) then
+	if g(viz,u.x8,u.y8,u.disc) then
 		if selx and int(u.r,selbox,0)
 		then
 			if not u.hu then
