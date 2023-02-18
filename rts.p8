@@ -1615,14 +1615,19 @@ function tick(u)
 
 	if typ.unit and not u.st.typ then
 		if not u.st.adj then
-			while g(pos,x\4,y\4,
-				not u.st.in_bld and
-				g(bldgs,x\8,y\8,{}).bldg==1)
-			do
-				x+=rndspl"-1,-.5,0,0,.5,1"
-				y+=rndspl"-1,-.5,0,0,.5,1"
-				u.st.typ,u.st.adj={{x,y}},1
-			end
+			repeat
+				local x,y=u.x,u.y
+				while g(pos,x\4,y\4,
+					not u.st.in_bld and
+					g(bldgs,x\8,y\8,{}).bldg==1)
+				do
+					x+=rndspl"-1,-.5,0,0,.5,1"
+					y+=rndspl"-1,-.5,0,0,.5,1"
+					u.st.adj=1
+				end
+				wayp=u.st.adj and path(u,x,y,0)
+			until not wayp or #wayp<8
+			u.st.typ=wayp
 		end
 		s(pos,x\4,y\4,1)
 	end
@@ -2445,21 +2450,22 @@ b=4]][q]
 	end
 end
 
-function path(u,x,y,tol,r)
-	local function nearest(gx,gy)
-		for n=0,16 do
-			local best_d,best_t=32767
-			surr(function(t)
-				local d=dist(
-					t[1]*8+4-x,
-					t[2]*8+4-y)
-				if d<best_d then
-					best_t,best_d=t,d
-				end
-			end,gx\8,gy\8,n)
-			if (best_t) return best_t,n
-		end
+function nearest(gx,gy)
+	for n=0,16 do
+		local best_d,best_t=32767
+		surr(function(t)
+			local d=dist(
+				t[1]*8+4-gx,
+				t[2]*8+4-gy)
+			if d<best_d then
+				best_t,best_d=t,d
+			end
+		end,gx\8,gy\8,n)
+		if (best_t) return best_t,n
 	end
+end
+
+function path(u,x,y,tol,r)
 	if u.typ.unit then
 		spdr=u.typ.spider
 		local dest,dest_d=nearest(x,y)
