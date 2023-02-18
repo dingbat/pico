@@ -43,9 +43,9 @@ function _update()
 			end
 			
 			unit(9,115,60,2)
---			typs[14][4].lady=nil
---			typs[14][4].atk=nil
---			typs[14][4].hp=800
+			typs[14][4].lady=nil
+			typs[14][4].atk=nil
+			typs[14][4].hp=800
 			for y=3,8 do
 			 unit(29,13*8+4,y*8+4,1)
 			end
@@ -1623,8 +1623,9 @@ function tick(u)
 					y+=rndspl"-1,-.5,0,0,.5,1"
 					st.adj=1
 				end
-				st.typ=st.adj and path(u,x,y,0)
-			until not st.typ or #st.typ<8
+				if (not st.adj) break
+				st.typ=path(u,x,y,0,nil,true)
+			until st.typ
 		end
 		s(pos,x\4,y\4,1)
 	end
@@ -2462,13 +2463,13 @@ function nearest(gx,gy)
 	end
 end
 
-function path(u,x,y,tol,r)
+function path(u,x,y,tol,...)
 	if u.typ.unit then
 		spdr=u.typ.spider
 		local dest,dest_d=nearest(x,y)
 		local wayp,e=as(
 			nearest(u.x,u.y),dest,
-			max(r))
+			...)
 		spdr=nil
 		if e and
 			dest_d<=(tol or 1) then
@@ -2479,7 +2480,7 @@ function path(u,x,y,tol,r)
 	end
 end
 
-function as(st,g,d)
+function as(st,g,d,l)
 	local gk,t=g.k>>16,
 		{[st.k]=p([[var=sh
 y=0
@@ -2501,12 +2502,15 @@ u=32767]],st)}
 			if (q<=c) m,c=i,q
 		end
 		sh=fr[m]
+		if l and sh.y>16 then
+			return {}
+		end
 		fr[m],sh.d=fr[frl],1
 		frl-=1
 		local pt=sh.typ
 		local f=asc[pt.k|gk] or
 			(pt.k==g.k or
-			sh.u<=d) and {e=1}
+			sh.u<=max(d)) and {e=1}
 		if f then
 			return path(
 				sh,{unpack(f)},f.e)
