@@ -33,6 +33,7 @@ function _update()
 			llclk=init()
 			tostr[[[[]]
 			srand"6"
+
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -40,6 +41,7 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
+			
 			unit(9,115,60,2)
 --			typs[14][4].lady=nil
 --			typs[14][4].atk=nil
@@ -47,7 +49,7 @@ function _update()
 			for y=3,8 do
 			 unit(29,13*8+4,y*8+4,1)
 			end
-			for i=0,15 do
+			for i=0,40 do
 				unit(4,61,76,1)
 			end
 			 --]]
@@ -1491,7 +1493,8 @@ function tick(u)
 		local _ENV=u
 		if farmer and
 			farmer.st.farm!=u
-			or exp then
+			or exp
+		then
 			farmer=nil
 		end
 	end
@@ -1508,7 +1511,7 @@ function tick(u)
 			gogth(u,t.x8,t.y8)
 		end
 		if not wayp then
-			u.dir=sgn(t.x-u.x)
+			u.dir=sgn(t.x-x)
 		end
 	end
 	if u.st.active then
@@ -1607,21 +1610,21 @@ function tick(u)
 		end
 	end
 
-	if typ.unit and not u.st.typ then
-		if not u.st.adj then
+	local st=u.st
+	if typ.unit and not st.typ then
+		if not st.adj then
 			repeat
 				local x,y=u.x,u.y
 				while g(pos,x\4,y\4,
-					not u.st.in_bld and
+					not st.in_bld and
 					g(bldgs,x\8,y\8,{}).bldg==1)
 				do
 					x+=rndspl"-1,-.5,0,0,.5,1"
 					y+=rndspl"-1,-.5,0,0,.5,1"
-					u.st.adj=1
+					st.adj=1
 				end
-				wayp=u.st.adj and path(u,x,y,0)
-			until not wayp or #wayp<8
-			u.st.typ=wayp
+				st.typ=st.adj and path(u,x,y,0)
+			until not st.typ or #st.typ<8
 		end
 		s(pos,x\4,y\4,1)
 	end
