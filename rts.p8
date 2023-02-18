@@ -2047,9 +2047,8 @@ function produce(u)
 				fget(mget(rtx,rty),1)
 			then
 				gl.gogth(new,rtx,rty)
-			else
-				gl.move(new,rx or x+5,
-					ry or y+5)
+			elseif rx then
+				gl.move(new,rx,ry)
 			end
 		end
 		if q.qty>1 then
