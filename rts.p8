@@ -1443,11 +1443,11 @@ in_bld=1]],path(u,
 end
 
 function tick(u)
-	typ,u.onscr,u.upd,x8,y8=
+	typ,u.onscr,u.upd,x8,y8,ox,oy=
 		u.typ,
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
-		u.x8,u.y8
+		u.x8,u.y8,u.x,u.y
 
 	if u.hp<=0 and u.alive then
 		del(sel,u)
@@ -1486,13 +1486,17 @@ function tick(u)
 		return
 	end
 
-	local wayp=u.st.typ
+	local wayp,bld=u.st.typ,
+		g(bldgs,x8,y8)
 	if wayp then
 		if norm(wayp[1],u,
 			u.st.spd or typ.spd)
 		then
 			deli(wayp,1)
 			u.st.typ=#wayp>0 and wayp
+		end
+		if bld!=g(bldgs,u.x\8,u.y\8) then
+			u.x,u.y,u.st.typ=ox,oy
 		end
 	elseif u.st.move then
 		rest(u)
@@ -1625,28 +1629,25 @@ function tick(u)
 			goatk(u,agg_u)
 		end
 	end
+	if typ.unit and g(bldgs,x\8,y\8) then
+		printh(u.p,"log")
+	end
 
 	if typ.unit and not u.st.typ then
-		if not u.st.adj and g(pos,x\4,y\4) then
-			local fr={{x8,y8}}
-			for p in all(fr) do
-				local px,py=unpack(p)
-				for xo=1,7 do
-					for yo=1,7 do
-						x,y=px*8+xo,py*8+yo
-						if not g(pos,x\4,y\4) then
-							u.st.typ,u.st.adj=
-								{{x,y}},1
-							goto done
-						end
-					end
-				end
-				surr(function(t)
-					add(fr,t)
-				end,px,py,1,u.st.in_bld)
+		while g(pos,x\4,y\4,
+			not u.st.in_bld and
+			g(bldgs,x\8,y\8,{}).bldg==1)
+		do
+			x+=rnd(split"-1,-.5,0,0,.5,1")
+			y+=rnd(split"-1,-.5,0,0,.5,1")
+			local b=g(bldgs,x\8,y\8)
+			if not u.st.in_bld and
+			b and b!=bld
+			then
+				x,y=ox,oy
 			end
+			u.st.typ,u.st.adj={{x,y}},1
 		end
-		::done::
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1999,8 +2000,8 @@ function bld(u)
 --			end
 		elseif dmgd and
 			pres.b>=1 then
-			hp+=2
-			pres.b-=.1
+--			hp+=2
+--			pres.b-=.1
 		else
 --			g.rest(u)
 --			g.surr(function(t)
@@ -2070,9 +2071,8 @@ function produce(u)
 				fget(mget(rtx,rty),1)
 			then
 				gl.gogth(new,rtx,rty)
-			else
-				gl.move(new,rx or x+5,
-					ry or y+5)
+			elseif rx then
+				gl.move(new,rx,ry)
 			end
 		end
 		if q.qty>1 then
@@ -2247,7 +2247,7 @@ function norm(it,nt,f)
 		sgn(dx)
 	nt.x+=dx*f/d
 	nt.y+=dy*f/d
-	return	d<1
+	return	d<=1
 end
 
 function acc(x,y,strict)
@@ -3169,6 +3169,82 @@ function() dset(1,~dget"1") end)
 cartdata"age_of_ants"
 foreach(split",,",mode)
 
+-->8
+tostr[[[[]]
+-- ~/pico-8_0.2.5e/pico8_64 -accept_future 1
+
+ai_debug=nil
+if ai_debug then
+	--ai in 1,2
+--	srand"18"
+	--ai in 2,3
+	--srand"12"
+	
+	_update60=_update
+	_draw_map,_dr,_pr,_resbar=
+		draw_map,_draw,print_res,
+		resbar
+	function draw_map(o,y)
+		if not ai_debug or o==0 then
+			_draw_map(o,y)
+		end
+	end
+	function _draw()
+		if upcycle and castles then
+			castles=1
+			castle.p1.atk=3
+			castle.p1.aoe=5
+			unit(13,298,204,1)
+			unit(13,318,180,1)
+			unit(13,290,224,1)
+			unit(13,280,206,1)
+			unit(13,300,184,1)
+			unit(13,333,196,1)
+		end
+		
+		_dr()
+		if ai_debug and res1 then
+		camera()
+		local ai=ais[2]
+		local secs=res1.t\1%60
+		?res.p2.diff,60,107,8
+		local b,g=0,0
+		for u in all(units) do
+			if u.ai==ai then
+				if u.typ.ant then
+					if (u.rs=="g") g+=1
+					if (u.rs=="b") b+=1
+				end
+			end
+		end
+		?"\f3"..g.."\f5/\f4"..b,60,114
+		?(res1.t\60)..(secs>9 and ":" or ":0")..secs,80,121,1
+		local i=ai.boi
+		local off=8288+i%32+i\32*128
+		local p,pid=peek(off,2)
+		local bl={
+			"mnd","farm","bar","den",
+			"mon","twr","cstl",
+			[157]="😐"
+		}
+		?bl[pid] or pid,80,114,3
+		?":\-e#\-e:"..(i/2+1),80,107,2
+		camera()
+		end
+	end
+	function print_res(...)
+		if (ai_debug) res1=res.p2
+		local x=_pr(...)
+		res1=res[1]
+		return x
+	end
+	function resbar(...)
+		if (ai_debug) res1=res.p2
+		_resbar(...)
+		res1=res[1]
+	end
+end
+--]]
 __gfx__
 000b0000d000000000000000000000000000000000d0000000000000000000000000000000100010000000000000000000000000011000110000000000000000
 00b330000d000000d00000000000000000000000000d00000d011100000000000011000000010100000000000110001100000000000101000000000000000000
