@@ -1444,10 +1444,9 @@ function tick(u)
 			u.onscr and
 				sfx(typ.bldg and 17 or 62)
 		if typ.lady then
-			local b=nearest(u.x,u.y)
-			local x8,y8=unpack(b)
-			mset(x8,y8,82+u.dir)
-			s(dmap_st.r or {},x8,y8,b)
+			local t=nearest(u.x,u.y)
+			mset(t[1],t[2],82+u.dir)
+			dmap_st.r[t.k]=t
 			qdmaps"r"
 		elseif typ.queen then
 			npl-=1
