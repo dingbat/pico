@@ -50,7 +50,7 @@ function _update()
 			 unit(29,13*8+4,y*8+4,1)
 			end
 			for i=0,40 do
-				unit(4,61,76,1)
+				unit(1,61,76,1)
 			end
 			 --]]
 			foreach(split([[7,64,64
@@ -1505,8 +1505,7 @@ function tick(u)
 				typ.ant and t.typ.lady and
 					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
-			u.st.active=1
-			halt(u)
+			u.st.active,u.st.typ=1
 		elseif u.st.gth and not wayp then
 			gogth(u,t.x8,t.y8)
 		end
@@ -1612,21 +1611,19 @@ function tick(u)
 
 	local st=u.st
 	if typ.unit and not st.typ then
-		if not st.adj then
-			repeat
-				local x,y=u.x,u.y
-				while g(pos,x\4,y\4,
-					not st.in_bld and
-					g(bldgs,x\8,y\8,{}).bldg==1)
-				do
-					x+=rndspl"-1,-.5,0,0,.5,1"
-					y+=rndspl"-1,-.5,0,0,.5,1"
-					st.adj=1
-				end
-				if (not st.adj) break
-				st.typ=path(u,x,y,0,nil,true)
-			until st.typ
-		end
+		repeat
+			local x,y,a=u.x,u.y
+			while g(pos,x\4,y\4,
+				not st.in_bld and
+				g(bldgs,x\8,y\8,{}).bldg==1)
+			do
+				x+=rndspl"-1,-.5,0,0,.5,1"
+				y+=rndspl"-1,-.5,0,0,.5,1"
+				a=1
+			end
+			if (not a) break
+			st.typ=path(u,x,y,0,nil,1)
+		until st.typ
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1904,12 +1901,6 @@ function frm(u)
 	end
 end
 
-function halt(u)
-	if not u.st.adj then
-		u.st.typ=nil
-	end
-end
-
 function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
@@ -1917,7 +1908,7 @@ function atk(u)
 		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
-			halt(u)
+			u.st.typ=nil
 			if cf%typ.atk_freq==u.id%
 				typ.atk_freq then
 				if e.ap==u.ap then
@@ -1952,7 +1943,7 @@ function atk(u)
 				typ.los>=d then
 				goatk(u,e.k!=u.st.k and e)
 			elseif not e.disc then
-				halt(u)
+				u.st.typ=nil
 			end
 			if not u.st.typ then
 				rest(u)
