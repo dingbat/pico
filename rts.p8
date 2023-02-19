@@ -31,9 +31,11 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if llclk then
 			llclk=init()
+		
 				tostr[[[[]]
 			srand"6"
-
+			--]]
+			
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -42,7 +44,7 @@ function _update()
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 
-		
+				tostr[[[[]]
 			unit(9,115,60,2)
 			typs[14][4].lady=nil
 			typs[14][4].atk=nil
@@ -2327,7 +2329,8 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local _typ=typs[t] or t
+	local _typ,next=typs[t] or t,
+		next
 	do
 		local _ENV=add(units,
 			p([[var=u
@@ -2336,18 +2339,19 @@ lp=1
 sproff=0
 cycles=0
 fres=0
-conv=0]],_typ[_p],rnd"60"\1))
+conv=0
+alive=1]],_typ[_p],rnd"60"\1))
+		for k,v in next,_typ do
+			_ENV[k]=v
+		end
 		max_hp=typ.hp/typ.const
 		id,x,y,p,hp,const,
-			disc,alive,prod,bldg,
-			unit,farm=
+			disc=
 			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
-			_disc==1,1,
-			_typ.prod or {},typ.bldg,
-			typ.unit,typ.farm
-	end
+			_disc==1
+		end
 	tot+=1
 	rest(box(u))
 	if u.bldg then
