@@ -31,7 +31,7 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if llclk then
 			llclk=init()
-			tostr[[[[]]
+				tostr[[[[]]
 			srand"6"
 
 			for k=1,3 do
@@ -41,7 +41,8 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
-			
+
+		
 			unit(9,115,60,2)
 			typs[14][4].lady=nil
 			typs[14][4].atk=nil
@@ -1609,19 +1610,19 @@ function tick(u)
 		end
 	end
 
-	local st=u.st
-	if typ.unit and not st.typ then
+	local st,adj=u.st,0
+	if u.typ.unit and not st.typ then
 		repeat
-			x,y,adj=u.x,u.y
+			x,y=u.x,u.y
 			while g(pos,x\4,y\4,
 				not st.in_bld and
 				g(bldgs,x\8,y\8,{}).bldg==1)
 			do
 				x+=rndspl"-1,-.5,0,0,.5,1"
 				y+=rndspl"-1,-.5,0,0,.5,1"
-				adj=1
+				adj+=1
 			end
-			if (not adj) break
+			if (adj&7==0) break
 			st.typ=path(u,x,y,0,nil,2)
 		until st.typ
 		s(pos,x\4,y\4,1)
@@ -2356,11 +2357,8 @@ end
 
 function prod(u,b,m)
 	pay(b,1,u.pres)
-	if u.q then
-		u.q.qty+=1
-	else
-		u.q=p("qty=1",b,b.t*m)
-	end
+	u.q=u.q or p("qty=0",b,b.t*m)
+	u.q.qty+=1
 end
 -->8
 --paths
@@ -2456,12 +2454,10 @@ end
 
 function path(u,x,y,tol,...)
 	if u.typ.unit then
-		spdr=u.typ.spider
-		local dest,dest_d=nearest(x,y)
-		local wayp,e=as(
-			nearest(u.x,u.y),dest,
-			...)
-		spdr=nil
+		spdr,dest,dest_d=
+			u.typ.spider,nearest(x,y)
+		wayp,e,spdr=as(
+			nearest(u.x,u.y),dest,...)
 		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
