@@ -31,6 +31,9 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if llclk then
 			llclk=init()
+			tostr[[[[]]
+			srand"6"
+
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -38,9 +41,6 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
-			
-			tostr[[[[]]
-			srand"6"
 			
 			unit(9,115,60,2)
 			typs[14][4].lady=nil
@@ -50,7 +50,7 @@ function _update()
 			 unit(29,13*8+4,y*8+4,1)
 			end
 			for i=0,40 do
-				unit(5,61,76,1)
+				unit(4,61,76,1)
 			end
 			 --]]
 			foreach(split([[7,64,64
@@ -1612,17 +1612,17 @@ function tick(u)
 	local st=u.st
 	if typ.unit and not st.typ then
 		repeat
-			local x,y,a=u.x,u.y
+			x,y,adj=u.x,u.y
 			while g(pos,x\4,y\4,
 				not st.in_bld and
 				g(bldgs,x\8,y\8,{}).bldg==1)
 			do
 				x+=rndspl"-1,-.5,0,0,.5,1"
 				y+=rndspl"-1,-.5,0,0,.5,1"
-				a=1
+				adj=1
 			end
-			if (not a) break
-			st.typ=path(u,x,y,0,nil,1)
+			if (not adj) break
+			st.typ=path(u,x,y,0,nil,2)
 		until st.typ
 		s(pos,x\4,y\4,1)
 	end
@@ -2493,7 +2493,7 @@ u=32767]],st)}
 			if (q<=c) m,c=i,q
 		end
 		sh=fr[m]
-		if l and sh.y>16 then
+		if l and sh.y>l then
 			return {}
 		end
 		fr[m],sh.d=fr[frl],1
