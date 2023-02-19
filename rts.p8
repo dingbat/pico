@@ -1611,7 +1611,7 @@ function tick(u)
 	end
 
 	local st,adj=u.st,0
-	if u.typ.unit and not st.typ then
+	if u.unit and not st.typ then
 		repeat
 			x,y=u.x,u.y
 			while g(pos,x\4,y\4,
@@ -1723,7 +1723,7 @@ function input()
 	end
 
 	if btnp"5" and sel1 and
-		sel1.typ.unit and
+		sel1.unit and
 		t()-selt<.2 then
 		sel,selx={}
 		foreach(units,function(u)
@@ -1770,7 +1770,7 @@ function input()
 			fsel(godrop,nil,hbld)
 			hilite(hbld)
 
-		elseif sel1.typ.unit then
+		elseif sel1.unit then
 			sfx"1"
 			mvg(sel,mx,my,atkmov,1)
 			hilite(p([[f=.5
@@ -2274,7 +2274,7 @@ end
 function dmg(typ,to)
 	to.hp-=typ.atk*dmg_mult[
 		typ.atk_typ..to.typ.def]
-	if to.typ.unit and
+	if to.unit and
 		to.st.idl or to.st.y then
 		wander(to)
 	end
@@ -2339,13 +2339,14 @@ fres=0
 conv=0]],_typ[_p],rnd"60"\1))
 		max_hp=typ.hp/typ.const
 		id,x,y,p,hp,const,
-			disc,alive,prod,bldg,farm=
+			disc,alive,prod,bldg,
+			unit,farm=
 			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
 			_disc==1,1,
 			_typ.prod or {},typ.bldg,
-			typ.farm
+			typ.unit,typ.farm
 	end
 	tot+=1
 	rest(box(u))
@@ -2453,7 +2454,7 @@ function nearest(gx,gy)
 end
 
 function path(u,x,y,tol,...)
-	if u.typ.unit then
+	if u.unit then
 		spdr,dest,dest_d=
 			u.typ.spider,nearest(x,y)
 		wayp,e,spdr=as(
@@ -2726,7 +2727,7 @@ portf=9]],
 	end
 
 	if sel1 and sel1.hu and
-		sel1.typ.unit then
+		sel1.unit then
 		draw_port(
 			p([[porty=72
 porto=2
@@ -3052,7 +3053,7 @@ function ai_frame(ai)
 					u.bld.p1,u)
 				add(add(miners,u.rs) and
 					not u.res and avail,u)
-			elseif u.typ.unit then
+			elseif u.unit then
 				if u.dead then
 					del(u.sqd,u)
 				elseif not u.sqd then
