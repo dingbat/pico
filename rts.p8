@@ -2239,8 +2239,8 @@ function reg_bldg(b)
 	end
 	reg(x,y,typ.h8 or reg(x,y-1))
 	if not typ.w8 then
-		reg(x+1,y)
-		reg(x+1,y-1)
+		reg(x+1,y,
+			typ.h8 or reg(x+1,y-1))
 	end
 	if not b.const and not typ.farm then
 		qdmaps"d"
