@@ -1505,7 +1505,7 @@ function tick(u)
 		if t.dead then
 			u.st.agg=1,
 				wayp or rest(u),
-				typ.ant and t.typ.lady and
+				typ.ant and t.lady and
 					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
 			u.st.active,u.st.typ=1
@@ -1731,7 +1731,7 @@ function input()
 		foreach(units,function(u)
 			add(u.onscr and
 				u.hu and
-				u.typ.idx==sel1.typ.idx and
+				u.idx==sel1.idx and
 				sel,u)
 		end)
 		return
@@ -1929,7 +1929,7 @@ function atk(u)
 						e.x,e.y,u.ap
 					) or dmg(typ,e))
 					if e.conv>=e.max_hp then
-						if e.typ.queen then
+						if e.queen then
 							e.hp=0
 						else
 --							e.pres.p-=1
@@ -1980,7 +1980,7 @@ function bld(u)
 			g.surr(function(t)
 				local _ENV=g.bldgs[t.k]
 				if _ENV and hu and const
-					and (u.typ.ant or typ.web)
+					and (u.ant or typ.web)
 				then
 					g.gobld(u,_ENV)
 				end
@@ -1995,7 +1995,7 @@ function gth(u)
 	local t=mget(x,y)
 	local f=resqty[fget(t)]
 	if not f then
-		if u.typ.monk then
+		if u.monk then
 			pay(pray,-1,res1)
 		elseif not mine_nxt(u,r) then
 			godrop(u,r)
@@ -2110,15 +2110,16 @@ function tile_unit(tx,ty)
 ais=
 hp=0
 max_hp=0
-const=1]],p[[w=8
-h=8]],tx*8+4,ty*8+4))
+const=1
+w=8
+h=8]],nil,tx*8+4,ty*8+4))
 end
 
 function box(u)
 	local _ENV,ais,rz=u,ais,res
-	local w2,h2=typ.w/2,typ.h/2
 	r,x8,y8,dmgd,ai,ap,pres=
-		{x-w2-1,y-h2-1,x+w2,y+h2,8},
+		{x-w/2-1,y-h/2-1,
+			x+w/2,y+h/2,8},
 		x\8,y\8,
 		hp<max_hp,
 		ais[p],p|9,rz[p]
@@ -2197,7 +2198,7 @@ function can_gth()
 end
 
 function can_atk()
-	return sel1.typ.atk
+	return sel1.atk
 		and hunit
 		and (not hunit.hu or
 			seltyp.monk and
@@ -2209,7 +2210,7 @@ end
 function can_bld()
 	return hbld.hu and
 		hbld.hp<hbld.typ.hp and
-		(seltyp.ant or hbld.typ.web and
+		(seltyp.ant or hbld.web and
 		seltyp.spider)
 end
 
@@ -2227,7 +2228,7 @@ function acc(x,y,strict)
 	local _ENV,s=g(bldgs,x,y),spdr
 	return not fget(mget(x,y),0)
 		and (not _ENV or
-			typ.web and s or
+			web and s or
 			not strict
 			and (const or farm))
 end
@@ -2275,7 +2276,7 @@ end
 
 function dmg(typ,to)
 	to.hp-=typ.atk*dmg_mult[
-		typ.atk_typ..to.typ.def]
+		typ.atk_typ..to.def]
 	if to.unit and
 		to.st.idl or to.st.y then
 		wander(to)
@@ -2314,7 +2315,7 @@ function can_drop()
 	for u in all(sel) do
 		if u.res then
 			return hbld.hu and
-				hbld.typ.drop
+				hbld.drop
 		end
 	end
 end
@@ -2341,16 +2342,16 @@ cycles=0
 fres=0
 conv=0
 alive=1]],_typ[_p],rnd"60"\1))
-		for k,v in next,_typ do
+		for k,v in next,typ do
 			_ENV[k]=v
 		end
 		max_hp=typ.hp/typ.const
 		id,x,y,p,hp,const,
-			disc=
+			disc,prod=
 			x,_x,_y,_p,
 			min(_hp or 9999,max_hp),
 			max(_const)>0 and _const,
-			_disc==1
+			_disc==1,_typ.prod or {}
 		end
 	tot+=1
 	rest(box(u))
@@ -2460,7 +2461,7 @@ end
 function path(u,x,y,tol,...)
 	if u.unit then
 		spdr,dest,dest_d=
-			u.typ.spider,nearest(x,y)
+			u.spider,nearest(x,y)
 		wayp,e,spdr=as(
 			nearest(u.x,u.y),dest,...)
 		if e and
@@ -2932,7 +2933,7 @@ function save()
 	end)
 	draw(#units)
 	foreach(units,function(_ENV)
-		foreach({typ.idx,x,y,p,
+		foreach({idx,x,y,p,
 			max(const),
 			max(disc),hp},draw)
 	end)
@@ -3046,7 +3047,7 @@ function ai_frame(ai)
 
 	for u in all(units) do
 		if u.ai==ai then
-			if add(aiu,u).typ.ant then
+			if add(aiu,u).ant then
 				ants+=1
 				if u.st.idl then
 					miner(u,bgnxt and "b" or "r")
@@ -3062,7 +3063,7 @@ function ai_frame(ai)
 					del(u.sqd,u)
 				elseif not u.sqd then
 					u.sqd=(#ai.p1>#ai.p2 or
-						u.typ.sg) and
+						u.sg) and
 						ai.p2 or ai.p1
 					add(u.sqd,u)
 				end
@@ -3076,9 +3077,8 @@ function ai_frame(ai)
 		-count(miners,"g")
 
 	for u in all(aiu) do
-		local typ=u.typ
 		local function send(fn)
-			if #u.p1<typ.bldrs then
+			if #u.p1<u.bldrs then
 				local w=add(u.p1,deli(avail))
 				if w then
 					w.bld,w.rs=u,fn(w,u)
@@ -3095,13 +3095,13 @@ function ai_frame(ai)
 		if bldg and u.dmgd or u.const
 		then
 			send(gobld)
-		elseif typ.farm and
+		elseif u.farm and
 			not u.farmer then
 			send(gofarm)
 		elseif
-			typ.queen and
+			u.queen and
 			ants<res.diff*13.5 or
-			typ.mil and
+			u.mil and
 			res.p<res.diff*26
 		then
 			local b,h=u.prod[u.lp]
@@ -3114,7 +3114,7 @@ function ai_frame(ai)
 				can_pay(b,res) then
 				prod(u,b,
 					split"5,1,1"[res.diff])
-				u.lp%=typ.units
+				u.lp%=u.units
 				u.lp+=1
 				res.tot+=1
 			end
