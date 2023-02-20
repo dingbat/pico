@@ -451,7 +451,7 @@ dead_x=32
 dead_y=12
 portx=0
 porty=72
-dir=1
+sdir=1
 unit=1
 ant=1
 sfx=10
@@ -503,7 +503,7 @@ portx=27
 porty=72
 unit=1
 sfx=10
-dir=1
+sdir=1
 tmap=-1
 hl=1
 d=0]]
@@ -555,7 +555,7 @@ porty=72
 spider=1
 unit=1
 sfx=10
-dir=1
+sdir=1
 tmap=-1
 hl=1
 d=0]].prod={
@@ -590,7 +590,7 @@ porty=80
 bldg=1
 bldrs=1
 bmap=128
-dir=-1
+sdir=-1
 tmap=-1
 web=1
 d=0]]
@@ -640,7 +640,7 @@ portx=45
 porty=72
 unit=1
 sfx=10
-dir=1
+sdir=1
 prj_xo=-2
 prj_yo=0
 prj_s=52
@@ -690,7 +690,7 @@ portx=36
 porty=72
 unit=1
 sfx=10
-dir=1
+sdir=1
 tmap=-1
 hl=1
 d=0]]
@@ -735,7 +735,7 @@ prj_s=52
 bmap=0
 units=1
 queen=1
-dir=-1
+sdir=-1
 tmap=-1
 hl=1
 d=61]].prod={
@@ -804,7 +804,7 @@ portx=63
 porty=72
 unit=1
 sfx=10
-dir=-1
+sdir=-1
 tmap=-1
 d=59]]
 
@@ -855,7 +855,7 @@ portx=87
 porty=80
 unit=1
 sfx=63
-dir=-1
+sdir=-1
 tmap=-1
 d=0]]
 
@@ -892,7 +892,7 @@ bldg=1
 bldrs=1
 drop=5
 bmap=2
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=farm
@@ -930,7 +930,7 @@ farm=1
 bldg=farm
 bldrs=1
 bmap=16
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=brks
@@ -967,7 +967,7 @@ bmap=8
 units=2
 idl=1
 mil=1
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=den
@@ -1005,7 +1005,7 @@ bmap=4
 units=2
 idl=1
 mil=1
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=mon
@@ -1042,7 +1042,7 @@ bldrs=2
 units=1
 bmap=64
 mil=1
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=tower
@@ -1088,7 +1088,7 @@ prj_yo=-2
 prj_xo=-1
 prj_s=48
 bmap=1
-dir=-1
+sdir=-1
 tmap=-1
 d=0]],
 	p[[var=castle
@@ -1136,7 +1136,7 @@ prj_s=48
 bmap=32
 units=1
 mil=1
-dir=-1
+sdir=-1
 tmap=-1
 d=0]]
 }
@@ -1317,7 +1317,7 @@ portx=54
 porty=72
 unit=1
 sfx=10
-dir=1
+sdir=1
 prj_xo=1
 prj_yo=-4
 prj_s=56
@@ -1810,21 +1810,18 @@ end
 --unit
 
 function draw_unit(u)
-	local typ,st,r=
-		u.typ,u.st,
-		u.res and u.res.typ or "_"
-
-	local fw,w,h,stt,ihp,ux,uy=
-		typ.fw,typ.w,typ.h,
-		st.typ and "move" or st.t,
+	local r,fw,w,h,stt,ihp,ux,uy=
+		u.res and u.res.typ or "_",
+		u.fw,u.w,u.h,
+		u.st.typ and "move" or u.st.t,
 		u.max_hp/u.hp,unpack(u.r)
 
 	local sx,sy,ufps,fr,f,selc=
-		typ[stt.."_x"]+resx[r]+
+		u[stt.."_x"]+resx[r]+
 			u.sproff\8*8,
-		typ[stt.."_y"]+resy[r],
-		typ[stt.."_fps"],
-		typ[stt.."_fr"],
+		u[stt.."_y"]+resy[r],
+		u[stt.."_fps"],
+		u[stt.."_fr"],
 		u.dead or (cf-u.id)%60,
 		count(sel,u)==1 and 9
 
@@ -1835,7 +1832,7 @@ function draw_unit(u)
 		rect(0,0,w,h,
 			u==sel1 and 9 or 12)
 		fillp()
-		local p=u.const/typ.const
+		local p=u.const/u.typ.const
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
 		sx+=p\-.5*fw
@@ -1847,13 +1844,13 @@ function draw_unit(u)
 	end
 	pal{
 		selc or u.pres.col,
-		[14]=pal(typ.farm and 5,selc or 5)
+		[14]=pal(u.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,1,1,w,h,
-		not typ.fire and u.dir==typ.dir)
+		not u.fire and u.dir==u.typ.sdir)
 	pal()
 	if u.alive and ihp>=2 then
-		if typ.fire then
+		if u.fire then
 			spr(247+f/20,w\3)
 		end
 		line(w,unspl"-1,0,-1,8")
