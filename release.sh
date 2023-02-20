@@ -1,9 +1,11 @@
 #!/bin/bash
 
+version=v1_3
+
 set -e
 
 tab () {
- sed -i -E "s/function $1\(/-->8\n--$2\n\nfunction $1(/" rts_sh.p8
+ sed -i -E "s/function $1\(/\n-->8\n--$2\n\nfunction $1(/" rts_sh.p8
 }
 
 cp rts.p8 rts_print.p8
@@ -13,10 +15,10 @@ sed -i -E "s/\?(split.*)/print(\1)/" rts_print.p8
 sed -i -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 
 echo "shrinking..."
-python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename --no-minify-lines
+python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename # --no-minify-lines
 
-header="\n--age of ants\n--eeooty\n\n--credits \& code with spaces\n--on bbs!\n"
-sed -i -E "s/print\((.*)\)/?\1/" rts_sh.p8
+header="\n--age of ants\n--eeooty\n\n--full credits \& uncompressed\n--code on bbs!\n"
+sed -i -E "s/print\(([^)]+)\)/?\1\n/" rts_sh.p8
 sed -i -E "s/^function /\nfunction /" rts_sh.p8
 sed -i -E "s/^__lua__/__lua__$header/" rts_sh.p8
 # sed -i -E "s/=240$/=0xf0/" rts_sh.p8
@@ -51,8 +53,6 @@ mv age_of_ants.bin out
 mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
-
-version=v1_2
 
 echo "cutting $version"
 
