@@ -2224,27 +2224,25 @@ function bldable()
 end
 
 function reg_bldg(b)
-	local typ,x,y=b.typ,b.x8,b.y8
+	local x,y=b.x8,b.y8
 	local function reg(xx,yy)
 		s(bldgs,xx,yy,b.alive and b)
 		if b.dead then
 			s(exp,xx,yy,1)
 			s(dmap_st.d,xx,yy)
-			if typ.fire and y==yy then
+			if b.fire and y==yy then
 				mset(xx,yy,69)
 			end
-		elseif	typ.drop then
+		elseif	b.drop then
 			s(dmap_st.d,xx,yy,{xx,yy})
 		end
 	end
-	reg(x,y,typ.h8 or reg(x,y-1))
-	if not typ.w8 then
-		reg(x+1,y,
-			typ.h8 or reg(x+1,y-1))
-	end
-	if not b.const and not typ.farm then
+	reg(x,y,b.h8 or reg(x,y-1),
+		b.w8 or reg(x+1,y,
+			b.h8 or reg(x+1,y-1)))
+	if not b.const and not b.farm then
 		qdmaps"d"
-		b.pres.reqs|=typ.bmap
+		b.pres.reqs|=b.bmap
 	end
 end
 
