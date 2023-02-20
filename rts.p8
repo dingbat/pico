@@ -1929,8 +1929,8 @@ function atk(u)
 						if e.queen then
 							e.hp=0
 						else
---							e.pres.p-=1
---							u.pres.p+=1
+							e.pres.p-=1
+							u.pres.p+=1
 							e.p,e.conv=u.p,0
 						end
 						del(e.sqd,e)
@@ -1998,7 +1998,7 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
---		f+=res1.diff*u.ap\33*10
+		f+=res1.diff*u.ap\33*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
 		if t<112 and
