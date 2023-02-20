@@ -888,7 +888,7 @@ hp=48
 const=8
 hpr=8
 def=bld
-cycles=5
+mcyc=5
 gr=.5
 
 r=0
@@ -1204,7 +1204,7 @@ txt=⁶h²5ᶜafarm upgr.:ᶜ7 increase farm growth⁶g⁴mrate and lifespan.
 portx=60
 porty=80]],farm,function(_ENV)
 		gr*=1.15
-		cycles\=.6
+		mcyc\=.6
 	end)
 }
 
@@ -1727,7 +1727,7 @@ function input()
 			sfx"0"
 			hilite(hbld)
 			hbld.sproff,
-				hbld.cycles,
+				hbld.cyc,
 				hbld.exp=0,0
 			pay(renew,1,res1)
 			gofarm(sel1,hbld)
@@ -1867,10 +1867,10 @@ function frm(u)
 			g.collect(u,"r")
 			if fres<1 then
 				g.godrop(u)
-				cycles+=1
-				exp,ready=cycles>=typ.cycles
+				cyc+=1
+				exp,ready=cyc>=typ.mcyc
 				if exp and ai then
-					cycles,exp=0,
+					cyc,exp=0,
 						g.pay(g.renew,1,pres)
 				end
 				sproff=exp and
@@ -2319,7 +2319,7 @@ function unit(t,_x,_y,_p,
 dir=1
 lp=1
 sproff=0
-cycles=0
+cyc=0
 fres=0
 conv=0
 alive=1]],_typ[_p],rnd"60"\1))
@@ -2601,7 +2601,7 @@ end
 function single()
 	local q=sel1.q
 	if sel1.farm then
-		?"ᶜ4⁶jbr⁴i"..sel1.cycles.."/"..seltyp.cycles.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
+		?"ᶜ4⁶jbr⁴i"..sel1.cyc.."/"..seltyp.mcyc.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 	end
 	for i,b in next,sel1.prod do
 		if not b.done then
