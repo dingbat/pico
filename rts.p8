@@ -44,7 +44,7 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-4,61,76]],"\n"),function(s)
+5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 version=v1_3
+echo "cutting $version"
 
 set -e
 
@@ -49,12 +50,10 @@ rm -rf out
 ~/pico-8/pico8_64 -export itch/index.js ./rts_sh.p8
 
 mv age_of_ants.bin out
-~/pico-8/pico8_64 -export "out/age_of_ants.p8.png" ./rts_sh.p8
+~/pico-8_0.2.5e/pico8_64 -accept_future 1 -export "out/age_of_ants.p8.png" ./rts_sh.p8
 mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
-
-echo "cutting $version"
 
 mv out/age_of_ants_raspi.zip out/age_of_ants_${version}_raspi.zip
 mv out/age_of_ants_osx.zip out/age_of_ants_${version}_osx.zip
