@@ -297,12 +297,13 @@ startpos:
 	
 --7=128/mmwratio+1
 
-- new unit: spider web. a light wall built by spiders. can only be crossed by your own spiders
+- new unit: spider web. a light wall built by spiders that can be crossed by your own spiders
 - new: right-click when placing building to keep placing more of those buildings
 - new: small grass tiles now contain a small amount of plant (green) resource
+- fixed: groups of overlapping units could go through buildings when spreading out (was especially noticable with the new spider web)
 - fixed: when ladybug dies, it could drop its food tile far from where it was
 - fixed: tile directly above queen's right half was inaccessible
-
+- fixed: when easy AI started in the bottom-left corner it never built anything 
 
 dirty token savers
 ============
