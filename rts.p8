@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -193,8 +193,8 @@ function _draw()
 		sspr(x,unspl"0,16,8,25,27,32,16")
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
-
-		?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.3⁵0fᶜ6V1.3⁶jej³j\0"
+		
+		?"⁶j5c³j⁶w⁶tᶜ0age of ants⁶j5b⁵ijᶜ7age of ants⁶jbg⁵ih⁶-w⁶-tᶜ0difficulty:⁶jbg³iᶜcdifficulty:⁶j8m⁴jᶜ0press ❎ to start⁶j8m⁴iᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8p⁴jᶜ0PAUSE FOR OPTIONS⁶j8p⁴iᶜaPAUSE FOR OPTIONS⁶jej³jᶜ6\0"
 		camera(split"8,12,8,18,14"[diff+1])
 		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 		return
