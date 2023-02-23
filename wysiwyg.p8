@@ -33,6 +33,31 @@ function _draw()
 		pset(mx-1,my+4,5)
 	end
 	
+	if load_error then
+		rectfill(10,10,118,118,5)
+		rect(10,10,118,118,6)
+		?"oh no! the clipped string",13,13,7
+		?"wasn't generated here!\n"
+		?"if the string below isn't"
+		?"right, press \f9ctrl-v\f7.\n"
+		
+		print_esc(stat"4",13,50,116,11)
+		
+		local xo=45
+		local yo=105
+		local ok={xo,yo,xo+30,yo+8,13}
+		button(
+			"ok",
+			ok,
+			{13,2},
+			function()
+				load_error=nil
+			end
+		)
+		rectfill(unpack(ok))
+		?"  ok",xo+4,yo+2,7
+	end
+	
 	spr(cursor_spr,mx,my)
 	
 	hovbtn={}
@@ -53,6 +78,13 @@ function _update()
 		end
 	end)
 	
+	if load_error then
+		if hovbtn.name!="ok" then
+			hovbtn={}
+		end
+		load_cc()
+	end
+	
 	if mode==1 and sel then
 		if btnp(⬅️) then
 			sel.x-=1
@@ -67,15 +99,21 @@ function _update()
 	
 	key=stat"31"
 	if key=="\t" then
-		menudx=menux==0 and 5 or -5
+		if menudx==0 then
+			menudx=menux==0 and 6 or -6
+		end
 		key=""
 	end
 	
 	menux+=menudx
-	if menux%50==0 then
+	menudx/=1.1
+	if menux>45 or menux<0 then
+		menux=menudx>0 and 45 or 0
 		menudx=0
 	end
-
+	
+	newclk=btnp"5" and not lastclk
+	lastclk=btn"5"
 	if not btn"5" then
 		dragl=nil
 	elseif dragl then
@@ -86,7 +124,9 @@ function _update()
 	if btnp"5" and key=="" then
 		if hovbtn and hovbtn.fn then
 			hovbtn.fn()			
-		elseif not dragl then
+		elseif not dragl and (
+			menux>0 or mx>mw)
+		then
 			sel,seli=nil
 		end
 	end
@@ -95,6 +135,14 @@ function _update()
 end
 -->8
 mw=42
+
+function edit(l)
+	mode=2
+	curs=#l.txt
+	if menux!=0 then
+		menudx=-6
+	end
+end
 
 function draw_menu(x)
 	camera(x)
@@ -112,7 +160,7 @@ function draw_menu(x)
 			function()
 				mode=i
 				if sel and i==2 then
-					curs=#sel.txt
+					edit(sel)
 				end
 			end
 		)
@@ -135,9 +183,21 @@ function draw_home()
 	?"⁶jhk⁵ghᶜ7codes⁶jgi⁵gjᶜ7control⁶jgg⁵gg⁶t⁶=ᶜ7wysiwyg"
 	camera(menux)
 	
-	?" (tab to\nhide this)",2,45,6
+	local yo=45
+	local loadd={2,yo,mw-2,yo+14,13}
+	button(
+		"load",
+		loadd,
+		{13,2},
+		function()
+			load_cc()
+		end
+	)
+	rectfill(unpack(loadd))
+	?"load from\nclipboard",4,yo+2,7
 	
-	local yo=65
+	yo+=20
+	
 	local saved={2,yo,mw-2,yo+14,13}
 	if not savet then
 		button(
@@ -161,38 +221,52 @@ function draw_home()
 	color_wheel(100,home,"fg")
 end
 
+function clone(obj)
+	local copy={}
+	for k,v in next,obj do
+		copy[k]=v
+	end
+	return copy
+end
+
 function draw_layers()
 	?"layers",2,13,7
 	
-	rectfill(0,119,mw,128,8)
-	line(mw/2,119,mw/2,128,2)
-	button(
-		"copy",
-		{0,119,mw/2,128},
-		{2,15},
-		function()
-			if sel then
-				local copy={}
-				for k,v in next,sel do
-					copy[k]=v
-				end
+	local cyo=117
+	local copy={1,cyo,mw/2-2,cyo+8,13}
+	if sel then
+		button(
+			"copy",
+			copy,
+			{13,2},
+			function()
+				local copy=clone(sel)
 				seli+=1
 				sel=add(layers,copy,seli)
 			end
-		end
-	)
-	?"copy",3,121,2
+		)
+	else
+		pal(7,6)
+		pal(13,5)
+	end
+	rectfill(unpack(copy))
+	?"copy",3,cyo+2,7
 	
-	button(
-		"del.",
-		{mw/2,119,mw,128},
-		{2,15},
-		function()
-			del(layers,sel)
-			seli,sel=nil
-		end
-	)
-	?"del.",25,121,2
+	local cyo=117
+	local dell={mw/2,cyo,mw-2,cyo+8,13}
+	if sel then
+		button(
+			"del",
+			dell,
+			{13,2},
+			function()
+				del(layers,sel)
+				seli,sel=nil
+			end
+		)
+	end
+	rectfill(unpack(dell))
+	?"\-jdel",mw/2+2,cyo+2,7
 	
 	button(
 		"add",
@@ -254,12 +328,14 @@ function draw_layers()
 		
 		pal()
 		
+		clip(-menux,y,mw,h)
 		local txt="\f"..alpha(l.fg)
 			..l.txt
 		if l.bg then
 			txt="\#"..alpha(l.bg)..txt
 		end
 		?txt,16,y+4
+		clip()
 	end
 end
 
@@ -306,7 +382,7 @@ function draw_edit()
 	end)
 	
 	?"style",2,36,6
-	for i,k in next,{"w","t","s","i","b"} do
+	for i,k in next,{"w","t","=","i","b"} do
 		i-=1
 		local w,xo,yo=8,1,43
 		local dims={xo+i*w,yo,
@@ -407,7 +483,36 @@ function alpha(c)
 	return c
 end
 
-function l2cc(l)
+function unalpha(c)
+	local o=ord(c)
+	if o>57 then
+		return o-87
+	end
+	return tonum(c)
+end
+
+function diff(k,prev,new)
+	local p=prev[k] or false
+	local n=new[k] or false
+	if k=="bg" then
+		k="#"
+	end
+	
+	if p==n then
+		return ""
+	elseif p and not n then
+		return "⁶-"..k
+	elseif type(n)=="boolean" then
+		return "⁶"..k
+	elseif k=="fg" then
+		return	"ᶜ"..alpha(n)
+	elseif k=="#" then
+		return "²"..alpha(n)
+	end
+end
+
+function l2cc(l,prev)
+	prev=prev or {b=true}
 	local x,y,ex,ey=
 		alpha(l.x\4),
 		alpha(l.y\4),
@@ -423,25 +528,25 @@ function l2cc(l)
 		cc..="⁴"..ey
 	end
 	
-	if (l.w) cc..="⁶w"
-	if (l.t) cc..="⁶t"
-	if (l.s) cc..="⁶="
-	if (l.i) cc..="⁶i"
-	if (not l.b) cc..="⁶-b"
-	
-	cc..="ᶜ"..alpha(l.fg)
-	if l.bg then
-		cc..="²"..alpha(l.bg)
-	end
-	
+	cc..=diff("w",prev,l)
+	cc..=diff("t",prev,l)
+	cc..=diff("=",prev,l)
+	cc..=diff("i",prev,l)
+	cc..=diff("b",prev,l)
+	cc..=diff("fg",prev,l)
+	cc..=diff("bg",prev,l)
 	cc..=l.txt
+	
 	return cc
 end
 
 function save()
 	local out="?\""
+	local prev
 	for i=#layers,1,-1 do
-		out..=l2cc(layers[i])
+		local l=layers[i]
+		out..=l2cc(l,prev)
+		prev=l
 	end
 	out..="\""
 	printh(out,"@clip")
@@ -466,6 +571,13 @@ function preview()
 				function()
 					if not dragl or l==sel
 						or not sel then
+						if sel==l and selt and
+							t()-selt<.4 and newclk then
+							edit(l)
+						end
+						if newclk then
+							selt=t()
+						end
 						sel,seli=l,i
 						dragl=l
 					end
@@ -480,6 +592,105 @@ function preview()
 			rect(unpack(r))
 		end
 		pal()
+	end
+end
+
+function load_cc()
+	load_error=nil
+	local str=stat"4"
+	layers={}
+	
+	local i=1
+	function nxt(match)
+		local s=sub(str,i,i+#match-1)
+		if match==s then
+			return c(#match)
+		end
+	end
+	function c(n)
+		local s=sub(str,i,i+n-1)
+		i+=n
+		return s
+	end
+	
+	local layer={b=true}
+	
+	if nxt"?\"" then
+		-- remove trailing "
+		str=sub(str,1,#str-1)
+	end
+	
+	if sub(str,1,2)!="⁶j" then
+		load_error=1
+		return
+	end
+	
+	while i<=#str do
+		if nxt"⁶j" then
+			prev=layer
+			if layer.x then
+				add(layers,layer,1)
+			end
+			layer=clone(prev)
+			layer.txt=""
+			local x,y=
+				unalpha(c"1")*4,
+				unalpha(c"1")*4
+			
+			local ax,ay=16,16
+			if nxt"⁵" then
+				ax,ay=
+					unalpha(c"1"),
+					unalpha(c"1")
+			elseif nxt"³" then
+				ax=unalpha(c"1")
+			elseif nxt"⁴" then
+				ay=unalpha(c"1")
+			end
+			
+			layer.x,layer.y=
+				x+ax-16,y+ay-16
+			
+			while nxt"⁶" do
+				if nxt"-" then
+					local k=c"1"
+					if (k=="#") k="bg"
+					layer[k]=false
+				else
+					layer[c"1"]=true
+				end
+			end
+			
+			if nxt"ᶜ" then
+				layer.fg=unalpha(c"1")
+			end
+			if nxt"²" then
+				layer.bg=unalpha(c"1")
+			end
+		else
+			layer.txt..=c"1"
+		end
+	end
+	add(layers,layer,1)
+	return true
+end
+-->8
+function print_esc(str,x,y,xlim,col)
+	local cx,cy=x,y
+	for i=1,#str do
+		if str[i]=="⁶" then
+			spr(40,cx,cy)
+		elseif str[i]=="ᶜ" then
+			spr(41,cx,cy)
+		elseif str[i]=="²" then
+			spr(42,cx,cy)
+		else
+			print(str[i],cx,cy,col)
+		end
+		cx+=4
+		if cx>=xlim then
+			cx,cy=x,cy+6
+		end
 	end
 end
 __gfx__
@@ -499,11 +710,11 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000022222220000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00222200000000000020000020000000000022200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02222220000000002220020020000000000222220000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000002222222000000000000200000000000000000000000000b0000000bbb00000bb0000000000000000000000000000000000000000000000
+0022220000000000002000002000000000002220000000000000000000000000bbb00000b00000000b0000000000000000000000000000000000000000000000
+0222222000000000222002002000000000022222000000000000000000000000bbb00000bbb000000bb000000000000000000000000000000000000000000000
 22222222000000002020202020000000002222200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02222020000000002020000020000000022222000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0222202000000000202000002000000002222200000000000000000000000000bbb00000bbb00000bbb000000000000000000000000000000000000000000000
 02202220000000002022222220000000202220000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 02202220000000002000002000000000200200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000002222222000000000222000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
