@@ -131,8 +131,34 @@ function draw_menu(x)
 end
 
 function draw_home()
-	?"preview bg",2,57,6
-	color_wheel(64,home,"fg")
+	camera(menux+56,50)
+	?"⁶jhk⁵ghᶜ7codes⁶jgi⁵gjᶜ7control⁶jgg⁵gg⁶t⁶=ᶜ7wysiwyg"
+	camera(menux)
+	
+	?" (tab to\nhide this)",2,45,6
+	
+	local yo=65
+	local saved={2,yo,mw-2,yo+14,13}
+	if not savet then
+		button(
+			"save",
+			saved,
+			{13,2},
+			save
+		)
+		savetxt=" save to\nclipboard"
+	else
+		saved[5]=3
+		if time()-savet>1 then
+			savet=nil
+		end
+		savetxt="\|j copied!"
+	end
+	rectfill(unpack(saved))
+	?savetxt,4,yo+2,7
+
+	?"editor\nbackground",2,87,6
+	color_wheel(100,home,"fg")
 end
 
 function draw_layers()
@@ -410,6 +436,16 @@ function l2cc(l)
 	
 	cc..=l.txt
 	return cc
+end
+
+function save()
+	local out="?\""
+	for i=#layers,1,-1 do
+		out..=l2cc(layers[i])
+	end
+	out..="\""
+	printh(out,"@clip")
+	savet=time()
 end
 
 function preview()
