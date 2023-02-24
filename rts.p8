@@ -194,7 +194,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,27,32,16,1")
 		
-		?"⁶j5c³j⁶w⁶tᶜ0age of ants⁶j5b⁵ijᶜ7age of ants⁶jbg⁵ih⁶-w⁶-tᶜ0difficulty:⁶jbg³iᶜcdifficulty:⁶j8m⁴jᶜ0press ❎ to start⁶j8m⁴iᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8p⁴jᶜ0PAUSE FOR OPTIONS⁶j8p⁴iᶜaPAUSE FOR OPTIONS⁶jej³jᶜ6\0"
+		?"⁶j5c³j⁶w⁶tᶜ0age of ants⁶j5b⁵ijᶜ7age of ants⁶jbg⁵ih⁶-w⁶-tᶜ0difficulty:⁶jbg³iᶜcdifficulty:⁶j8m⁴jᶜ0press ❎ to start⁶j8m⁴iᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8p⁴jᶜ0PAUSE FOR OPTIONS⁶j8p⁴iᶜ6PAUSE FOR OPTIONS⁶jej³jᶜ6\0"
 		camera(split"8,12,8,18,14"[diff+1])
 		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 		return
@@ -1563,7 +1563,7 @@ function tick(u)
 
 			foreach(vcache[k],function(t)
 				local k=u.k+t
-				if k<8192 and k>=0 and
+				if mid(k,8191)==k and
 					k%256<48 then
 					if bldgs[k] then
 						bldgs[k].disc=1
@@ -1609,7 +1609,9 @@ function tick(u)
 				adj+=1
 			end
 			if (adj&7==0) break
-			st.typ=path(u,x,y,0,nil,2)
+			st.typ=st.gth and
+				{{x,y}} or
+				path(u,x,y,0,nil,2)
 		until st.typ
 		s(pos,x\4,y\4,1)
 	end
@@ -2756,7 +2758,6 @@ end,20,108)
 	resbar()
 
 	if hc then
-		campal()
 		cursor(dget"1"&0xf000|1,93)
 		if hc.reqs then
 			?hc.txt
@@ -2778,6 +2779,7 @@ function resbar()
 		unspl"1,122,2"))
 	unl"-128,120,-4,120,5"
 	unl"-3,121"
+	campal()
 end
 -->8
 --const
