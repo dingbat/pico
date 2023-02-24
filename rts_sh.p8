@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -22,7 +22,7 @@ unl"119,80,84,80,9"pal{res1.col,[14]=0}sspr(64+pack(48,cf\5%3*16)[a],unspl"0,16,
 ?"⁶j7r⁴i⁶y7²9⁵ffᶜ4⁶x1⁴f ⁴h⁶x4 "..st
 ?"⁶jdn⁴h⁶w⁶tᶜa"..t
 campal()end function draw_map(o,y)camera(cx%8,cy%8)map(cx/8+o,cy/8,0,0,17,y)end function _draw()draw_map(0,17)if menu then camera()local x=64+t()\.5%2*16pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"sspr(x,unspl"0,16,8,25,28,32,16")sspr(x,unspl"0,16,8,74,28,32,16,1")pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0"pal{pcol[1]}sspr(x,unspl"0,16,8,25,27,32,16")pal{pcol[2]}sspr(x,unspl"0,16,8,74,27,32,16,1")
-?"⁶j5c³jᶜ0⁶w⁶tage of ants⁶j5c⁵ifᶜ7age of ants⁶-w⁶-t⁶jcg⁵ehᶜ0difficulty:⁶jcg³eᶜcdifficulty:⁶j8n⁴hᶜ0press ❎ to start⁶j8nᶜ9press ❎ to start⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶jqtᶜ0V1.3⁵0fᶜ6V1.3⁶jej³j\0"
+?"⁶j5c³j⁶w⁶tᶜ0age of ants⁶j5b⁵ijᶜ7age of ants⁶jbg⁵ih⁶-w⁶-tᶜ0difficulty:⁶jbg³iᶜcdifficulty:⁶j8m⁴jᶜ0press ❎ to start⁶j8m⁴iᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8p⁴jᶜ0PAUSE FOR OPTIONS⁶j8p⁴iᶜ6PAUSE FOR OPTIONS⁶jej³jᶜ6\0"
 camera(split"8,12,8,18,14"[diff+1])
 ?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 return end aspl"bfog,afog,btns"for u in all(units)do if u.onscr or loser then if not loser and not g(viz,u.x8,u.y8)and u.disc then add(afog,u)elseif u.bldg or u.dead then draw_unit(u)else add(bfog,u)end end end foreach(bfog,draw_unit)camera(cx,cy)local cf5=cf\5foreach(prj,function(_ENV)sspr(typ.prj_s+cf5%2*2,96,2,2,x,y)end)if loser then resbar()bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],stat"54">56and"press ❎ for menu ⁴f⁶x1 "or"thx for playingᶜ8♥ ⁴f⁶x1 ",ban)return end pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"draw_map(48,15)_pal,pal=pal,max foreach(afog,draw_unit)pal=_pal pal()fillp"23130.5"for x=cx\8,cx\8+16do for y=cy\8,cy\8+13do local i=x|y<<8local function b(a,col)color(col)camera(cx-x*8,cy-y*8)
@@ -927,9 +927,9 @@ in_bld=1]],path(u,f.x+rndspl"-2,-1,0,1,2",f.y+rndspl"-2,-1,0,1,2"))u.st.farm=f e
 if(u.const)return
 if u.st.idl then
 if(typ.lady and t6)wander(u)
-if u.hu then if typ.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif typ.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(typ.los/8)local k=xo|yo*16|typ.los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<typ.los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if k<8192and k>=0and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and typ.atk then for e in all(units)do if e.ap!=u.ap or typ.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=typ.los then if e.bldg then d+=typ.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end local st,adj=u.st,0if u.unit and not st.typ then repeat x,y=u.x,u.y while g(pos,x\4,y\4,not st.in_bld and g(bldgs,x\8,y\8,{}).bldg==1)do x+=rndspl"-1,-.5,0,0,.5,1"y+=rndspl"-1,-.5,0,0,.5,1"adj+=1end
+if u.hu then if typ.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif typ.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(typ.los/8)local k=xo|yo*16|typ.los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<typ.los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if mid(k,8191)==k and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and typ.atk then for e in all(units)do if e.ap!=u.ap or typ.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=typ.los then if e.bldg then d+=typ.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end local st,adj=u.st,0if u.unit and not st.typ then repeat x,y=u.x,u.y while g(pos,x\4,y\4,not st.in_bld and g(bldgs,x\8,y\8,{}).bldg==1)do x+=rndspl"-1,-.5,0,0,.5,1"y+=rndspl"-1,-.5,0,0,.5,1"adj+=1end
 if(adj&7==0)break
-st.typ=path(u,x,y,0,nil,2)until st.typ s(pos,x\4,y\4,1)end end 
+st.typ=st.gth and{{x,y}}or path(u,x,y,0,nil,2)until st.typ s(pos,x\4,y\4,1)end end 
 -->8
 --input
 
@@ -997,11 +997,11 @@ portf=9]],function()pay(seltyp,-1,res1)sel1.hp=0end,24,107,sel1.const/seltyp.con
 unspr"133,1,111"add(btns,{r=split"0,110,14,119",fn=function()deli(sel)end})end if sel1 and sel1.hu and sel1.unit then draw_port(p([[porty=72
 porto=2
 portf=13
-portx=]]..split"90,81,81"[dget"0"]),function()axn=not axn end,20,108)end camera()sspr(add(btns,idl and{r=split"116,121,125,128",fn=function()sfx"1"hilite(idl)sel,cx,cy={idl},idl.x-64,idl.y-64cam()end})and 48or 56,unspl"105,8,6,116,121")sspr(add(btns,idlm and{r=split"106,121,113,128",fn=function()hilite(idlm)sel={idlm}end})and 48or 56,unspl"98,8,6,104,121")pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"sspr(unspl"109,72,19,12,105,107")camera(cx\-20.21,cy\-21.33)rect(unspl"104,106,112,114,10")resbar()if hc then campal()cursor(dget"1"&61440|1,93)if hc.reqs then
+portx=]]..split"90,81,81"[dget"0"]),function()axn=not axn end,20,108)end camera()sspr(add(btns,idl and{r=split"116,121,125,128",fn=function()sfx"1"hilite(idl)sel,cx,cy={idl},idl.x-64,idl.y-64cam()end})and 48or 56,unspl"105,8,6,116,121")sspr(add(btns,idlm and{r=split"106,121,113,128",fn=function()hilite(idlm)sel={idlm}end})and 48or 56,unspl"98,8,6,104,121")pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"sspr(unspl"109,72,19,12,105,107")camera(cx\-20.21,cy\-21.33)rect(unspl"104,106,112,114,10")resbar()if hc then cursor(dget"1"&61440|1,93)if hc.reqs then
 ?hc.txt
 local l=pres(hc,0,150)camera(l/2-4-hbtn.r[1],8-hbtn.r[2])pres(hc,2,2)rect(l+2,unspl"0,0,8,1")else
 ?hc.req
-end end end function resbar()camera()rectfill(unspl"0,120,30,128,7")camera(-pres(res1,unspl"1,122,2"))unl"-128,120,-4,120,5"unl"-3,121"end 
+end end end function resbar()camera()rectfill(unspl"0,120,30,128,7")camera(-pres(res1,unspl"1,122,2"))unl"-128,120,-4,120,5"unl"-3,121"campal()end 
 -->8
 --const
 

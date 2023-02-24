@@ -1,11 +1,18 @@
 pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
+--devkit
 poke(0x5f2d,3)
+
+--prevent scrolling when
+--printing text near the
+--bottom of the screen
+poke(0x5f36,0x40)
 
 cf=0
 curs=0
 mode=0
+scroll=0
 layers={}
 hovbtn={}
 sel=nil
@@ -98,6 +105,16 @@ function _update()
 		end
 	end
 	
+	--height of viewport: 93
+	--content height: layers*12
+	local s=stat"36"
+	if mode==1 and mx<mw then
+		scroll-=s*2
+		scroll=mid(
+			scroll,
+			#layers*12-90)
+	end
+	
 	key=stat"31"
 	if key=="\t" then
 		if menudx==0 then
@@ -160,6 +177,7 @@ function draw_menu(x)
 			{2,15},
 			function()
 				mode=i
+				scroll=0
 				if sel and i==2 then
 					edit(sel)
 				end
@@ -274,6 +292,7 @@ function draw_layers()
 		{34,12,mw,20},
 		{6,7},
 		function()
+			for i=0,10 do
 			seli=(seli or 0)+1
 			sel=add(layers,{
 				b=true,
@@ -282,10 +301,13 @@ function draw_layers()
 				x=64,
 				y=64,
 			},seli)
+			end
 		end
 	)
 	spr(8,34,12)
+	camera(menux,scroll)
 	for i,l in inext,layers do
+		clip(0,21,mw+1,93)
 		local h=12
 		local y=i*h+9
 		rectfill(0,y,mw,y+h,
@@ -329,7 +351,7 @@ function draw_layers()
 		
 		pal()
 		
-		clip(-menux,y,mw,h)
+		clip(-menux,y-scroll,mw,h,true)
 		local txt="\f"..alpha(l.fg)
 			..l.txt
 		if l.bg then
@@ -578,8 +600,9 @@ function preview()
 	for i=#layers,1,-1 do
 		local l=layers[i]
 		cursor()
+
 		local x1,y1,x2,y2=l.x,l.y,
-			print(l2cc(l).."\0")
+			print(l2cc(l))
 		
 		local r={x1-2,y1-2,x2,y2,7}
 		if l==sel or not sel then
