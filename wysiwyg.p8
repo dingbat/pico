@@ -177,7 +177,6 @@ function draw_menu(x)
 			{2,15},
 			function()
 				mode=i
-				scroll=0
 				if sel and i==2 then
 					edit(sel)
 				end
@@ -292,7 +291,6 @@ function draw_layers()
 		{34,12,mw,20},
 		{6,7},
 		function()
-			for i=0,10 do
 			seli=(seli or 0)+1
 			sel=add(layers,{
 				b=true,
@@ -301,7 +299,6 @@ function draw_layers()
 				x=64,
 				y=64,
 			},seli)
-			end
 		end
 	)
 	spr(8,34,12)
@@ -310,12 +307,13 @@ function draw_layers()
 		clip(0,21,mw+1,93)
 		local h=12
 		local y=i*h+9
+		local by=y-scroll
 		rectfill(0,y,mw,y+h,
 			sel==l and 2 or 5)
 		rect(0,y,mw,y+h,13)
 		
 		add(buttons,{
-			r={0,y,mw,y+h},
+			r=clip_rect{0,by,mw,by+h},
 			fn=function()
 				sel,seli=l,i
 			end
@@ -325,7 +323,7 @@ function draw_layers()
 		if i>1 then
 			button(
 				"up"..i,
-				{0,y,5,y+8},
+				clip_rect{0,by,5,by+8},
 				{6,10},
 				function()
 					layers[i],layers[i-1]=
@@ -339,7 +337,7 @@ function draw_layers()
 		if i<#layers then
 			button(
 				"down"..i,
-				{6,y,11,y+8},
+				clip_rect{6,by,11,by+8},
 				{6,10},
 				function()
 					layers[i],layers[i+1]=
@@ -496,6 +494,21 @@ function join(arr)
 		str..=s
 	end)
 	return str
+end
+
+function clip_rect(r1)
+	local r2={0,21,mw+1,21+93}
+	if not int(r1,r2,0) then
+		return {-1,-1,-1,-1}
+	end
+	
+	local x1,x2=
+		max(r2[1],r1[1]),
+		min(r2[3],r1[3])
+	local y1,y2=
+		max(r2[2],r1[2]),
+		min(r2[4],r1[4])
+	return {x1,y1,x2,y2}
 end
 -->8
 function button(
