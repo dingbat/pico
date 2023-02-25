@@ -157,19 +157,15 @@ function bnr(a,t,st,cx)
 	camera(cx)
 	local s=res1.t\1%60
 	rectfill(unspl"0,88,128,107,9")
-	unl"6,87,44,87"
-	unl"82,87,121,87"
-	unl"25,108,105,108"
 	line(
-		?split",⁶j2l⁴e²9ᶜ5 ,⁶j2l⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ,normal ai ⁴m⁶x1 ,hard ai "[res1.diff]
+		?split",⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ5 ,⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ⁶y0⁵dm²9 ,normal ai ⁴m⁶x1 ⁶y0⁵dm²9 ,hard ai ⁶y0⁵dm²9 "[res1.diff]
 		-3,unspl"80,8,80,9")
-	?"⁶jll²9⁴c⁴i ᶜ5⧗³h"..(res1.t<600 and "0" or "")..res1.t\60 ..(s<10 and ":0" or ":")..s.." "
-	unl"119,80,84,80,9"
+	?"⁶jll²9⁴e ⁵df⁶xz ⁶x4⁶jll⁵keᶜ5⧗³h"..(res1.t<600 and "0" or "")..res1.t\60 ..(s<10 and ":0" or ":")..s.." ⁶y0⁵dm²9 ⁶jll⁵fk²9 "
 	pal{res1.col,[14]=0}
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
-	?"⁶j7r⁴i⁶y7²9⁵ffᶜ4⁶x1⁴f ⁴h⁶x4 "..st
+	?"⁶j7r⁶y0⁵eh²9 ⁶jqr⁵eh ⁶j7r⁴i⁶y7²9⁵ffᶜ4⁶x1⁴f ⁴h⁶x4 "..st
 	?"⁶jdn⁴h⁶w⁶tᶜa"..t
 	campal()
 end
