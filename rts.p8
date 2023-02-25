@@ -1596,7 +1596,8 @@ function tick(u)
 	if u.unit and not st.typ then
 		repeat
 			x,y=u.x,u.y
-			while g(pos,x\4,y\4,
+			while u.upd and
+				g(pos,x\4,y\4,
 				not st.in_bld and
 				g(bldgs,x\8,y\8,{}).bldg==1)
 			do
