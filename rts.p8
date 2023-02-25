@@ -190,7 +190,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
+		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.4⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.4⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 
 		camera(split"8,12,8,18,14"[diff+1])
 		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
