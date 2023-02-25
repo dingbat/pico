@@ -307,34 +307,13 @@ startpos:
 
 dirty token savers
 ============
-x remove `.."_vs_"..` (2 tok)
-- organic endscreen (6 tok)
-(2 tok) pal(14,0) => 	pspl"1,2,3,4,5,6,7,8,9,10,11,12,13,0"
-- revert 0532b54 (... hack, 2 tokens)
-- revert c02cd41 (hbld renew farm, pal on farm, 11 tok)
-  (hbld is extreme luxury, only matters if new ant is assigned to farm, 6 tok)
-- revert bf60644 (lady wandering, 25 tok)
-x remove sfx from save (2 tok)
-x 9c01935 hbanner toggle (8 tok)
-x inline ai_dmg() in dmg() (7 tok)
 - inline a bunch of other functions (~5-7 each)
-x remove make_dmap argument (priotize resource) (5 tok)
+- remove make_dmap argument (priotize resource) (5 tok)
 - revert 0121c42bc52f8534e216baf94951f20601295fe0 parse trick in a* (6 tok)
 - remove aoe hilite effect (15 tok)
-x a8c9657 add `id=0` to cat (2 tok)
-- (2 tok) put d<0.5 in norm
-x (5 tok) inline new() in init()
-x (4 tok) 7ded44f - make p3 color black
-- (7 tok but +1.04%) arrs (see below)
-- (2 tok but .07%) r.npl,r.diff=unspl(split"2:1,2:2,2:3,3:2,3:3"[ai_diff+1],":"))
-x (10 tok) conv pop, very unncessary: res[e.p].p-=1 / res[u.p].p+=1
-- (1 tok) los var (=typ.loc) in tick()
-- (4 tok) parseify adding proj
-- (6 tok) remove constants
+- (10 tok) conv pop: res[e.p].p-=1 / res[u.p].p+=1
 x hunt
 
-
-vars to rename:
 
 
 \)([^}|),\].<>\s/\-*%+=^\[\\!])
@@ -342,15 +321,6 @@ vars to rename:
 
 ^\s+|\s+$
 \n\n([^f]|f[^u]) -> \n$1
-
---[[
-for source w/whitespace,
-see /bbs/1230431
-
-credits:
-fast dist - musurca
-a* - morgan3d
-]]
 
 clip(x+3,0,sec-6,128)
 		sspr(unspl"10,64,2,2,0,104,128,2")

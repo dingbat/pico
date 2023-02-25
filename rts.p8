@@ -1416,10 +1416,11 @@ in_bld=1]],path(u,
 end
 
 function tick(u)
-	typ,u.onscr,u.upd=
+	typ,u.onscr,u.upd,wayp=
 		u.typ,
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
-		u.id%upcycle==upc
+		u.id%upcycle==upc,
+		u.st.typ
 	if u.hp<=0 and u.alive then
 		del(sel,u)
 		tot-=1
@@ -1453,7 +1454,6 @@ function tick(u)
 		return
 	end
 
-	local wayp=u.st.typ
 	if wayp then
 		if norm(wayp[1],u,
 			u.st.spd or typ.spd)
@@ -1467,8 +1467,8 @@ function tick(u)
 		u.st.active=1
 	end
 
-	local x,y,t,agg_d,agg_u=
-		u.x,u.y,u.st.x,9999
+	local x,y,t,los,agg_d,agg_u=
+		u.x,u.y,u.st.x,typ.los,9999
 
 	if u.q then
 		produce(u)
@@ -1544,15 +1544,15 @@ function tick(u)
 	if u.upd then
 		if u.hu then
 			local xo,yo,l=x%8\2,y%8\2,
-				ceil(typ.los/8)
-			local k=xo|yo*16|typ.los*256
+				ceil(los/8)
+			local k=xo|yo*16|los*256
 			if not vcache[k] then
 				vcache[k]={}
 				for dx=-l,l do
 					for dy=-l,l do
 						add(
 							dist(xo*2-dx*8-4,
-								yo*2-dy*8-4)<typ.los
+								yo*2-dy*8-4)<los
 							and vcache[k],dx+dy*256)
 					end
 				end
@@ -1578,7 +1578,7 @@ function tick(u)
 				then
 					local d=dist(x-e.x,y-e.y)
 					if e.alive and
-						d<=typ.los then
+						d<=los then
 						if e.bldg then
 							d+=typ.sg and e.bldg==1
 								and -999 or 999
