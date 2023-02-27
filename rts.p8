@@ -31,7 +31,11 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if llclk then
 			llclk=init()
-
+		
+				tostr[[[[]]
+			srand"6"
+			--]]
+			
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -40,6 +44,18 @@ function _update()
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 
+				tostr[[[[]]
+			unit(9,115,60,2)
+			typs[14][4].lady=nil
+			typs[14][4].atk=nil
+			typs[14][4].hp=800
+			for y=3,8 do
+			 unit(29,13*8+4,y*8+4,1)
+			end
+			for i=0,40 do
+				unit(4,61,76,1)
+			end
+			 --]]
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
