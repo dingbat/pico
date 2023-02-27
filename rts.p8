@@ -1614,21 +1614,15 @@ function tick(u)
 		end
 	end
 	
-	function overlaps()
-	 return g(pos,x\4,y\4,
-			not u.st.in_bld and
-			g(bldgs,x\8,y\8,{}).bldg==1
-		)
-	end
 	if u.unit and not u.st.typ then
-		local fr,v={{u.x,u.y}},{}
+		local fr,v={{x,y}},{}
 		for p in all(fr) do
 			x,y=unpack(p)
 			if u.st.ez_adj or
 				acc(x\8,y\8)
 			then
 				if not g(pos,x\4,y\4) then
-					u.st.typ=#fr>1 and {{x,y}}
+					u.st.typ=#fr>1 and {p}
 					break
 				end
 				foreach(
@@ -1944,8 +1938,8 @@ function atk(u)
 						if e.queen then
 							e.hp=0
 						else
---							e.pres.p-=1
---							u.pres.p+=1
+							e.pres.p-=1
+							u.pres.p+=1
 							e.p,e.conv=u.p,0
 						end
 						del(e.sqd,e)
@@ -2013,19 +2007,19 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
---		f+=res1.diff*u.ap\33*10
+		f+=res1.diff*u.ap\33*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
---		if t<112 and
---			(n==f\3 or n==f\1.25)
---		then
---			mset(x,y,t+16)
---		elseif n==1 then
---			mset(x,y,68)
---			s(dmap_st[r],x,y)
---			s(dmaps[r],x,y,.55)
---			qdmaps(r)
---		end
+		if t<112 and
+			(n==f\3 or n==f\1.25)
+		then
+			mset(x,y,t+16)
+		elseif n==1 then
+			mset(x,y,68)
+			s(dmap_st[r],x,y)
+			s(dmaps[r],x,y,.55)
+			qdmaps(r)
+		end
 		s(restiles,x,y,n-1)
 	end
 end
