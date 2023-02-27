@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --age of ants
 --eeooty
@@ -31,11 +31,7 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if llclk then
 			llclk=init()
-		
-				tostr[[[[]]
-			srand"6"
-			--]]
-			
+			 
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -43,32 +39,10 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
-
-				tostr[[[[]]
-			unit(9,115,60,2)
-			typs[14][4].lady=nil
-			typs[14][4].atk=nil
-			typs[14][4].hp=800
-			for y=3,8 do
-			 unit(29,13*8+4,y*8+4,1)
-			end
-			for i=0,40 do
-				unit(4,61,76,1)
-			end
-			 --]]
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
 1,59,52
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
 5,61,76
 5,61,76
 5,61,76
@@ -1632,13 +1606,13 @@ function tick(u)
 	
 	if u.unit and not u.st.typ then
 		local fr,v={{x,y}},{}
-		for p in all(fr) do
+		for i,p in next,fr do
 			x,y=unpack(p)
-			if u.st.ez_adj or
+			local a=u.st.ez_adj or
 				acc(x\8,y\8)
-			then
-				if not g(pos,x\4,y\4) then
-					u.st.typ=#fr>1 and {p}
+			if a or i==1 then
+				if a and not g(pos,x\4,y\4) then
+					u.st.typ=i>1 and {p}
 					break
 				end
 				foreach(
@@ -2023,7 +1997,7 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
-		f+=res1.diff*u.ap\33*10
+--		f+=res1.diff*u.ap\33*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
 		if t<112 and
@@ -3204,8 +3178,8 @@ fff88fffffffffffffffff8fffffffffffff333fffffffffffffffffffffffffffffffffffffffff
 f887888ffffffffff8fff888fffffffffff33b3ff33fff33ffff44ffff444ffffffffff6776fff766fffffff1dd1111111111dd1ffffffffffffffffffffffff
 87887878fff888ff888ff888ff888fffff33b33ff3bff3bbf4f4444fff444ffffffff7666cc666cc667fffff1111111cc1111111ffffffffffffffffffffffaf
 88788788ff88188f888f8fdff88188ffff3b333fffbbfbffff44454ff4494fffffff67cccccccccccc76ffff1111cccccccc1111fffff7ffffffffffffffffff
-fff77fff1181881ffdf888dff1881811ff3333fffffbbbfff444544fff544ffffff76ccccc6cc6ccccc67fff111cccccccccc111fffffffffffffaffffffffff
-ff7777ff1685858ffdd888dff8585861fff33fffffffbfff499544ffff9444fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d1ffffffffffffffffffffffff
+fff77fff1181881ffdf888dff1881811ff333dfffffbbbfff444544fff544ffffff76ccccc6cc6ccccc67fff111cccccccccc111fffffffffffffaffffffffff
+ff7777ff1685858ffdd888dff8585861fff3dfffffffbfff499544ffff9444fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d1ffffffffffffffffffffffff
 fff77fffffffffffffdfdfdffffffffffff3ffffffffbfff49944fffff5444ffff66cccc7cccc11ccccc66ff111ccc6666ccc111ffffffffffffffffffffffff
 fff77fffffffffffffffdffffffffffffff3ffffffffbffff444ffffff445ffff6c7ccc1111111111ccc7c6f11ccc667766ccc11ffffffffffffffffffffffff
 fff88ffffffffffffffffffffffffffffffff3fffffffffffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc11ffffffffffffffffffffffff
@@ -3213,7 +3187,7 @@ f887888ffffffffff8fff88fffffffffffff3bfffffffffffffff4fffff4fffff6ccc6111dd11111
 ff8878f8fffffffff88ff888ffffffffffffb33ff3bfff3ffff4f44ffff44ffff7cccc111166111111cccc7f1d1cccccccccc1d1ffffffffffffffffffffffff
 f8788fffff8815ff888f8fdfff5188ffff3bf3fffffbfbffff44454fff494ffff6c6cc111111111111cc6c6f111cccccccccc111ffffffffff7fffffffffffff
 fff77ffff121885ffdff88dff588121fff3333fffffbbbffff4454ffff544ffff66ccc1111111dd111ccc66f1111cccccccc1111fffaffffffffffffffffffff
-ff77ffff1585858fffd88fdff8585851fff33fffffffbffff495ffffff9444ffff6c6cc1111111111cc6c6ff1111111cc1111111ffffffffffffffffffffffff
+ff77ffff1585858fffd88fdff8585851fff3dfffffffbffff495ffffff9444ffff6c6cc1111111111cc6c6ff1111111cc1111111ffffffffffffffffffffffff
 fff7ffffffffffffffdfdffffffffffffff3ffffffffbfff49944ffffff44fffff6cccc111dd111111ccc6ff1dd1111111111dd1ffffffffffffffffffffafff
 fff77fffffffffffffffdffffffffffffff3ffffffffbffff444fffffffffffff76c6c111111111111c6c67f1111d111111d1111ffffffffffffffffffffffff
 fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6c7ccc1111111111ccc7c6ffffffffffffffff5ffffffffffffffffffffffff
