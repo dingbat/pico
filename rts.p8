@@ -29,9 +29,8 @@ function _update()
 		end
 		add(pcol,
 			deli(btnp"4" and pcol,1))
-		if llclk then
-			llclk=init()
-			 
+		if lclk then
+			init()
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -43,42 +42,6 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
-5,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
@@ -2837,7 +2800,7 @@ pspl,rndspl,unspl,campal=
 unl,unspr,aspl,
 	typs,stp,resk,pcol,
 	hlt,diff,
-	menu,cx,cy,cvx,cvy
+	menu,loser,cx,cy,cvx,cvy
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
@@ -2846,7 +2809,7 @@ unl,unspr,aspl,
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
-	unspl"-10,0,63,0,30,1,1"
+	unspl"-10,0,63,0,0,30,1,1"
 
 p[[var=resqty
 7=45
