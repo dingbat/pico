@@ -353,12 +353,12 @@ t=0
 npl=0]]
 
 	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"
-	res1,dmap_st.d,posidx,
+	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
 		res.p1,{},
 		split"1,2,3,4",
-		unspl"59,0,0,0,64,64,50"
+		unspl"0x9004,59,0,0,0,64,64,50"
 	
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
@@ -2922,7 +2922,6 @@ end
 function loadgame()
 	init()
 	pal()
-	local ptr=0x9004
 	serial(unspl"0x802,0x9000,0x4000")
 	local function px(n)
 		n-=1
