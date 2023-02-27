@@ -1621,26 +1621,23 @@ function tick(u)
 		)
 	end
 	if u.unit and not u.st.typ then
-		local fr,v={{0,0}},{}
+		local fr,v={{u.x,u.y}},{}
 		for p in all(fr) do
-			local dx,dy=unpack(p)
-			x,y=u.x+dx,u.y+dy
+			x,y=unpack(p)
 			if u.st.ez_adj or
 				acc(x\8,y\8)
 			then
 				if not g(pos,x\4,y\4) then
-					u.st.typ=dx|dy!=0 and {{x,y}}
+					u.st.typ=#fr>1 and {{x,y}}
 					break
 				end
 				foreach(
 				split"2:0,2:2,0:2,-2:2,-2:0,-2:-2,0:-2,2:-2"
 ,function(k)
-					local nx,ny=unpack(split(k,":"))
-					nx+=dx
-					ny+=dy
-					local kx,ky=nx+u.x,ny+u.y
-					if not g(v,kx,ky) then
-						s(v,kx,ky,add(fr,{nx,ny}))
+					local dx,dy=unspl(k,":")
+					local nx,ny=x+dx,y+dy
+					if not g(v,nx,ny) then
+						s(v,nx,ny,add(fr,{nx,ny}))
 					end
 				end)
 			end
