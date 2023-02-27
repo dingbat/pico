@@ -2798,7 +2798,7 @@ pspl,rndspl,unspl,campal=
 	comp(camera,pal)
 	
 unl,unspr,aspl,
-	typs,stp,resk,pcol,
+	typs,stp,pcol,
 	hlt,diff,
 	menu,loser,cx,cy,cvx,cvy
 	=
@@ -2807,7 +2807,6 @@ unl,unspr,aspl,
 	comp(a,unspl),
 	{},
 	split"-9:-20,263:-20,263:148,-9:148",
-	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,63,0,0,30,1,1"
 
@@ -2904,7 +2903,9 @@ function save()
 			draw(mget(x,y)|g(exp,x,y,0))
 		end
 	end
-	foreach(resk,function(k)
+	foreach(
+split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col"
+	,function(k)
 		foreach(res,function(r)
 			draw(r[k])
 		end)
@@ -2938,7 +2939,9 @@ function loadgame()
 				v>127 and s(exp,x,y,128))
 		end
 	end
-	foreach(resk,function(k)
+	foreach(
+	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col"
+	,function(k)
 		foreach(res,function(r)
 			r[k]=px"1"
 		end)
