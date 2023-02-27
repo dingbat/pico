@@ -3,7 +3,7 @@ version 41
 __lua__
 units={}
 
-for i=1,80 do
+for i=1,35 do
 	add(units,{id=i,x=25,y=25})
 end
 
@@ -46,13 +46,13 @@ function adj_sp2(u)
 				u.x,u.y=x,y
 				break
 			end
-			foreach(spl,function(k)
-				local dx,dy=unpack(split(k,":"))
-				local nx,ny=x+dx,y+dy
-				if not g(v,nx,ny) then
-					s(v,nx,ny,add(fr,{nx,ny}))
+			for nx=x-2,x+2,2 do
+				for ny=y-2,y+2,2 do
+					s(v,nx,ny,
+						add(g(v,nx,ny,fr),{nx,ny})
+					)
 				end
-			end)
+			end
 		end
 	end
 	s(pos,x\4,y\4,1)

@@ -52,6 +52,33 @@ function _update()
 5,61,76
 5,61,76
 5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
@@ -1615,15 +1642,13 @@ function tick(u)
 					u.st.typ=i>1 and {p}
 					break
 				end
-				foreach(
-				split"2:0,2:2,0:2,-2:2,-2:0,-2:-2,0:-2,2:-2"
-,function(k)
-					local dx,dy=unspl(k,":")
-					local nx,ny=x+dx,y+dy
-					if not g(v,nx,ny) then
-						s(v,nx,ny,add(fr,{nx,ny}))
-					end
-				end)
+				for nx=max(x-2),x+2,2 do
+				for ny=max(y-2),y+2,2 do
+					s(v,nx\2,ny\2,
+						add(g(v,nx\2,ny\2,fr),
+							{nx,ny}))
+				end
+				end
 			end
 		end
 		s(pos,x\4,y\4,1)
