@@ -799,7 +799,7 @@ atk=0
 conv=2
 atk_typ=ant
 def=ant
-monk=65
+monk=74
 
 t=30
 r=0
@@ -1765,7 +1765,7 @@ function input()
 c=8]],mx,my))
 
 		elseif sel1.typ.units then
-			if fget(mget(mx8,my8),1) then
+			if resqty[mget(mx8,my8)] then
 				hilite(htile)
 			end
 			sfx"3"
@@ -1976,7 +1976,7 @@ function gth(u)
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
 	local t=mget(x,y)
-	local f=resqty[fget(t)]
+	local f=resqty[t]
 	if not f then
 		if u.monk then
 			pay(pray,-1,res1)
@@ -1984,7 +1984,7 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
---		f+=res1.diff*u.ap\33*10
+		f+=res1.diff*u.ap\33*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
 		if t<112 and
@@ -2024,7 +2024,7 @@ function produce(u)
 				onscr and hu and gl.sfx"19"
 			if bld.ant and
 				rtx and
-				fget(mget(rtx,rty),1)
+				resqty[mget(rtx,rty)]
 			then
 				gl.gogth(new,rtx,rty)
 			elseif rx then
@@ -2172,10 +2172,10 @@ function avail_farm()
 end
 
 function can_gth()
-	local f=fget(mget(mx8,my8))
+	local t=mget(mx8,my8)
 	return (seltyp.ant and
-		(f&2==2 or avail_farm())
-		or seltyp.monk==f)
+		(resqty[t] or avail_farm())
+		or seltyp.monk==t)
 		and g(exp,mx8,my8)
 		and surr(nil,mx8,my8)
 end
@@ -2810,12 +2810,42 @@ unl,unspr,aspl,
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,63,0,0,30,1,1"
 
+--\3
+--\1.25
 p[[var=resqty
-7=45
-10=12
-11=50
-19=45
-39=60]]
+80=45
+96=36
+112=15
+
+82=45
+98=36
+114=15
+
+81=60
+97=48
+113=20
+
+83=60
+99=48
+115=20
+
+123=12
+
+84=50
+100=40
+116=16
+
+85=50
+101=40
+117=16
+
+86=45
+102=36
+118=15
+
+87=45
+103=36
+119=15]]
 
 p[[var=pray
 g=.00318
@@ -2904,12 +2934,12 @@ function save()
 		end
 	end
 	foreach(
-split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col"
-	,function(k)
-		foreach(res,function(r)
-			draw(r[k])
+		split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
+		function(k)
+			foreach(res,function(r)
+				draw(r[k])
+			end)
 		end)
-	end)
 	draw(#units)
 	foreach(units,function(_ENV)
 		foreach({idx,x,y,p,
@@ -2938,12 +2968,12 @@ function loadgame()
 		end
 	end
 	foreach(
-	split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col"
-	,function(k)
-		foreach(res,function(r)
-			r[k]=px"1"
+		split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
+		function(k)
+			foreach(res,function(r)
+				r[k]=px"1"
+			end)
 		end)
-	end)
 	for i=1,px"1" do
 		unit(px"7")
 	end

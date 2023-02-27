@@ -10,7 +10,7 @@ __lua__
 music(63,2000)function _update()lclk,rclk,llclk,lrclk=llclk and not btn"5",lrclk and not btn"4",btn"5",btn"4",stat"121"and loadgame()if dget"0">1and not loser then lclk,rclk=btnp"5",btnp"4"end if menu then cx+=cvx cy+=cvy
 if(cx%256==0)cvx*=-1
 if(cy%127==0)cvy*=-1
-if btnp"0"or btnp"1"then diff+=btnp()^^-2diff%=5end add(pcol,deli(btnp"4"and pcol,1))if llclk then llclk=init()for k=1,3do local r=res[k]r.pos,r.col,r.npl,r.diff=del(posidx,rnd(posidx)),pcol[k],unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")end foreach(split([[7,64,64
+if btnp"0"or btnp"1"then diff+=btnp()^^-2diff%=5end add(pcol,deli(btnp"4"and pcol,1))if lclk then init()for k=1,3do local r=res[k]r.pos,r.col,r.npl,r.diff=del(posidx,rnd(posidx)),pcol[k],unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")end foreach(split([[7,64,64
 1,49,64
 1,77,59
 1,59,52
@@ -21,8 +21,8 @@ c=13]],b.x,b.y))end end end end end)foreach(units,tick)if selx then sel=selh or 
 pal{res1.col,[14]=0}sspr(64+pack(48,cf\5%3*16)[a],unspl"0,16,8,12,90,32,16")
 ?"⁶j7r⁶y0⁵eh²9 ⁶jqr⁵eh ⁶j7r⁴i⁶y7²9⁵ffᶜ4⁶x1⁴f ⁴h⁶x4 "..st
 ?"⁶jdn⁴h⁶w⁶tᶜa"..t
-campal()end function draw_map(o,y)camera(cx%8,cy%8)map(cx/8+o,cy/8,0,0,17,y)end function _draw()draw_map(0,17)if menu then camera()local x=64+t()\.5%2*16pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"sspr(x,unspl"0,16,8,25,28,32,16")sspr(x,unspl"0,16,8,74,28,32,16,1")pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0"pal{pcol[1]}sspr(x,unspl"0,16,8,25,27,32,16")pal{pcol[2]}sspr(x,unspl"0,16,8,74,27,32,16,1")
-?"⁶j5c³j⁶w⁶tᶜ0age of ants⁶j5b⁵ijᶜ7age of ants⁶jbg⁵ih⁶-w⁶-tᶜ0difficulty:⁶jbg³iᶜcdifficulty:⁶j8m⁴jᶜ0press ❎ to start⁶j8m⁴iᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.3⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.3⁶j8p⁴jᶜ0PAUSE FOR OPTIONS⁶j8p⁴iᶜ6PAUSE FOR OPTIONS⁶jej³jᶜ6\0"
+campal()end function draw_map(o,y)camera(cx%8,cy%8)map(cx/8+o,cy/8,0,0,17,y)end function _draw()draw_map(0,17)if menu then camera()local x=64+t()\.5%2*16pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"sspr(x,unspl"0,16,8,25,18,32,16")sspr(x,unspl"0,16,8,74,18,32,16,1")pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0,2"pal{pcol[1]}sspr(x,unspl"0,16,8,25,17,32,16")pal{pcol[2]}sspr(x,unspl"0,16,8,74,17,32,16,1")
+?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.4⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.4⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 camera(split"8,12,8,18,14"[diff+1])
 ?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
 return end aspl"bfog,afog,btns"for u in all(units)do if u.onscr or loser then if not loser and not g(viz,u.x8,u.y8)and u.disc then add(afog,u)elseif u.bldg or u.dead then draw_unit(u)else add(bfog,u)end end end foreach(bfog,draw_unit)camera(cx,cy)local cf5=cf\5foreach(prj,function(_ENV)sspr(typ.prj_s+cf5%2*2,96,2,2,x,y)end)if loser then resbar()bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],stat"54">56and"press ❎ for menu ⁴f⁶x1 "or"thx for playingᶜ8♥ ⁴f⁶x1 ",ban)return end pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"draw_map(48,15)_pal,pal=pal,max foreach(afog,draw_unit)pal=_pal pal()fillp"23130.5"for x=cx\8,cx\8+16do for y=cy\8,cy\8+13do local i=x|y<<8local function b(a,col)color(col)camera(cx-x*8,cy-y*8)
@@ -47,7 +47,7 @@ reqs=0
 diff=0
 techs=0
 t=0
-npl=0]]aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"res1,dmap_st.d,posidx,cf,selt,alert,ban,amx,amy,tot,loser,menu=res.p1,{},split"1,2,3,4",unspl"59,0,0,0,64,64,50"for i=2,4do ais[i]=p("boi=0",i)end p[[var=heal
+npl=0]]aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"res1,dmap_st.d,posidx,ptr,cf,selt,alert,ban,amx,amy,tot,loser,menu=res.p1,{},split"1,2,3,4",unspl"0x9004,59,0,0,0,64,64,50"for i=2,4do ais[i]=p("boi=0",i)end p[[var=heal
 qty=.00083]]p[[var=renew
 r=0
 g=0
@@ -450,7 +450,7 @@ atk=0
 conv=2
 atk_typ=ant
 def=ant
-monk=65
+monk=74
 
 t=30
 r=0
@@ -914,35 +914,36 @@ function rest(u)u.st=p[[t=rest
 agg=1
 idl=1]]end function mvg(units,x,y,agg,frc)local l=999foreach(units,function(u)if frc or u.st.idl then move(u,x,y,agg)end l=min(u.typ.spd,l)end)foreach(units,function(_ENV)st.spd,grp=l,agg end)end function move(u,x,y,agg)u.st=p([[t=move
 move=1]],path(u,x,y,0))u.st.agg=agg end function gobld(u,b)if u.st.farm and b.farm then return end u.st,u.res=p([[t=bld
-in_bld=1]],path(u,b.x,b.y),b)end function gogth(u,tx,ty,wp)local t=tile_unit(tx,ty)u.st=p([[t=gth
-gth=1]],wp or path(u,t.x,t.y),t,p[[7=r
+in_bld=1
+ez_adj=1]],path(u,b.x,b.y),b)end function gogth(u,tx,ty,wp)local t=tile_unit(tx,ty)u.st=p([[t=gth
+gth=1
+ez_adj=1]],wp or path(u,t.x,t.y),t,p[[7=r
 10=g
 11=g
 19=b
 39=r]][fget(mget(tx,ty))],tx,ty)end function godrop(u,nxt_res,dropu)local wayp if not dropu then wayp,x,y=dpath(u,"d")dropu=not wayp and units[u.p]end u.st=p([[t=drop
 drop=1
-in_bld=1]],wayp or path(u,dropu.x,dropu.y),dropu or tile_unit(x,y),nxt_res)end function goatk(u,e)if e then u.st,u.disc,u.res=p([[t=atk
+in_bld=1
+ez_adj=1]],wayp or path(u,dropu.x,dropu.y),dropu or tile_unit(x,y),nxt_res)end function goatk(u,e)if e then u.st,u.disc,u.res=p([[t=atk
 active=1]],path(u,e.x,e.y,0,u.typ.range/8),e),e.hu and u.bldg u.st.k=e.k end end function gofarm(u,f)f.farmer,u.st,u.res=u,p([[t=frm
-in_bld=1]],path(u,f.x+rndspl"-2,-1,0,1,2",f.y+rndspl"-2,-1,0,1,2"))u.st.farm=f end function tick(u)typ,u.onscr,u.upd=u.typ,int(box(u).r,{cx,cy,cx+128,cy+104},0),u.id%upcycle==upc if u.hp<=0and u.alive then del(sel,u)tot-=1u.dead,u.farmer,u.alive=typ.d u.st=p"t=dead",typ.bldg and reg_bldg(u),u.onscr and sfx(typ.bldg and 17or 62)if typ.lady then local t=nearest(u.x,u.y)mset(t[1],t[2],82+u.dir)dmap_st.r[t.k]=t qdmaps"r"elseif typ.queen then npl-=1if npl==1or u==hq then loser,sel=min(u.p,2),{}music"56"end elseif typ.drop and not u.const then u.pres.pl-=typ.drop elseif typ.unit then u.pres.p-=1end end if u.dead then u.dead+=1del(u.dead==60and units,u)return end local wayp=u.st.typ if wayp then if norm(wayp[1],u,u.st.spd or typ.spd)then deli(wayp,1)u.st.typ=#wayp>0and wayp end elseif u.st.move then rest(u)elseif u.st.farm then u.st.active=1end local x,y,t,agg_d,agg_u=u.x,u.y,u.st.x,9999if u.q then produce(u)end if typ.farm then local _ENV=u if farmer and farmer.st.farm!=u or exp then farmer=nil end end if t then if t.dead then u.st.agg=1,wayp or rest(u),typ.ant and t.lady and gogth(u,t.x8,t.y8)elseif int(t.r,u.r,-2)then u.st.active,u.st.typ=1elseif u.st.gth and not wayp then gogth(u,t.x8,t.y8)end if not wayp then u.dir=sgn(t.x-x)end end if u.st.active then _ENV[u.st.t](u)end if u.hl and u.dmgd then u.hp+=heal[u.p].qty end if int(u.r,{mx,my,mx,my},1)and(not hunit or hunit.hu)then hunit=u end if g(viz,u.x8,u.y8,u.disc)then if selx and int(u.r,selbox,0)then if not u.hu then sele={u}elseif typ.unit then selh=selh or{}add(selh,u)else selb={u}end end sset(109+x/20.21,72+y/21.33,u.ap)end
+in_bld=1]],path(u,f.x+rndspl"-2,-1,0,1,2",f.y+rndspl"-2,-1,0,1,2"))u.st.farm=f end function tick(u)u.onscr,u.upd,wayp=int(box(u).r,{cx,cy,cx+128,cy+104},0),u.id%upcycle==upc,u.st.typ if u.hp<=0and u.alive then del(sel,u)tot-=1u.dead,u.farmer,u.alive=u.d u.st=p"t=dead",u.bldg and reg_bldg(u),u.onscr and sfx(u.bldg and 17or 62)if u.lady then local t=nearest(u.x,u.y)mset(t[1],t[2],82+u.dir)dmap_st.r[t.k]=t qdmaps"r"elseif u.queen then npl-=1if npl==1or u==hq then loser,sel=min(u.p,2),{}music"56"end elseif u.drop and not u.const then u.pres.pl-=u.drop elseif u.unit then u.pres.p-=1end end if u.dead then u.dead+=1del(u.dead==60and units,u)return end if wayp then if norm(wayp[1],u,u.st.spd or u.typ.spd)then deli(wayp,1)u.st.typ=#wayp>0and wayp end elseif u.st.move then rest(u)elseif u.st.farm then u.st.active=1end local x,y,t,los,agg_d,agg_u=u.x,u.y,u.st.x,u.typ.los,9999if u.q then produce(u)end if u.farm then local _ENV=u if farmer and farmer.st.farm!=u or exp then farmer=nil end end if t then if t.dead then u.st.agg=1,wayp or rest(u),u.ant and t.lady and gogth(u,t.x8,t.y8)elseif int(t.r,u.r,-2)then u.st.active,u.st.typ=1elseif u.st.gth and not wayp then gogth(u,t.x8,t.y8)end if not wayp then u.dir=sgn(t.x-x)end end if u.st.active then _ENV[u.st.t](u)end if u.hl and u.dmgd then u.hp+=heal[u.p].qty end if int(u.r,{mx,my,mx,my},1)and(not hunit or hunit.hu)then hunit=u end if g(viz,u.x8,u.y8,u.disc)then if selx and int(u.r,selbox,0)then if not u.hu then sele={u}elseif u.unit then selh=selh or{}add(selh,u)else selb={u}end end sset(109+x/20.21,72+y/21.33,u.ap)end
 if(u.const)return
 if u.st.idl then
-if(typ.lady and t6)wander(u)
-if u.hu then if typ.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif typ.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(typ.los/8)local k=xo|yo*16|typ.los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<typ.los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if mid(k,8191)==k and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and typ.atk then for e in all(units)do if e.ap!=u.ap or typ.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=typ.los then if e.bldg then d+=typ.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end local st,adj=u.st,0if u.unit and not st.typ then repeat x,y=u.x,u.y while g(pos,x\4,y\4,not st.in_bld and g(bldgs,x\8,y\8,{}).bldg==1)do x+=rndspl"-1,-.5,0,0,.5,1"y+=rndspl"-1,-.5,0,0,.5,1"adj+=1end
-if(adj&7==0)break
-st.typ=st.gth and{{x,y}}or path(u,x,y,0,nil,2)until st.typ s(pos,x\4,y\4,1)end end 
+if(u.lady and t6)wander(u)
+if u.hu then if u.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif u.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(los/8)local k=xo|yo*16|los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if mid(k,8191)==k and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and u.atk then for e in all(units)do if e.ap!=u.ap or u.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=los then if e.bldg then d+=u.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end if u.unit and not u.st.typ then local fr,v={{x,y}},{}for i,p in next,fr do x,y=unpack(p)local a=u.st.ez_adj or acc(x\8,y\8)if a or i==1then if a and not g(pos,x\4,y\4)then u.st.typ=i>1and{p}break end for nx=max(x-2),x+2,2do for ny=max(y-2),y+2,2do s(v,nx\2,ny\2,add(g(v,nx\2,ny\2,fr),{nx,ny}))end end end end s(pos,x\4,y\4,1)end end 
 -->8
 --input
 
 function cam()local b=btn()
 if(b>255)b>>=8
 local dx,dy=(b&2)-(b&1)*2,(b&8)/4-(b&4)/2if dget"0"!=2or loser then amx,amy=stat"32",stat"33"else amx+=dx amy+=dy dx,dy=amx\128*2,amy\128*2end cx,cy,amx,amy=mid(cx+dx,256),mid(cy+dy,loser and 128or 151),mid(amx,126),mid(amy,126)mx,my,hbtn=amx+cx,amy+cy mx8,my8=mx\8,my\8end function fsel(func,...)for u in all(sel)do func(u,...)end end function input()cam()foreach(btns,function(b)if int(b.r,{amx,amy,amx,amy},1)then hbtn=b end end)local cont,htile,atkmov,clk=not axn,tile_unit(mx8,my8),axn and dget"0">1,lclk or rclk if clk and hbtn then hbtn.fn(rclk)axn=axn and cont==axn return end if lclk and axn then rclk,axn=1end if amy>104and not selx then local dx,dy=amx-105,amy-107if min(dx,dy)>=0and dx<19and dy<13then local x,y=20.21*dx,21.33*dy if rclk and sel1 then sfx"1"fsel(move,x,y,atkmov)hilite{amx,amy,2,8}elseif not axn and llclk then cx,cy=x-64,y-64cam()end end if clk then to_bld=nil end return end if to_bld then if clk and bldable()then local b=unit(to_bld,mx8*8+to_bld.w\2,my8*8+to_bld.h\2,unspl"1,1,1")fsel(gobld,b)pay(to_bld,1,res1)selx,to_bld=sfx"1",rclk and can_pay(to_bld,res1)and to_bld end return end if btnp"5"and sel1 and sel1.unit and t()-selt<.2then sel,selx={}foreach(units,function(u)add(u.onscr and u.hu and u.idx==sel1.idx and sel,u)end)return end if rclk and sel1 and sel1.hu then if can_renew()then sfx"0"hilite(hbld)hbld.sproff,hbld.cyc,hbld.exp=0,0pay(renew,1,res1)gofarm(sel1,hbld)elseif can_gth()then sfx"0"hilite(htile)if avail_farm()then gofarm(sel1,hbld)else fsel(gogth,mx8,my8)end elseif can_bld()then sfx"0"fsel(gobld,hbld)hilite(hbld)elseif can_atk()then sfx"4"fsel(goatk,hunit)hilite(hunit)elseif can_drop()then sfx"0"fsel(godrop,nil,hbld)hilite(hbld)elseif sel1.unit then sfx"1"mvg(sel,mx,my,atkmov,1)hilite(p([[f=.5
-c=8]],mx,my))elseif sel1.typ.units then if fget(mget(mx8,my8),1)then hilite(htile)end sfx"3"sel1.rx,sel1.ry,sel1.rtx,sel1.rty=mx,my,mx8,my8 else cont=1end end if cont then if btnp"5"and not selx then selx,sely,selt=mx,my,t()end if llclk and selx then selbox={min(selx,mx),min(sely,my),max(selx,mx),max(sely,my),7}else selx=nil end end end 
+c=8]],mx,my))elseif sel1.typ.units then if resqty[mget(mx8,my8)]then hilite(htile)end sfx"3"sel1.rx,sel1.ry,sel1.rtx,sel1.rty=mx,my,mx8,my8 else cont=1end end if cont then if btnp"5"and not selx then selx,sely,selt=mx,my,t()end if llclk and selx then selbox={min(selx,mx),min(sely,my),max(selx,mx),max(sely,my),7}else selx=nil end end end 
 -->8
 --unit
 
 function draw_unit(u)local r,fw,w,h,stt,ihp,ux,uy=u.res and u.res.typ or"_",u.fw,u.w,u.h,u.st.typ and"move"or u.st.t,u.max_hp/u.hp,unpack(u.r)local sx,sy,ufps,fr,f,selc=u[stt.."_x"]+resx[r]+u.sproff\8*8,u[stt.."_y"]+resy[r],u[stt.."_fps"],u[stt.."_fr"],u.dead or(cf-u.id)%60,count(sel,u)==1and 9camera(cx-ux,cy-uy)if u.const and u.alive then fillp"23130.5"rect(0,0,w,h,u==sel1 and 9or 12)fillp()local p=u.const/u.typ.const line(fw-1,unspl"0,0,0,5")line(fw*p,0,14)sx+=p\-.5*fw if p<=.15then return end elseif ufps then sx+=f\ufps%fr*fw end pal{selc or u.pres.col,[14]=pal(u.farm and 5,selc or 5)}sspr(sx,sy,w,h,1,1,w,h,not u.fire and u.dir==u.typ.sdir)pal()if u.alive and ihp>=2then if u.fire then spr(247+f/20,w\3)end line(w,unspl"-1,0,-1,8")line(w\ihp,-1,11)end end function drop(u)if u.res then u.pres[u.res.typ]+=u.res.qty/u.typ.gr end u.st.idl,u.res=11if u.st.farm then gofarm(u,u.st.farm)elseif u.st.y then mine_nxt(u,u.st.y)else rest(u)end end function frm(u)local _ENV,g=u.st.farm,_ENV if not farmer then g.rest(u)elseif g.cf==0then if ready then fres-=1sproff+=1g.collect(u,"r")if fres<1then g.godrop(u)cyc+=1exp,ready=cyc>=typ.mcyc if exp and ai then cyc,exp=0,g.pay(g.renew,1,pres)end sproff=exp and(g.sfx"36"or 32)or 0end u.st.farm=_ENV else fres+=typ.gr sproff,ready=fres*2,fres>=9end end end function atk(u)local typ,e=u.typ,u.st.x if u.upd then local d=dist(e.x-u.x,e.y-u.y)if typ.range>=d or int(u.r,e.r,0)then u.st.typ=nil if cf%typ.atk_freq==u.id%typ.atk_freq then if e.ap==u.ap then if typ.monk and e.dmgd then e.hp+=1
 if(u.onscr)sfx"20"
-else rest(u)end else add(prj,typ.prj_s and p("",typ,u.x-u.dir*typ.prj_xo,u.y+typ.prj_yo,e.x,e.y,u.ap)or dmg(typ,e))if e.conv>=e.max_hp then if e.queen then e.hp=0else e.pres.p-=1u.pres.p+=1e.p,e.conv=u.p,0end del(e.sqd,e)sfx"38"end end end else if u.hu and viz[e.k]or typ.los>=d then goatk(u,e.k!=u.st.k and e)elseif not e.disc then u.st.typ=nil end if not u.st.typ then rest(u)end end end end function bld(u)if cf%30==0then local _ENV,g=u.st.x,_ENV if const then const+=1max_hp+=typ.hpr hp+=typ.hpr if const>=typ.const then const=u.hu and g.sfx"26"g.reg_bldg(_ENV)if typ.drop then pres.pl+=5elseif farm then g.gofarm(u,_ENV)end end elseif dmgd and pres.b>=1then hp+=2pres.b-=.1else g.rest(u)g.surr(function(t)local _ENV=g.bldgs[t.k]if _ENV and hu and const and(u.ant or typ.web)then g.gobld(u,_ENV)end end,x8,y8,4)end end end function gth(u)local r,x,y=u.st.y,unpack(u.st.p1)local t=mget(x,y)local f=resqty[fget(t)]if not f then if u.monk then pay(pray,-1,res1)elseif not mine_nxt(u,r)then godrop(u,r)end elseif cf==u.id then f+=res1.diff*u.ap\33*10local n=g(restiles,x,y,f)collect(u,r)if t<112and(n==f\3or n==f\1.25)then mset(x,y,t+16)elseif n==1then mset(x,y,68)s(dmap_st[r],x,y)s(dmaps[r],x,y,.55)qdmaps(r)end s(restiles,x,y,n-1)end end function produce(u)local _ENV,gl=u,_ENV local bld=q.typ q.x-=.03333if q.x<=0then if bld.x then local _ENV=bld gl.res1.techs|=tmap x(typ.p1)gl.sfx"33"if up and up<1then up+=1r*=1.75g*=2b*=2t*=1.5done=nil end else local new=gl.unit(bld,x,y,p),onscr and hu and gl.sfx"19"if bld.ant and rtx and fget(mget(rtx,rty),1)then gl.gogth(new,rtx,rty)elseif rx then gl.move(new,rx,ry)end end if q.qty>1then q.qty-=1q.x=bld.t else q=nil end end end function mine_nxt(u,res)local wp,x,y=dpath(u,res)if wp then gogth(u,x,y,wp)return res end end 
+else rest(u)end else add(prj,typ.prj_s and p("",typ,u.x-u.dir*typ.prj_xo,u.y+typ.prj_yo,e.x,e.y,u.ap)or dmg(typ,e))if e.conv>=e.max_hp then if e.queen then e.hp=0else e.pres.p-=1u.pres.p+=1e.p,e.conv=u.p,0end del(e.sqd,e)sfx"38"end end end else if u.hu and viz[e.k]or typ.los>=d then goatk(u,e.k!=u.st.k and e)elseif not e.disc then u.st.typ=nil end if not u.st.typ then rest(u)end end end end function bld(u)if cf%30==0then local _ENV,g=u.st.x,_ENV if const then const+=1max_hp+=typ.hpr hp+=typ.hpr if const>=typ.const then const=u.hu and g.sfx"26"g.reg_bldg(_ENV)if typ.drop then pres.pl+=5elseif farm then g.gofarm(u,_ENV)end end elseif dmgd and pres.b>=1then hp+=2pres.b-=.1else g.rest(u)g.surr(function(t)local _ENV=g.bldgs[t.k]if _ENV and hu and const and(u.ant or typ.web)then g.gobld(u,_ENV)end end,x8,y8,4)end end end function gth(u)local r,x,y=u.st.y,unpack(u.st.p1)local t=mget(x,y)local f=resqty[t]if not f then if u.monk then pay(pray,-1,res1)elseif not mine_nxt(u,r)then godrop(u,r)end elseif cf==u.id then f+=res1.diff*u.ap\33*10local n=g(restiles,x,y,f)collect(u,r)if t<112and(n==f\3or n==f\1.25)then mset(x,y,t+16)elseif n==1then mset(x,y,68)s(dmap_st[r],x,y)s(dmaps[r],x,y,.55)qdmaps(r)end s(restiles,x,y,n-1)end end function produce(u)local _ENV,gl=u,_ENV local bld=q.typ q.x-=.03333if q.x<=0then if bld.x then local _ENV=bld gl.res1.techs|=tmap x(typ.p1)gl.sfx"33"if up and up<1then up+=1r*=1.75g*=2b*=2t*=1.5done=nil end else local new=gl.unit(bld,x,y,p),onscr and hu and gl.sfx"19"if bld.ant and rtx and resqty[mget(rtx,rty)]then gl.gogth(new,rtx,rty)elseif rx then gl.move(new,rx,ry)end end if q.qty>1then q.qty-=1q.x=bld.t else q=nil end end end function mine_nxt(u,res)local wp,x,y=dpath(u,res)if wp then gogth(u,x,y,wp)return res end end 
 -->8
 --utils
 
@@ -954,7 +955,7 @@ const=1
 w=8
 h=8]],nil,tx*8+4,ty*8+4))end function box(u)local _ENV,ais,rz=u,ais,res r,x8,y8,dmgd,ai,ap,pres={x-w/2-1,y-h/2-1,x+w/2,y+h/2,8},x\8,y\8,hp<max_hp,ais[p],p|9,rz[p]k,hu=x8|y8<<8,not ai if not const then hp+=typ.hp-max_hp max_hp=typ.hp end return u end function can_pay(typ,_ENV)typ.reqs=reqs|typ.breq==reqs return r>=typ.r and g>=typ.g and b>=typ.b and(not typ.unit or p<min(pl,99))and typ.reqs end function pay(typ,dir,_ENV)r-=typ.r*dir g-=typ.g*dir b-=typ.b*dir if typ.unit then p+=dir end end function dist(dx,dy)local x,y=dx>>31,dy>>31local a0,b0=dx+x^^x,dy+y^^y return a0>b0 and a0*.9609+b0*.3984or b0*.9609+a0*.3984end function surr(fn,x,y,n,na)local n,e=n or 1for dx=-n,n do for dy=-n,n do local xx,yy=x+dx,y+dy if min(xx,yy)>=0and xx<48and yy<32and(na or acc(xx,yy))then
 if(dx|dy!=0)e=1
-if fn then fn{xx,yy,d=dx&dy!=0and 1.4or 1,k=xx|yy<<8}end end end end return e end function avail_farm()local _ENV=hbld return farm and not exp and not farmer and not const end function can_gth()local f=fget(mget(mx8,my8))return(seltyp.ant and(f&2==2or avail_farm())or seltyp.monk==f)and g(exp,mx8,my8)and surr(nil,mx8,my8)end function can_atk()return sel1.atk and hunit and(not hunit.hu or seltyp.monk and hunit.dmgd and not hunit.bldg)and g(viz,mx8,my8,hunit.disc)end function can_bld()return hbld.hu and hbld.hp<hbld.typ.hp and(seltyp.ant or hbld.web and seltyp.spider)end function norm(it,nt,f)local dx,dy=it[1]-nt.x,it[2]-nt.y d,nt.dir=dist(dx,dy)+.0001,sgn(dx)nt.x+=dx*f/d nt.y+=dy*f/d return d<1end function acc(x,y,strict)local _ENV,s=g(bldgs,x,y),spdr return not fget(mget(x,y),0)and(not _ENV or web and s or not strict and(const or farm))end function bldable()return acc(mx8,my8,1)and(to_bld.h8 or acc(mx8,my8+1,1))and(to_bld.w8 or acc(mx8+1,my8,1)and acc(mx8+1,my8+1,1))end function reg_bldg(b)local x,y=b.x8,b.y8 local function reg(xx,yy)s(bldgs,xx,yy,b.alive and b)if b.dead then s(exp,xx,yy,1)s(dmap_st.d,xx,yy)if b.fire and y==yy then mset(xx,yy,69)end elseif b.drop then s(dmap_st.d,xx,yy,{xx,yy})end end reg(x,y,b.h8 or reg(x,y-1),b.w8 or reg(x+1,y,b.h8 or reg(x+1,y-1)))if not b.const and not b.farm then qdmaps"d"b.pres.reqs|=b.bmap end end function wander(u)move(u,u.x+rndspl"-6,-5,-4,-3,3,4,5,6",u.y+rndspl"-6,-5,-4,-3,3,4,5,6",1)end function dmg(typ,to)to.hp-=typ.atk*dmg_mult[typ.atk_typ..to.def]if to.unit and to.st.idl or to.st.y then wander(to)end to.conv+=typ.conv if to.ai and to.grp~="atk"then to.ai.safe=mvg(to.ai.p1,to.x,to.y,1)end if to.onscr then poke(0x34a8,rnd"32",rnd"32")sfx(typ.sfx)alert=t()elseif to.hu and t()-alert>10then sfx"34"hilite{105+to.x/20.21,107+to.y/21.33,3,14}alert=hlt hlt+=2.5end end function collect(u,res)if u.res and u.res.typ==res then u.res.qty+=1else u.res=p("qty=1",res)end if u.res.qty>=u.typ.cap then godrop(u,res)end end function can_drop()for u in all(sel)do if u.res then return hbld.hu and hbld.drop end end end function can_renew(t)if hbld.exp and seltyp.ant then pres(renew,10,2)rect(unspl"8,0,18,8,4")return can_pay(renew,res1)or t end end function unit(t,_x,_y,_p,_const,_disc,_hp)local _typ,next=typs[t]or t,next do local _ENV=add(units,p([[var=u
+if fn then fn{xx,yy,d=dx&dy!=0and 1.4or 1,k=xx|yy<<8}end end end end return e end function avail_farm()local _ENV=hbld return farm and not exp and not farmer and not const end function can_gth()local t=mget(mx8,my8)return(seltyp.ant and(resqty[t]or avail_farm())or seltyp.monk==t)and g(exp,mx8,my8)and surr(nil,mx8,my8)end function can_atk()return sel1.atk and hunit and(not hunit.hu or seltyp.monk and hunit.dmgd and not hunit.bldg)and g(viz,mx8,my8,hunit.disc)end function can_bld()return hbld.hu and hbld.hp<hbld.typ.hp and(seltyp.ant or hbld.web and seltyp.spider)end function norm(it,nt,f)local dx,dy=it[1]-nt.x,it[2]-nt.y d,nt.dir=dist(dx,dy)+.0001,sgn(dx)nt.x+=dx*f/d nt.y+=dy*f/d return d<1end function acc(x,y,strict)local _ENV,s=g(bldgs,x,y),spdr return not fget(mget(x,y),0)and(not _ENV or web and s or not strict and(const or farm))end function bldable()return acc(mx8,my8,1)and(to_bld.h8 or acc(mx8,my8+1,1))and(to_bld.w8 or acc(mx8+1,my8,1)and acc(mx8+1,my8+1,1))end function reg_bldg(b)local x,y=b.x8,b.y8 local function reg(xx,yy)s(bldgs,xx,yy,b.alive and b)if b.dead then s(exp,xx,yy,1)s(dmap_st.d,xx,yy)if b.fire and y==yy then mset(xx,yy,69)end elseif b.drop then s(dmap_st.d,xx,yy,{xx,yy})end end reg(x,y,b.h8 or reg(x,y-1),b.w8 or reg(x+1,y,b.h8 or reg(x+1,y-1)))if not b.const and not b.farm then qdmaps"d"b.pres.reqs|=b.bmap end end function wander(u)move(u,u.x+rndspl"-6,-5,-4,-3,3,4,5,6",u.y+rndspl"-6,-5,-4,-3,3,4,5,6",1)end function dmg(typ,to)to.hp-=typ.atk*dmg_mult[typ.atk_typ..to.def]if to.unit and to.st.idl or to.st.y then wander(to)end to.conv+=typ.conv if to.ai and to.grp~="atk"then to.ai.safe=mvg(to.ai.p1,to.x,to.y,1)end if to.onscr then poke(0x34a8,rnd"32",rnd"32")sfx(typ.sfx)alert=t()elseif to.hu and t()-alert>10then sfx"34"hilite{105+to.x/20.21,107+to.y/21.33,3,14}alert=hlt hlt+=2.5end end function collect(u,res)if u.res and u.res.typ==res then u.res.qty+=1else u.res=p("qty=1",res)end if u.res.qty>=u.typ.cap then godrop(u,res)end end function can_drop()for u in all(sel)do if u.res then return hbld.hu and hbld.drop end end end function can_renew(t)if hbld.exp and seltyp.ant then pres(renew,10,2)rect(unspl"8,0,18,8,4")return can_pay(renew,res1)or t end end function unit(t,_x,_y,_p,_const,_disc,_hp)local _typ,next=typs[t]or t,next do local _ENV=add(units,p([[var=u
 dir=1
 lp=1
 sproff=0
@@ -972,11 +973,11 @@ d=d,r,g,b]][r])end function dmap()local q=dq[1]if q then if q.c then for i=1,#q.
 g=3
 b=4]][q]if not dmap_st[q]then dmap_st[q]={}for x=0,48do for y=0,32do if fget(mget(x,y),f)then s(dmap_st[q],x,y,{x,y})end end end end for i,t in next,dmap_st[q]do if surr(nil,unpack(t))then add(o,t).k=i end end dq[1]=p("c=0",o,q)end end end function nearest(gx,gy)for n=0,16do local best_d,best_t=32767surr(function(t)local d=dist(t[1]*8+4-gx,t[2]*8+4-gy)if d<best_d then best_t,best_d=t,d end end,gx\8,gy\8,n)
 if(best_t)return best_t,n
-end end function path(u,x,y,tol,...)if u.unit then spdr,dest,dest_d=u.spider,nearest(x,y)wayp,e,spdr=as(nearest(u.x,u.y),dest,...)if e and dest_d<=(tol or 1)then deli(wayp)add(wayp,{x,y})end return#wayp>0and wayp end end function as(st,g,d,l)local gk,t=g.k>>16,{[st.k]=p([[var=sh
+end end function path(u,x,y,tol,r)if u.unit then spdr,dest,dest_d=u.spider,nearest(x,y)wayp,e,spdr=as(nearest(u.x,u.y),dest,r)if e and dest_d<=(tol or 1)then deli(wayp)add(wayp,{x,y})end return#wayp>0and wayp end end function as(st,g,d)local gk,t=g.k>>16,{[st.k]=p([[var=sh
 y=0
-u=32767]],st)}local function path(s,f,e)while s.typ!=st do add(f,{s.typ[1]*8+4,s.typ[2]*8+4},1)asc[s.typ.k|gk],s={e=e,unpack(f)},t[s.p.k]end return f,e end local fr,frl,cl={sh},1,sh while frl>0do local c,m=32767for i=1,frl do local q=fr[i].y+fr[i].u
+x=32767]],st)}local function path(s,f,e)while s.typ!=st do add(f,{s.typ[1]*8+4,s.typ[2]*8+4},1)asc[s.typ.k|gk],s={e=e,unpack(f)},t[s.p.k]end return f,e end local fr,frl,cl={sh},1,sh while frl>0do local c,m=32767for i=1,frl do local q=fr[i].y+fr[i].x
 if(q<=c)m,c=i,q
-end sh=fr[m]if l and sh.y>l then return{}end fr[m],sh.d=fr[frl],1frl-=1local pt=sh.typ local f=asc[pt.k|gk]or(pt.k==g.k or sh.u<=max(d))and{e=1}if f then return path(sh,{unpack(f)},f.e)end surr(function(n)local ob,x=t[n.k],sh.y+n.d if not ob then ob={y=32767,typ=n,u=dist(n[1]-g[1],n[2]-g[2])}frl+=1fr[frl],t[n.k]=ob,ob end if not ob.d and ob.y>x then ob.y,ob.p=x,pt end if ob.u<cl.u then cl=ob end end,unpack(pt))end return path(cl,{})end 
+end sh=fr[m]fr[m],sh.d=fr[frl],1frl-=1local pt=sh.typ local f=asc[pt.k|gk]or(pt.k==g.k or sh.x<=max(d))and{e=1}if f then return path(sh,{unpack(f)},f.e)end surr(function(n)local ob,x=t[n.k],sh.y+n.d if not ob then ob={y=32767,typ=n,x=dist(n[1]-g[1],n[2]-g[2])}frl+=1fr[frl],t[n.k]=ob,ob end if not ob.d and ob.y>x then ob.y,ob.p=x,pt end if ob.x<cl.x then cl=ob end end,unpack(pt))end return path(cl,{})end 
 -->8
 --menu
 
@@ -1005,12 +1006,40 @@ end end end function resbar()camera()rectfill(unspl"0,120,30,128,7")camera(-pres
 -->8
 --const
 
-function comp(f,g)return function(...)return f(g(...))end end function a(v,...)_ENV[v]={},...and a(...)end pspl,rndspl,unspl,campal=comp(pal,split),comp(rnd,split),comp(unpack,split),comp(camera,pal)unl,unspr,aspl,typs,stp,resk,pcol,hlt,diff,menu,cx,cy,cvx,cvy=comp(line,unspl),comp(spr,unspl),comp(a,unspl),{},split"-9:-20,263:-20,263:148,-9:148",split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",split"1,2,0,3,1,0,2,1,3,0",unspl"-10,0,63,0,30,1,1"p[[var=resqty
-7=45
-10=12
-11=50
-19=45
-39=60]]p[[var=pray
+function comp(f,g)return function(...)return f(g(...))end end function a(v,...)_ENV[v]={},...and a(...)end pspl,rndspl,unspl,campal=comp(pal,split),comp(rnd,split),comp(unpack,split),comp(camera,pal)unl,unspr,aspl,typs,stp,pcol,hlt,diff,menu,loser,cx,cy,cvx,cvy=comp(line,unspl),comp(spr,unspl),comp(a,unspl),{},split"-9:-20,263:-20,263:148,-9:148",split"1,2,0,3,1,0,2,1,3,0",unspl"-10,0,63,0,0,30,1,1"p[[var=resqty
+80=45
+96=45
+112=45
+
+82=45
+98=45
+114=45
+
+81=60
+97=60
+113=60
+
+83=60
+99=60
+115=60
+
+123=12
+
+84=50
+100=50
+116=50
+
+85=50
+101=50
+117=50
+
+86=45
+102=45
+118=45
+
+87=45
+103=45
+119=45]]p[[var=pray
 g=.00318
 b=.00318
 r=0]]p[[var=rescol
@@ -1072,7 +1101,7 @@ bldbld=.1]]
 -->8
 --save
 
-function save()local ptr,foreach=0,foreach bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")local function draw(v)for i=0,8,4do pset(ptr%128,ptr\128,v>>i&15)ptr+=1end end for x=0,47do for y=0,31do draw(mget(x,y)|g(exp,x,y,0))end end foreach(resk,function(k)foreach(res,function(r)draw(r[k])end)end)draw(#units)foreach(units,function(_ENV)foreach({idx,x,y,p,max(const),max(disc),hp},draw)end)extcmd("screen",1)end function loadgame()init()pal()local ptr=0x9004serial(unspl"0x802,0x9000,0x4000")local function px(n)n-=1if n>=0then local v1,v2,v3=peek(ptr,3)ptr+=3return v1|v2<<4|v3<<8,px(n)end end for x=0,47do for y=0,31do local v=px"1"mset(x,y,v&127,v>127and s(exp,x,y,128))end end foreach(resk,function(k)foreach(res,function(r)r[k]=px"1"end)end)for i=1,px"1"do unit(px"7")end local techs=res1.techs foreach(typs,function(_ENV)if techs|tmap==techs then x(typ.p1)up,done=up and 0,not up end end)start()end 
+function save()local ptr,foreach=0,foreach bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")local function draw(v)for i=0,8,4do pset(ptr%128,ptr\128,v>>i&15)ptr+=1end end for x=0,47do for y=0,31do draw(mget(x,y)|g(exp,x,y,0))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)draw(r[k])end)end)draw(#units)foreach(units,function(_ENV)foreach({idx,x,y,p,max(const),max(disc),hp},draw)end)extcmd("screen",1)end function loadgame()init()pal()serial(unspl"0x802,0x9000,0x4000")local function px(n)if n>=1then local v1,v2,v3=peek(ptr,3)ptr+=3return v1|v2<<4|v3<<8,px(n-1)end end for x=0,47do for y=0,31do local v=px"1"mset(x,y,v&127,v>127and s(exp,x,y,128))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)r[k]=px"1"end)end)for i=1,px"1"do unit(px"7")end local techs=res1.techs foreach(typs,function(_ENV)if techs|tmap==techs then x(typ.p1)up,done=up and 0,not up end end)start()end 
 -->8
 --ai
 
@@ -1124,29 +1153,29 @@ d00001100d0000000dd000000000000000310011003100110d0000000000000000d0000000000000
 004000000040000000400000eeeeeeeeffffffffff5fff6ff3ffffff67c111c6ffaffffff566555fffbbbbff33bbb33311514151ffffffffffffffffffffffff
 014100000141000001410000eeeeeeeefff6fffffff6ffffffffaffff6ccc76fffffffffff5555f6f333333f1b333b3111121211ffffffffffffffff7fffffff
 011100000111000001110000eeeeeeeeffffffffffffffffffffffffff6666fffffffffff6ffffffffffffff11333311dd1111ddffffffffffffffffffffffff
-fff88fffffffffffffffff8fffffffffffffbbbfffffffffffffffffffffffffffffffffffffffffffffffff1111d111111d1111ffffffffffffffffffffffff
-f887888ffffffffff8fff888fffffffffffbb3bff33fff33ffff44ffff444ffffffffff6776fff766fffffff1dd1111111111dd1ffffffffffffffffffffffff
-87887878fff888ff888ff888ff888fffffbb3bbff3bff3bbf4f4444fff444ffffffff7666cc666cc667fffff1111111cc1111111ffffffffffffffffffffffaf
-88788788ff88188f888f8fdff88188ffffb3bbbfffbbfbffff44454ff4494fffffff67cccccccccccc76ffff1111cccccccc1111fffff7ffffffffffffffffff
-fff77fff1181881ffdf888dff1881811ffbbbbfffffbbbfff444544fff544ffffff76ccccc6cc6ccccc67fff111cccccccccc111fffffffffffffaffffffffff
-ff7777ff1685858ffdd888dff8585861fffbbfffffffbfff499544ffff9444fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d1ffffffffffffffffffffffff
-fff77fffffffffffffdfdfdffffffffffffbffffffffbfff49944fffff5444ffff66cccc7cccc11ccccc66ff111ccc6666ccc111ffffffffffffffffffffffff
-fff77fffffffffffffffdffffffffffffffbffffffffbffff444ffffff445ffff6c7ccc1111111111ccc7c6f11ccc667766ccc11ffffffffffffffffffffffff
-fff88ffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc11ffffffffffffffffffffffff
-f887888ffffffffff8fff88fffffffffffffb3fffffffffffffff4fffff4fffff6ccc6111dd11111116ccc6f111ccc6666ccc111fffffffffffffffff7ffffff
-ff8878f8fffffffff88ff888ffffffffffff3bbff3bfff3ffff4f44ffff44ffff7cccc111166111111cccc7f1d1cccccccccc1d1ffffffffffffffffffffffff
-f8788fffff8815ff888f8fdfff5188ffffb3fbfffffbfbffff44454fff494ffff6c6cc111111111111cc6c6f111cccccccccc111ffffffffff7fffffffffffff
-fff77ffff121885ffdff88dff588121fffbbbbfffffbbbffff4454ffff544ffff66ccc1111111dd111ccc66f1111cccccccc1111fffaffffffffffffffffffff
-ff77ffff1585858fffd88fdff8585851fffbbfffffffbffff495ffffff9444ffff6c6cc1111111111cc6c6ff1111111cc1111111ffffffffffffffffffffffff
-fff7ffffffffffffffdfdffffffffffffffbffffffffbfff49944ffffff44fffff6cccc111dd111111ccc6ff1dd1111111111dd1ffffffffffffffffffffafff
-fff77fffffffffffffffdffffffffffffffbffffffffbffff444fffffffffffff76c6c111111111111c6c67f1111d111111d1111ffffffffffffffffffffffff
+fff88fffffffffffffffff8fffffffffffff333fffffffffffffffffffffffffffffffffffffffffffffffff1111d111111d1111ffffffffffffffffffffffff
+f887888ffffffffff8fff888fffffffffff33b3ff33fff33ffff44ffff444ffffffffff6776fff766fffffff1dd1111111111dd1ffffffffffffffffffffffff
+87887878fff888ff888ff888ff888fffff33b33ff3bff3bbf4f4444fff444ffffffff7666cc666cc667fffff1111111cc1111111ffffffffffffffffffffffaf
+88788788ff88188f888f8fdff88188ffff3b333fffbbfbffff44454ff4494fffffff67cccccccccccc76ffff1111cccccccc1111fffff7ffffffffffffffffff
+fff77fff1181881ffdf888dff1881811ff333dfffffbbbfff444544fff544ffffff76ccccc6cc6ccccc67fff111cccccccccc111fffffffffffffaffffffffff
+ff7777ff1685858ffdd888dff8585861fff3dfffffffbfff499544ffff9444fffff6cccc6ccc6ccccccc6fff1d1cccccccccc1d1ffffffffffffffffffffffff
+fff77fffffffffffffdfdfdffffffffffff3ffffffffbfff49944fffff5444ffff66cccc7cccc11ccccc66ff111ccc6666ccc111ffffffffffffffffffffffff
+fff77fffffffffffffffdffffffffffffff3ffffffffbffff444ffffff445ffff6c7ccc1111111111ccc7c6f11ccc667766ccc11ffffffffffffffffffffffff
+fff88ffffffffffffffffffffffffffffffff3fffffffffffffffffffffffffff66ccc111111111111ccc66f11ccc667766ccc11ffffffffffffffffffffffff
+f887888ffffffffff8fff88fffffffffffff3bfffffffffffffff4fffff4fffff6ccc6111dd11111116ccc6f111ccc6666ccc111fffffffffffffffff7ffffff
+ff8878f8fffffffff88ff888ffffffffffffb33ff3bfff3ffff4f44ffff44ffff7cccc111166111111cccc7f1d1cccccccccc1d1ffffffffffffffffffffffff
+f8788fffff8815ff888f8fdfff5188ffff3bf3fffffbfbffff44454fff494ffff6c6cc111111111111cc6c6f111cccccccccc111ffffffffff7fffffffffffff
+fff77ffff121885ffdff88dff588121fff3333fffffbbbffff4454ffff544ffff66ccc1111111dd111ccc66f1111cccccccc1111fffaffffffffffffffffffff
+ff77ffff1585858fffd88fdff8585851fff3dfffffffbffff495ffffff9444ffff6c6cc1111111111cc6c6ff1111111cc1111111ffffffffffffffffffffffff
+fff7ffffffffffffffdfdffffffffffffff3ffffffffbfff49944ffffff44fffff6cccc111dd111111ccc6ff1dd1111111111dd1ffffffffffffffffffffafff
+fff77fffffffffffffffdffffffffffffff3ffffffffbffff444fffffffffffff76c6c111111111111c6c67f1111d111111d1111ffffffffffffffffffffffff
 fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6c7ccc1111111111ccc7c6ffffffffffffffff5ffffffffffffffffffffffff
-ffff8ffffffffffffffff8ffffffffffffffbfffffffffffffffffffffffffffff66ccccc11cccc7cccc66ffffffffaf6f5555ffffffffffffffffffffffffff
-ff88f8fffffffffff8ffff8fffffffffffff3bbffffffffffff4f4fffff44ffffff6ccccccc6ccc6cccc6fffffbffffff533555fffffffffffffffffffffffff
-f8788ffffff884fff88fffdfff488fffffb3fbfffffffbfffff4444fff494ffffff76ccccc6cc6ccccc67ffffffbf3fff535535fffffffffffffffff7fffffff
-ffff7fffff21825ffdff8ffff52812ffffffbbfffffbbfffff4454fffff44fffffff67cccccccccccc76fffffffb3ffff555555ff7ffffffffffffffffffffff
-fff7fffff285258fffd88fdff852582ffffbffffffffbffff4944ffffff45ffffffff766cc666cc6667ffffffffb3ffff53555f6ffffffffffffffffffffffff
-fff7ffffffffffffffdfdffffffffffffffbffffffffbfffff4ffffffff4fffffffffff667fff6776fffffffffffffffff555fffffffffffffffffffffffffff
+ffff8ffffffffffffffff8ffffffffffffff3fffffffffffffffffffffffffffff66ccccc11cccc7cccc66ffffffffaf6f5555ffffffffffffffffffffffffff
+ff88f8fffffffffff8ffff8fffffffffffffb33ffffffffffff4f4fffff44ffffff6ccccccc6ccc6cccc6fffffbffffff533555fffffffffffffffffffffffff
+f8788ffffff884fff88fffdfff488fffff3bf3fffffffbfffff4444fff494ffffff76ccccc6cc6ccccc67ffffffbf3fff535535fffffffffffffffff7fffffff
+ffff7fffff21825ffdff8ffff52812ffffff33fffffbbfffff4454fffff44fffffff67cccccccccccc76fffffffb3ffff555555ff7ffffffffffffffffffffff
+fff7fffff285258fffd88fdff852582ffff3ffffffffbffff4944ffffff45ffffffff766cc666cc6667ffffffffb3ffff53555f6ffffffffffffffffffffffff
+fff7ffffffffffffffdfdffffffffffffff3ffffffffbfffff4ffffffff4fffffffffff667fff6776fffffffffffffffff555fffffffffffffffffffffffffff
 fff77fffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffff6fffff5fffffffffffffffffffffffff
 00d00d0000000000080000000330000004000000101000000000000000000000000000000000000000000000dd00000000000000008880000000000000000000
 d010100d55777755888000003330000044000000101000000d000000000000000000000000000000dd600000060000000888000008e88ee00088800000488000
