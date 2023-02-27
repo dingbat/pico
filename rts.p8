@@ -2924,11 +2924,10 @@ function loadgame()
 	pal()
 	serial(unspl"0x802,0x9000,0x4000")
 	local function px(n)
-		n-=1
-		if n>=0 then
+		if n>=1 then
 			local v1,v2,v3=peek(ptr,3)
 			ptr+=3
-			return v1|v2<<4|v3<<8,px(n)
+			return v1|v2<<4|v3<<8,px(n-1)
 		end
 	end
 	for x=0,47 do
