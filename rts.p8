@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -1454,34 +1454,33 @@ in_bld=1]],path(u,
 end
 
 function tick(u)
-	typ,u.onscr,u.upd,wayp=
-		u.typ,
+	u.onscr,u.upd,wayp=
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
 		u.st.typ
 	if u.hp<=0 and u.alive then
 		del(sel,u)
 		tot-=1
-		u.dead,u.farmer,u.alive=typ.d
+		u.dead,u.farmer,u.alive=u.d
 		u.st=
 			p"t=dead",
-			typ.bldg and reg_bldg(u),
+			u.bldg and reg_bldg(u),
 			u.onscr and
-				sfx(typ.bldg and 17 or 62)
-		if typ.lady then
+				sfx(u.bldg and 17 or 62)
+		if u.lady then
 			local t=nearest(u.x,u.y)
 			mset(t[1],t[2],82+u.dir)
 			dmap_st.r[t.k]=t
 			qdmaps"r"
-		elseif typ.queen then
+		elseif u.queen then
 			npl-=1
 			if npl==1 or u==hq then
 				loser,sel=min(u.p,2),{}
 				music"56"
 			end
-		elseif typ.drop and not u.const then
-			u.pres.pl-=typ.drop
-		elseif typ.unit then
+		elseif u.drop and not u.const then
+			u.pres.pl-=u.drop
+		elseif u.unit then
 			u.pres.p-=1
 		end
 	end
@@ -1494,7 +1493,7 @@ function tick(u)
 
 	if wayp then
 		if norm(wayp[1],u,
-			u.st.spd or typ.spd)
+			u.st.spd or u.typ.spd)
 		then
 			deli(wayp,1)
 			u.st.typ=#wayp>0 and wayp
@@ -1506,12 +1505,12 @@ function tick(u)
 	end
 
 	local x,y,t,los,agg_d,agg_u=
-		u.x,u.y,u.st.x,typ.los,9999
+		u.x,u.y,u.st.x,u.typ.los,9999
 
 	if u.q then
 		produce(u)
 	end
-	if typ.farm then
+	if u.farm then
 		local _ENV=u
 		if farmer and
 			farmer.st.farm!=u
@@ -1524,7 +1523,7 @@ function tick(u)
 		if t.dead then
 			u.st.agg=1,
 				wayp or rest(u),
-				typ.ant and t.lady and
+				u.ant and t.lady and
 					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
 			u.st.active,u.st.typ=1
@@ -1554,7 +1553,7 @@ function tick(u)
 		then
 			if not u.hu then
 				sele={u}
-			elseif typ.unit then
+			elseif u.unit then
 				selh=selh or {}
 				add(selh,u)
 			else
@@ -1566,14 +1565,14 @@ function tick(u)
 
 	if (u.const) return
 	if u.st.idl then
-		if (typ.lady and t6)	wander(u)
+		if (u.lady and t6) wander(u)
 		if u.hu then
-			if typ.ant then
+			if u.ant then
 				if u.st.idl>10 then
 					idl=u
 				end
 				u.st.idl+=1
-			elseif typ.idl and not u.q then
+			elseif u.idl and not u.q then
 				idlm=u
 			end
 		end
@@ -1608,17 +1607,17 @@ function tick(u)
 			end)
 		end
 
-		if u.st.agg and typ.atk then
+		if u.st.agg and u.atk then
 			for e in all(units) do
 				if e.ap!=u.ap or
-					typ.monk and e.dmgd and
+					u.monk and e.dmgd and
 					not e.bldg
 				then
 					local d=dist(x-e.x,y-e.y)
 					if e.alive and
 						d<=los then
 						if e.bldg then
-							d+=typ.sg and e.bldg==1
+							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
 						if d<agg_d then
