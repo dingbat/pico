@@ -44,6 +44,24 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
+5,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
@@ -1365,13 +1383,15 @@ function gobld(u,b)
 		return
 	end
 	u.st,u.res=p([[t=bld
-in_bld=1]],path(u,b.x,b.y),b)
+in_bld=1
+ez_adj=1]],path(u,b.x,b.y),b)
 end
 
 function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	u.st=p([[t=gth
-gth=1]],
+gth=1
+ez_adj=1]],
 		wp or path(u,t.x,t.y),
 		t,p[[7=r
 10=g
@@ -1388,7 +1408,8 @@ function godrop(u,nxt_res,dropu)
 	end
 	u.st=p([[t=drop
 drop=1
-in_bld=1]],
+in_bld=1
+ez_adj=1]],
 		wayp or
 			path(u,dropu.x,dropu.y),
 		dropu or tile_unit(x,y),
@@ -1592,25 +1613,38 @@ function tick(u)
 			goatk(u,agg_u)
 		end
 	end
-
-	local st,adj=u.st,0
-	if u.unit and not st.typ then
-		repeat
-			x,y=u.x,u.y
-			while u.upd and
-				g(pos,x\4,y\4,
-				not st.in_bld and
-				g(bldgs,x\8,y\8,{}).bldg==1)
-			do
-				x+=rndspl"-1,-.5,0,0,.5,1"
-				y+=rndspl"-1,-.5,0,0,.5,1"
-				adj+=1
+	
+	function overlaps()
+	 return g(pos,x\4,y\4,
+			not u.st.in_bld and
+			g(bldgs,x\8,y\8,{}).bldg==1
+		)
+	end
+	if u.unit and not u.st.typ then
+		local fr,v={{0,0}},{}
+		for p in all(fr) do
+			local dx,dy=unpack(p)
+			x,y=u.x+dx,u.y+dy
+			if u.st.ez_adj or
+				acc(x\8,y\8)
+			then
+				if not g(pos,x\4,y\4) then
+					u.st.typ=dx|dy!=0 and {{x,y}}
+					break
+				end
+				foreach(
+				split"2:0,2:2,0:2,-2:2,-2:0,-2:-2,0:-2,2:-2"
+,function(k)
+					local nx,ny=unpack(split(k,":"))
+					nx+=dx
+					ny+=dy
+					local kx,ky=nx+u.x,ny+u.y
+					if not g(v,kx,ky) then
+						s(v,kx,ky,add(fr,{nx,ny}))
+					end
+				end)
 			end
-			if (adj&7==0) break
-			st.typ=st.gth and
-				{{x,y}} or
-				path(u,x,y,0,nil,2)
-		until st.typ
+		end
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -1913,8 +1947,8 @@ function atk(u)
 						if e.queen then
 							e.hp=0
 						else
-							e.pres.p-=1
-							u.pres.p+=1
+--							e.pres.p-=1
+--							u.pres.p+=1
 							e.p,e.conv=u.p,0
 						end
 						del(e.sqd,e)
@@ -1982,19 +2016,19 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
-		f+=res1.diff*u.ap\33*10
+--		f+=res1.diff*u.ap\33*10
 		local n=g(restiles,x,y,f)
 		collect(u,r)
-		if t<112 and
-			(n==f\3 or n==f\1.25)
-		then
-			mset(x,y,t+16)
-		elseif n==1 then
-			mset(x,y,68)
-			s(dmap_st[r],x,y)
-			s(dmaps[r],x,y,.55)
-			qdmaps(r)
-		end
+--		if t<112 and
+--			(n==f\3 or n==f\1.25)
+--		then
+--			mset(x,y,t+16)
+--		elseif n==1 then
+--			mset(x,y,68)
+--			s(dmap_st[r],x,y)
+--			s(dmaps[r],x,y,.55)
+--			qdmaps(r)
+--		end
 		s(restiles,x,y,n-1)
 	end
 end
@@ -2437,12 +2471,12 @@ function nearest(gx,gy)
 	end
 end
 
-function path(u,x,y,tol,...)
+function path(u,x,y,tol,r)
 	if u.unit then
 		spdr,dest,dest_d=
 			u.spider,nearest(x,y)
 		wayp,e,spdr=as(
-			nearest(u.x,u.y),dest,...)
+			nearest(u.x,u.y),dest,r)
 		if e and
 			dest_d<=(tol or 1) then
 			deli(wayp)
@@ -2452,7 +2486,7 @@ function path(u,x,y,tol,...)
 	end
 end
 
-function as(st,g,d,l)
+function as(st,g,d)
 	local gk,t=g.k>>16,
 		{[st.k]=p([[var=sh
 y=0
@@ -2474,9 +2508,6 @@ u=32767]],st)}
 			if (q<=c) m,c=i,q
 		end
 		sh=fr[m]
-		if l and sh.y>l then
-			return {}
-		end
 		fr[m],sh.d=fr[frl],1
 		frl-=1
 		local pt=sh.typ

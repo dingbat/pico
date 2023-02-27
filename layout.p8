@@ -1,9 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 units={}
 
-for i=1,40 do
+for i=1,80 do
 	add(units,{id=i,x=25,y=25})
 end
 
@@ -23,6 +23,7 @@ function _draw()
 end
 
 function _update()
+	if not pos then
 	pos={}
 	foreach(units,function(u)
 		u.x,u.y=25,25
@@ -30,10 +31,33 @@ function _update()
 	foreach(units,box)
 --	foreach(units,adj_rand)
 --	foreach(units,adj_smart)
-	foreach(units,adj_sp)
-
+	foreach(units,adj_sp2)
+	end
 end
 	--printh("unit "..u.id.." overlaps","log")
+
+spl=split"2:0,2:2,0:2,-2:2,-2:0,-2:-2,0:-2,2:-2"
+function adj_sp2(u)
+	local fr,v={{u.x,u.y}},{}
+	for p in all(fr) do
+		x,y=unpack(p)
+		if acc(x\8,y\8) then
+			if not g(pos,x\4,y\4) then
+				u.x,u.y=x,y
+				break
+			end
+			foreach(spl,function(k)
+				local dx,dy=unpack(split(k,":"))
+				local nx,ny=x+dx,y+dy
+				if not g(v,nx,ny) then
+					s(v,nx,ny,add(fr,{nx,ny}))
+				end
+			end)
+		end
+	end
+	s(pos,x\4,y\4,1)
+end
+
 
 function adj_sp(u)
 	local x,y,n=u.x,u.y,1
@@ -60,7 +84,8 @@ function adj_smart(u)
 				for yo=0,7 do
 					x,y=px*8+xo,py*8+yo
 					if not g(pos,x\4,y\4) then
-						u.x,u.y=x+rnd(3)-1.5,y+rnd(3)-1.5
+						u.x,u.y=x+rnd"3"-1.5,
+							y+rnd"3"-1.5
 						goto done
 					end
 				end
@@ -89,8 +114,8 @@ function adj_rand(u)
 	s(pos,x\4,y\4,1)
 end
 
-function wall(x,y)
-	return fget(mget(x,y),0)
+function acc(x,y)
+	return not fget(mget(x,y),0)
 end
 -->8
 
@@ -126,9 +151,9 @@ function surr(fn,x,y,n,na)
 	return e
 end
 
-function acc(x,y)
-	return true
-end
+--function acc(x,y)
+--	return true
+--end
 
 function box(u)
 	u.x8,u.y8=u.x\8,u.y\8
