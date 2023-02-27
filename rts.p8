@@ -2496,7 +2496,7 @@ function as(st,g,d)
 	local gk,t=g.k>>16,
 		{[st.k]=p([[var=sh
 y=0
-u=32767]],st)}
+x=32767]],st)}
 	local function path(s,f,e)
 		while s.typ!=st do
 			add(f,{s.typ[1]*8+4,
@@ -2510,7 +2510,7 @@ u=32767]],st)}
 	while frl>0 do
 		local c,m=32767
 		for i=1,frl do
-			local q=fr[i].y+fr[i].u
+			local q=fr[i].y+fr[i].x
 			if (q<=c) m,c=i,q
 		end
 		sh=fr[m]
@@ -2519,7 +2519,7 @@ u=32767]],st)}
 		local pt=sh.typ
 		local f=asc[pt.k|gk] or
 			(pt.k==g.k or
-			sh.u<=max(d)) and {e=1}
+			sh.x<=max(d)) and {e=1}
 		if f then
 			return path(
 				sh,{unpack(f)},f.e)
@@ -2529,7 +2529,7 @@ u=32767]],st)}
 			if not ob then
 				ob={
 					y=32767,typ=n,
-					u=dist(n[1]-g[1],n[2]-g[2])
+					x=dist(n[1]-g[1],n[2]-g[2])
 				}
 				frl+=1
 				fr[frl],t[n.k]=ob,ob
@@ -2537,7 +2537,7 @@ u=32767]],st)}
 			if not ob.d and ob.y>x then
 				ob.y,ob.p=x,pt
 			end
-			if ob.u<cl.u then
+			if ob.x<cl.x then
 				cl=ob
 			end
 		end,unpack(pt))
