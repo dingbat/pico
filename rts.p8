@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --age of ants
 --eeooty
@@ -17,7 +17,7 @@ function _update()
 	if dget"0">1 and not loser then
 		lclk,rclk=btnp"5",btnp"4"
 	end
-	
+
 	if menu then
 		cx+=cvx
 		cy+=cvy
@@ -190,8 +190,7 @@ function _draw()
 
 		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.4⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.4⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 
-		camera(split"8,12,8,18,14"[diff+1])
-		?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
+		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
 	end
 
@@ -333,7 +332,7 @@ end
 function init()
 	poke(0x5f2d,3)
 	reload()
-	
+
 	music(unspl"0,0,7")
 	menuitem(3,"⌂ save",save)
 	menuitem(4,"∧ resign",
@@ -359,7 +358,7 @@ npl=0]]
 		res.p1,{},
 		split"1,2,3,4",
 		unspl"0x9004,59,0,0,0,64,64,50"
-	
+
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
@@ -1592,7 +1591,7 @@ function tick(u)
 			goatk(u,agg_u)
 		end
 	end
-	
+
 	if u.unit and not u.st.typ then
 		local fr,v={{x,y}},{}
 		for i,p in next,fr do
@@ -2721,7 +2720,7 @@ portx=]]..
 	axn=not axn
 end,20,108)
 	end
-	
+
 	camera()
 
 	sspr(
@@ -2748,10 +2747,10 @@ end,20,108)
 		unspl"98,8,6,104,121")
 
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
-	sspr(unspl"109,72,19,12,105,107")	
+	sspr(unspl"109,72,19,12,105,107")
 	camera(cx\-20.21,cy\-21.33)
 	rect(unspl"104,106,112,114,10")
-	
+
 	resbar()
 
 	if hc then
@@ -2796,7 +2795,7 @@ pspl,rndspl,unspl,campal=
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(camera,pal)
-	
+
 unl,unspr,aspl,
 	typs,stp,pcol,
 	hlt,diff,
@@ -2952,10 +2951,12 @@ function loadgame()
 	pal()
 	serial(unspl"0x802,0x9000,0x4000")
 	local function px(n)
-		if n>=1 then
+		--casts str to number
+		n-=1
+		if n>=0 then
 			local v1,v2,v3=peek(ptr,3)
 			ptr+=3
-			return v1|v2<<4|v3<<8,px(n-1)
+			return v1|v2<<4|v3<<8,px(n)
 		end
 	end
 	for x=0,47 do
@@ -3574,4 +3575,3 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
-

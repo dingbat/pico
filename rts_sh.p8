@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --age of ants
 --eeooty
@@ -23,8 +23,7 @@ pal{res1.col,[14]=0}sspr(64+pack(48,cf\5%3*16)[a],unspl"0,16,8,12,90,32,16")
 ?"⁶jdn⁴h⁶w⁶tᶜa"..t
 campal()end function draw_map(o,y)camera(cx%8,cy%8)map(cx/8+o,cy/8,0,0,17,y)end function _draw()draw_map(0,17)if menu then camera()local x=64+t()\.5%2*16pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"sspr(x,unspl"0,16,8,25,18,32,16")sspr(x,unspl"0,16,8,74,18,32,16,1")pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0,2"pal{pcol[1]}sspr(x,unspl"0,16,8,25,17,32,16")pal{pcol[2]}sspr(x,unspl"0,16,8,74,17,32,16,1")
 ?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.4⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.4⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
-camera(split"8,12,8,18,14"[diff+1])
-?"ᶜ0◀⁵cfᶜ7◀⁴h "..split"ᶜ0easy⁵0fᶜbeasy,ᶜ0normal³0⁵8fᶜanormal,ᶜ0hard⁵0fᶜ9hard,ᶜ02 normals³0³0⁵cfᶜ22 normals,ᶜ02 hards³0⁵4fᶜ82 hards"[diff+1].." ⁴hᶜ0▶⁵cfᶜ7▶"
+?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 return end aspl"bfog,afog,btns"for u in all(units)do if u.onscr or loser then if not loser and not g(viz,u.x8,u.y8)and u.disc then add(afog,u)elseif u.bldg or u.dead then draw_unit(u)else add(bfog,u)end end end foreach(bfog,draw_unit)camera(cx,cy)local cf5=cf\5foreach(prj,function(_ENV)sspr(typ.prj_s+cf5%2*2,96,2,2,x,y)end)if loser then resbar()bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],stat"54">56and"press ❎ for menu ⁴f⁶x1 "or"thx for playingᶜ8♥ ⁴f⁶x1 ",ban)return end pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"draw_map(48,15)_pal,pal=pal,max foreach(afog,draw_unit)pal=_pal pal()fillp"23130.5"for x=cx\8,cx\8+16do for y=cy\8,cy\8+13do local i=x|y<<8local function b(a,col)color(col)camera(cx-x*8,cy-y*8)
 if(a[i-1])unl"-1,0,-1,7"
 if(a[i-256])unl"0,-1,7,-1"
@@ -1099,7 +1098,7 @@ bldbld=.1]]
 -->8
 --save
 
-function save()local ptr,foreach=0,foreach bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")local function draw(v)for i=0,8,4do pset(ptr%128,ptr\128,v>>i&15)ptr+=1end end for x=0,47do for y=0,31do draw(mget(x,y)|g(exp,x,y,0))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)draw(r[k])end)end)draw(#units)foreach(units,function(_ENV)foreach({idx,x,y,p,max(const),max(disc),hp},draw)end)extcmd("screen",1)end function loadgame()init()pal()serial(unspl"0x802,0x9000,0x4000")local function px(n)if n>=1then local v1,v2,v3=peek(ptr,3)ptr+=3return v1|v2<<4|v3<<8,px(n-1)end end for x=0,47do for y=0,31do local v=px"1"mset(x,y,v&127,v>127and s(exp,x,y,128))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)r[k]=px"1"end)end)for i=1,px"1"do unit(px"7")end local techs=res1.techs foreach(typs,function(_ENV)if techs|tmap==techs then x(typ.p1)up,done=up and 0,not up end end)start()end 
+function save()local ptr,foreach=0,foreach bnr(2,"savefile⁶jdnᶜ1savefile","drag+drop to load ⁴f⁶x1 ")local function draw(v)for i=0,8,4do pset(ptr%128,ptr\128,v>>i&15)ptr+=1end end for x=0,47do for y=0,31do draw(mget(x,y)|g(exp,x,y,0))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)draw(r[k])end)end)draw(#units)foreach(units,function(_ENV)foreach({idx,x,y,p,max(const),max(disc),hp},draw)end)extcmd("screen",1)end function loadgame()init()pal()serial(unspl"0x802,0x9000,0x4000")local function px(n)n-=1if n>=0then local v1,v2,v3=peek(ptr,3)ptr+=3return v1|v2<<4|v3<<8,px(n)end end for x=0,47do for y=0,31do local v=px"1"mset(x,y,v&127,v>127and s(exp,x,y,128))end end foreach(split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",function(k)foreach(res,function(r)r[k]=px"1"end)end)for i=1,px"1"do unit(px"7")end local techs=res1.techs foreach(typs,function(_ENV)if techs|tmap==techs then x(typ.p1)up,done=up and 0,not up end end)start()end 
 -->8
 --ai
 
