@@ -2024,7 +2024,7 @@ function produce(u)
 				onscr and hu and gl.sfx"19"
 			if bld.ant and
 				rtx and
-				resqty[mget(rtx,rty)]
+				gl.resqty[mget(rtx,rty)]
 			then
 				gl.gogth(new,rtx,rty)
 			elseif rx then
@@ -2150,7 +2150,7 @@ function surr(fn,x,y,n,na)
 			xx<48 and yy<32 and
 			(na or acc(xx,yy))
 		then
-			if (dx|dy!=0) e=1
+			e=e or dx|dy!=0
 			if fn then
 				fn{
 					xx,yy,
