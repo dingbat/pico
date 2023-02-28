@@ -1372,11 +1372,7 @@ function gogth(u,tx,ty,wp)
 gth=1
 ez_adj=1]],
 		wp or path(u,t.x,t.y),
-		t,p[[7=r
-10=g
-11=g
-19=b
-39=r]][fget(mget(tx,ty))],tx,ty)
+		t,f2r[fget(mget(tx,ty))],tx,ty)
 end
 
 function godrop(u,nxt_res,dropu)
@@ -2400,14 +2396,12 @@ function dmap()
 				dmaps[q.x]=deli(dq,1).p1
 			end
 		else
-			local o,f={},p[[r=2
-g=3
-b=4]][q]
+			local o={}
 			if not dmap_st[q] then
 				dmap_st[q]={}
 				for x=0,48 do
 					for y=0,32 do
-						if fget(mget(x,y),f) then
+						if f2r[fget(mget(x,y))]==q then
 							s(dmap_st[q],x,y,{x,y})
 						end
 					end
@@ -2808,6 +2802,13 @@ unl,unspr,aspl,
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,63,0,0,30,1,1"
+
+p[[var=f2r
+7=r
+10=g
+11=g
+19=b
+39=r]]
 
 p[[var=resqty
 80=45
