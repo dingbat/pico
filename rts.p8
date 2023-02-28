@@ -31,6 +31,7 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if lclk then
 			init()
+			
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -38,7 +39,16 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
+			 
 			foreach(split([[7,64,64
+1,49,64
+1,77,59
+1,59,52
+5,61,76
+1,49,64
+1,77,59
+1,59,52
+5,61,76
 1,49,64
 1,77,59
 1,59,52
@@ -1599,8 +1609,8 @@ function tick(u)
 					u.st.typ=i>1 and {p}
 					break
 				end
-				for nx=max(x-2),x+2,2 do
-				for ny=max(y-2),y+2,2 do
+				for nx=max(x-2),min(x+2,254),2 do
+				for ny=max(y-2),min(y+2,382),2 do
 					s(v,nx\2,ny\2,
 						add(g(v,nx\2,ny\2,fr),
 							{nx,ny}))
@@ -2022,8 +2032,9 @@ function produce(u)
 				gl.resqty[mget(rtx,rty)]
 			then
 				gl.gogth(new,rtx,rty)
-			elseif rx then
-				gl.move(new,rx,ry)
+			else
+				gl.move(new,rx or x+5,
+					ry or y+5)
 			end
 		end
 		if q.qty>1 then
