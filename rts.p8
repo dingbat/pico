@@ -1672,8 +1672,8 @@ function input()
 
 	if amy>104 and not selx then
 		local dx,dy=amx-105,amy-107
-		if min(dx,dy)>=0 and
-			dx<19 and dy<13 then
+		if mid(dx,18)==dx and
+			mid(dy,12)==dy then
 			local x,y=20.21*dx,21.33*dy
 			if rclk and sel1 then
 				sfx"1"
