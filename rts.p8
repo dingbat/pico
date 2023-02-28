@@ -2441,7 +2441,7 @@ function path(u,x,y,tol,r)
 			u.spider,nearest(x,y)
 		wayp,e,spdr=as(
 			nearest(u.x,u.y),dest,r)
-		if e and
+		if e and not r and
 			dest_d<=(tol or 1) then
 			deli(wayp)
 			add(wayp,{x,y})

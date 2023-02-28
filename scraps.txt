@@ -5,12 +5,29 @@ credits:
 - carlc27843's pxaviz https://carlc27843.itch.io/pico-8-source-compression-visualizer
 - siege engineers' [aoe2techtree.net]https://aoe2techtree.net/
 - thisismypassport [shrinko8](https://github.com/thisismypassport/shrinko8) for whitespace removal
-- wolfe3d for savefile idea 
+- wolfe3d for savefile idea
 
 1; touch
 2; handheld
 3; desktop
 
+if b.hu then
+		printh(b.idx..":"..xx..","..yy,"log")
+		end
+
+tostr[[[[]]
+		if u.idx==4 and u.hu then
+			local st=nearest(u.x,u.y)
+			printh("e:"..tostr(e).." dest_d:"..dest_d.. " start:"..st[1]
+				..","..st[2] ..
+				" dest:"..dest[1]..","..
+				dest[2],"log")
+				foreach(wayp,function(p)
+					printh(p[1]\8 ..","..p[2]\8,"log")
+				end)
+			printh("","log")
+		end
+		--]]
 
 --27 tok
 ob={
@@ -258,7 +275,7 @@ function nohold(p)
 	 (p.b==0 or res2.b-p.b>=uhold.b)
 end
 
-\*6 
+\*6
 
 
 	--autosave
@@ -307,7 +324,7 @@ end
 
 startpos:
 	--x*8+7,y*8+4 -64
-	
+
 --7=128/mmwratio+1
 
 - new unit: spider web. a light wall built by spiders that can be crossed by your own spiders
@@ -316,7 +333,7 @@ startpos:
 - fixed: groups of overlapping units could go through buildings when spreading out (was especially noticable with the new spider web)
 - fixed: when ladybug dies, it could drop its food tile far from where it was
 - fixed: tile directly above queen's right half was inaccessible
-- fixed: when easy AI started in the bottom-left corner it never built anything 
+- fixed: when easy AI started in the bottom-left corner it never built anything
 
 dirty token savers
 ============
@@ -431,7 +448,7 @@ for k,r in inext,res do
 		r.pos,r.diff=
 			del(posidx,rnd(posidx)),
 			ai_diff+1
-	end	
+	end
 
 	alt menu pal
 	pspl"0,5,3,13,13,13,6,2,6,5,13,13,1,0,5"
@@ -443,7 +460,7 @@ for k,r in inext,res do
 +               sspr(x,unspl"0,16,8,25,11,32,16")
                 pspl"2"
 +               sspr(x,unspl"0,16,8,74,11,32,16,1")
-+               
++
 +               ?"\^j58\-j\f0\^w\^tage of ants\^j58\|f\-i\f7age of ants\^-w\^-t\^jcg\-h\f0◀\-z\-p▶\^jad\|h\f0ai difficulty:\^jad\f6ai difficulty:\^jcn\-h\f0◀\-z\-p▶\^jck\-h\|h\f0ai count:\^jck\-h\f6ai count:\^j7q\f9\#0 press ❎ to start \^-#\^j2t\|h\f0EEOOTY\^j2t\f6EEOOTY\^jqt\f0V1.0\-0\|f\f6V1.0\0"
 +               ?"\^jcg\-h\|f\fa◀\-z\-p▶"
 +               ?"\^jcn\-h\|f\f6◀\-z\-p▶\^jeg\-j\0"
