@@ -96,7 +96,7 @@ function _update()
 				sset(109+tx,72+ty,
 					g(exp,x,y) and rescol[
 						g(viz,x,y,"e")..
-						fget(mget(x,y))] or 14)
+						fmget(x,y)] or 14)
 			end
 		end
 	end
@@ -253,7 +253,7 @@ function _draw()
 		if not exp[i] then
 			b(exp)
 		elseif not viz[i] then
-			b(viz,fget(mget(x,y),7) or 5)
+			b(viz,fmget(x,y)>=128 or 5)
 		end
 	end
 	end
@@ -1372,7 +1372,7 @@ function gogth(u,tx,ty,wp)
 gth=1
 ez_adj=1]],
 		wp or path(u,t.x,t.y),
-		t,f2r[fget(mget(tx,ty))],tx,ty)
+		t,f2r[fmget(tx,ty)],tx,ty)
 end
 
 function godrop(u,nxt_res,dropu)
@@ -2401,7 +2401,7 @@ function dmap()
 				dmap_st[q]={}
 				for x=0,48 do
 					for y=0,32 do
-						if f2r[fget(mget(x,y))]==q then
+						if f2r[fmget(x,y)]==q then
 							s(dmap_st[q],x,y,{x,y})
 						end
 					end
@@ -2784,11 +2784,12 @@ function a(v,...)
 	_ENV[v]={},... and a(...)
 end
 
-pspl,rndspl,unspl,campal=
+pspl,rndspl,unspl,campal,fmget=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
-	comp(camera,pal)
+	comp(camera,pal),
+	comp(fget,mget)
 
 unl,unspr,aspl,
 	typs,stp,pcol,
@@ -3576,3 +3577,4 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
+
