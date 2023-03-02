@@ -308,18 +308,18 @@ function draw_layers()
 		local h=12
 		local y=i*h+9
 		local by=y-scroll
+		--row
 		rectfill(0,y,mw,y+h,
-			sel==l and 2 or 5)
+			sel==l and 13 or 5)
 		rect(0,y,mw,y+h,13)
-		
+
 		add(buttons,{
 			r=clip_rect{0,by,mw,by+h},
 			fn=function()
 				sel,seli=l,i
 			end
 		})
-		
-		pal(6,13)
+
 		if i>1 then
 			button(
 				"up"..i,
@@ -330,10 +330,9 @@ function draw_layers()
 						layers[i-1],l
 				end
 			)
+			spr(10,2,y+2)
 		end
-		spr(10,2,y+2)
-		
-		pal(6,13)
+
 		if i<#layers then
 			button(
 				"down"..i,
@@ -344,11 +343,11 @@ function draw_layers()
 						layers[i+1],l
 				end
 			)
+			spr(9,8,y+2)
 		end
-		spr(9,8,y+2)
 		
 		pal()
-		
+
 		clip(-menux,y-scroll,mw,h,true)
 		local txt="\f"..alpha(l.fg)
 			..l.txt
