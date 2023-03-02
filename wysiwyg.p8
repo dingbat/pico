@@ -93,7 +93,7 @@ function _update()
 		load_cc()
 	end
 	
-	if mode==1 and sel then
+	if (mode<2 or menux!=0) and sel then
 		if btnp(⬅️) then
 			sel.x-=1
 		elseif btnp(➡️) then
@@ -197,9 +197,7 @@ function draw_menu(x)
 end
 
 function draw_home()
-	camera(menux+56,50)
-	?"⁶jhk⁵ghᶜ7codes⁶jgi⁵gjᶜ7control⁶jgg⁵gg⁶t⁶=ᶜ7wysiwyg"
-	camera(menux)
+	?"⁶j27⁵iiᶜ7editor⁶j16³ictrlcode⁶j23⁴h⁶t⁶=wysiwyg\0"
 	
 	local yo=45
 	local loadd={2,yo,mw-2,yo+14,13}
@@ -312,12 +310,14 @@ function draw_layers()
 			sel==l and 2 or 5)
 		rect(0,y,mw,y+h,13)
 		
-		add(buttons,{
-			r=clip_rect{0,by,mw,by+h},
-			fn=function()
-				sel,seli=l,i
-			end
-		})
+		if menux==0 then
+			add(buttons,{
+				r=clip_rect{0,by,mw,by+h},
+				fn=function()
+					sel,seli=l,i
+				end
+			})
+		end
 		
 		pal(6,13)
 		if i>1 then
@@ -370,10 +370,12 @@ function textbox(txt,fn)
 		line(cx,23,cx,29,7)
 	end
 	
-	if btnp(⬅️) then
-		curs-=1
-	elseif btnp(➡️) then
-		curs+=1
+	if menux==0 then
+		if btnp(⬅️) then
+			curs-=1
+		elseif btnp(➡️) then
+			curs+=1
+		end
 	end
 	
 	local chars=split(txt,"")
@@ -512,7 +514,7 @@ function clip_rect(r1)
 end
 -->8
 function button(
-	name,r,cols,fn,data
+	name,r,cols,fn,data,non_menu
 )
 	pal()
 	if
@@ -522,12 +524,14 @@ function button(
 			hovbtn.name==name then
 		pal(unpack(cols))
 	end
-	add(buttons,{
-		r=r,
-		name=name,
-		fn=fn,
-		data=data,
-	})
+	if non_menu or menux==0 then
+		add(buttons,{
+			r=r,
+			name=name,
+			fn=fn,
+			data=data,
+		})
+	end
 end
 -->8
 function alpha(c)
@@ -637,7 +641,7 @@ function preview()
 						dragl=l
 					end
 				end,
-				l
+				l,true
 			)
 		end
 		if
@@ -651,7 +655,6 @@ function preview()
 end
 
 function load_cc()
-	load_error=1
 	local str=stat"4"
 	layers={}
 	
