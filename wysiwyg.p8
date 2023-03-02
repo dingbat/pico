@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
+--wysiwyg ctrlcode editor
+--eeooty
+
 --devkit
 poke(0x5f2d,3)
 
@@ -127,6 +130,8 @@ function _update()
 			menudx=menux==0 and 6 or -6
 		end
 		key=""
+	elseif key=="\r" then
+		key="\n"
 	end
 	
 	menux+=menudx
@@ -155,7 +160,7 @@ function _update()
 		end
 	end
 
-	poke(0x5f30,key=="p" and 1)
+	poke(0x5f30,(key=="p" or key=="\n") and 1)
 end
 -->8
 mw=42
@@ -206,20 +211,7 @@ function draw_home()
 	-- :-)
 	?"⁶j28⁵iiᶜ0editor⁶j28⁵ihᶜdeditor⁶j16⁵iiᶜ0ctrlcode⁶j16⁵ihᶜdctrlcode⁶j23⁴h⁶tᶜ0wysiwyg⁶j23⁴h⁶=ᶜ8wysiwyg⁶j23⁴hᶜ9⁶y4wysiwyg⁶j23⁴hᶜa⁶y3wysiwyg⁶j23⁴hᶜb⁶y2wysiwyg⁶j23⁴hᶜc⁶y1wysiwyg\0"
 
-	local yo=42
-	local loadd={2,yo,mw-2,yo+14,13}
-	button(
-		"load",
-		loadd,
-		{13,2},
-		function()
-			load_cc()
-		end
-	)
-	rectfill(unpack(loadd))
-	?"load from\nclipboard",4,yo+2,7
-	
-	yo+=17
+	local yo=43
 	
 	local saved={2,yo,mw-2,yo+14,13}
 	if not savet then
@@ -229,7 +221,7 @@ function draw_home()
 			{13,2},
 			save
 		)
-		savetxt=" save to\nclipboard"
+		savetxt=" \fbsave\f7 to\nclipboard"
 	else
 		saved[5]=3
 		if time()-savet>1 then
@@ -239,6 +231,32 @@ function draw_home()
 	end
 	rectfill(unpack(saved))
 	?savetxt,4,yo+2,7
+	
+	yo+=17
+	
+	local loadd={2,yo,mw-2,yo+14,13}
+	if not loadt then
+		button(
+			"load",
+			loadd,
+			{13,2},
+			function()
+				load_cc()
+				if not load_error then
+					loadt=time()
+				end
+			end
+		)
+		loadtxt="\fcload\f7 from\nclipboard"
+	else
+		loadd[5]=12
+		if time()-loadt>1 then
+			loadt=nil
+		end
+		loadtxt="\|j loaded!"
+	end
+	rectfill(unpack(loadd))
+	?loadtxt,4,yo+2,7
 
 	?"editor\nbackground",2,79,6
 	color_wheel(92,home,"fg")
@@ -359,7 +377,7 @@ function draw_layers()
 		
 		clip(-menux,y-scroll,mw,h,true)
 		local txt="\f"..alpha(l.fg)
-			..l.txt
+			..gsub(l.txt,"\n","■")
 		if l.bg then
 			txt="\#"..alpha(l.bg)..txt
 		end
@@ -371,13 +389,15 @@ end
 function textbox(y,txt,fn)
 	rectfill(1,y,mw-1,y+10,13)
 	rect(1,y,mw-1,y+10,7)
-	?txt,4,y+3,7
+	
+	local ptext=gsub(txt,"\n","■")
+	?ptext,4,y+3,7
 	
 	if cf<15 then
 		--calculate cursor based off
 		--printing in case there are
 		--wide chars like ▒🐱●
-		local s=sub(txt,1,curs)
+		local s=sub(ptext,1,curs)
 		local cx=3+?s,0,150
 		line(cx,y+2,cx,y+8,7)
 	end
@@ -556,6 +576,18 @@ function clip_rect(r1)
 		min(r2[4],r1[4])
 	return {x1,y1,x2,y2}
 end
+
+function gsub(str,old,new)
+	local s=""
+	for i=1,#str do
+		if str[i]==old then
+			s..=new
+		else
+			s..=str[i]
+		end
+	end
+	return s
+end
 -->8
 function button(
 	name,r,cols,fn,data,non_menu
@@ -634,6 +666,14 @@ function l2cc(l,prev)
 		cc..="⁴"..ey
 	end
 	
+	if #split(l.txt,"\n")>1 then
+		--has newline, so we have
+		--to set a home point so
+		--the line starts at the
+		--right x-offset
+		cc..="⁶h"
+	end
+	
 	foreach({
 		"w","t","=","i","b",
 		"fg","bg","xs","ys"
@@ -647,14 +687,16 @@ function l2cc(l,prev)
 end
 
 function save()
-	local out="?\""
+	local out=""
 	local prev
 	for i=#layers,1,-1 do
 		local l=layers[i]
 		out..=l2cc(l,prev)
 		prev=l
 	end
-	out..="\\0\""
+	out=gsub(out,"\n","\\n")
+	out=gsub(out,"\"","\\\"")
+	out="?\""..out.."\\0\""
 	printh(out,"@clip")
 	savet=time()
 end
@@ -733,7 +775,10 @@ function load_cc()
 	end
 	
 	while i<=#str do
+		--ignore \0 and \^h, they
+		--get auto-added
 		nxt"\\0"
+		nxt"⁶h"
 		if nxt"⁶j" then
 			prev=layer
 			if layer.x then
@@ -785,7 +830,15 @@ function load_cc()
 				end
 			end
 		else
-			layer.txt..=c"1"
+			local t
+			if nxt"\\n" then
+				t="\n"
+			elseif nxt"\\\"" then
+				t="\""
+			else
+				t=c"1"
+			end
+			layer.txt..=t
 		end
 	end
 	add(layers,layer,1)
