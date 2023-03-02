@@ -24,6 +24,12 @@ home={
 	fg=0
 }
 
+default_layer={
+	b=true,
+	xs=4,
+	ys=6,
+}
+
 function _draw()
 	cls(home.fg)
 	buttons={}
@@ -197,9 +203,10 @@ function draw_menu(x)
 end
 
 function draw_home()
-	?"⁶j27⁵iiᶜ7editor⁶j16³ictrlcode⁶j23⁴h⁶t⁶=wysiwyg\0"
-	
-	local yo=45
+	-- :-)
+	?"⁶j28⁵iiᶜ0editor⁶j28⁵ihᶜdeditor⁶j16⁵iiᶜ0ctrlcode⁶j16⁵ihᶜdctrlcode⁶j23⁴h⁶tᶜ0wysiwyg⁶j23⁴h⁶=ᶜ8wysiwyg⁶j23⁴hᶜ9⁶y4wysiwyg⁶j23⁴hᶜa⁶y3wysiwyg⁶j23⁴hᶜb⁶y2wysiwyg⁶j23⁴hᶜc⁶y1wysiwyg\0"
+
+	local yo=42
 	local loadd={2,yo,mw-2,yo+14,13}
 	button(
 		"load",
@@ -212,7 +219,7 @@ function draw_home()
 	rectfill(unpack(loadd))
 	?"load from\nclipboard",4,yo+2,7
 	
-	yo+=20
+	yo+=17
 	
 	local saved={2,yo,mw-2,yo+14,13}
 	if not savet then
@@ -233,8 +240,10 @@ function draw_home()
 	rectfill(unpack(saved))
 	?savetxt,4,yo+2,7
 
-	?"editor\nbackground",2,87,6
-	color_wheel(100,home,"fg")
+	?"editor\nbackground",2,79,6
+	color_wheel(92,home,"fg")
+	
+	?"tab\^x2 \^x4to\^x2 \^x4hide",2,121,13
 end
 
 function clone(obj)
@@ -290,13 +299,12 @@ function draw_layers()
 		{6,7},
 		function()
 			seli=(seli or 0)+1
-			sel=add(layers,{
-				b=true,
-				fg=7,
-				txt="txt",
-				x=64,
-				y=64,
-			},seli)
+			sel=add(layers,
+				clone(default_layer),seli)
+			sel.fg=7
+			sel.txt="txt"
+			sel.x=64
+			sel.y=64
 		end
 	)
 	spr(8,34,12)
@@ -360,14 +368,14 @@ function draw_layers()
 	end
 end
 
-function textbox(txt,fn)
-	rectfill(1,21,mw-1,31,13)
-	rect(1,21,mw-1,31,7)
-	?txt,4,24,7
+function textbox(y,txt,fn)
+	rectfill(1,y,mw-1,y+10,13)
+	rect(1,y,mw-1,y+10,7)
+	?txt,4,y+3,7
 	
 	if cf<15 then
 		local cx=3+curs*4
-		line(cx,23,cx,29,7)
+		line(cx,y+2,cx,y+8,7)
 	end
 	
 	if menux==0 then
@@ -396,18 +404,17 @@ function textbox(txt,fn)
 end
 
 function draw_edit()
-	?"edit layer",2,13,7
 	
 	if not sel then
-		?"no layer\nselected!",2,22,10
+		?"no layer\nselected\nto edit!",2,12,10
 		return
 	end
 	
-	textbox(sel.txt,function(txt)
-		sel.txt=txt
+	textbox(12,sel.txt,function(t)
+		sel.txt=t
 	end)
 	
-	local punyd={2,34,7,39,7}
+	local punyd={2,25,7,30,7}
 	button(
 		"puny",
 		punyd,
@@ -417,15 +424,15 @@ function draw_edit()
 		end
 	)
 	if puny then
-		spr(11,2,34)
+		spr(11,2,25)
 	else
 		rect(unpack(punyd))
 	end
 	pal()
-	?"PUNYFONT",10,34,6
+	?"PUNYFONT",10,25,6
 	for i,k in next,{"w","t","=","i","b"} do
 		i-=1
-		local w,xo,yo=8,1,43
+		local w,xo,yo=8,1,33
 		local dims={xo+i*w,yo,
 			xo+w+i*w,yo+8,6}
 		rect(unpack(dims))
@@ -443,11 +450,41 @@ function draw_edit()
 		pal()
 		?k,4+i*w,yo+2,7
 	end
+	
+	number(1,46,"x","xs")
+	number(24,46,"y","ys")
 
 	?"fg color",2,56,6
 	color_wheel(63,sel,"fg")
 	?"bg color",2,93,6
 	color_wheel(100,sel,"bg")
+end
+
+function number(x,y,label,k)
+	local def=k=="xs" and sel[k]==4
+		or k=="ys" and sel[k]==6
+	?label,x+5,y,6
+	local fx=?sel[k],x+10,y,def and 13 or 10
+	button(
+		k.."-",
+		{x,y,x+4,y+5},
+		{6,7},
+		function()
+			sel[k]=max(sel[k]-1)
+		end
+	)
+	?"◀",x,y,6
+	x=fx
+	button(
+		k.."+",
+		{x,y,x+4,y+5},
+		{6,7},
+		function()
+			sel[k]=min(sel[k]+1,32)
+		end
+	)
+	?"▶",x+1,y,6
+	pal()
 end
 
 function color_wheel(yoff,obj,key)
@@ -566,11 +603,15 @@ function diff(k,prev,new)
 		return	"ᶜ"..alpha(n)
 	elseif k=="#" then
 		return "²"..alpha(n)
+	elseif k=="xs" then
+		return "⁶x"..alpha(n)
+	elseif k=="ys" then
+		return "⁶y"..alpha(n)
 	end
 end
 
 function l2cc(l,prev)
-	prev=prev or {b=true}
+	prev=prev or default_layer
 	local x,y,ex,ey=
 		alpha(l.x\4),
 		alpha(l.y\4),
@@ -586,13 +627,13 @@ function l2cc(l,prev)
 		cc..="⁴"..ey
 	end
 	
-	cc..=diff("w",prev,l)
-	cc..=diff("t",prev,l)
-	cc..=diff("=",prev,l)
-	cc..=diff("i",prev,l)
-	cc..=diff("b",prev,l)
-	cc..=diff("fg",prev,l)
-	cc..=diff("bg",prev,l)
+	foreach({
+		"w","t","=","i","b",
+		"fg","bg","xs","ys"
+	},function(k)
+		cc..=diff(k,prev,l)
+	end)
+	
 	cc..=l.txt
 	
 	return cc
@@ -672,7 +713,7 @@ function load_cc()
 		return s
 	end
 	
-	local layer={b=true}
+	local layer=default_layer
 	
 	if nxt"?\"" then
 		-- remove trailing "
@@ -721,6 +762,10 @@ function load_cc()
 						local k=c"1"
 						if (k=="#") k="bg"
 						layer[k]=false
+					elseif nxt"x" then
+						layer.xs=unalpha(c"1")
+					elseif nxt"y" then
+						layer.ys=unalpha(c"1")
 					else
 						layer[c"1"]=true
 					end
