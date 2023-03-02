@@ -374,7 +374,11 @@ function textbox(y,txt,fn)
 	?txt,4,y+3,7
 	
 	if cf<15 then
-		local cx=3+curs*4
+		--calculate cursor based off
+		--printing in case there are
+		--wide chars like ▒🐱●
+		local s=sub(txt,1,curs)
+		local cx=3+?s,0,150
 		line(cx,y+2,cx,y+8,7)
 	end
 	
@@ -394,7 +398,10 @@ function textbox(y,txt,fn)
 		else
 			curs+=1
 			if puny then
-				key=smallcaps(key)
+				local ko=ord(key)
+				if ko>=ord"a" and ko<=ord"z" then
+					key=chr(ko-32)
+				end
 			end
 			add(chars,key,curs)
 		end
@@ -822,36 +829,6 @@ function print_esc(str,x,y,xlim,col)
 			cx,cy=x,cy+6
 		end
 	end
-end
--->8
---smallcaps
---by felice
---https://www.lexaloffle.com/bbs/?pid=24069#p
-function smallcaps(s)
-  local d=""
-  local l,c,t=false,false
-  for i=1,#s do
-    local a=sub(s,i,i)
-    if a=="^" then
-      if(c) d=d..a
-      c=not c
-    elseif a=="~" then
-      if(t) d=d..a
-      t,l=not t,not l
-    else 
-      if c==l and a>="a" and a<="z" then
-        for j=1,26 do
-          if a==sub("abcdefghijklmnopqrstuvwxyz",j,j) then
-            a=sub("\65\66\67\68\69\70\71\72\73\74\75\76\77\78\79\80\81\82\83\84\85\86\87\88\89\90\91\92",j,j)
-            break
-          end
-        end
-      end
-      d=d..a
-      c,t=false,false
-    end
-  end
-  return d
 end
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
