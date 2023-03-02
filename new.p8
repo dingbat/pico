@@ -3,7 +3,7 @@ version 41
 __lua__
 function _draw()
 	cls()
-	?"⁶j9l⁵hjᶜ7²3only 2 tokens!⁶j89⁵hi⁶-#any text layout⁶j9f⁵jh⁶w⁶tᶜ3hello!⁶jaf⁵ggᶜ7hello!"	
+
 end
 
 __gfx__

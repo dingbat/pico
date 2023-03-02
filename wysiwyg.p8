@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
+--wysiwyg ctrlcode editor
+--eeooty
+
 --devkit
 poke(0x5f2d,3)
 
@@ -24,23 +27,29 @@ home={
 	fg=0
 }
 
+default_layer={
+	b=true,
+	xs=4,
+	ys=6,
+}
+
 function _draw()
 	cls(home.fg)
 	buttons={}
-	
+
 	preview()
 
-	pal()	
+	pal()
 	draw_menu(menux)
 
-	local cursor_spr=1		
-	
+	local cursor_spr=1
+
 	if hovbtn.r then
 		cursor_spr=2
 		if (stat"34">0) cursor_spr=3
 		pset(mx-1,my+4,5)
 	end
-	
+
 	if load_error then
 		rectfill(10,10,118,118,5)
 		rect(10,10,118,118,6)
@@ -48,9 +57,9 @@ function _draw()
 		?"wasn't generated here!\n"
 		?"if the string below isn't"
 		?"right, press \f9ctrl-v\f7.\n"
-		
+
 		print_esc(stat"4",13,50,116,11)
-		
+
 		local xo=45
 		local yo=105
 		local ok={xo,yo,xo+30,yo+8,13}
@@ -65,35 +74,35 @@ function _draw()
 		rectfill(unpack(ok))
 		?"  ok",xo+4,yo+2,7
 	end
-	
+
 	spr(cursor_spr,mx,my)
-	
+
 	hovbtn={}
 end
 
 function _update()
 	cf+=1
 	cf%=30
-	
+
 	pmx,pmy=mx,my
 	mx,my=
 		mid(stat"32",127),
 		mid(stat"33",127)
-		
+
 	foreach(buttons,function(b)
 		if int(b.r,{mx,my,mx,my},1) then
 			hovbtn=b
 		end
 	end)
-	
+
 	if load_error then
 		if hovbtn.name!="ok" then
 			hovbtn={}
 		end
 		load_cc()
 	end
-	
-	if mode==1 and sel then
+
+	if (mode<2 or menux!=0) and sel then
 		if btnp(⬅️) then
 			sel.x-=1
 		elseif btnp(➡️) then
@@ -104,7 +113,7 @@ function _update()
 			sel.y+=1
 		end
 	end
-	
+
 	--height of viewport: 93
 	--content height: layers*12
 	local s=stat"36"
@@ -114,22 +123,24 @@ function _update()
 			scroll,
 			#layers*12-90)
 	end
-	
+
 	key=stat"31"
 	if key=="\t" then
 		if menudx==0 then
 			menudx=menux==0 and 6 or -6
 		end
 		key=""
+	elseif key=="\r" then
+		key="\n"
 	end
-	
+
 	menux+=menudx
 	menudx/=1.1
 	if menux>45 or menux<0 then
 		menux=menudx>0 and 45 or 0
 		menudx=0
 	end
-	
+
 	newclk=btnp"5" and not lastclk
 	lastclk=btn"5"
 	if not btn"5" then
@@ -138,10 +149,10 @@ function _update()
 		dragl.x+=mx-pmx
 		dragl.y+=my-pmy
 	end
-	
+
 	if btnp"5" and key=="" then
 		if hovbtn and hovbtn.fn then
-			hovbtn.fn()			
+			hovbtn.fn()
 		elseif not dragl and (
 			menux>0 or mx>mw)
 		then
@@ -149,7 +160,7 @@ function _update()
 		end
 	end
 
-	poke(0x5f30,key=="p" and 1)
+	poke(0x5f30,(key=="p" or key=="\n") and 1)
 end
 -->8
 mw=42
@@ -168,7 +179,7 @@ function draw_menu(x)
 	rectfill(0,0,mw,9,8)
 	line(mw+1,0,mw+1,128,5)
 	line(mw+1,0,mw+1,9,2)
-	
+
 	for i=0,2 do
 		local w=mw/3
 		button(
@@ -184,7 +195,7 @@ function draw_menu(x)
 		)
 		spr(16+i*2,3+i*w,1,2,2)
 	end
-	
+
 	if mode==0 then
 		draw_home()
 	elseif mode==1 then
@@ -192,30 +203,16 @@ function draw_menu(x)
 	else
 		draw_edit()
 	end
-	
+
 	camera()
 end
 
 function draw_home()
-	camera(menux+56,50)
-	?"⁶jhk⁵ghᶜ7codes⁶jgi⁵gjᶜ7control⁶jgg⁵gg⁶t⁶=ᶜ7wysiwyg"
-	camera(menux)
-	
-	local yo=45
-	local loadd={2,yo,mw-2,yo+14,13}
-	button(
-		"load",
-		loadd,
-		{13,2},
-		function()
-			load_cc()
-		end
-	)
-	rectfill(unpack(loadd))
-	?"load from\nclipboard",4,yo+2,7
-	
-	yo+=20
-	
+	-- :-)
+	?"⁶j28⁵iiᶜ0editor⁶j28⁵ihᶜdeditor⁶j16⁵iiᶜ0ctrlcode⁶j16⁵ihᶜdctrlcode⁶j23⁴h⁶tᶜ0wysiwyg⁶j23⁴h⁶=ᶜ8wysiwyg⁶j23⁴hᶜ9⁶y4wysiwyg⁶j23⁴hᶜa⁶y3wysiwyg⁶j23⁴hᶜb⁶y2wysiwyg⁶j23⁴hᶜc⁶y1wysiwyg\0"
+
+	local yo=43
+
 	local saved={2,yo,mw-2,yo+14,13}
 	if not savet then
 		button(
@@ -224,7 +221,7 @@ function draw_home()
 			{13,2},
 			save
 		)
-		savetxt=" save to\nclipboard"
+		savetxt=" \fbsave\f7 to\nclipboard"
 	else
 		saved[5]=3
 		if time()-savet>1 then
@@ -235,8 +232,36 @@ function draw_home()
 	rectfill(unpack(saved))
 	?savetxt,4,yo+2,7
 
-	?"editor\nbackground",2,87,6
-	color_wheel(100,home,"fg")
+	yo+=17
+
+	local loadd={2,yo,mw-2,yo+14,13}
+	if not loadt then
+		button(
+			"load",
+			loadd,
+			{13,2},
+			function()
+				load_cc()
+				if not load_error then
+					loadt=time()
+				end
+			end
+		)
+		loadtxt="\fcload\f7 from\nclipboard"
+	else
+		loadd[5]=12
+		if time()-loadt>1 then
+			loadt=nil
+		end
+		loadtxt="\|j loaded!"
+	end
+	rectfill(unpack(loadd))
+	?loadtxt,4,yo+2,7
+
+	?"editor\nbackground",2,79,6
+	color_wheel(92,home,"fg")
+
+	?"tab\^x2 \^x4to\^x2 \^x4hide",2,121,13
 end
 
 function clone(obj)
@@ -249,7 +274,7 @@ end
 
 function draw_layers()
 	?"layers",2,13,7
-	
+
 	local cyo=117
 	local copy={1,cyo,mw/2-2,cyo+8,13}
 	if sel then
@@ -269,7 +294,7 @@ function draw_layers()
 	end
 	rectfill(unpack(copy))
 	?"copy",3,cyo+2,7
-	
+
 	local cyo=117
 	local dell={mw/2,cyo,mw-2,cyo+8,13}
 	if sel then
@@ -285,20 +310,19 @@ function draw_layers()
 	end
 	rectfill(unpack(dell))
 	?"\-jdel",mw/2+2,cyo+2,7
-	
+
 	button(
 		"add",
 		{34,12,mw,20},
 		{6,7},
 		function()
 			seli=(seli or 0)+1
-			sel=add(layers,{
-				b=true,
-				fg=7,
-				txt="txt",
-				x=64,
-				y=64,
-			},seli)
+			sel=add(layers,
+				clone(default_layer),seli)
+			sel.fg=7
+			sel.txt="txt"
+			sel.x=64
+			sel.y=64
 		end
 	)
 	spr(8,34,12)
@@ -313,12 +337,14 @@ function draw_layers()
 			sel==l and 13 or 5)
 		rect(0,y,mw,y+h,13)
 
-		add(buttons,{
-			r=clip_rect{0,by,mw,by+h},
-			fn=function()
-				sel,seli=l,i
-			end
-		})
+		if menux==0 then
+			add(buttons,{
+				r=clip_rect{0,by,mw,by+h},
+				fn=function()
+					sel,seli=l,i
+				end
+			})
+		end
 
 		if i>1 then
 			button(
@@ -345,12 +371,12 @@ function draw_layers()
 			)
 			spr(9,8,y+2)
 		end
-		
+
 		pal()
 
 		clip(-menux,y-scroll,mw,h,true)
 		local txt="\f"..alpha(l.fg)
-			..l.txt
+			..gsub(l.txt,"\n","■")
 		if l.bg then
 			txt="\#"..alpha(l.bg)..txt
 		end
@@ -359,22 +385,30 @@ function draw_layers()
 	end
 end
 
-function textbox(txt,fn)
-	rectfill(1,21,mw-1,31,13)
-	rect(1,21,mw-1,31,7)
-	?txt,4,24,7
-	
+function textbox(y,txt,fn)
+	rectfill(1,y,mw-1,y+10,13)
+	rect(1,y,mw-1,y+10,7)
+
+	local ptext=gsub(txt,"\n","■")
+	?ptext,4,y+3,7
+
 	if cf<15 then
-		local cx=3+curs*4
-		line(cx,23,cx,29,7)
+		--calculate cursor based off
+		--printing in case there are
+		--wide chars like ▒🐱●
+		local s=sub(ptext,1,curs)
+		local cx=3+?s,0,150
+		line(cx,y+2,cx,y+8,7)
 	end
-	
-	if btnp(⬅️) then
-		curs-=1
-	elseif btnp(➡️) then
-		curs+=1
+
+	if menux==0 then
+		if btnp(⬅️) then
+			curs-=1
+		elseif btnp(➡️) then
+			curs+=1
+		end
 	end
-	
+
 	local chars=split(txt,"")
 	if key!="" then
 		if key=="\b" then
@@ -383,7 +417,10 @@ function textbox(txt,fn)
 		else
 			curs+=1
 			if puny then
-				key=smallcaps(key)
+				local ko=ord(key)
+				if ko>=ord"a" and ko<=ord"z" then
+					key=chr(ko-32)
+				end
 			end
 			add(chars,key,curs)
 		end
@@ -393,18 +430,17 @@ function textbox(txt,fn)
 end
 
 function draw_edit()
-	?"edit layer",2,13,7
-	
+
 	if not sel then
-		?"no layer\nselected!",2,22,10
+		?"no layer\nselected\nto edit!",2,12,10
 		return
 	end
-	
-	textbox(sel.txt,function(txt)
-		sel.txt=txt
+
+	textbox(12,sel.txt,function(t)
+		sel.txt=t
 	end)
-	
-	local punyd={2,34,7,39,7}
+
+	local punyd={2,25,7,30,7}
 	button(
 		"puny",
 		punyd,
@@ -414,15 +450,15 @@ function draw_edit()
 		end
 	)
 	if puny then
-		spr(11,2,34)
+		spr(11,2,25)
 	else
 		rect(unpack(punyd))
 	end
 	pal()
-	?"PUNYFONT",10,34,6
+	?"PUNYFONT",10,25,6
 	for i,k in next,{"w","t","=","i","b"} do
 		i-=1
-		local w,xo,yo=8,1,43
+		local w,xo,yo=8,1,33
 		local dims={xo+i*w,yo,
 			xo+w+i*w,yo+8,6}
 		rect(unpack(dims))
@@ -441,10 +477,40 @@ function draw_edit()
 		?k,4+i*w,yo+2,7
 	end
 
+	number(1,46,"x","xs")
+	number(24,46,"y","ys")
+
 	?"fg color",2,56,6
 	color_wheel(63,sel,"fg")
 	?"bg color",2,93,6
 	color_wheel(100,sel,"bg")
+end
+
+function number(x,y,label,k)
+	local def=k=="xs" and sel[k]==4
+		or k=="ys" and sel[k]==6
+	?label,x+5,y,6
+	local fx=?sel[k],x+10,y,def and 13 or 10
+	button(
+		k.."-",
+		{x,y,x+4,y+5},
+		{6,7},
+		function()
+			sel[k]=max(sel[k]-1)
+		end
+	)
+	?"◀",x,y,6
+	x=fx
+	button(
+		k.."+",
+		{x,y,x+4,y+5},
+		{6,7},
+		function()
+			sel[k]=min(sel[k]+1,32)
+		end
+	)
+	?"▶",x+1,y,6
+	pal()
 end
 
 function color_wheel(yoff,obj,key)
@@ -500,7 +566,7 @@ function clip_rect(r1)
 	if not int(r1,r2,0) then
 		return {-1,-1,-1,-1}
 	end
-	
+
 	local x1,x2=
 		max(r2[1],r1[1]),
 		min(r2[3],r1[3])
@@ -509,9 +575,21 @@ function clip_rect(r1)
 		min(r2[4],r1[4])
 	return {x1,y1,x2,y2}
 end
+
+function gsub(str,old,new)
+	local s=""
+	for i=1,#str do
+		if str[i]==old then
+			s..=new
+		else
+			s..=str[i]
+		end
+	end
+	return s
+end
 -->8
 function button(
-	name,r,cols,fn,data
+	name,r,cols,fn,data,non_menu
 )
 	pal()
 	if
@@ -521,12 +599,14 @@ function button(
 			hovbtn.name==name then
 		pal(unpack(cols))
 	end
-	add(buttons,{
-		r=r,
-		name=name,
-		fn=fn,
-		data=data,
-	})
+	if non_menu or menux==0 then
+		add(buttons,{
+			r=r,
+			name=name,
+			fn=fn,
+			data=data,
+		})
+	end
 end
 -->8
 function alpha(c)
@@ -550,7 +630,7 @@ function diff(k,prev,new)
 	if k=="bg" then
 		k="#"
 	end
-	
+
 	if p==n then
 		return ""
 	elseif p and not n then
@@ -561,17 +641,21 @@ function diff(k,prev,new)
 		return	"ᶜ"..alpha(n)
 	elseif k=="#" then
 		return "²"..alpha(n)
+	elseif k=="xs" then
+		return "⁶x"..alpha(n)
+	elseif k=="ys" then
+		return "⁶y"..alpha(n)
 	end
 end
 
 function l2cc(l,prev)
-	prev=prev or {b=true}
+	prev=prev or default_layer
 	local x,y,ex,ey=
 		alpha(l.x\4),
 		alpha(l.y\4),
 		alpha(l.x%4+16),
 		alpha(l.y%4+16)
-	
+
 	local cc="⁶j"..x..y
 	if ex!="g" and ey!="g" then
 		cc..="⁵"..ex..ey
@@ -580,28 +664,38 @@ function l2cc(l,prev)
 	elseif ey!="g" then
 		cc..="⁴"..ey
 	end
-	
-	cc..=diff("w",prev,l)
-	cc..=diff("t",prev,l)
-	cc..=diff("=",prev,l)
-	cc..=diff("i",prev,l)
-	cc..=diff("b",prev,l)
-	cc..=diff("fg",prev,l)
-	cc..=diff("bg",prev,l)
+
+	if #split(l.txt,"\n")>1 then
+		--has newline, so we have
+		--to set a home point so
+		--the line starts at the
+		--right x-offset
+		cc..="⁶h"
+	end
+
+	foreach({
+		"w","t","=","i","b",
+		"fg","bg","xs","ys"
+	},function(k)
+		cc..=diff(k,prev,l)
+	end)
+
 	cc..=l.txt
-	
+
 	return cc
 end
 
 function save()
-	local out="?\""
+	local out=""
 	local prev
 	for i=#layers,1,-1 do
 		local l=layers[i]
 		out..=l2cc(l,prev)
 		prev=l
 	end
-	out..="\\0\""
+	out=gsub(out,"\n","\\n")
+	out=gsub(out,"\"","\\\"")
+	out="?\""..out.."\\0\""
 	printh(out,"@clip")
 	savet=time()
 end
@@ -615,7 +709,7 @@ function preview()
 
 		local x1,y1,x2,y2=l.x,l.y,
 			print(l2cc(l))
-		
+
 		local r={x1-2,y1-2,x2,y2,7}
 		if l==sel or not sel then
 			button(
@@ -636,7 +730,7 @@ function preview()
 						dragl=l
 					end
 				end,
-				l
+				l,true
 			)
 		end
 		if
@@ -650,10 +744,9 @@ function preview()
 end
 
 function load_cc()
-	load_error=1
 	local str=stat"4"
 	layers={}
-	
+
 	local i=1
 	function nxt(match,keep)
 		local s=sub(str,i,i+#match-1)
@@ -667,21 +760,24 @@ function load_cc()
 		i+=n
 		return s
 	end
-	
-	local layer={b=true}
-	
+
+	local layer=default_layer
+
 	if nxt"?\"" then
 		-- remove trailing "
 		str=sub(str,1,#str-1)
 	end
-	
+
 	if sub(str,i,i+1)!="⁶j" then
 		load_error=1
 		return
 	end
-	
+
 	while i<=#str do
+		--ignore \0 and \^h, they
+		--get auto-added
 		nxt"\\0"
+		nxt"⁶h"
 		if nxt"⁶j" then
 			prev=layer
 			if layer.x then
@@ -692,7 +788,7 @@ function load_cc()
 			local x,y=
 				unalpha(c"1")*4,
 				unalpha(c"1")*4
-			
+
 			local ax,ay=16,16
 			if nxt"⁵" then
 				ax,ay=
@@ -703,10 +799,10 @@ function load_cc()
 			elseif nxt"⁴" then
 				ay=unalpha(c"1")
 			end
-			
+
 			layer.x,layer.y=
 				x+ax-16,y+ay-16
-			
+
 			while
 				nxt("⁶",true) or
 				nxt("ᶜ",true) or
@@ -717,10 +813,14 @@ function load_cc()
 						local k=c"1"
 						if (k=="#") k="bg"
 						layer[k]=false
+					elseif nxt"x" then
+						layer.xs=unalpha(c"1")
+					elseif nxt"y" then
+						layer.ys=unalpha(c"1")
 					else
 						layer[c"1"]=true
 					end
-				end			
+				end
 				if nxt"ᶜ" then
 					layer.fg=unalpha(c"1")
 				end
@@ -729,7 +829,15 @@ function load_cc()
 				end
 			end
 		else
-			layer.txt..=c"1"
+			local t
+			if nxt"\\n" then
+				t="\n"
+			elseif nxt"\\\"" then
+				t="\""
+			else
+				t=c"1"
+			end
+			layer.txt..=t
 		end
 	end
 	add(layers,layer,1)
@@ -773,36 +881,6 @@ function print_esc(str,x,y,xlim,col)
 			cx,cy=x,cy+6
 		end
 	end
-end
--->8
---smallcaps
---by felice
---https://www.lexaloffle.com/bbs/?pid=24069#p
-function smallcaps(s)
-  local d=""
-  local l,c,t=false,false
-  for i=1,#s do
-    local a=sub(s,i,i)
-    if a=="^" then
-      if(c) d=d..a
-      c=not c
-    elseif a=="~" then
-      if(t) d=d..a
-      t,l=not t,not l
-    else 
-      if c==l and a>="a" and a<="z" then
-        for j=1,26 do
-          if a==sub("abcdefghijklmnopqrstuvwxyz",j,j) then
-            a=sub("\65\66\67\68\69\70\71\72\73\74\75\76\77\78\79\80\81\82\83\84\85\86\87\88\89\90\91\92",j,j)
-            break
-          end
-        end
-      end
-      d=d..a
-      c,t=false,false
-    end
-  end
-  return d
 end
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
