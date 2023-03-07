@@ -390,14 +390,14 @@ function textbox(y,txt,fn)
 	rect(1,y,mw-1,y+10,7)
 
 	local ptext=gsub(txt,"\n","■")
-	?ptext,4,y+3,7
+	print_esc(ptext,4,y+3,nil,7)
 
 	if cf<15 then
 		--calculate cursor based off
 		--printing in case there are
 		--wide chars like ▒🐱●
 		local s=sub(ptext,1,curs)
-		local cx=3+?s,0,150
+		local cx=3+print_esc(s,0,150)
 		line(cx,y+2,cx,y+8,7)
 	end
 
@@ -455,7 +455,7 @@ function draw_edit()
 		rect(unpack(punyd))
 	end
 	pal()
-	?"PUNYFONT",10,25,6
+	?"PUNY",10,25,6
 	for i,k in next,{"w","t","=","i","b"} do
 		i-=1
 		local w,xo,yo=8,1,33
@@ -877,10 +877,11 @@ function print_esc(str,x,y,xlim,col)
 			cx=print(str[i],cx,cy,col)
 		end
 		pal()
-		if cx>=xlim then
+		if xlim and cx>=xlim then
 			cx,cy=x,cy+6
 		end
 	end
+	return cx
 end
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
