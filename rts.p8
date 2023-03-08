@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --age of ants
 --eeooty
@@ -31,7 +31,7 @@ function _update()
 			deli(btnp"4" and pcol,1))
 		if lclk then
 			init()
-			
+
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -39,7 +39,7 @@ function _update()
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
-			 
+
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
@@ -1608,7 +1608,7 @@ function tick(u)
 							{nx,ny}))
 				end
 				end
-			end			
+			end
 		end
 		s(pos,x\4,y\4,1)
 	end
@@ -1830,7 +1830,7 @@ function draw_unit(u)
 		[14]=pal(u.farm and 5,selc or 5)
 	}
 	sspr(sx,sy,w,h,1,1,w,h,
-		not u.fire and u.dir==u.typ.sdir)
+		not u.fire and u.dir==u.sdir)
 	pal()
 	if u.alive and ihp>=2 then
 		if u.fire then
@@ -1940,12 +1940,12 @@ function bld(u)
 		local _ENV,g=u.st.x,_ENV
 		if const then
 			const+=1
-			max_hp+=typ.hpr
-			hp+=typ.hpr
+			max_hp+=hpr
+			hp+=hpr
 			if const>=typ.const then
 				const=u.hu and g.sfx"26"
 				g.reg_bldg(_ENV)
-				if typ.drop then
+				if drop then
 					pres.pl+=5
 				elseif farm then
 					g.gofarm(u,_ENV)
@@ -1960,7 +1960,7 @@ function bld(u)
 			g.surr(function(t)
 				local _ENV=g.bldgs[t.k]
 				if _ENV and hu and const
-					and (u.ant or typ.web)
+					and (u.ant or web)
 				then
 					g.gobld(u,_ENV)
 				end
@@ -2309,8 +2309,8 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local _typ,next=typs[t] or t,
-		next
+	local _typ,next,printh=typs[t] or t,
+		next,printh
 	do
 		local _ENV=add(units,
 			p([[var=u
@@ -2324,7 +2324,10 @@ alive=1]],_typ[_p],rnd"60"\1))
 		for k,v in next,typ do
 			_ENV[k]=v
 		end
-		max_hp=typ.hp/typ.const
+		
+		max_hp=_const and _const>0
+			and _const*hpr or typ.hp
+		
 		id,x,y,p,hp,const,
 			disc,prod=
 			x,_x,_y,_p,
@@ -2591,66 +2594,6 @@ function sel_ports(x)
 	end)
 end
 
-function single()
-	local q=sel1.q
-	if sel1.farm then
-		?"ᶜ4⁶jbr⁴i"..sel1.cyc.."/"..seltyp.mcyc.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
-	end
-	for i,b in next,sel1.prod do
-		if not b.done then
-			draw_port(
-				b,
-				function()
-					if can_pay(b,res1) and (
-						not q or
-						q.typ==b and q.qty<9) then
-						if b.bldg then
-							to_bld=b!=to_bld and b
-							return
-						end
-						sfx"2"
-						prod(sel1,b,1)
-						b.done=b.x
-					else
-						sfx"16"
-					end
-				end,
-				split"88,76,64,52,40,88,76,64"[i],
-				split"106,106,106,106,106,117,117,117"[i],
-				nil,nil,nil,nil,b
-			)
-		end
-	end
-	if q then
-		local b=q.typ
-		draw_port(
-			b,
-			function()
-				b.done=pay(b,-1,res1)
-				if q.qty==1 then
-					sel1.q=nil
-				else
-					q.qty-=1
-				end
-				sfx"18"
-			end,
-			b.x and 24 or
-				?"ᶜ7⁶j8r⁴iX"..q.qty
-				and 20,
-			107,
-			q.x/b.t,5,12
-		)
-	end
-	if sel1.typ.units then
-		draw_port(p[[portx=120
-porty=64
-porto=15
-portf=15]],function()
-	axn=not axn
-end,42,108)
-	end
-end
-
 function draw_menu()
 	local x,hc=0,hbtn and hbtn.cost
 	for i,sec in inext,split(
@@ -2672,7 +2615,7 @@ function draw_menu()
 		x-=sec
 		pal()
 	end
-	
+
 	if sel1 then
 		if sel1.hu then
 			if sel1.unit then
@@ -2687,18 +2630,77 @@ portx=]]..
 				end,20,108)
 			end
 			if seltyp.ant or nsel==1 then
-				single(sel1.const and
+				if sel1.const then
 					draw_port(p[[portx=72
 porty=72
 porto=8
 portf=9]],
-					function()
-						pay(seltyp,-1,res1)
-						sel1.hp=0
-					end,24,107,
-					sel1.const/seltyp.const,
-					5,12
-				))
+						function()
+							pay(seltyp,-1,res1)
+							sel1.hp=0
+						end,24,107,
+						sel1.const/seltyp.const,
+						5,12
+					)
+				else
+					local q=sel1.q
+					if sel1.farm then
+						?"ᶜ4⁶jbr⁴i"..sel1.cyc.."/"..seltyp.mcyc.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
+					end
+					for i,b in next,sel1.prod do
+						if not b.done then
+							draw_port(
+								b,
+								function()
+									if can_pay(b,res1) and (
+										not q or
+										q.typ==b and q.qty<9) then
+										if b.bldg then
+											to_bld=b!=to_bld and b
+											return
+										end
+										sfx"2"
+										prod(sel1,b,1)
+										b.done=b.x
+									else
+										sfx"16"
+									end
+								end,
+								split"88,76,64,52,40,88,76,64"[i],
+								split"106,106,106,106,106,117,117,117"[i],
+								nil,nil,nil,nil,b
+							)
+						end
+					end
+					if q then
+						local b=q.typ
+						draw_port(
+							b,
+							function()
+								b.done=pay(b,-1,res1)
+								if q.qty==1 then
+									sel1.q=nil
+								else
+									q.qty-=1
+								end
+								sfx"18"
+							end,
+							b.x and 24 or
+								?"ᶜ7⁶j8r⁴iX"..q.qty
+								and 20,
+							107,
+							q.x/b.t,5,12
+						)
+					end
+					if sel1.typ.units then
+						draw_port(p[[portx=120
+porty=64
+porto=15
+portf=15]],function()
+							axn=not axn
+						end,42,108)
+					end
+				end
 			else
 				sel_ports"24"
 			end
