@@ -74,6 +74,53 @@ function _draw()
 		rectfill(unpack(ok))
 		?"  ok",xo+4,yo+2,7
 	end
+	
+	if ins then
+		local win={mw+1,24,
+			mw+70,111,1}
+		add(buttons,{
+			name="inswin",
+			r=win,
+		})
+		local wx,wy=unpack(win)
+		rectfill(unpack(win))
+		win[5]=5
+		rect(unpack(win))
+		?"insert:",wx+3,wy+3,6
+		
+		for i,c in next,split"¹,²,³,⁴,⁵,⁶,ᵇ,ᶜ" do
+			local s=specials[c]
+			local y=wy+4+i*8
+			local b={wx+3,y-1,wx+7,y+5,13}
+			button(
+				"insert"..c,
+				b,
+				{13,2},
+				function()
+					type_txt(c)
+					ins=false
+				end
+			)
+			rectfill(unpack(b))
+			spr(s[1],wx+4,y)
+			pal()
+			?s.d,wx+12,y,13
+		end
+		
+		local paste={wx+3,wy+76,
+			wx+45,wy+84,13}
+		button(
+			"paste text",
+			paste,
+			{13,2},
+			function()
+				type_txt(stat"4")
+				ins=false
+			end
+		)
+		rectfill(unpack(paste))
+		?"paste text",wx+5,wy+78,7
+	end
 
 	spr(cursor_spr,mx,my)
 
@@ -95,6 +142,9 @@ function _update()
 		end
 	end)
 
+	if hovbtn.name=="inswin" then
+		hovbtn={win=true}
+	end
 	if load_error then
 		if hovbtn.name!="ok" then
 			hovbtn={}
@@ -128,6 +178,7 @@ function _update()
 	if key=="\t" then
 		if menudx==0 then
 			menudx=menux==0 and 6 or -6
+			ins=false
 		end
 		key=""
 	elseif key=="\r" then
@@ -151,10 +202,11 @@ function _update()
 	end
 
 	if btnp"5" and key=="" then
-		if hovbtn and hovbtn.fn then
+		if hovbtn.fn then
 			hovbtn.fn()
-		elseif not dragl and (
-			menux>0 or mx>mw)
+		elseif not dragl and not
+			hovbtn.win and
+			(menux>0 or mx>mw)
 		then
 			sel,seli=nil
 		end
@@ -168,6 +220,7 @@ mw=42
 function edit(l)
 	mode=2
 	curs=#l.txt
+	ins=false
 	if menux!=0 then
 		menudx=-6
 	end
@@ -188,6 +241,7 @@ function draw_menu(x)
 			{2,15},
 			function()
 				mode=i
+				ins=false
 				if sel and i==2 then
 					edit(sel)
 				end
@@ -385,8 +439,9 @@ function draw_layers()
 	end
 end
 
-function textbox(y,txt,fn)
-	local ptext=gsub(txt,"\n","■")
+function textbox(y)
+	local ptext=gsub(
+		sel.txt,"\n","■")
 	local wid=max(
 		print_esc(ptext,0,150)+4,
 		mw-2
@@ -413,22 +468,26 @@ function textbox(y,txt,fn)
 		end
 	end
 
-	local chars=split(txt,"")
-	if key!="" then
-		if key=="\b" then
+	type_txt(key)
+end
+
+function type_txt(inp)
+	local chars=split(sel.txt,"")
+	for c in all(split(inp,"")) do
+		if c=="\b" then
 			deli(chars,curs)
 			curs-=1
 		else
 			curs+=1
 			if puny then
-				local ko=ord(key)
+				local ko=ord(c)
 				if ko>=ord"a" and ko<=ord"z" then
-					key=chr(ko-32)
+					c=chr(ko-32)
 				end
 			end
-			add(chars,key,curs)
+			add(chars,c,curs)
 		end
-		fn(join(chars))
+		sel.txt=join(chars)
 	end
 	curs=mid(0,curs,#chars)
 end
@@ -441,30 +500,41 @@ function draw_edit()
 	end
 
 	if menux<40 then
-		textbox(12,sel.txt,function(t)
-			sel.txt=t
-		end)
+		textbox(12)
 	end
 
-	local punyd={2,25,7,30,7}
+	local punyd={1,26,6,31,7}
 	button(
 		"puny",
-		punyd,
+		{1,26,23,31},
 		{7,10},
 		function()
 			puny=not puny
 		end
 	)
 	if puny then
-		spr(11,2,25)
+		spr(11,1,26)
 	else
 		rect(unpack(punyd))
 	end
 	pal()
-	?"PUNYFONT",10,25,6
-	for i,k in next,{"w","t","=","i","b"} do
+	?"PUNY",9,26,hovbtn.name=="puny" and 7 or 6
+	
+	local insd={27,25,mw-1,32,13}
+	button(
+		"ins",
+		insd,
+		{13,2},
+		function()
+			ins=not ins
+		end
+	)
+	rectfill(unpack(insd))
+	?"INS",29,26,7
+	
+	for i,k in next,split"w,t,=,i,b" do
 		i-=1
-		local w,xo,yo=8,1,33
+		local w,xo,yo=8,1,44
 		local dims={xo+i*w,yo,
 			xo+w+i*w,yo+8,6}
 		rect(unpack(dims))
@@ -483,11 +553,11 @@ function draw_edit()
 		?k,4+i*w,yo+2,7
 	end
 
-	number(1,46,"x","xs")
-	number(24,46,"y","ys")
+	number(1,36,"x","xs")
+	number(24,36,"y","ys")
 
-	?"fg color",2,56,6
-	color_wheel(63,sel,"fg")
+	?"fg color",2,57,6
+	color_wheel(64,sel,"fg")
 	?"bg color",2,93,6
 	color_wheel(100,sel,"bg")
 end
@@ -852,14 +922,14 @@ function load_cc()
 end
 -->8
 specials={
-	["⁶"]={56,10,1},
-	["⁵"]={55,9,2},
-	["⁴"]={54,9,1},
-	["³"]={53,9,1},
-	["²"]={52,10,1},
-	["¹"]={51,10,2},
-	["ᵇ"]={57,10,2},
-	["ᶜ"]={58,10,1},
+	["⁶"]={56,10,1,d="\\^ (special)"},
+	["⁵"]={55,9,2,d="\\+ (move x/y)"},
+	["⁴"]={54,9,1,d="\\| (move y)"},
+	["³"]={53,9,1,d="\\- (move x)"},
+	["²"]={52,10,1,d="\\# (bg col)"},
+	["¹"]={51,10,2,d="\\* (repeat)"},
+	["ᵇ"]={57,10,2,d="\\v (decorate)"},
+	["ᶜ"]={58,10,1,d="\\f (fg col)"},
 }
 
 function print_esc(str,x,y,xlim,col)
