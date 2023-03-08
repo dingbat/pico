@@ -16,7 +16,7 @@
 	// if the browser can not create an audio context outside of a user gesture (e.g. on iOS), p8_autoplay has no effect
 	var p8_autoplay = false;
 
-	// When pico8_state is defined, PICO-8 will set .is_paused, .sound_volume and .frame_number each frame 
+	// When pico8_state is defined, PICO-8 will set .is_paused, .sound_volume and .frame_number each frame
 	// (used for determining button icons)
 	var pico8_state = [];
 
@@ -56,7 +56,7 @@
 "controls_left_panel":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AAAEI0lEQVR42u3dMU7DQBCG0Tjam9DTcP8jpEmfswS5iHBhAsLxev/hvQY6pGXyZRTQ+nQCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHqbHEEtl+vt7hS+fLy/mXHBQqxEi/6aI/AiFW9SnB2BWDkDBAtAsADBAhAsAMECBAtAsAAECxAsAMECECxAsAAEC0CwONJ8tYvrXRAsImK19j0IFsPGSrQQLCJiNV+et7xAT7QQLIaN1dr3ooVgMWysRAvBIipWooVgERUr0UKwiIqVaCFYRMVKtBAsomIlWggWUbESLQSLqFiJFoJFVKxEC8EiKlaihWARFSvRQrDYJSSVfhaCBSBYAIIFCBbAHpoj4Bl/scOGBWDD4lX8iwE2LADBAgQLQLAABAsQLADBAhAsQLAABAtAsADBAhAsAMECBAtAsAAECxAsAMECECxAsAAECxAsAMECECxAsMh1ud7uTsHZVDcZyFo8Yt5sVJ6NyUAaSNEyIymaXwZepIKd4mwoQbAFC0CwAMECECwAwQIEC0CwAAQLECwAwQIQLECwAAQLQLAAwQI4UHME2/10QZq7usyBObBhRQwpmBUb1nADuPbuaUD/p2ezMH+1admwhosVfBcxb2SCJVaIlmAhVoiWYIkVoiVagiVWiJZgiZVYIVqCJVaIlmgJllghWoIlViBagiVWiJZoCZZYIVqCJVYgWoIlViBaggUIlnc0sPELlmghVmIlWKKFWAmWaIFYCZZoIVYIlmghVoIlWiBWgiVaiJVgIVqIlWCJFoiVYIkWYiVYiBZiJViihViJ1XbNEWyL1mMQRYvfvIGJlQ1rmE0LzIoNyyBiDrBhAYIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgDc+Nn1D/tdH8YupwgZy5qG4ykKIlVmZDsDjshSlazqQqH7p793Q2CBaAYAGCBSBYAIIFCBaAYAEIFiBYAIIFIFiAYAEIFoBgAYIFIFgAggUIFoBgAQgWIFgAggUgWIBgAQgWwENzBKxZPub9CJ7WjA0LsGFRV+9N5+jNDhsWgGABggUgWACCxW56fgjuA3cEiz9Z/nWwR0iWP8P/YCFYDBstsUKwiIiWWCFYRERLrBAsIqIlVggWEdESKwSLiGiJFYJFRLTECsEiIlpihWARES2xQrCIiJZYIVhEREusECwioiVWCBYx0RIrBIuoaIkVr+YhFHTZtMCGBQgWgGABCBYgWACCBSBYgGABCBaAYAGCBSBYAIIFCBbj2uOR8s6AEbhexgsWYri3SKhKczcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMA2n+e0UMDzh3yTAAAAAElFTkSuQmCC",
 
 
-"controls_right_panel":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAFeCAYAAAA/lyK/AAAKHklEQVR42u3dAZKaWBAGYE3tvfBmMCfDnGzWJLhLHHBGBt7rhu+rSiWbbAk8p3+7UeF0AgAAAAAAAAAAAOAQzpaAzN5vDlOsNwILhJXQSuIfP/YoZMGcxQ9LgLByfAILQGABAgtAYAEILEBgAQgsAIEFCCwAgQUgsACBBSCwAAQWILAABBYst/cL3LmA3/9ccRRFTRquZIigylKsrjwKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMZ0tAXz0/v7eLi6q8/nNCgos2CKYmttvl+E/uw02cX/M6y3IflpxgQVLu6fuScC8HDIP4ff08XVhwNMwuf3q3z9qvzP+fTUgh1+P+iHkAP4Li6mQairtTzO3T54tEFRhu5mZrk9wwYGDqo0+ds10XYILjhRUjgOI2J30ezqRvcdjAmH1dzeyu6KeCC7dFiQt5sMU8mMwe/YhV9cx1jhuQKehswRWCKvm4GvRCC3I0VUYhT6GlvNaIKyEFiCshBYIK6EltKBuAQorawYKz9oBaxWct+uXraGPf0ChYuudh7GOkKkzUGTrhpZOFTYcBY0x1hR0A7pWQFF5MYDDFJSxpdBoaDVgp93Vk3sJzmmjdjF76rLc+Zmq3dXvH8KbKCF1+nPn5svDP12HX1Om/v9fukh3d4621pC1u2oD7cv4+vDtwscJeZ/BSOsNKbur2udVtrqlVtT7DDqXBQlf7aduo1UoFPsjrzvorpaFVdGbOUwEZHPEtYeMYdXU6jZqXzcqQmiN9sHHSOCFsaQpvN0mSIdT9WoKo3UwFkLEkSTaZWtqh6exEIK+uke9xta40zpKlwvGwc+32Qf+NH2VfTMWQsBRJMMXq2t9bcZYCF8rkrZ0UUYefWp9Ofke5tl+hn4oI0oVSOnOZfjjr+/0/Yy6LsO+XWusUa1tQorAKjwOphp5KnVZzmNB7YLM+BWUGvvsPBY8L45eIc7uc/FvANxP+GdaJ+ewKOm602192+hc1sUaCSwqjzsVtnVNuFTX0utVY3sCiyxdxNset5V1nzOukcBibzrHsF8CC6EVcCxEYIHAElgAAgtAYAECC0BgAQgsiOdiCQQWx9IJLIEFwsoxCCxYW8YL07mYnsDiYAU5+kJvxtHq8nAMAhIqhVWxq2m6gN/XA8sF/OCTDqKALmEHcV+b6w6fD0jZYbkJRaD9zdiJ6rAopSu8vWuWLmt8S7IDPC+QooNo3Uh1ch+r3kjViXd4HiBthaJ0q/qZtfFTCZ90PJUCoQ+4HtX2zT0J4esdT1Nwm81oNGwDrsV7hW03xkEIWijRQuthf5oK22+jn9uDw46FEUJiqrOqtR/GQUjw6v4QWjXOG/UBwso4CAsKpq+8/WLBMWyzD9Lh9cZBSDSSTARIv+G22ppdnXEQ1iviNsh+rHpCfgjETR57D+sOuqx1g6tfUtTD4/TRgmpP3dVZ6VArJE5/vsfWlbr+0xf36XL6eBWD62n+KgpT//8p0nFFXW+BRbou6/cP4U3QQD2dvv7l4G44ljdrDTvtsqJ/128n69w7dwUrvfJ7m33T9W28Mwi6LN0VKCq8GECSscVoaE1BN6BrBTYqMqFlHSHVGKMz+F6nahSEwqGl4KwdKDxrBqxZgL0CXBRWzluB0BJWgNASViC0hBVQr0C9XT8dVj7+AQlCqz/oGvTCCnJ2F4fpto563KDT0FkCtQt5b13HxO3IjICws6JOH1x7PCZgvttK243s5TiAhQUfvTuJeuNVoF5whRurJkY/QQWC64NqXddMNyWogE+7mXt4tRtvu50JKSfTX+QusByy6xr+2E388/jvrufz+ecroXj6+7b1s4+f+XbxAmv/hfH6E+MHuljnNQqZboNNdEvCD4Hlhx4vNgLLWGGsAEJ2Uk7cAuG7KW+NA9mCyocPgfBB5esdQPygchxAxO7EJUqAVN2Ii8ABYYvZZXaBFF2HGxkYEUGnobME1g4rN+MUWpCiqzAKndzuHISV0AKEldACYYXQgmAFKKysGSg8awesVXDerl+2hj7+AYWKrXcexjpCps5Aka0bWjpV2HAUNMZYU9AN6FoBReXFAA5TUMaWQqOh1YBA3dWeinLNY9FlwYrdVdTH28u67GltyOtH9u5q+GO31mOeb7J3Wvd9vx/LirqHdQcivOJn7Sa23m9dFjqsIN1V9k5rw85KlwUZXumzdBQl91OXhQ7rtYK5f3zhuvW2MnRahTqrsevD8wAC64nLluNgptCqEFbjdb8oIQg6kkQbhWruj7EQHdZr42BXetuROq1KndWHLstYiMD62jh4rbHxCKEVIKzG628shOijiLHUWIgO66VxpKYanVaQzirU84DAitxdhfqwYsnQChhWYZ8XBFYot5p9O1JoRQ2rSM8DROywwp4z2Wrfop8nch4LHdZz16Bd3+qdVuQxMPrzgcBSIAVDK0lYCSwE1kwBpzixu0ZoJQqrdM8PAqt0ILwl2MfFoZUtrJx4R2DtwJLQythZgcA6YGgJKxBYKUJLWIHAShFawgoEVorQElYgsFKElrACgZUmtIQVCKzwpkZCQGCFDavzQGiBwAofVo8jodACgRU6rIQWCKxUYSW0YOeBlemqAK98dCFraLlKAwJruqDfkhXyy5+zytxpuWoDAmvaZY9hlTi0LsoIZoIgeiGvtY9ZrpXumu7osOZ1e+2skndanVJCYM0HQxtwn1b/bmD00HLCHYH1vIDfghbuZl9kztBpOeEOT8IhUvGW2p+I54qcv0KH9bluKJZmz51V9E5rtP6dMkJgzbsOv1+OElZBQ+vy8HwAEUeRo2/fOIgOK8lYGOFKobU7LeMgvFgwwwt8f+Suotb+/Fr3YdONn0YIWKxRR6Aa+2UcxEi4fCxsSxRo7TEwyng4Wm/jIER7pfedPt0VOqwUXVamW3GV6LR0VxD0FT9rJ7Hlfuuu0GGt12X1axZmls6qVKc1Wl/dFazxyr/G2+x76SLWPI7Rx0h0V7BCQbVrfS5rT0W5YmDdP3flcjKgqI7xYgBMjC0+gW1NQTegawU2KjKhZR0h1RijM/hep2oUhMKhpeCsHSg8awasWYC9AlwUVs5bgdASVoDQElYgtIQVUK9AvV0/HVY+/gEJQqs/6Br0wgpydheH6baOetyg09BZArULeW9dx9BVGQFhx0WdPrj2eEzAfLeVthvZy3EACws+encydFSCCgRX3LFqYvQTVCC4PqjWdc10U4IK+LSbuYdXu/G225mQcjKdwzhbguUBMvyxm/jn8d9dz+fzz1dC8fbbZeax/vq72+O+eSYQWLzceY1CpttgE92S8AOBxZIu7PUnRvcEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwwL/cvBIh09+hJAAAAABJRU5ErkJggg==",
+"controls_right_panel":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAFeCAYAAAA/lyK/AAAAAXNSR0IArs4c6QAAAFBlWElmTU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABLKADAAQAAAABAAABXgAAAABJrx9WAAABWWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgoZXuEHAAAZGklEQVR4Ae3dDbabOBKG4WQ2xt2Z6JXJvbLMV7Eq0aX9A1gSErw6hxhjUJUeXHVJZjr58YOBAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAII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",
 
 	};
 
@@ -76,7 +76,7 @@
 	function p8_drop_file(e)
 	{
 		// console.log("@@ dropping file...");
-	
+
 		e.stopPropagation();
 		e.preventDefault();
 		if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0])
@@ -154,7 +154,7 @@
 			return;
 		}
 		var is_fullscreen=(document.fullscreenElement || document.mozFullScreenElement || document.webkitIsFullScreen || document.msFullscreenElement);
-		
+
 		// hash based on: pico8_state.sound_volume  pico8_state.is_paused bottom_margin left is_fullscreen p8_touch_detected
 		var hash = 0;
 		hash = pico8_state.sound_volume;
@@ -167,7 +167,7 @@
 			requestAnimationFrame(p8_update_button_icons);
 			return;
 		}
-		
+
 		p8_buttons_hash = hash;
 		// console.log("@@ updating button icons");
 
@@ -175,7 +175,7 @@
 		for (i = 0; i < els.length; i++)
 		{
 			el = els[i];
-			index = el.id;			
+			index = el.id;
 			if (index == 'p8b_sound') index += (pico8_state.sound_volume == 0 ? "0" : "1"); // 1 if undefined
 			if (index == 'p8b_pause') index += (pico8_state.is_paused > 0 ? "1" : "0");     // 0 if undefined
 
@@ -187,7 +187,7 @@
 
 
 			// hide all buttons for touch mode (can pause with menu buttons)
-			
+
 			var is_visible = p8_is_running;
 
 			if ((!p8_touch_detected || !p8_allow_mobile_menu) && el.parentElement.id == "p8_menu_buttons_touch")
@@ -196,7 +196,7 @@
 			if (p8_touch_detected && el.parentElement.id == "p8_menu_buttons")
 				is_visible = false;
 
-			if (is_fullscreen) 
+			if (is_fullscreen)
 				is_visible = false;
 
 			if (is_visible)
@@ -213,19 +213,19 @@
 	{
 		return x < 0 ? -x : x;
 	}
-	
+
 	// step 0 down 1 drag 2 up (not used)
 	function pico8_buttons_event(e, step)
 	{
 		if (!p8_is_running) return;
-	
+
 		pico8_buttons[0] = 0;
 
 		if (step == 2 && typeof(pico8_mouse) !== 'undefined')
 		{
 			pico8_mouse[2] = 0;
 		}
-		
+
 		var num = 0;
 		if (e.touches) num = e.touches.length;
 
@@ -235,7 +235,7 @@
 			pico8_mouse[2] = 0;
 		}
 
-		
+
 		for (var i = 0; i < num; i++)
 		{
 			var touch = e.touches[i];
@@ -273,7 +273,7 @@
 
 
 			// buttons
-			
+
 			b = 0;
 
 			if (y < h - r*8)
@@ -288,8 +288,9 @@
 				{
 					// menu button: half as high as X O button
 					// stretch across right-hand half above X O buttons
-					if (x > w - r*3) 
-						b |= 0x40;
+          // disable menu button
+					// if (x > w - r*3)
+					// 	b |= 0x40;
 				}
 				else if (x < w/2 && x < r*6)
 				{
@@ -303,7 +304,7 @@
 					var dx = x - cx;
 					var dy = y - cy;
 
-					if (abs(dx) > abs(dy) * 0.6) // horizontal 
+					if (abs(dx) > abs(dy) * 0.6) // horizontal
 					{
 						if (dx < -deadzone) b |= 0x1;
 						if (dx > deadzone) b |= 0x2;
@@ -317,9 +318,9 @@
 				else if (x > w - r*6)
 				{
 					// button; diagonal split from bottom right corner
-				
+
 					mask = 0x30;
-					
+
 					// one or both of [X], [O]
 					if ( (h-y) > (w-x) * 0.8) b |= 0x10;
 					if ( (w-x) > (h-y) * 0.8) b |= 0x20;
@@ -327,7 +328,7 @@
 			}
 
 			pico8_buttons[0] |= b;
-		
+
 		}
 	}
 
@@ -357,7 +358,7 @@
 		p8_layout_frames ++;
 
 		// assumes frame doesn't have padding
-		
+
 		var is_fullscreen=(document.fullscreenElement || document.mozFullScreenElement || document.webkitIsFullScreen || document.msFullscreenElement);
 		var frame_width = p8_frame.offsetWidth;
 		var frame_height = p8_frame.offsetHeight;
@@ -393,9 +394,9 @@
 
 		// csize should never be higher than parent frame
 		// (otherwise stretched large when fullscreen and then return)
-		if (!is_fullscreen && p8_frame) 
+		if (!is_fullscreen && p8_frame)
 			csize = Math.min(csize, last_windowed_container_height); // p8_frame_0 parent
-		
+
 
 		if (is_fullscreen)
 		{
@@ -444,7 +445,7 @@
 		// record this for returning to original size after fullscreen pushes out container height (argh)
 		if (!is_fullscreen && p8_frame)
 			last_windowed_container_height = p8_frame.parentNode.parentNode.offsetHeight;
-		
+
 
 		// mobile in portrait mode: put screen at top (w / a little extra space for fullscreen button if needed)
 		// (don't cart too about buttons overlapping screen)
@@ -478,7 +479,7 @@
 			p8_container.style.marginTop = "0px";
 
 			// buttons
-			
+
 			// same as touch event handling
 			var w = window.innerWidth;
 			var h = window.innerHeight;
@@ -501,7 +502,7 @@
 			el.style.height = r*6;
 			if (el.getAttribute("src") != p8_gfx_dat["controls_left_panel"]) // optimisation: avoid reload? (browser should handle though)
 				el.setAttribute("src", p8_gfx_dat["controls_left_panel"]);
-			
+
 			// scroll to cart (commented; was a failed attempt to prevent scroll-on-drag on some browsers)
 			// p8_frame.scrollIntoView(true);
 
@@ -542,18 +543,18 @@
 
 	function p8_create_audio_context()
 	{
-		if (pico8_audio_context) 
+		if (pico8_audio_context)
 		{
 			try {
 				pico8_audio_context.resume();
 			}
 			catch(err) {
 				console.log("** pico8_audio_context.resume() failed");
-			}	
+			}
 			return;
 		}
 
-		var webAudioAPI = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext;			
+		var webAudioAPI = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext;
 		if (webAudioAPI)
 		{
 			pico8_audio_context = new webAudioAPI;
@@ -565,7 +566,7 @@
 					var dummy_source_sfx = pico8_audio_context.createBufferSource();
 					dummy_source_sfx.buffer = pico8_audio_context.createBuffer(1, 1, 22050); // dummy
 					dummy_source_sfx.connect(pico8_audio_context.destination);
-					dummy_source_sfx.start(1, 0.25); // gives InvalidStateError -- why? hasn't been played before 
+					dummy_source_sfx.start(1, 0.25); // gives InvalidStateError -- why? hasn't been played before
 					//dummy_source_sfx.noteOn(0); // deleteme
 				}
 				catch(err) {
@@ -583,7 +584,7 @@
 	function p8_close_cart(num)
 	{
 		if (window.confirm("are you sure you want to quit?")) {
-		// just reload page! used for touch buttons -- hard to roll back state 
+		// just reload page! used for touch buttons -- hard to roll back state
 		// window.location.hash = ""; // triggers reload
 		history.go(num)
 		}
@@ -609,7 +610,7 @@
 			}
 		}
 
-		// create audio context and wake it up (for iOS -- needs happen inside touch event)		
+		// create audio context and wake it up (for iOS -- needs happen inside touch event)
 		p8_create_audio_context();
 
 		// show touch elements
@@ -629,7 +630,7 @@
 		e = document.createElement("script");
 		p8_script = e;
 		e.onload = function(){
-			
+
 			// show canvas / menu buttons only after loading
 			el = document.getElementById("p8_playarea");
 			if (el) el.style.display="table";
@@ -644,7 +645,7 @@
 		e.type = "application/javascript";
 		e.src = "index.js";
 		e.id = "e_script";
-		
+
 		document.body.appendChild(e); // load and run
 
 		// hide start button and show canvas / menu buttons. hide start button
@@ -652,7 +653,7 @@
 		if (el) el.style.display="none";
 
 		// add #playing for touchscreen devices (allows back button to close)
-		// X button can also be used to trigger this 
+		// X button can also be used to trigger this
 		if (p8_touch_detected)
 		{
 			window.location.hash = "#playing";
@@ -677,9 +678,9 @@
 		}
 	}
 
-	
+
 		// Gamepad code
-	
+
 	var P8_BUTTON_O = {action:'button', code: 0x10};
 	var P8_BUTTON_X = {action:'button', code: 0x20};
 	var P8_DPAD_LEFT = {action:'button', code: 0x1};
@@ -776,7 +777,7 @@
 		});
 
 		var all_actions = axes_actions.concat(button_actions);
-		
+
 		var menu_button = button_actions.some(function (action) { return action.action == 'menu'; });
 		var button_state = (all_actions
 			.filter(function (a) { return a.action == 'button'; })
@@ -835,7 +836,7 @@
 		});
 
 		any_button |= button_state; //jww: include axes 0,1 as might be first intended action
-		
+
 		return {
 			button_state,
 			menu_button,
@@ -843,7 +844,7 @@
 		};
 	}
 
-	
+
 	// gamepad  https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
 	// (sets bits in pico8_buttons[])
 	function p8_update_gamepads() {
@@ -943,7 +944,7 @@
 		    }
 			return;
 		}
-		
+
 		var el = document.getElementById("p8_playarea");
 
 		if ( el.requestFullscreen ) {
@@ -1044,6 +1045,7 @@ canvas{
 		<div class="p8_menu_button" id="p8b_sound" style="float:left;margin-left:10px" onClick="p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();"></div>
 		<input type="file" id="upload" hidden accept="image/png" onchange="p8_upload_file(this)" />
 		<label class="p8_menu_button" id="p8b_upload" style="float:left;margin-left:10px" for="upload"></label>
+    <div class="p8_menu_button" style="float:left;margin-left:10px" id="p8b_pause" onClick="p8_give_focus(); Module.pico8TogglePaused(); p8_update_layout_hash = -22;"></div>
 		<div class="p8_menu_button" id="p8b_close" style="float:right; margin-right:10px" onClick="p8_close_cart(-2);"></div>
 	</div>
 
@@ -1071,10 +1073,10 @@ canvas{
 				<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault();" >
 				</canvas>
 				<div class=p8_menu_buttons id="p8_menu_buttons" style="margin-left:10px;">
-					<div class="p8_menu_button" style="position:absolute; bottom:200px" id="p8b_close" onClick="p8_close_cart(-1);"></div>					
+					<div class="p8_menu_button" style="position:absolute; bottom:200px" id="p8b_close" onClick="p8_close_cart(-1);"></div>
 					<input type="file" id="upload" hidden accept="image/png" onchange="p8_upload_file(this)" />
 					<label class="p8_menu_button" id="p8b_upload" style="position:absolute; bottom:160px" for="upload"></label>
-					<div class="p8_menu_button" style="position:absolute; bottom:125px" id="p8b_controls" onClick="p8_give_focus(); Module.pico8ToggleControlMenu();"></div>					
+					<div class="p8_menu_button" style="position:absolute; bottom:125px" id="p8b_controls" onClick="p8_give_focus(); Module.pico8ToggleControlMenu();"></div>
 					<div class="p8_menu_button" style="position:absolute; bottom:90px" id="p8b_pause" onClick="p8_give_focus(); Module.pico8TogglePaused(); p8_update_layout_hash = -22;"></div>
 					<div class="p8_menu_button" style="position:absolute; bottom:55px" id="p8b_sound" onClick="p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();"></div>
 					<div class="p8_menu_button" style="position:absolute; bottom:20px" id="p8b_full" onClick="p8_give_focus(); p8_request_fullscreen();"></div>
@@ -1084,13 +1086,13 @@ canvas{
 
 			<!-- display after first layout update -->
 			<div  id="touch_controls_gfx"
-				  style=" pointer-events:none; display:table; 
+				  style=" pointer-events:none; display:table;
 						 position:fixed; top:0px; left:0px; border:0; width:100vw; height:100vh">
 
 					<img src="" id="controls_right_panel" style="position:absolute; opacity:0.5;">
 					<img src="" id="controls_left_panel" style="position:absolute;  opacity:0.5;">
-						
-			
+
+
 			</div> <!-- touch_controls_gfx -->
 
 			<!-- used for clipboard access & keyboard input; displayed and used by PICO-8 only once needed. can be safely removed if clipboard / key presses not needed. -->
@@ -1132,7 +1134,7 @@ canvas{
 	}
 
 	// pointer lock request needs to be inside a canvas interaction event
-	// pico8_state.request_pointer_lock is true when 0x5f2d bit 0 and bit 2 are set -- poke(0x5f2d,0x5) 
+	// pico8_state.request_pointer_lock is true when 0x5f2d bit 0 and bit 2 are set -- poke(0x5f2d,0x5)
 	// note on mouse acceleration for future: // https://github.com/w3c/pointerlock/pull/49
 	canvas.addEventListener("click", function()
 	{
@@ -1140,7 +1142,7 @@ canvas{
 			if (pico8_state.request_pointer_lock)
 				canvas.requestPointerLock();
 	});
-	
+
 </script>
 
 
@@ -1152,4 +1154,3 @@ canvas{
 
 </div> <!-- body_0 -->
 </body></html>
-
