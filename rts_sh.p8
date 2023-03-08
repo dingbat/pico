@@ -925,7 +925,7 @@ in_bld=1]],path(u,f.x+rndspl"-2,-1,0,1,2",f.y+rndspl"-2,-1,0,1,2"))u.st.farm=f e
 if(u.const)return
 if u.st.idl then
 if(u.lady and t6)wander(u)
-if u.hu then if u.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif u.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(los/8)local k=xo|yo*16|los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if mid(k,8191)==k and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and u.atk then for e in all(units)do if e.ap!=u.ap or u.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=los then if e.bldg then d+=u.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end if u.unit and not u.st.typ then local fr,v={{x,y}},{}for i,p in next,fr do x,y=unpack(p)local a=u.st.ez_adj or acc(x\8,y\8)if a or i==1then if a and not g(pos,x\4,y\4)then u.st.typ=i>1and{p}break end for nx=max(x-2),min(x+2,254),2do for ny=max(y-2),min(y+2,382),2do s(v,nx\2,ny\2,add(g(v,nx\2,ny\2,fr),{nx,ny}))end end end end s(pos,x\4,y\4,1)end end 
+if u.hu then if u.ant then if u.st.idl>10then idl=u end u.st.idl+=1elseif u.idl and not u.q then idlm=u end end end if u.upd then if u.hu then local xo,yo,l=x%8\2,y%8\2,ceil(los/8)local k=xo|yo*16|los*256if not vcache[k]then vcache[k]={}for dx=-l,l do for dy=-l,l do add(dist(xo*2-dx*8-4,yo*2-dy*8-4)<los and vcache[k],dx+dy*256)end end end foreach(vcache[k],function(t)local k=u.k+t if mid(k,8191)==k and k%256<48then if bldgs[k]then bldgs[k].disc=1end exp[k],nviz[k]=128,"v"end end)end if u.st.agg and u.atk then for e in all(units)do if e.ap!=u.ap or u.monk and e.dmgd and not e.bldg then local d=dist(x-e.x,y-e.y)if e.alive and d<=los then if e.bldg then d+=u.sg and e.bldg==1and-999or 999end if d<agg_d then agg_u,agg_d=e,d end end end end goatk(u,agg_u)end end if u.unit and not u.st.typ then local fr,v={{x,y}},{}for i,p in next,fr do x,y=unpack(p)local a=u.st.ez_adj or acc(x\8,y\8)if a or i==1then if a and not g(pos,x\4,y\4)then u.st.typ=i>1and{p}break end for nx=max(x-2),min(x+2,382),2do for ny=max(y-2),min(y+2,253),2do s(v,nx\2,ny\2,add(g(v,nx\2,ny\2,fr),{nx,ny}))end end end end s(pos,x\4,y\4,1)end end 
 -->8
 --input
 
@@ -981,15 +981,15 @@ end for i,b in next,sel1.prod do if not b.done then draw_port(b,function()if can
 and 20,107,q.x/b.t,5,12)end if sel1.typ.units then draw_port(p[[portx=120
 porty=64
 porto=15
-portf=15]],function()axn=not axn end,42,108)end end function draw_menu()local x,hc=0,hbtn and hbtn.cost for i,sec in inext,split(sel1 and sel1.hu and(sel1.bldg and"17,24,61,26"or"17,17,68,26")or"102,26")do pspl(i%2!=0and"1,2,3,15")palt(5,not(hc and dget"1"==0or cy==151))camera(x)unspr"129,0,104"spr(129,sec-8,104)line(sec-4,unspl"105,3,105,7")rectfill(sec-4,unspl"106,3,108,4")rectfill(sec,unspl"108,0,128")x-=sec pal()end if nsel==1then sel_ports"-10"if sel1.const then draw_port(p[[portx=72
-porty=72
-porto=8
-portf=9]],function()pay(seltyp,-1,res1)sel1.hp=0end,24,107,sel1.const/seltyp.const,5,12)elseif sel1.hu then single()end elseif seltyp and seltyp.ant then single()else sel_ports"24"end if nsel>1then camera(nsel<10and-2)
-?"ᶜ1⁶j1r⁵hjX"..nsel
-unspr"133,1,111"add(btns,{r=split"0,110,14,119",fn=function()deli(sel)end})end if sel1 and sel1.hu and sel1.unit then draw_port(p([[porty=72
+portf=15]],function()axn=not axn end,42,108)end end function draw_menu()local x,hc=0,hbtn and hbtn.cost for i,sec in inext,split(sel1 and sel1.hu and(sel1.bldg and"17,24,61,26"or"17,17,68,26")or"102,26")do pspl(i%2!=0and"1,2,3,15")palt(5,not(hc and dget"1"==0or cy==151))camera(x)unspr"129,0,104"spr(129,sec-8,104)line(sec-4,unspl"105,3,105,7")rectfill(sec-4,unspl"106,3,108,4")rectfill(sec,unspl"108,0,128")x-=sec pal()end if sel1 then if sel1.hu then if sel1.unit then draw_port(p([[porty=72
 porto=2
 portf=13
-portx=]]..split"90,81,81"[dget"0"]),function()axn=not axn end,20,108)end camera()sspr(add(btns,idl and{r=split"116,121,125,128",fn=function()sfx"1"hilite(idl)sel,cx,cy={idl},idl.x-64,idl.y-64cam()end})and 48or 56,unspl"105,8,6,116,121")sspr(add(btns,idlm and{r=split"106,121,113,128",fn=function()hilite(idlm)sel={idlm}end})and 48or 56,unspl"98,8,6,104,121")pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"sspr(unspl"109,72,19,12,105,107")camera(cx\-20.21,cy\-21.33)rect(unspl"104,106,112,114,10")resbar()if hc then cursor(dget"1"&61440|1,93)if hc.reqs then
+portx=]]..split"90,81,81"[dget"0"]),function()axn=not axn end,20,108)end if seltyp.ant or nsel==1then single(sel1.const and draw_port(p[[portx=72
+porty=72
+porto=8
+portf=9]],function()pay(seltyp,-1,res1)sel1.hp=0end,24,107,sel1.const/seltyp.const,5,12))else sel_ports"24"end end if nsel==1then sel_ports"-10"else camera(nsel<10and-2)
+?"ᶜ1⁶j1r⁵hjX"..nsel
+unspr"133,1,111"add(btns,{r=split"0,110,14,119",fn=function()deli(sel)end})end end camera()sspr(add(btns,idl and{r=split"116,121,125,128",fn=function()sfx"1"hilite(idl)sel,cx,cy={idl},idl.x-64,idl.y-64cam()end})and 48or 56,unspl"105,8,6,116,121")sspr(add(btns,idlm and{r=split"106,121,113,128",fn=function()hilite(idlm)sel={idlm}end})and 48or 56,unspl"98,8,6,104,121")pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"sspr(unspl"109,72,19,12,105,107")camera(cx\-20.21,cy\-21.33)rect(unspl"104,106,112,114,10")resbar()if hc then cursor(dget"1"&61440|1,93)if hc.reqs then
 ?hc.txt
 local l=pres(hc,0,150)camera(l/2-4-hbtn.r[1],8-hbtn.r[2])pres(hc,2,2)rect(l+2,unspl"0,0,8,1")else
 ?hc.req

@@ -30,6 +30,7 @@ sed -i'.bak' -E "s/24365/0x5f2d/" rts_sh.p8
 sed -i'.bak' -E "s/13480/0x34a8/" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
 sed -i'.bak' -E "s/36868/0x9004/" rts_sh.p8
+sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 tab start init
 tab rest tick
 tab cam input
