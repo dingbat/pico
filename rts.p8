@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 39
+version 41
 __lua__
 --age of ants
 --eeooty
@@ -2672,50 +2672,48 @@ function draw_menu()
 		x-=sec
 		pal()
 	end
-
-	if nsel==1 then
-		sel_ports"-10"
-		if sel1.const then
-			draw_port(p[[portx=72
-porty=72
-porto=8
-portf=9]],
-				function()
-					pay(seltyp,-1,res1)
-					sel1.hp=0
-				end,24,107,
-				sel1.const/seltyp.const,
-				5,12
-			)
-		elseif sel1.hu then
-			single()
-		end
-	elseif seltyp and seltyp.ant then
-		single()
-	else
-		sel_ports"24"
-	end
-	if nsel>1 then
-		camera(nsel<10 and -2)
-		?"ᶜ1⁶j1r⁵hjX"..nsel
-		unspr"133,1,111"
-		add(btns,{
-			r=split"0,110,14,119",
-			fn=function() deli(sel) end
-		})
-	end
-
-	if sel1 and sel1.hu and
-		sel1.unit then
-		draw_port(
-			p([[porty=72
+	
+	if sel1 then
+		if sel1.hu then
+			if sel1.unit then
+				draw_port(
+					p([[porty=72
 porto=2
 portf=13
 portx=]]..
-	split"90,81,81"[dget"0"])
-	,function()
-	axn=not axn
-end,20,108)
+					split"90,81,81"[dget"0"])
+					,function()
+					axn=not axn
+				end,20,108)
+			end
+			if seltyp.ant or nsel==1 then
+				single(sel1.const and
+					draw_port(p[[portx=72
+porty=72
+porto=8
+portf=9]],
+					function()
+						pay(seltyp,-1,res1)
+						sel1.hp=0
+					end,24,107,
+					sel1.const/seltyp.const,
+					5,12
+				))
+			else
+				sel_ports"24"
+			end
+		end
+		if nsel==1 then
+			sel_ports"-10"
+		else
+			camera(nsel<10 and -2)
+			?"ᶜ1⁶j1r⁵hjX"..nsel
+			unspr"133,1,111"
+			add(btns,{
+				r=split"0,110,14,119",
+				fn=function() deli(sel) end
+			})
+		end
 	end
 
 	camera()
