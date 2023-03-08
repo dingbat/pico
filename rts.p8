@@ -1601,14 +1601,14 @@ function tick(u)
 					u.st.typ=i>1 and {p}
 					break
 				end
-				for nx=max(x-2),min(x+2,254),2 do
-				for ny=max(y-2),min(y+2,382),2 do
+				for nx=max(x-2),min(x+2,382),2 do
+				for ny=max(y-2),min(y+2,253),2 do
 					s(v,nx\2,ny\2,
 						add(g(v,nx\2,ny\2,fr),
 							{nx,ny}))
 				end
 				end
-			end
+			end			
 		end
 		s(pos,x\4,y\4,1)
 	end
