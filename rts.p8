@@ -17,12 +17,12 @@ function a(v,...)
 end
 
 local pspl,rndspl,unspl,
-	campal,fmget=
+	campal,fmget,sfx=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(camera,pal),
-	comp(fget,mget)
+	comp(fget,mget),sfx
 
 local unl,unspr,aspl,
 	typs,stp,pcol,
@@ -1905,7 +1905,7 @@ function frm(u)
 						g.pay(g.renew,1,pres)
 				end
 				sproff=exp and
-					(g.sfx"36" or 32) or 0
+					(sfx"36" or 32) or 0
 			end
 			--reset farm after drop
 			u.st.farm=_ENV
@@ -1975,7 +1975,7 @@ function bld(u)
 			max_hp+=hpr
 			hp+=hpr
 			if const>=typ.const then
-				const=u.hu and g.sfx"26"
+				const=u.hu and sfx"26"
 				g.reg_bldg(_ENV)
 				if drop then
 					pres.pl+=5
@@ -2039,7 +2039,7 @@ function produce(u)
 			local _ENV=bld
 			gl.res1.techs|=tmap
 			x(typ.p1)
-			gl.sfx"33"
+			sfx"33"
 			if up and up<1 then
 				up+=1
 				r*=1.75
@@ -2050,7 +2050,7 @@ function produce(u)
 			end
 		else
 			local new=gl.unit(bld,x,y,p),
-				onscr and hu and gl.sfx"19"
+				onscr and hu and sfx"19"
 			if bld.ant and
 				rtx and
 				gl.resqty[mget(rtx,rty)]
