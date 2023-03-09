@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 --wysiwyg ctrlcode editor
 --eeooty
@@ -74,7 +74,7 @@ function _draw()
 		rectfill(unpack(ok))
 		?"  ok",xo+4,yo+2,7
 	end
-	
+
 	if ins then
 		local win={mw+1,24,
 			mw+70,111,1}
@@ -87,7 +87,7 @@ function _draw()
 		win[5]=5
 		rect(unpack(win))
 		?"insert:",wx+3,wy+3,6
-		
+
 		for i,c in next,split"¹,²,³,⁴,⁵,⁶,ᵇ,ᶜ" do
 			local s=specials[c]
 			local y=wy+4+i*8
@@ -106,7 +106,7 @@ function _draw()
 			pal()
 			?s.d,wx+12,y,13
 		end
-		
+
 		local paste={wx+3,wy+76,
 			wx+45,wy+84,13}
 		button(
@@ -273,7 +273,12 @@ function draw_home()
 			"save",
 			saved,
 			{13,2},
-			save
+			function()
+				local txt=save(layers)
+				txt="?\""..txt.."\\0\""
+				printh(txt,"@clip")
+				savet=time()
+			end
 		)
 		savetxt=" \fbsave\f7 to\nclipboard"
 	else
@@ -448,7 +453,7 @@ function textbox(y)
 	)
 	rectfill(1,y,1+wid,y+10,13)
 	rect(1,y,1+wid,y+10,7)
-	
+
 	print_esc(ptext,4,y+3,nil,7)
 
 	if cf<15 then
@@ -519,7 +524,7 @@ function draw_edit()
 	end
 	pal()
 	?"PUNY",9,26,hovbtn.name=="puny" and 7 or 6
-	
+
 	local insd={27,25,mw-1,32,13}
 	button(
 		"ins",
@@ -531,7 +536,7 @@ function draw_edit()
 	)
 	rectfill(unpack(insd))
 	?"INS",29,26,7
-	
+
 	for i,k in next,split"w,t,=,i,b" do
 		i-=1
 		local w,xo,yo=8,1,44
@@ -761,19 +766,22 @@ function l2cc(l,prev)
 	return cc
 end
 
-function save()
+function save(layers)
 	local out=""
 	local prev
 	for i=#layers,1,-1 do
 		local l=layers[i]
-		out..=l2cc(l,prev)
-		prev=l
+		local cc=l2cc(l,prev)
+		out..=cc
+		--re-parse generated text
+		--to include any cc's entered
+		--in the text field
+		local sofar=parse(out)
+		prev=sofar[1].extra
 	end
 	out=gsub(out,"\n","\\n")
 	out=gsub(out,"\"","\\\"")
-	out="?\""..out.."\\0\""
-	printh(out,"@clip")
-	savet=time()
+	return out
 end
 
 function preview()
@@ -819,12 +827,13 @@ function preview()
 	end
 end
 
-function load_cc()
-	local str=stat"4"
-	layers={}
-	sel,seli=nil
-
+function parse(str)
 	local i=1
+	local layer={
+		extra=default_layer
+	}
+	local layers={}
+	
 	function nxt(match,keep)
 		local s=sub(str,i,i+#match-1)
 		if match==s then
@@ -837,30 +846,46 @@ function load_cc()
 		i+=n
 		return s
 	end
-
-	local layer=default_layer
-
-	if nxt"?\"" then
-		-- remove trailing "
-		str=sub(str,1,#str-1)
+	
+	local function check_cc(l)
+		while
+			nxt("⁶",true) or
+			nxt("ᶜ",true) or
+			nxt("²",true)
+		do
+			if nxt"⁶" then
+				if nxt"-" then
+					local k=c"1"
+					if (k=="#") k="bg"
+					l[k]=false
+				elseif nxt"x" then
+					l.xs=unalpha(c"1")
+				elseif nxt"y" then
+					l.ys=unalpha(c"1")
+				else
+					l[c"1"]=true
+				end
+			end
+			if nxt"ᶜ" then
+				l.fg=unalpha(c"1")
+			end
+			if nxt"²" then
+				l.bg=unalpha(c"1")
+			end
+		end
 	end
-
-	if sub(str,i,i+1)!="⁶j" then
-		load_error=1
-		return
-	end
-
+	
 	while i<=#str do
 		--ignore \0 and \^h, they
 		--get auto-added
 		nxt"\\0"
 		nxt"⁶h"
 		if nxt"⁶j" then
-			prev=layer
+			--if not the default layer...
 			if layer.x then
 				add(layers,layer,1)
 			end
-			layer=clone(prev)
+			layer=clone(layer.extra)
 			layer.txt=""
 			local x,y=
 				unalpha(c"1")*4,
@@ -880,32 +905,23 @@ function load_cc()
 			layer.x,layer.y=
 				x+ax-16,y+ay-16
 
-			while
-				nxt("⁶",true) or
-				nxt("ᶜ",true) or
-				nxt("²",true)
-			do
-				if nxt"⁶" then
-					if nxt"-" then
-						local k=c"1"
-						if (k=="#") k="bg"
-						layer[k]=false
-					elseif nxt"x" then
-						layer.xs=unalpha(c"1")
-					elseif nxt"y" then
-						layer.ys=unalpha(c"1")
-					else
-						layer[c"1"]=true
-					end
-				end
-				if nxt"ᶜ" then
-					layer.fg=unalpha(c"1")
-				end
-				if nxt"²" then
-					layer.bg=unalpha(c"1")
-				end
-			end
+			check_cc(layer)
+			layer.extra=clone(layer)
 		else
+			local j=i
+			
+			--put any cc's found in txt
+			--into layer.extra
+			check_cc(layer.extra)
+			
+			--add back whatever we
+			--consumed into the original
+			--layer (don't care about
+			--extra)
+			if i!=j and layer.extra then
+				layer.txt..=sub(str,j,i-1)
+			end
+		
 			local t
 			if nxt"\\n" then
 				t="\n"
@@ -918,6 +934,30 @@ function load_cc()
 		end
 	end
 	add(layers,layer,1)
+	
+	return layers
+end
+
+function load_cc()
+	local str=stat"4"
+	sel,seli=nil
+
+	--trim trailing "\n"
+	if str[#str]=="\n" then
+		str=sub(str,1,#str-1)
+	end
+	if sub(str,1,2)=="?\"" then
+		-- trim trailing "
+		str=sub(str,3,#str-1)
+	end
+
+	if sub(str,1,2)!="⁶j" then
+		load_error=1
+		return
+	end
+	
+	layers=parse(str)
+
 	return true
 end
 -->8
@@ -942,7 +982,7 @@ function print_esc(str,x,y,xlim,col)
 			if sp==56 and str[i+1]=="j" then
 				crn,c=3,8
 			end
-			if str[i+1]=="-" then
+			if count({"-","x","y"},str[i+1])==1 then
 				crn=2
 			end
 			pal(7,c)
@@ -960,8 +1000,38 @@ function print_esc(str,x,y,xlim,col)
 			cx,cy=x,cy+6
 		end
 	end
-	return cx
+	return cx,cy
 end
+-->8
+--tests
+
+local i=0
+function example(expected)
+	--assert that parsing and
+	--saving gives us back the
+	--same result
+	i+=1
+	local got=save(parse(expected))
+
+	if got!=expected then
+		cls()
+		?"example "..i.." failed!",6
+		local x,y=0,14
+		?"got:",0,y,7
+		y+=7
+		x,y=print_esc(got,0,y,128,6)
+		y+=7
+		?"exp:",0,y+7,7
+		print_esc(expected,0,y+14,128,6)
+		?""
+		assert(
+		false)
+	end
+end
+
+example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2⁶jf7⁴iᶜ73"
+example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2aᶜ7x⁶jf7⁴i3"
+example"⁶j59⁵ji⁶w⁶tᶜ0a⁶j78⁵jj⁶-w⁶-t⁶y7b⁶x3 .⁶x2⁶jea⁵ii⁶x4⁶y6c"
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
 00000000575000000575000000000000000000000000000000000000000000006000006000000000006000007333370000000000000000006666000000000000

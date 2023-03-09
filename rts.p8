@@ -223,7 +223,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.5⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.5⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
+    ?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.5⁶jqtᶜ6V1.5⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
@@ -2357,10 +2357,10 @@ alive=1]],_typ[_p],rnd"60"\1))
 		for k,v in next,typ do
 			_ENV[k]=v
 		end
-		
+
 		max_hp=_const and _const>0
 			and _const*hpr or typ.hp
-		
+
 		id,x,y,p,hp,const,
 			disc,prod=
 			x,_x,_y,_p,
@@ -3583,4 +3583,3 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
-

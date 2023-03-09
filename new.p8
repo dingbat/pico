@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 function _draw()
-	cls()
+	cls(2)
 
 end
 
