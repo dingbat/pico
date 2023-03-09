@@ -1032,6 +1032,7 @@ end
 example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2⁶jf7⁴iᶜ73"
 example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2aᶜ7x⁶jf7⁴i3"
 example"⁶j59⁵ji⁶w⁶tᶜ0a⁶j78⁵jj⁶-w⁶-t⁶y7b⁶x3 .⁶x2⁶jea⁵ii⁶x4⁶y6c"
+example"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0v1.5⁶jqtᶜ6v1.5⁶j2t⁴hᶜ0eeooty⁶j2tᶜ6eeooty⁶j8pᶜ0pause for options⁶j8o⁴jᶜapause for options⁶jeh⁵jiᶜ6"
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
 00000000575000000575000000000000000000000000000000000000000000006000006000000000006000007333370000000000000000006666000000000000
