@@ -27,7 +27,8 @@ local pspl,rndspl,unspl,
 local unl,unspr,aspl,
 	typs,stp,pcol,
 	hlt,diff,
-	menu,loser,cx,cy,cvx,cvy
+	menu,loser,cx,cy,cvx,cvy,
+	spdr
 	=
 	comp(line,unspl),
 	comp(spr,unspl),
@@ -63,7 +64,6 @@ function _update()
 		if lclk then
 			init()
 
-			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -2238,10 +2238,10 @@ function norm(it,nt,f)
 end
 
 function acc(x,y,strict)
-	local _ENV,s=g(bldgs,x,y),spdr
+	local _ENV=g(bldgs,x,y)
 	return not fget(mget(x,y),0)
 		and (not _ENV or
-			web and s or
+			web and spdr or
 			not strict
 			and (const or farm))
 end
