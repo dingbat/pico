@@ -1367,10 +1367,16 @@ end
 -->8
 --tick
 
-function rest(u)
+local function rest(u)
 	u.st=p[[t=rest
 agg=1
 idl=1]]
+end
+
+local function move(u,x,y,agg)
+	u.st=p([[t=move
+move=1]],path(u,x,y,0))
+	u.st.agg=agg
 end
 
 function mvg(units,x,y,agg,frc)
@@ -1385,13 +1391,7 @@ function mvg(units,x,y,agg,frc)
 		st.spd,grp=l,agg end)
 end
 
-function move(u,x,y,agg)
-	u.st=p([[t=move
-move=1]],path(u,x,y,0))
-	u.st.agg=agg
-end
-
-function gobld(u,b)
+local function gobld(u,b)
 	if u.st.farm and b.farm then
 		return
 	end
@@ -1400,7 +1400,7 @@ in_bld=1
 ez_adj=1]],path(u,b.x,b.y),b)
 end
 
-function gogth(u,tx,ty,wp)
+local function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	u.st=p([[t=gth
 gth=1
@@ -1409,7 +1409,7 @@ ez_adj=1]],
 		t,f2r[fmget(tx,ty)],tx,ty)
 end
 
-function godrop(u,nxt_res,dropu)
+local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
@@ -1437,7 +1437,7 @@ active=1]],
 	end
 end
 
-function gofarm(u,f)
+local function gofarm(u,f)
 	f.farmer,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
@@ -1873,6 +1873,17 @@ function draw_unit(u)
 	end
 end
 
+local function collect(u,res)
+	if u.res and u.res.typ==res then
+		u.res.qty+=1
+	else
+		u.res=p("qty=1",res)
+	end
+	if u.res.qty>=u.typ.cap then
+		godrop(u,res)
+	end
+end
+
 function drop(u)
 	if u.res then
 		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
@@ -1890,14 +1901,14 @@ end
 function frm(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not farmer then
-		g.rest(u)
+		rest(u)
 	elseif g.cf==0 then
 		if ready then
 			fres-=1
 			sproff+=1
-			g.collect(u,"r")
+			collect(u,"r")
 			if fres<1 then
-				g.godrop(u)
+				godrop(u)
 				cyc+=1
 				exp,ready=cyc>=typ.mcyc
 				if exp and ai then
@@ -1980,7 +1991,7 @@ function bld(u)
 				if drop then
 					pres.pl+=5
 				elseif farm then
-					g.gofarm(u,_ENV)
+					gofarm(u,_ENV)
 				end
 			end
 		elseif dmgd and
@@ -1988,13 +1999,13 @@ function bld(u)
 			hp+=2
 			pres.b-=.1
 		else
-			g.rest(u)
+			rest(u)
 			g.surr(function(t)
 				local _ENV=g.bldgs[t.k]
 				if _ENV and hu and const
 					and (u.ant or web)
 				then
-					g.gobld(u,_ENV)
+					gobld(u,_ENV)
 				end
 			end,x8,y8,4)
 		end
@@ -2055,9 +2066,9 @@ function produce(u)
 				rtx and
 				gl.resqty[mget(rtx,rty)]
 			then
-				gl.gogth(new,rtx,rty)
+				gogth(new,rtx,rty)
 			else
-				gl.move(new,rx or x+5,
+				move(new,rx or x+5,
 					ry or y+5)
 			end
 		end
@@ -2308,17 +2319,6 @@ function dmg(typ,to)
 			107+to.y/21.33,3,14}
 		alert=hlt
 		hlt+=2.5
-	end
-end
-
-function collect(u,res)
-	if u.res and u.res.typ==res then
-		u.res.qty+=1
-	else
-		u.res=p("qty=1",res)
-	end
-	if u.res.qty>=u.typ.cap then
-		godrop(u,res)
 	end
 end
 
