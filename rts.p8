@@ -63,6 +63,7 @@ function _update()
 		if lclk then
 			init()
 
+			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -221,7 +222,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.4⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.4⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
+		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j59⁵ihᶜ7age of ants⁶jbf³i⁶-w⁶-tᶜ0difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.5⁶j2t⁴hEEOOTY⁶j2tᶜ6EEOOTY⁶jqtV1.5⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
@@ -384,7 +385,7 @@ techs=0
 t=0
 npl=0]]
 
-	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,typs,ais,dmap_st"
+	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,ais,dmap_st"
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
