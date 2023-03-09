@@ -6,6 +6,37 @@ __lua__
 
 --see bbs for full credits
 
+function comp(f,g)
+	return function(...)
+		return f(g(...))
+	end
+end
+
+function a(v,...)
+	_ENV[v]={},... and a(...)
+end
+
+local pspl,rndspl,unspl,
+	campal,fmget=
+	comp(pal,split),
+	comp(rnd,split),
+	comp(unpack,split),
+	comp(camera,pal),
+	comp(fget,mget)
+
+local unl,unspr,aspl,
+	typs,stp,pcol,
+	hlt,diff,
+	menu,loser,cx,cy,cvx,cvy
+	=
+	comp(line,unspl),
+	comp(spr,unspl),
+	comp(a,unspl),
+	{},
+	split"-9:-20,263:-20,263:148,-9:148",
+	split"1,2,0,3,1,0,2,1,3,0",
+	unspl"-10,0,63,0,0,30,1,1"
+
 music(63,2000)
 function _update()
 	lclk,rclk,llclk,lrclk=
@@ -2309,8 +2340,8 @@ end
 
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
-	local _typ,next,printh=typs[t] or t,
-		next,printh
+	local _typ,next=typs[t] or t,
+		next
 	do
 		local _ENV=add(units,
 			p([[var=u
@@ -2776,36 +2807,6 @@ function resbar()
 end
 -->8
 --const
-
-function comp(f,g)
-	return function(...)
-		return f(g(...))
-	end
-end
-
-function a(v,...)
-	_ENV[v]={},... and a(...)
-end
-
-pspl,rndspl,unspl,campal,fmget=
-	comp(pal,split),
-	comp(rnd,split),
-	comp(unpack,split),
-	comp(camera,pal),
-	comp(fget,mget)
-
-unl,unspr,aspl,
-	typs,stp,pcol,
-	hlt,diff,
-	menu,loser,cx,cy,cvx,cvy
-	=
-	comp(line,unspl),
-	comp(spr,unspl),
-	comp(a,unspl),
-	{},
-	split"-9:-20,263:-20,263:148,-9:148",
-	split"1,2,0,3,1,0,2,1,3,0",
-	unspl"-10,0,63,0,0,30,1,1"
 
 p[[var=f2r
 7=r

@@ -42,6 +42,12 @@ dist(n[1]-g[1],n[2]-g[2])
 )
 
 
+- fix bug where HP would be very messed up (much lower) when loading a saved game
+- fix bug where unit spreading out wouldn't work on the right half of the map
+- fix bug where you could cancel an enemy building construction
+- allow loading games on mobile via file upload button (itch.io only)
+
+
 for i=0,20 do unit(1,hq.x,hq.y,1) end
 
 ai:
