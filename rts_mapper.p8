@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 39
 __lua__
 cartdata"aoa_mapper"
 
@@ -18,16 +18,16 @@ pid_codes={
 	m=5, --m: monastary
 	t=6, --t: tower
 	c=7, --c: castle
-	
+
 	--$: wild ladybug, created at
 	--   tile x,y at start of game.
 	["$"]=10,
-	
+
 	--%: percentage of workers on
 	--   wood. must be first order
 	--   val:1=64%,2=58%,3=50%
 	["%"]=11,
-	
+
 	-->b/g: position (at x,y) of
 	--      large cluster of that
 	--      resource. goes to next
@@ -35,11 +35,11 @@ pid_codes={
  -- must have p>3!
 	["grp>b"]=98,
 	["grp>g"]=103,
-	
+
 	--exit: stop orders for
 	--      difficulties <= p
 	exit=153,
-	
+
 	--tech: *_n (n=tech idx)
 	--      for difficulties >= x
 	--      y=0 ▶ free, y=1 ▶ paid
@@ -50,15 +50,15 @@ pid_codes={
 
 function _init()
 	derender()
-	
+
 	if step_mode then
 		poke(0x5f2d,3)
 		render(step_mode,step)
 	 return
 	end
-	
+
 --	analyze()
-	
+
 -- reset_to_rts()
 -- write_self()
 
@@ -82,7 +82,7 @@ cy=dget(2)
 function _update()
 	if step_mode then
 		prevstep=step
-		
+
 		if (btnp(❎)) step+=1
 		if (btnp(🅾️)) step-=1
 		if (btnp(⬅️)) cx-=1
@@ -94,7 +94,7 @@ function _update()
 		step=mid(step,1,#pos[step_mode])
 		mx,my=stat"32",stat"33"
 		mx8,my8=mx\8*8,my\8*8
-		
+
 		dset(1,cx)
 		dset(2,cy)
 
@@ -145,19 +145,19 @@ function encode_bo()
 		print("warning: debug_pos is on!",8)
 		print("only encoding those positions!",10)
 	end
-	
+
 	print("encoding bo data",6)
 	local data={
 		bo,unpack(pos)
 	}
-	
+
 	for y=0,31 do
 		--clear out bo section
 		memset(0x2060+y*128,0,32)
 		--fill fog
 		memset(0x2030+y*128,67,48)
 	end
-	
+
 	for i,a in inext,data do
 		i-=1
 		encode(a,0x2060+i*128*6)
@@ -181,14 +181,14 @@ function write_bo_to_rts()
 			32,
 			"rts.p8")
 	end
-	
+
 	print("wrote encoded bo to rts.p8",12)
 	color(6)
 end
 
 function write_map_to_rts()
 	derender()
-	 
+
 	for y=0,31 do
 		cstore(
 			0x2000+y*128,
@@ -196,7 +196,7 @@ function write_map_to_rts()
 			48,
 			"rts.p8")
 	end
-	
+
 	print("wrote map to rts.p8",12)
 	color(6)
 end
@@ -284,7 +284,7 @@ function addpos(str)
 		add(xy,comment)
 		add(a,xy)
 	end
-	
+
 	assert(
 		#a==#bo,
 		"pos "..#pos.." has "..#a.." orders (needs "..#bo..")")
@@ -756,7 +756,7 @@ function derender()
 		print("map ok\n")
 		return
 	end
-	
+
 	print("detected backup map!")
 	print("derendering (restoring map)")
 	--copy saved map back to
@@ -766,12 +766,12 @@ function derender()
 			0x2000+y*128,
 			0x2050+y*128,
 			48)
-					
+
 		--fill fog so backup map
 		--is now inactive
 		memset(0x2030+y*128,67,48)
 	end
-	
+
 	if not step_mode then
 		write_self()
 	end
@@ -792,7 +792,7 @@ function render(n,max_bo)
 		--renders on top of live map
 		--to make it easier to do
 		--building placement.
-		
+
 		--first copy original map over a
 		--to a safe zone (over fog and
 		--bo encoding) so that we can
@@ -804,14 +804,14 @@ function render(n,max_bo)
 				48)
 		end
 	end
-	
+
 	if not max_bo then
 		print("rendering position "..n)
 	end
-	
+
 	--mark a render
 	mset(0,0,190)
-	
+
 	local p=pos[n]
 	local res={
 		[7]="r",
@@ -870,7 +870,7 @@ function render(n,max_bo)
 			set(x,y+1,s+16,i)
 		end
 	end
-	
+
 	local startx,starty=startpos(n)
 	render_unit(
 		units[8],
@@ -893,7 +893,7 @@ function render(n,max_bo)
 			render_unit(units[b],x,y,i)
 		end
 	end
-	
+
 	if not max_bo then
 		write_self()
 	end
@@ -978,7 +978,7 @@ function acorner(corner)
 		qnx,qny,cx,cy=
 		startpos(corner)
 	cursor(cx,cy)
-	
+
 	local r,g,b,o,u=get(x,y)
 	sset(qnx,qny,9)
 	sset(qnx+1,qny,9)
@@ -993,7 +993,7 @@ function acorner(corner)
 	cx,cy=print("")
 	sspr(0,0,w,h,cx,cy-4)
 	sspr(0,0,w,h,43+x,5+y)
-	
+
 	--for camera
 	startx-=64
 	starty-=64
@@ -1282,4 +1282,3 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
-

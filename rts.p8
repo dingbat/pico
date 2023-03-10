@@ -3025,43 +3025,49 @@ function ai_frame(ai)
 			chr(pid),ant.prod[pid],
 			g(bldgs,x,y)
 		if res.tot>=p then
-		if b then
-			if not bld and ai.safe then
-				if can_pay(b,res) then
-					pay(b,1,res)
-					unit(b,ux+b.w/2,
-						uy+b.h/2,ai.typ,1)
-				else
-					hold=b
-				end
-			end
-		else
-			if pid>90 then
-				if res.diff==x then
-					bgrat=2
-					break
-				end
-				nxt[r]=nxt[r] or
-					g(dmaps[r] or {},x,y) and
-					{ux,uy}
-			elseif adv then
-				if pid==10 then
-					if res.newg then
-						unit(14,ux,uy,4)
-					end
-				elseif res.diff>=x then
-					hold=typs[pid]
-					if y==0 or
-						can_pay(hold,res) then
-						hold.x(hold.typ[ai.typ])
-						hold=pay(hold,y,res)
+			if b then
+				if not bld and ai.safe then
+					if can_pay(b,res) then
+						pay(b,1,res)
+						local u=unit(b,ux+b.w/2,
+							uy+b.h/2,ai.typ,1)
+						--after 53 there are just
+						--two more defensive
+						--castles, don't want
+						--them overproducing
+						--caterpillars
+						u.mil=u.mil and p<53
+					else
+						hold=b
 					end
 				end
+			else
+				if pid>90 then
+					if res.diff==x then
+						bgrat=2
+						break
+					end
+					nxt[r]=nxt[r] or
+						g(dmaps[r] or {},x,y) and
+						{ux,uy}
+				elseif adv then
+					if pid==10 then
+						if res.newg then
+							unit(14,ux,uy,4)
+						end
+					elseif res.diff>=x then
+						hold=typs[pid]
+						if y==0 or
+							can_pay(hold,res) then
+							hold.x(hold.typ[ai.typ])
+							hold=pay(hold,y,res)
+						end
+					end
+				end
 			end
-		end
-		if adv and not hold then
-			ai.boi+=2
-		end
+			if adv and not hold then
+				ai.boi+=2
+			end
 		end
 	end
 
