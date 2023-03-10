@@ -64,6 +64,7 @@ function _update()
 		if lclk then
 			init()
 
+			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -2026,19 +2027,22 @@ function gth(u)
 		end
 	elseif cf==u.id then
 		f+=res1.diff*u.ap\33*10
-		local n=g(restiles,x,y,f)
+		local n=g(restiles,x,y,f)-1
 		collect(u,r)
 		if t<112 and
 			(n==f\3 or n==f\1.25)
 		then
 			mset(x,y,t+16)
-		elseif n==1 then
+		elseif n==0 then
 			mset(x,y,68)
 			s(dmap_st[r],x,y)
 			s(dmaps[r],x,y,.55)
-			qdmaps(r)
+			--clear n out so that if a
+			--ladybug lands on this
+			--spot it will reset its qty
+			n=qdmaps(r)
 		end
-		s(restiles,x,y,n-1)
+		s(restiles,x,y,n)
 	end
 end
 
@@ -3583,3 +3587,4 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
+
