@@ -64,7 +64,6 @@ function _update()
 		if lclk then
 			init()
 
-			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -981,6 +980,7 @@ bmap=8
 units=2
 idl=1
 mil=1
+maxbop=100
 sdir=-1
 tmap=-1
 d=0]],
@@ -1019,6 +1019,7 @@ bmap=4
 units=2
 idl=1
 mil=1
+maxbop=100
 sdir=-1
 tmap=-1
 d=0]],
@@ -1056,6 +1057,7 @@ bldrs=2
 units=1
 bmap=64
 mil=1
+maxbop=100
 sdir=-1
 tmap=-1
 d=0]],
@@ -1150,6 +1152,7 @@ prj_s=48
 bmap=32
 units=1
 mil=1
+maxbop=42
 sdir=-1
 tmap=-1
 d=0]]
@@ -2026,7 +2029,7 @@ function gth(u)
 			godrop(u,r)
 		end
 	elseif cf==u.id then
-		f+=res1.diff*u.ap\33*10
+		f+=res1.diff*u.ap\33*5
 		local n=g(restiles,x,y,f)-1
 		collect(u,r)
 		if t<112 and
@@ -2894,7 +2897,7 @@ g=4
 b=4]]
 
 p[[var=dmg_mult
-antant=1
+antant=1.1
 antqueen=.7
 antspider=.8
 antsg=1.5
@@ -2903,16 +2906,16 @@ antbld=.5
 acidant=1
 acidqueen=.6
 acidspider=1.5
-acidsg=.7
+acidsg=.9
 acidbld=.25
 
 spiderant=1.5
 spiderqueen=1.1
 spiderspider=1
-spidersg=1
+spidersg=1.2
 spiderbld=.1
 
-sgant=.9
+sgant=.8
 sgqueen=3
 sgspider=.7
 sgsg=1
@@ -3029,14 +3032,8 @@ function ai_frame(ai)
 				if not bld and ai.safe then
 					if can_pay(b,res) then
 						pay(b,1,res)
-						local u=unit(b,ux+b.w/2,
-							uy+b.h/2,ai.typ,1)
-						--after 53 there are just
-						--two more defensive
-						--castles, don't want
-						--them overproducing
-						--caterpillars
-						u.mil=u.mil and p<53
+						unit(b,ux+b.w/2,
+							uy+b.h/2,ai.typ,1).bop=p
 					else
 						hold=b
 					end
@@ -3128,6 +3125,9 @@ function ai_frame(ai)
 			u.queen and
 			ants<res.diff*13.5 or
 			u.mil and
+			--don't produce from
+			--all castles
+			u.bop<u.maxbop and
 			res.p<res.diff*26
 		then
 			local b,h=u.prod[u.lp]
