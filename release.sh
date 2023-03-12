@@ -31,17 +31,16 @@ sed -i'.bak' -E "s/13480/0x34a8/" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
 sed -i'.bak' -E "s/36868/0x9004/" rts_sh.p8
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
-tab start init
-tab rest tick
-tab cam input
-tab draw_unit unit
-tab p utils
-tab dpath paths
-tab pres menu
-tab comp const
-tab save save
-tab ai_frame ai
-tab mode mode
+# tab start init
+# tab rest tick
+# tab cam input
+# tab draw_unit unit
+# tab p utils
+# tab dpath paths
+# tab pres menu
+# tab save save
+# tab ai_frame ai
+# tab mode mode
 
 rm rts_print.p8 rts_print.p8.bak rts_sh.p8.bak
 
