@@ -1493,7 +1493,7 @@ function tick(u)
 			u.st.spd or u.typ.spd)
 		then
 			deli(wayp,1)
-			u.st.typ=#wayp>0 and wayp
+			u.st.typ=wayp[1] and wayp
 		end
 	elseif u.st.move then
 		rest(u)
@@ -2600,7 +2600,7 @@ function path(u,x,y,tol,r)
 			deli(wayp)
 			add(wayp,{x,y})
 		end
-		return #wayp>0 and wayp
+		return wayp[1] and wayp
 	end
 end
 
@@ -3146,7 +3146,7 @@ function ai_frame(ai)
 		end
 	end
 
-	if #ai.p2>=res.diff*5 and ai.safe then
+	if ai.p2[res.diff*5] and ai.safe then
 		while ai.p2[1] do
 			add(ai.p3,deli(ai.p2))
 		end
