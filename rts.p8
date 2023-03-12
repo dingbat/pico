@@ -3147,10 +3147,9 @@ function ai_frame(ai)
 	end
 
 	if #ai.p2>=res.diff*5 and ai.safe then
-		foreach(ai.p2,function(x)
-			add(ai.p3,x)
-		end)
-		ai.p2={}
+		while ai.p2[1] do
+			add(ai.p3,deli(ai.p2))
+		end
 	end
 	mvg(ai.p3,hq.x,hq.y,"atk")
 end
