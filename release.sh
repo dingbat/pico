@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=v1_5
+version=v1_6
 pico_path=/Applications/PICO-8.app/Contents/MacOS/pico8
 # pico_path=~/pico-8/pico8_64
 echo "cutting $version"
@@ -20,7 +20,7 @@ sed -i'.bak' -r -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 echo "shrinking..."
 python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename
 
-header="\n--age of ants\n--eeooty\n\n--credits \& uncompressed\n--code on bbs!\n"
+header="\n--age of ants\n--eeooty\n\n--uncompressed code on bbs:\n--lexaloffle.com\/bbs\/?tid=51464"
 sed -i'.bak' -r -E "s/print\(([^)]+)\)/?\1\n/" rts_sh.p8
 sed -i'.bak' -E "s/^function /\nfunction /" rts_sh.p8
 sed -i'.bak' -E "s/^__lua__/__lua__$header/" rts_sh.p8
