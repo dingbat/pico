@@ -63,10 +63,9 @@ function _update()
 		add(pcol,
 			deli(btnp"4" and pcol,1))
 		if lclk then
-			sfx"4"
 			init()
-
-			srand"6"
+			
+--			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -197,7 +196,7 @@ function bnr(a,t,st,cx)
 		?split",⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ5 ,⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ⁶y0⁵dm²9 ,normal ai ⁴m⁶x1 ⁶y0⁵dm²9 ,hard ai ⁶y0⁵dm²9 "[res1.diff]
 		-3,unspl"80,8,80,9")
 	?"⁶jll²9⁴e ⁵df⁶xz ⁶x4⁶jll⁵keᶜ5⧗³h"..(res1.t<600 and "0" or "")..res1.t\60 ..(s<10 and ":0" or ":")..s.." ⁶y0⁵dm²9 ⁶jll⁵fk²9 "
-	pal{res1.col,[14]=0}
+	pspl(res1.col..",2,3,4,5,6,7,8,9,10,11,12,13,0")
 	sspr(64+
 		pack(48,cf\5%3*16)[a],
 		unspl"0,16,8,12,90,32,16")
@@ -288,10 +287,11 @@ function _draw()
 		local function b(a,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
-			if (a[i-1]) unl"-1,0,-1,7"
-			if (a[i-256]) unl"0,-1,7,-1"
-			if (a[i+256]) unl"0,8,7,8"
-			if (a[i+1]) unl"8,0,8,7"
+			return
+				a[i-1] and unl"-1,0,-1,7",
+				a[i-256] and unl"0,-1,7,-1",
+				a[i+256] and unl"0,8,7,8",
+				a[i+1] and unl"8,0,8,7"
 		end
 		if not exp[i] then
 			b(exp)
@@ -303,14 +303,12 @@ function _draw()
 
 	camera(cx,cy)
 
-	if (selx) rect(unpack(selbox))
-
-	fillp()
-
-	if sel1 and sel1.rx then
-		spr(64+cf5%3,
-			sel1.rx-2,sel1.ry-5)
-	end
+	fillp(
+		selx and rect(unpack(selbox)),
+		sel1 and sel1.rx and
+			spr(64+cf5%3,
+				sel1.rx-2,sel1.ry-5)
+	)
 
 	local dt=t()-hlt
 	if dt>.5 then
@@ -1426,14 +1424,19 @@ local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
-		dropu=not wayp and units[u.p]
+		--if no path or ant is led to
+		--opponent mound, go to queen
+		dropu=(not wayp or
+			g(bldgs,x,y,{}).p!=u.p
+			) and units[u.p]
 	end
 	u.st=p([[t=drop
 drop=1
 in_bld=1
 ez_adj=1]],
-		wayp or
-			path(u,dropu.x,dropu.y),
+		dropu and
+			path(u,dropu.x,dropu.y)
+			or wayp,
 		dropu or tile_unit(x,y),
 		nxt_res)
 end
@@ -2287,11 +2290,10 @@ function reg_bldg(b)
 	local function reg(xx,yy)
 		s(bldgs,xx,yy,b.alive and b)
 		if b.dead then
-			s(exp,xx,yy,1)
+			s(exp,xx,yy,1,
+				b.fire and y==yy and
+				mset(xx,yy,69))
 			s(dmap_st.d,xx,yy)
-			if b.fire and y==yy then
-				mset(xx,yy,69)
-			end
 		elseif	b.drop then
 			s(dmap_st.d,xx,yy,{xx,yy})
 		end
@@ -2315,8 +2317,7 @@ end
 function dmg(typ,to)
 	to.hp-=typ.atk*dmg_mult[
 		typ.atk_typ..to.def]
-	if to.unit and
-		to.st.idl or to.st.y then
+	if to.st.idl or to.st.y then
 		wander(to)
 	end
 	to.conv+=typ.conv
