@@ -65,7 +65,7 @@ function _update()
 		if lclk then
 			init()
 			
---			srand"6"
+			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -126,6 +126,9 @@ function _update()
 	res1.t+=0x.0888
 
 	if cf%30==19 then
+		tostr[[[[]]
+		printh(stat(0),"log")
+		--]]
 		for tx=0,19 do
 			for ty=0,12 do
 				local x,y=tx\0x.6556,
@@ -2533,36 +2536,35 @@ function dpath(u,k)
 end
 
 function qdmaps(r)
-	dq=split(p[[r=r,g,b,d
-g=g,r,b,d
-b=b,g,r,d
-d=d,r,g,b]][r])
+	dq=split(p[[r=d,b,g,r
+g=d,b,r,g
+b=d,r,g,b
+d=b,g,r,d]][r])
 end
 
 function dmap()
-	local q=dq[1]
-	if q then
-		if q.c then
-			for i=1,#q.typ do
-				if i>20 then
-					return
-				end
-				local pt=deli(q.typ)
-				q.p1[pt.k]=q.c
-				if q.c<8 then
-					surr(function(t)
-						q.p3[t.k]=q.p3[t.k] or
-							add(q.p2,t)
-						end,unpack(pt))
-				end
+	if cdq then
+		for i=1,#cdq.typ do
+			if i>20 then
+				return
 			end
-			q.c+=1
-			q.typ,q.p2=q.p2,{}
-			if q.c==9 then
-				dmaps[q.x]=deli(dq,1).p1
+			local pt=deli(cdq.typ)
+			cdq.p1[pt.k]=cdq.c
+			if cdq.c<8 then
+				surr(function(t)
+					cdq.p3[t.k]=cdq.p3[t.k] or
+						add(cdq.p2,t)
+					end,unpack(pt))
 			end
-		else
-			local o={}
+		end
+		cdq.c+=1
+		cdq.typ,cdq.p2=cdq.p2,{}
+		if cdq.c==9 then
+			dmaps[cdq.x],cdq=cdq.p1
+		end
+	else
+		local q,o=deli(dq),{}
+		if q then
 			if not dmap_st[q] then
 				dmap_st[q]={}
 				for x=0,48 do
@@ -2578,7 +2580,7 @@ function dmap()
 					add(o,t).k=i
 				end
 			end
-			dq[1]=p("c=0",o,q)
+			cdq=p("c=0",o,q)
 		end
 	end
 end
