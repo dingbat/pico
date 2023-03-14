@@ -2816,7 +2816,7 @@ function draw_menu()
 		rectfill(sec-4,unspl"106,3,108,4")
 		rectfill(sec,unspl"108,0,128")
 		x-=sec
-		pal()
+		campal()
 	end
 
 	if sel1 then
