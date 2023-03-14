@@ -79,7 +79,7 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-6,61,76]],"\n"),function(s)
+5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
@@ -88,7 +88,6 @@ function _update()
 						unit(u,x+dx,y+dy,p)
 				end
 			end)
-			unit(unspl"9,80,80,2")
 			start()
 		else
 			--pal for menu map
@@ -128,9 +127,9 @@ function _update()
 	res1.t+=0x.0888
 
 	if cf%30==19 then
---		tostr[[[[]]
---		printh(stat(0),"log")
---		--]]
+		tostr[[[[]]
+		printh(stat(0),"log")
+		--]]
 		for tx=0,19 do
 			for ty=0,12 do
 				local x,y=tx\0x.6556,
@@ -1342,7 +1341,6 @@ spd=.2
 los=50
 hp=15
 range=50
-minrange8=2
 atk=1.5
 conv=0
 atk_freq=60
@@ -1489,9 +1487,7 @@ function goatk(u,e)
 			p([[t=atk
 active=1]],
 			path(u,e.x,e.y,0,
-				u.typ.range/8,
-				u.typ.minrange8),
-			e),
+			u.typ.range/8),e),
 			e.hu and u.bldg
 		u.st.k=e.k
 	end
@@ -1993,9 +1989,8 @@ function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
 		local d=dist(e.x-u.x,e.y-u.y)
-		if (typ.range>=d
-			or int(u.r,e.r,0)) and
-			typ.minrange8*8<=d
+		if typ.range>=d
+			or int(u.r,e.r,0)
 		then
 			u.st.typ=nil
 			if cf%typ.atk_freq==u.id%
@@ -2646,12 +2641,12 @@ function nearest(gx,gy)
 	end
 end
 
-function path(u,x,y,tol,...)
+function path(u,x,y,tol,r)
 	if u.unit then
 		spdr,dest,dest_d=
 			u.sp,nearest(x,y)
 		wayp,e,spdr=as(
-			nearest(u.x,u.y),dest,...)
+			nearest(u.x,u.y),dest,r)
 		if e and not r and
 			dest_d<=(tol or 1) then
 			deli(wayp)
@@ -2661,7 +2656,7 @@ function path(u,x,y,tol,...)
 	end
 end
 
-function as(st,g,r,minr)
+function as(st,g,d)
 	local gk,t=g.k>>16,
 		{[st.k]=p([[var=sh
 y=0
@@ -2687,16 +2682,9 @@ x=32767]],st)}
 		frl-=1
 		local pt=sh.typ
 		local f=asc[pt.k|gk] or
-			(not minr and pt.k==g.k or
-			sh.x<=max(r)) and
-			sh.x>=max(minr) and {e=1}
+			(pt.k==g.k or
+			sh.x<=max(d)) and {e=1}
 		if f then
-			tostr[[[[]]
-			if minr then
-		printh(st[1]..","..st[2].."->"..pt[1]..","..pt[2]..":"..sh.x..","..max(minr),"log")
-			
-			end
-			--]]
 			return path(
 				sh,{unpack(f)},f.e)
 		end
@@ -3221,14 +3209,14 @@ end
 -->8
 function mode()
 --	dset(0,dget"0"%3+1)
---	menuitem(1,
---		split"● mode:touch,● mode:handheld,● mode:desktop"[dget"0"],
---		mode)
+	menuitem(1,
+		split"● mode:touch,● mode:handheld,● mode:desktop"[dget"0"],
+		mode)
 	return true
 end
 
---menuitem(2,"▤ toggle help",
---function() dset(1,~dget"1") end)
+menuitem(2,"▤ toggle help",
+function() dset(1,~dget"1") end)
 
 
 cartdata"age_of_ants"
