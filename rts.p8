@@ -1616,7 +1616,7 @@ function tick(u)
 					idl=u
 				end
 				u.st.idl+=1
-			elseif u.idl and not u.q then
+			elseif ut.idl and not u.q then
 				idlm=u
 			end
 		end
