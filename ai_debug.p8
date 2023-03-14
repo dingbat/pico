@@ -7,14 +7,14 @@ if ai_debug then
 	srand"18"
 	--ai in 2,3
 	--srand"12"
-	
+
 	_update60=_update
 	_draw_map,_dr,_pr,_resbar=
 		draw_map,_draw,print_res,
 		resbar
-	function draw_map(o,y)
-		if not ai_debug or o==0 then
-			_draw_map(o,y)
+	function draw_map(o)
+		if not ai_debug or o=="0" then
+			_draw_map(o)
 		end
 	end
 	function _draw()
@@ -29,7 +29,7 @@ if ai_debug then
 			unit(13,300,184,1)
 			unit(13,333,196,1)
 		end
-		
+
 		_dr()
 		if ai_debug and res1 then
 		camera()

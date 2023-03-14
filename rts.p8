@@ -66,7 +66,6 @@ function _update()
 		if lclk then
 			init()
 			
-			srand"6"
 			for k=1,3 do
 				local r=res[k]
 				r.pos,r.col,r.npl,r.diff=
@@ -127,9 +126,6 @@ function _update()
 	res1.t+=0x.0888
 
 	if cf%30==19 then
-		tostr[[[[]]
-		printh(stat(0),"log")
-		--]]
 		for tx=0,19 do
 			for ty=0,12 do
 				local x,y=tx\0x.6556,
@@ -3208,7 +3204,7 @@ function ai_frame(ai)
 end
 -->8
 function mode()
---	dset(0,dget"0"%3+1)
+	dset(0,dget"0"%3+1)
 	menuitem(1,
 		split"● mode:touch,● mode:handheld,● mode:desktop"[dget"0"],
 		mode)
