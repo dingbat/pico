@@ -20,7 +20,7 @@ sed -i'.bak' -r -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
 echo "shrinking..."
 python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename
 
-header="\n--age of ants\n--eeooty\n"
+header="\n--age of ants\n--eeooty\n\n--uncompressed code on bbs!\n"
 sed -i'.bak' -r -E "s/print\(([^)]+)\)/?\1\n/" rts_sh.p8
 # sed -i'.bak' -E "s/^function /\nfunction /" rts_sh.p8
 sed -i'.bak' -E "s/^__lua__/__lua__$header/" rts_sh.p8
@@ -31,15 +31,43 @@ sed -i'.bak' -E "s/~=/!=/" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
 # sed -i'.bak' -E "s/36868/0x9004/" rts_sh.p8
 
-# sed -i'.bak' -E "s/rndspl/rs/" rts_sh.p8
-# sed -i'.bak' -E "s/campal/cp/" rts_sh.p8
-# sed -i'.bak' -E "s/fmget/fm/" rts_sh.p8
-# sed -i'.bak' -E "s/loadgame/lg/" rts_sh.p8
-# sed -i'.bak' -E "s/posidx/pi/" rts_sh.p8
-# sed -i'.bak' -E "s/seltyp/st/" rts_sh.p8
-# sed -i'.bak' -E "s/draw_unit/du/" rts_sh.p8
-# sed -i'.bak' -E "s/selbox/sb/" rts_sh.p8
-# sed -i'.bak' -E "s/produce/pr/" rts_sh.p8
+for _ in 1 2
+do
+  sed -i'.bak' -E "s/avail_farm/afarm/" rts_sh.p8
+  sed -i'.bak' -E "s/can_renew/cr/" rts_sh.p8
+done
+for _ in 1 2 3 4
+do
+  sed -i'.bak' -E "s/renew/ren/" rts_sh.p8
+  sed -i'.bak' -E "s/rndspl/rs/" rts_sh.p8
+  sed -i'.bak' -E "s/campal/cp/" rts_sh.p8
+  sed -i'.bak' -E "s/fmget/fm/" rts_sh.p8
+  sed -i'.bak' -E "s/loadgame/lg/" rts_sh.p8
+  sed -i'.bak' -E "s/posidx/pi/" rts_sh.p8
+  sed -i'.bak' -E "s/maxbop/mb/" rts_sh.p8
+  sed -i'.bak' -E "s/avail/av/" rts_sh.p8
+  sed -i'.bak' -E "s/fire/f/" rts_sh.p8
+  sed -i'.bak' -E "s/seltyp/st/" rts_sh.p8
+  sed -i'.bak' -E "s/draw_unit/du/" rts_sh.p8
+  sed -i'.bak' -E "s/selbox/sb/" rts_sh.p8
+  sed -i'.bak' -E "s/breq/bq/" rts_sh.p8
+  sed -i'.bak' -E "s/prj_xo/px/" rts_sh.p8
+  sed -i'.bak' -E "s/prj_yo/py/" rts_sh.p8
+  sed -i'.bak' -E "s/prj_s/s/" rts_sh.p8
+  sed -i'.bak' -E "s/portx/ptx/" rts_sh.p8
+  sed -i'.bak' -E "s/porty/pty/" rts_sh.p8
+  sed -i'.bak' -E "s/produce/pr/" rts_sh.p8
+  sed -i'.bak' -E "s/dropu/dr/" rts_sh.p8
+  sed -i'.bak' -E "s/nearest/nr/" rts_sh.p8
+  sed -i'.bak' -E "s/upcycle/z/" rts_sh.p8
+  sed -i'.bak' -E "s/wander/w/" rts_sh.p8
+  sed -i'.bak' -E "s/lady/l/" rts_sh.p8
+  sed -i'.bak' -E "s/vcache/vc/" rts_sh.p8
+  sed -i'.bak' -E "s/mine_nxt/mn/" rts_sh.p8
+  sed -i'.bak' -E "s/tile_unit/tu/" rts_sh.p8
+done
+
+sed -i'.bak' -E "s/fball:/fireball:/" rts_sh.p8
 
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 # tab start init
@@ -57,7 +85,6 @@ rm rts_print.p8 rts_print.p8.bak rts_sh.p8.bak
 
 python3 ~/shrinko8/shrinko8.py ./rts_sh.p8 --count
 echo
-exit 1
 
 rm -rf out
 $pico_path -export "age_of_ants.bin" ./rts_sh.p8
