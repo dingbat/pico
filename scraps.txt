@@ -42,10 +42,12 @@ dist(n[1]-g[1],n[2]-g[2])
 )
 
 1.6
-- fix bug where enemies could stall
+- fix bug where enemy attackers could stall in the middle of the map
 - fix bug where a worker ant could drop resources off at an opponent mound (now it goes back to queen)
 - fix bug where mounds could take an extra long time to register as drop-offs
-
+- fix bug where ai didn't repair buildings
+- fix memory issue
+- added sfx to difficulty selection in title screen
 
 
 - fix bug where HP would be very messed up (much lower) when loading a saved game
