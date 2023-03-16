@@ -1934,19 +1934,37 @@ end
 -->8
 --tick
 
+--makes a unit rest
 local function rest(u)
+	--agg=aggress nearby enemies
 	u.st=p[[t=rest
 agg=1
 idl=1]]
 end
 
+--(attack)move a unit
 local function move(u,x,y,agg)
+	--second arg to p sets "typ"
+	--on the returned object. typ
+	--is thus the var for the path
+	--(array of waypoints)
 	u.st=p([[t=move
 move=1]],path(u,x,y,0))
 	u.st.agg=agg
 end
 
+--moves a group of units. if
+--agg is given, also sets each
+--unit's 'grp' to the agg value
+--(useful for ai squads)
+--"frc"=force, if not given,
+--only moves units that are idle
 function mvg(units,x,y,agg,frc)
+	--get the lowest speed of the
+	--group and set it to each
+	--unit's state.speed (will get
+	--used instead of unit's base
+	--speed if set)
 	local l=999
 	foreach(units,function(u)
 		if frc or u.st.idl then
@@ -1958,17 +1976,51 @@ function mvg(units,x,y,agg,frc)
 		st.spd,grp=l,agg end)
 end
 
+--make a unit build a building
 local function gobld(u,b)
+	--active farmers don't build,
+	--this allows you to select
+	--a group of workers and build
+	--a bunch of farms and have
+	--each worker stay at a farm
 	if u.st.farm and b.farm then
 		return
 	end
+	--in_bld means the unit is
+	--allowed to be ontop of a bld
+	--ez_adj means the surrounding
+	--areas the unit can adjust to
+	--(if overlapping) don't have
+	--to be valid tiles
 	u.st,u.res=p([[t=bld
 in_bld=1
 ez_adj=1]],path(u,b.x,b.y),b)
 end
 
+--send a worker to gather tile
+--tx,ty. optionally dictate the
+--path waypoints, eg when using
+--distance map to find next
+--closest resource after drop
 local function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
+	--the second argument to p gets
+	--set to "x", designated for
+	--a state's 'target unit'.
+	--here, the target is the tile
+	
+	--the third arg to p gets set
+	--to y, in this case the res
+	--type being gathered.
+	
+	--the 4/5th args to p get put
+	--into the "p1" array. here we
+	--put tx,ty to it can be unpkd
+	
+	--path tolerance (4th arg) is
+	--default (1), so unit can go
+	--to given coords if there's a
+	--path ending 1 tile away
 	u.st=p([[t=gth
 gth=1
 ez_adj=1]],
@@ -1976,16 +2028,24 @@ ez_adj=1]],
 		t,f2r[fmget(tx,ty)],tx,ty)
 end
 
+--have a unit drop its carry
+--takes an optional next res
+--type to gather, + an optional
+--unit to drop to (qn or mound)
 local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
 		--if no path or ant is led to
 		--opponent mound, go to queen
+		--of ant's player (queens are
+		--always the first units).
 		dropu=(not wayp or
 			g(bldgs,x,y,{}).p!=u.p
 			) and units[u.p]
 	end
+	--path tol=1 (default) since
+	--unit goes "into" the bldg
 	u.st=p([[t=drop
 drop=1
 in_bld=1
@@ -1997,8 +2057,19 @@ ez_adj=1]],
 		nxt_res)
 end
 
+--make a unit attack an enemy
 function goatk(u,e)
 	if e then
+		--enemy bldgs get discovered
+		--when attacking a human unit.
+		--carry should be dropped.
+		
+		--path tol=0, unit can't enter
+		--bldg. the last arg to 'path'
+		--is range (in tiles), which
+		--finds a path until we are
+		--within that distance (not
+		--necessarily at the goal).
 		u.st,u.disc,u.res=
 			p([[t=atk
 active=1]],
@@ -2009,7 +2080,10 @@ active=1]],
 	end
 end
 
+--tell a worker to farm a farm
 local function gofarm(u,f)
+	--add some rand to the farm
+	--center so it farms diff parts
 	f.farmer,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
@@ -2017,45 +2091,80 @@ in_bld=1]],path(u,
 	u.st.farm=f
 end
 
+--the main unit update func!
 function tick(u)
+	--onscreen - does the unit box
+	--intersect with the current
+	--viewport?
+	
+	--upd - should we do expensive
+	--updates for this unit? checks
+	--if the unit's id (rand 0-59)
+	--aligns with upcycle
+	
+	--wayp,ut=helper vars
 	u.onscr,u.upd,wayp,ut=
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
 		u.st.typ,
 		u.typ
+		
+	--unit just died
 	if u.hp<=0 and u.alive then
 		tot-=1
 		u.st,u.dead,u.farmer,u.alive=
 			p"t=dead",ut.d
+		--unregister the building,
+		--play sfx if died onscreen
 		del(sel,u,
 			u.bldg and reg_bldg(u),
 			u.onscr and sfx(ut.dsfx)
 		)
 		if ut.lady then
+			--ladybugs find the nearest
+			--valid tile and turn it into
+			--a food tile (picks an lbug
+			--tile depending on facing)
 			local t=nearest(u.x,u.y)
 			mset(t[1],t[2],82+u.dir)
+			
+			--add new tile to the red
+			--dist-map start list and
+			--queue regenerating it
 			dmap_st.r[t.k]=t
 			qdmaps"r"
 		elseif u.qn then
+			--when a queen dies, reduce
+			--the number of players. if
 			npl-=1
 			if npl==1 or u==hq then
+				--trigger end of game
 				loser,sel=min(u.p,2),{}
 				music"56"
 			end
-		elseif u.drop and not u.const then
-			u.pres.pl-=u.drop
+		elseif ut.drop and not u.const then
+			--if dropoff bld dies, reduce
+			--pop limit
+			u.pres.pl-=ut.drop
 		elseif u.unit then
+			--reduce player's population
 			u.pres.p-=1
 		end
 	end
 
+	--increase dead counter till
+	--60, then remove unit
 	if u.dead then
 		u.dead+=1
 		del(u.dead==60 and units,u)
 		return
 	end
 
+	--move unit
 	if wayp then
+		--norm moves u.x,u.y by spd
+		--in direction of wayp[1],
+		--then returns if intersect
 		if norm(wayp[1],u,
 			u.st.spd or ut.spd)
 		then
@@ -2063,8 +2172,11 @@ function tick(u)
 			u.st.typ=wayp[1] and wayp
 		end
 	elseif u.st.move then
+		--no wayp, finished moving
 		rest(u)
 	elseif u.st.farm then
+		--just got to the farming
+		--spot, start farming!
 		u.st.active=1
 	end
 
@@ -2072,9 +2184,13 @@ function tick(u)
 		u.x,u.y,u.st.x,ut.los,9999
 
 	if u.q then
+		--make progress on current
+		--thing in production queue
 		produce(u)
 	end
 	if u.farm then
+		--clear farm's farmer if prev
+		--farmer left or farm expired
 		local _ENV=u
 		if farmer and
 			farmer.st.farm!=u
@@ -2083,38 +2199,68 @@ function tick(u)
 			farmer=nil
 		end
 	end
+	--t=state.target
 	if t then
 		if t.dead then
+			--dead target means, if you
+			--have a path still, keep
+			--walking towards the target
+			--but aggress, in case of
+			--other enemies. if no path,
+			--rest.
+			--if you're an ant and your
+			--target was a ladybug, eat!
 			u.st.agg=1,
 				wayp or rest(u),
-				u.ant and t.typ.lady and
+				u.ant and t.lady and
 					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
+			--if you've gone "inside" the
+			--target (drop,build,gather),
+			--halt + you are now active
 			u.st.active,u.st.typ=1
 		elseif u.st.gth and not wayp then
+			--unit is gathering + stopped
+			--but is not inside resource,
+			--so try going to res again
 			gogth(u,t.x8,t.y8)
 		end
+		--if you're stopped, face the
+		--direction of your target
 		if not wayp then
 			u.dir=sgn(t.x-x)
 		end
 	end
+	--if you're in an active state
+	--(note atk is always active),
+	--call the appropriate func,
+	--eg atk(), bld(), gth(), ...
 	if u.st.active then
 		_ENV[u.st.t](u)
 	end
 
+	--heal damaged unit passively
 	if ut.hl and u.dmgd then
 		u.hp+=heal[u.p].qty
 	end
 
+	--is unit being hovered over?
+	--(prioritize non-human unit)
 	if int(u.r,{mx,my,mx,my},1)
 		and (not hunit or hunit.hu
 	) then
 		hunit=u
 	end
 
+	--if unit is visible _or_ has
+	--been discovered, it's
+	--selectable, and should be
+	--added to the minimap
 	if g(viz,u.x8,u.y8,u.disc) then
 		if selx and int(u.r,selbox,0)
 		then
+			--put unit into bucket, these
+			--get prioritized in update()
 			if not u.hu then
 				sele={u}
 			elseif u.unit then
@@ -2124,10 +2270,24 @@ function tick(u)
 				selb={u}
 			end
 		end
-		sset(109+x/20.21,72+y/21.33,u.ap)
+		--add unit dot to minimap in
+		--spritesheet. note u.ap will
+		--be: 9 for p1 (orange), 11
+		--for ai (pal'd to pink), 13
+		--for ladyb (pal'd to red)
+		sset(109+x/20.21,
+			72+y/21.33,u.ap)
 	end
 
+	--ignore bldg under constructn
 	if (u.const) return
+	
+	--if unit is at rest, make
+	--ladybug wander every 6 sec,
+	--mark ant as idle worker
+	--(after 10 frames of idleness)
+	--and barracks/dens as idle
+	--bldg if no queue
 	if u.st.idl then
 		if (ut.lady and t6) wander(u)
 		if u.hu then
@@ -2142,8 +2302,14 @@ function tick(u)
 		end
 	end
 
+	--update visibility
 	if u.upd then
 		if u.hu then
+			--first see where in a tile
+			--the unit is. see if we have
+			--the relative surrounding
+			--tiles cached for that pos.
+			--if not, generate them
 			local xo,yo,l=x%8\2,y%8\2,
 				ceil(los/8)
 			local k=xo|yo*16|los*256
@@ -2159,6 +2325,9 @@ function tick(u)
 				end
 			end
 
+			--for each relative tile,
+			--mark bldgs as discovered,
+			--and the tile as exp + viz
 			foreach(vcache[k],function(t)
 				local k=u.k+t
 				if mid(k,8191)==k and
@@ -2171,40 +2340,70 @@ function tick(u)
 			end)
 		end
 
+		--aggress nearby units
 		if u.st.agg and u.atk then
 			for e in all(units) do
+				--check for enemy, or monk
+				--healing own non-bldg unit
 				if e.ap!=u.ap or
 					u.mnk and e.dmgd and
 					not e.bldg
 				then
 					local d=dist(x-e.x,y-e.y)
-					if e.alive and
-						d<=los then
+					if e.alive and d<=los then
 						if e.bldg then
+							--if enemy is non-farm
+							--bldg, prioritize it if
+							--unit is siege, or de-
+							--prioritize it non-siege
 							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
+						--choose the closest targ
 						if d<agg_d then
 							agg_u,agg_d=e,d
 						end
 					end
 				end
 			end
+			--attack (agg_u can be nil)
 			goatk(u,agg_u)
 		end
 	end
 
+	--units don't pathfind around
+	--other units (they don't
+	--obstruct) so we need an
+	--algorithm to adjust units
+	--that are stopped overlapped
+	--(so you can see how many
+	--there are)
 	if u.unit and not u.st.typ then
+		--fr=frontier, v=visited
 		local fr,v={{x,y}},{}
 		for i,p in next,fr do
 			x,y=unpack(p)
+			
+			--this tile is allowed if
+			--it's accessible or ez_adj
 			local a=u.st.ez_adj or
 				acc(x\8,y\8)
+				
+			--if accessible or is the
+			--current position (in case
+			--the current pos is inacc)..
 			if a or i==1 then
+				--if accessible and there
+				--is no overlap, move to
+				--this position (or stay
+				--put if already there)
 				if a and not g(pos,x\4,y\4) then
 					u.st.typ=i>1 and {p}
 					break
 				end
+				--otherwise, add surrounding
+				--positions (adj x+y by 2)
+				--to the frontier
 				for nx=max(x-2),min(x+2,382),2 do
 				for ny=max(y-2),min(y+2,253),2 do
 					s(v,nx\2,ny\2,
@@ -2214,6 +2413,8 @@ function tick(u)
 				end
 			end
 		end
+		--mark this position as
+		--occupied for the next unit
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -2930,7 +3131,7 @@ conv=0
 alive=1
 bop=101]],_typ[_p],rnd"60"\1))
 		foreach(
-		split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr",
+		split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
 		function(k)
 			_ENV[k]=typ[k]
 		end)
