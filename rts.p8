@@ -7,16 +7,26 @@ __lua__
 --see bbs for full credits:
 --lexaloffle.com/bbs/?tid=51464
 
+--util to compose two funcs
+--commonly used together:
+--"unspl(x)" = unpack(split(x))
 function comp(f,g)
 	return function(...)
 		return f(g(...))
 	end
 end
 
+--util to set a global var
+--to an empty array, used in
+--combination with "unspl"
+--allows a"x,y" => x,y={},{} 
 function a(v,...)
 	_ENV[v]={},... and a(...)
 end
 
+--define sfx and foreach
+--locally so they can be used
+--in custom _ENV contexts
 local pspl,rndspl,unspl,
 	campal,fmget,sfx,foreach=
 	comp(pal,split),
@@ -25,6 +35,38 @@ local pspl,rndspl,unspl,
 	comp(camera,pal),
 	comp(fget,mget),sfx,foreach
 
+--typs=array of unit types,
+--allows us to deserialize a
+--unit type index into an
+--actual type (eg when loading)
+--must be defined here and not
+--in aspl in init bc it's
+--required by the p func (parse)
+
+--stp=starting positions - for
+--each corner of the map, has
+--the starting x and y camera
+--position (also used to place
+--starting units)
+
+--pcol=array of player colors
+--it rotates when pressing z
+--on the title screen
+
+--hlt=time when a highlight
+--(represented by hlv) occured.
+
+--diff=selected dffclty on title
+
+--cx,cy=camera x,y
+
+--cvx,cvy=camera velocity (for
+--title screen only)
+
+--spdr=represents whether a
+--spider is making a movement,
+--indicating to mvmt funcs that
+--webs should be walkable
 local unl,unspr,aspl,
 	typs,stp,pcol,
 	hlt,diff,
@@ -41,12 +83,28 @@ local unl,unspr,aspl,
 
 music(63,2000)
 function _update()
+	--lclk and rclk are "key up"
+	--events. useful for certain
+	--times, and required on
+	--touch screens (touch events
+	--can be weird)
+	
+	--stat(121) checks if a file
+	--was dropped, we load it ifso
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
 		lrclk and not btn"4",
 		btn"5",btn"4",
 		stat"121" and loadgame()
 
+	--dget(0) is controls mode.
+	-->1 means console or desktop,
+	--so we don't need "key up"
+	--behavior, unless the game
+	--is over (in which case, we
+	--don't want the keypress to
+	--repeat and start a new game
+	--immediately from the title)
 	if dget"0">1 and not loser then
 		lclk,rclk=btnp"5",btnp"4"
 	end
@@ -54,26 +112,58 @@ function _update()
 	if menu then
 		cx+=cvx
 		cy+=cvy
+		--bounce the camera off walls
 		if (cx%256==0) cvx*=-1
 		if (cy%127==0) cvy*=-1
+		
+		--⬅️/➡️ buttons
 		if btnp"0" or btnp"1" then
+		 --loop difficulty from 0-4
+		 --the btnp()^^-2 trick yields
+		 -- -1 on ⬅️ and -4 on ➡️
+		 --(-4%5=1). how did i find
+		 --this? lots of trial+error
 			diff+=btnp()^^-2
 			diff%=5
 			sfx"18"
 		end
+		
+		--put the first color on the
+		--end of the pcol array if
+		--🅾️ is pressed
 		add(pcol,
 			deli(btnp"4" and pcol,1))
+		
+		--start the game
 		if lclk then
+			--this fn initializes a lot
+			--variables
 			init()
 			
+			--initialize all 3 players
+			--(even tho there might only
+			--be two). "res" is a table
+			--with 3 items that started
+			--as the resources for each
+			--player but evolved to keep
+			--a lot more player state
 			for k=1,3 do
 				local r=res[k]
+				--choose a random position
+				--(and delete it),
+				--get color from pcol,
+				--get # of players + ai diff
+				--from diff selection
 				r.pos,r.col,r.npl,r.diff=
 					del(posidx,rnd(posidx)),
 					pcol[k],
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 
+			--generate starting units
+			--typ_idx,x,y
+			--(x and y are offsets from
+			--starting position)
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
@@ -83,53 +173,135 @@ function _update()
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
+					--set res.p2.newg to
+					--truthy, this will
+					--differentiate from a
+					--loaded game, instructing
+					--the ai system to create
+					--ladybugs
 					res.p2.newg=
 						unit(u,x+dx,y+dy,p)
 				end
 			end)
+			
+			--start the game!
 			start()
 		else
-			--pal for menu map
+			--pal for title screen map
 			pspl"1,5,13,13,13,13,6,2,6,5,3,13,13,0,5"
 			return
 		end
 	end
 
+	--incr a 0-59 frame counter
 	cf+=1
 	cf%=60
 
+	--capture input like ⬅️➡️⬆️⬇️,
+	--mouse clicks, etc.
 	input()
 
+	--win/lose screen
 	if loser then
+		--disable mouse interaction
 		poke"0x5f2d"
+		
+		--reset back to the title
+		--screen if ❎ is pressed
+		--and the first bar of end
+		--music has passed (this
+		--prevents immediately jumping
+		--to the title screen if the
+		--player was mid-click)
 		if lclk and stat"54">56 then
-			menu,cx,cy=unspl"63,5,35"
+			menu,cx,cy=unspl"1,5,35"
 			music"63"
 		end
+		
+		--toggle whether the endgame
+		--banner is showing
 		if rclk then
+			--ban starts at 0. ^^=0xf0
+			--toggles it between 0 and
+			--240, which we can use as
+			--a camera offset for the
+			--banner. fewer tokens than
+			--not'ing a bool
 			ban^^=0xf0
 		end
 		return
 	end
 
+	--work on our async dist-map
+	--queue
 	dmap()
+	
+	--this is an internal refresh
+	--rate for non-essential things
+	--like visibility updating,
+	--aggression checks, that
+	--scales with the number of
+	--units. we decrease this rate
+	--to keep perf high as
+	--more units are made
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
+	--pos="2d" array that will tell
+	--us if units are overlapping
+	--(and so should be spread out)
+	
+	--asc=a* path cache. if a grp
+	--of close units are given a
+	--move order, we can reuse
+	--a lot of pathfinding. resets
+	--every frame because new
+	--obstructions etc invalid8
+	
+	--sele=selected enemy. used
+	--in selection system later
 	aspl"pos,asc,sele"
+	
+	--upc=constrains frame counter
+	-- to upcycle
+	--hbld=bldg being hovered over
+	--t6=6-second interval
+	--selh=selected human units
+	--selb=selected human bldgs
 	upc,hbld,t6,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
 		g(bldgs,mx8,my8,{}),
 		t()%6<1
 
+	--keep track of game time for
+	--end screen (add 0.0333 sec)
 	res1.t+=0x.0888
 
+	--every second, update minimap
+	--sprite. this is faster than
+	--drawing it new every frame.
+	--(19 so it doesn't fall on an
+	--upcycle)
 	if cf%30==19 then
 		for tx=0,19 do
 			for ty=0,12 do
+				--minimap-to-realmap ratio
 				local x,y=tx\0x.6556,
 					ty\0x.6003
+				--109,72 is where minimap
+				--lives in spritesheet.
+				
+				--if maptile is explored,
+				--look its color up by flag.
+				--if maptile is not crrntly
+				--visible, prepend an "e"
+				--to that flag, which will
+				--give a darker color.
+				
+				--if map is not explored,
+				--draw 14 (will be pal'd to
+				--black)
 				sset(109+tx,72+ty,
 					g(exp,x,y) and rescol[
 						g(viz,x,y,"e")..
@@ -138,8 +310,29 @@ function _update()
 		end
 	end
 
+	--refresh visibility.
 	if upc==0 then
+		--each frame this upcycle,
+		--units have been entering
+		--their visibility into nviz.
+		--now we have all of it, so
+		--set viz to nviz
 		viz,nviz=nviz,{}
+		
+		--units have also been
+		--updating explored tiles.
+		--for each explored tile,
+		--update it in the fogmap (48
+		--tiles offset from realmap).
+		
+		--if the tile is visible,
+		--viz[k] is "v", which sets
+		--the tile to 0 (transparent)
+		--which is a hole in fogmap.
+		--if not visible, copy the
+		--tile from realmap (fogmap
+		--is drawn with pal change,
+		--so it will look foggy)
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
 			mset(x+48,y,viz[k] or
@@ -147,19 +340,39 @@ function _update()
 		end
 	end
 
+	--loop through projectiles
 	foreach(prj,function(b)
 		local typ=b.typ
+		--norm moves the projectile
+		--by the attacker's prj speed
+		--towards the coordinate b.p1
 		if norm(b.p1,b,typ.prj_spd)
 		then
+			--if it reached its dest,
+			--delete it and check for hit
 			del(prj,b)
 			for u in all(units) do
+				--skip friendly fire
+				--ap is a player index
+				--that is the same for ai's
+				
+				--expand intersection
+				--tolerance by proj aoe
 				if u.ap!=b.p1[3] and
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
 					dmg(typ,u)
+					--if no aoe, then only hit
+					--a single unit. otherwise,
+					--keep checking hits
 					if typ.aoe==0 then
 						break
 					end
+					
+					--hlv.var means it was
+					--reset, so there is no
+					--current hilite. draw an
+					--aoe hilite
 					if hlv.var then
 						hilite(p([[f=2
 c=13]],b.x,b.y))
@@ -169,18 +382,40 @@ c=13]],b.x,b.y))
 		end
 	end)
 
+	--each unit does its thing
+	--this also populates the
+	--vars selh,selb, and sele
+	--if the unit is within the
+	--selection box
 	foreach(units,tick)
 
+	--if we are drawing a selection
+	--box, then set our selection
+	--array to our own units, our
+	--own building, or an enemy
+	--unit, in that priority order
 	if selx then
 		sel=selh or selb or sele
 	end
+	--some selection helpers -
+	--sel1=first selected unit
+	--nsel=number of selected units
+	--seltyp=
+	-- nil if no selection
+	-- {} if different typs sel'd
+	-- typ if same typs selected
 	sel1,nsel,seltyp=sel[1],#sel
+	
+	--compute seltyp by looping
+	--through the selection
 	fsel(function(s)
 		seltyp=(not seltyp or
 			s.typ==seltyp) and s.typ
 			or {}
 	end)
 
+	--run any ai still alive
+	--(npl=number of players)
 	for i=2,npl do
 		if upc==i and units[i].alive then
 			ai_frame(ais[i])
@@ -188,6 +423,13 @@ c=13]],b.x,b.y))
 	end
 end
 
+--draw a banner. used in game
+--end screen and savefile.
+--a=which ant to show?
+--  1=sad, 2=happy
+--t=banner title
+--st=banner subtitle
+--cx=camera offset
 function bnr(a,t,st,cx)
 	camera(cx)
 	local s=res1.t\1%60
@@ -205,47 +447,74 @@ function bnr(a,t,st,cx)
 	campal()
 end
 
+--draws map at offset o
+--(realmap at 0, fogmap at 48)
 function draw_map(o)
 	camera(cx%8,cy%8)
 	--if loser (which includes
 	--title), draw full map, else,
 	--menu obscures bottom 2 tiles
+	--so take a small perf win
 	map(cx/8+o,cy/8,
 		unspl(loser and "0,0,17,17"
 		or "0,0,17,15"))
 end
 
 function _draw()
+	--draw the realmap
 	draw_map"0"
+	
+	--title screen
 	if menu then
 		camera()
 
+		--x=current ant anim frame
 		local x=64+t()\.5%2*16
+		
+		--ant shadows
 		pspl"0,5,0,0,0,0,0,0,0,0,0,0,0,5"
 		sspr(x,unspl"0,16,8,25,18,32,16")
 		sspr(x,unspl"0,16,8,74,18,32,16,1")
+		
 		pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0,2"
+		
+		--left ant (player 1 color)
 		pal{pcol[1]}
 		sspr(x,unspl"0,16,8,25,17,32,16")
+		
+		--right ant (player 2 color)
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
+		--static title text
 		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.6⁶jqtᶜ6V1.6⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
-
+		
+		--difficulty selection
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
 	end
 
+	--bfog=units to draw "before
+	-- fog" (eg visible units that
+	-- can be partially obscured)
+	--afog=units to draw after fog
+	-- (eg discovered buildings)
+	--btns=array of ui buttons
 	aspl"bfog,afog,btns"
 	for u in all(units) do
+		--only draw units onscreen or
+		--if the game is over
 		if u.onscr or loser then
 			if
 				not loser and
 				not g(viz,u.x8,u.y8)
-				and u.disc
+				and u.disc --or u.hu
 			then
 				add(afog,u)
 			elseif u.bldg or u.dead then
+				--dead units and buildings
+				--are drawn first so they
+				--are behind everything else
 				draw_unit(u)
 			else
 				add(bfog,u)
@@ -253,15 +522,22 @@ function _draw()
 		end
 	end
 
+	--draw units before fog
 	foreach(bfog,draw_unit)
+	
+	--draw projectiles
 	camera(cx,cy)
+	--anim frame
 	local cf5=cf\5
 	foreach(prj,function(_ENV)
 		sspr(
 			typ.prj_s+cf5%2*2,
 			96,2,2,x,y)
 	end)
+	
+	--gameover screen, draw banner
 	if loser then
+		--keep resource bar in view
 		resbar()
 		bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],
 			stat"54">56 and
@@ -271,19 +547,30 @@ function _draw()
 		return
 	end
 
+	--draw the fogmap
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
-	draw_map"48" --fogmap
-
+	draw_map"48"
+	
+	--draw "after fog" units
+	--(keep the same fogmap pal -
+	--don't allow draw_unit to pal)
 	_pal,pal=pal,max
 	foreach(afog,draw_unit)
 	pal=_pal
 	pal()
 
+	--fillp(▒)
 	fillp"23130.5"
 
+	--draw borders around fog
+	--and visible area.
+	--for each tile on screen...
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
+		--this function takes a tile
+		--and draws a line along its
+		--edges with visible neighbors
 		local function b(a,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
@@ -294,8 +581,14 @@ function _draw()
 				a[i+1] and unl"8,0,8,7"
 		end
 		if not exp[i] then
+			--not explored, draw black
 			b(exp)
 		elseif not viz[i] then
+			--not visible, draw gray (5),
+			--unless the tile has flag 7,
+			--(true for water tiles,
+			--which look bad with a gray
+			--line), if so, draw black
 			b(viz,fmget(x,y)>=128 or 5)
 		end
 	end
@@ -304,37 +597,69 @@ function _draw()
 	camera(cx,cy)
 
 	fillp(
+		--draw selection box
 		selx and rect(unpack(selbox)),
+		--draw (+ animate) the rally
+		--flag. this happens here to
+		--avoid 'if' and save a token
 		sel1 and sel1.rx and
 			spr(64+cf5%3,
 				sel1.rx-2,sel1.ry-5)
 	)
+	--reset fillp (happens after
+	--drawing the selbox)
 
+	--draw the current highlight
 	local dt=t()-hlt
 	if dt>.5 then
+		--if hilite is .5 sec old,
+		--set it to {} (essentially)
 		p"var=hlv"
 	elseif hlv.f then
+		--this is a movement circle
+		--hilite. shrink it with time
 		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
 	elseif mid(dt,.1,.25)!=dt
 		and hlv.r then
+		--this is a unit hilite. dont
+		--draw it between .1 and .25
+		--secs, this makes it flash 2x
+		--draw the unit's hitbox
 		rect(unpack(hlv.r))
 	end
 
 	draw_menu()
+	
+	--reset camera + palette
 	campal()
+	
+	--if hlv was not generated
+	--by p (parse), then it's a
+	--minimap movement hilite
 	if not hlv.p1 then
 		circ(unpack(hlv))
 	end
+	
+	--if we are placing a bldg...
 	if to_bld then
+		--snap it to an 8x8 grid
 		camera(cx-mx8*8,cy-my8*8)
+		
+		--if invalid spot, draw the
+		--sprite all red
 		pspl(bldable() or
 			"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
+			--below the menubar, the
+			--sprite should follow the
+			--mouse closely
 			camera(4-amx,4-amy)
 		else
+			--fillp(▒)
 			fillp"23130.5"
+			--bldg footprint
 			rect(to_bld.fw,to_bld.h,
 				unspl"-1,-1,3")
 			fillp()
@@ -344,8 +669,16 @@ function _draw()
 		pal()
 	end
 
+	--draw the cursor if controls
+	--are not mobile.
+	--amx/amy is "absolute" x/y,
+	--not relative to cx,cy
 	camera(-amx,-amy)
 	if dget"0">1 then
+		--choose the right cursor
+		--sprite.
+		--note spr 188 (hand cursor)
+		--needs an extra pixel!
 		spr(
 			hbtn and pset(unspl"-1,4,5")
 				and 188 or
@@ -363,15 +696,29 @@ end
 --init
 
 function start()
+	--starts the game!
+	--this function is essentially
+	--the common elements of
+	--starting a new game and
+	--loading a saved game.
+	
+	--npl==number of players
+	--hq=human queen, or hq!
+	--cx,cy=camera x,y
 	npl,hq,cx,cy=res1.npl,
 		units[1],
 		unspl(stp[res1.pos],":")
 
+	--queue distance map calcs
+	--starting with drop-offs
 	qdmaps"d"
 end
 
 function init()
+	--enable mouse
 	poke(0x5f2d,3)
+	
+	--reset the realmap+fogmap
 	reload()
 
 	music(unspl"0,0,7")
@@ -379,6 +726,27 @@ function init()
 	menuitem(4,"∧ resign",
 		function()	hq.hp=0	end)
 
+	--initialize "res", which
+	--keeps track of player state,
+	--including their resources.
+	
+	--note that p generates a
+	--table which has all the given
+	--vals, but also puts 4
+	--sequential ites in that table
+	--that each also have all the
+	--given vals. this means we
+	--also get: res[1] (or res.p1),
+	-- res[2] (.p2), res[3] (.p3)
+	
+	--p=current population
+	--pl=population limit
+	--tot=total units made
+	--reqs=bldg reqs met (bitmap)
+	--diff=ai difficulty
+	--techs=techs done (bitmap)
+	--t=gametime (seconds)
+	--npl=number of players
 	p[[var=res
 r=20
 g=10
@@ -392,7 +760,33 @@ techs=0
 t=0
 npl=0]]
 
+	--generate a bunch of arrays:
+	--dq=queue of dist-map keys to
+	-- process.
+	--exp=keys are explored tiles
+	--vcache=line-of-sight cache
+	-- (for a given los value and
+	-- position in a tile, which
+	-- tiles around me can i see?)
+	--dmaps=dist-map table-entry
+	-- for each res (r,g,b), plus
+	-- dropoff bldgs (d)
+	--units=all created units
+	--restiles=tracks how many
+	-- resources are left per tile
+	--sel=currently selected units
+	--prj=projectiles
+	--bldgs=coordinates=>bldg map
+	--nviz="new" visibility map,
+	-- gets built up over several
+	-- frames and then replaces viz
+	--ais=ai states
+	--dmap_st=goal tiles for each
+	-- dist-map
 	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,ais,dmap_st"
+	
+	--res1=helper var for res.p1
+	--
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
@@ -2407,7 +2801,8 @@ sproff=0
 cyc=0
 fres=0
 conv=0
-alive=1]],_typ[_p],rnd"60"\1))
+alive=1
+bop=101]],_typ[_p],rnd"60"\1))
 		foreach(
 		split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr",
 		function(k)
@@ -3076,11 +3471,22 @@ function ai_frame(ai)
 			g(bldgs,x,y)
 		if res.tot>=p then
 			if b then
-				if not bld and ai.safe then
+				if bld then
+					--set "build order pop" so
+					--that we control which
+					--castles produce cats
+					--otherwise there's an
+					--imbalance of them in the
+					--lategame bc ai builds
+					--lots of castles. we set
+					--this here so that units
+					--from loaded games have it
+					bld.bop=p
+				elseif ai.safe then
 					if can_pay(b,res) then
 						pay(b,1,res)
 						unit(b,ux+b.w/2,
-							uy+b.h/2,ai.typ,1).bop=p
+							uy+b.h/2,ai.typ,1)
 					else
 						hold=b
 					end
