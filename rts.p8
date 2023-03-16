@@ -786,7 +786,21 @@ npl=0]]
 	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,ais,dmap_st"
 	
 	--res1=helper var for res.p1
-	--
+	--posidx=array to remove from
+	-- when determining starting
+	-- locations
+	--ptr=starting mem pointer when
+	-- loading a file
+	--cf=current frame. starts at
+	-- 59 so first frame is 0
+	--selt=time since last select
+	-- used for double-click
+	--alert=time since atk warn
+	--ban=banner camera x offset
+	--amx,amy=mouse (absolute pos)
+	--tot=total active units
+	-- starts at 50 so upcycle
+	-- index (tot\50)=1
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
@@ -794,19 +808,131 @@ npl=0]]
 		split"1,2,3,4",
 		unspl"0x9004,59,0,0,0,64,64,50"
 
+	--setup the ais. note that we
+	--have a "3rd" ai (index #4)
+	--for ladybugs - they are not
+	--human so they will trigger
+	--an ai response (of nothing)
+	--when attacked.
+	--boi is the build order index
+	-- (0-based offset since it
+	-- gets looked up in map mem)	
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
 
+	--how much units heal (per
+	--player, eg heal[1],heal[2]...)
+	--can change with upgrades
 p[[var=heal
 qty=.00083]]
 
+	--cost of renewing a farm
 p[[var=renew
 r=0
 g=0
 b=6
 breq=0]]
 
+	--start unit definitions
+	
+	--general
+	--idx=index in typs array
+	--txt=helper description
+	--req=text if not unlocked
+	--spd=speed (px/frame)
+	--los=line of sight (px)
+	--hp=max hp
+	--atk=atk strength
+	--atk_freq (frames)
+	--conv=conversion amt (monks)
+	--def=defense type
+	--atk_typ=attack type
+	--unit=is unit?
+	--bldg=is a building?
+	--dsfx=die sfx (unit=62/bld=27)
+	--sfx=atk sfx (all=10,monk=63)
+	--hl=should this unit heal?
+	--d=what to start dead counter
+	-- at. once it hits 60, the
+	-- unit is removed from game.
+	-- (61 for never, eg queen,
+	-- 59 for immediate eg ladybug)
+
+	--ranged units
+	--range=attack range (px)
+	--prj_spd=projectile speed
+	--prj_xo,yo=proj origin offset
+	--prj_s=proj sprite x (y=96)
+	--aoe=area of effect on proj?
+
+	--buildings
+	--drop=is a drop-off site?
+	--bldrs=how many ai workers
+	-- should build/repair this?
+	--bmap=bldg bitmap value
+	--units=number of units bld
+	-- produces (ai uses to cycle)
+	--idl=whether to include the
+	-- bld in idle military bldg
+	-- check (bottom-right corner)
+	--mil=produces military units?
+	--maxbop=if bldg has a greater
+	-- bop (build order population)
+	-- than this, do not produce.
+	-- used to make ai only prod
+	-- caterpillars from 2 castles
+	--const=time to build bld (sec)
+	-- (1 for units)
+
+	--cost
+	--t=unit/tech build time (sec)
+	--r=red resource cost
+	--g=green resource cost
+	--b=brown resource cost
+	--breq=prerequisites (bitmap)
+	--p=blank if unit, nil if not
+	
+	--drawing
+	--w=hitbox width (px)
+	--fw=sprite width (px)
+	--h=sprite/hitbox height (px)
+	--<state>_x,_y=position in
+	-- spritesheet for that state
+	--<state>_fr,_fps=# of anim
+	-- frames, anim rate for state.
+	--portx,porty="portrait" pos
+	-- in spritesheet
+	--sdir=sprite face direction
+	-- (1 looks left, -1 right)
+	--fire=should there be a fire
+	-- anim when unit is low hp
+	
+	--unit-specific keys:
+	--sg=is siege unit?
+	--gr=worker "gather rate"
+	-- how much to divide its carry
+	-- when dropping off to get
+	-- the final resource gain)
+	--cap=worker resource capacity
+	--gr=farm grow rate
+	--mcyc=max farm cycles
+	
+	--techs
+	--tmap=tech bitmap value (-1
+	-- if not tech)
+	--up=(upgrade): 0 if tech is
+	-- repeatable, -1 if not
+	--
+	--when defining upgrades, the
+	--second argument is the unit
+	--type that should be modified,
+	--and the third arg is a func
+	--to run when the tech is done.
+	--the func will be passed the
+	--player index of the passed
+	--typ, eg if player 1 does an
+	--ant upgrade, arg is ant[1].
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
