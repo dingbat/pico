@@ -435,6 +435,74 @@ end
 stog(1,1)
 stog(2,1)
 
+remove comments:
+python3 ~/shrinko8/shrinko8.py rts_print.p8 rts_no_comment.p8 -m --no-minify-rename --no-minify-spaces --no-minify-lines --no-minify-tokens
+
+diffs comment stuff:
+- return axn
+- foreach(sel,function(u) > fsel(function(u)
+- q>k in cdq=p("c=0",o,q)
+- for x=0,48 do -> 0,47
+- return u,u.bldg and reg_bldg(u)
+- add lady to unit
+- +5 to 7 hard modified
+- rect(0,0,w,h,u==sel1 and 9 or 12) to rect(0,0,w,h,selc or 12)
+
+
+
+< 	local htile,atkmov,clk=
+---
+> 	local cont,htile,atkmov,clk=
+> 		not axn,
+1957d1746
+<
+1959,1960c1748,1749
+<
+< 		axn=hbtn.fn(rclk)
+---
+> 		hbtn.fn(rclk)
+> 		axn=axn and cont==axn
+1964d1752
+<
+1966c1754
+< 		rclk,axn,llclk=1
+---
+> 		rclk,axn=1
+2074a1856,1857
+> 		else
+> 			cont=1
+2078,2090c1861,1873
+< 	if btnp"5" and not selx then
+< 		selx,sely,selt=mx,my,t()
+< 	end
+<
+< 	if llclk and selx then
+<
+< 		selbox={
+< 			min(selx,mx),
+< 			min(sely,my),
+< 			max(selx,mx),
+< 			max(sely,my),7}
+< 	else
+< 		selx=nil
+---
+> 	if cont then
+> 		if btnp"5" and not selx then
+> 			selx,sely,selt=mx,my,t()
+> 		end
+> 		if llclk and selx then
+> 			selbox={
+> 				min(selx,mx),
+> 				min(sely,my),
+> 				max(selx,mx),
+> 				max(sely,my),7}
+> 		else
+> 			selx=nil
+> 		end
+2093c1876,1877
+
+
+
 
 
 ====

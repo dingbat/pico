@@ -15,10 +15,9 @@ function comp(f,g)
 	end
 end
 
---[[
-sets a global var to an empty
-array, composed with "unspl"
-allows a"x,y" => x,y={},{} ]]
+--sets a global var to an empty
+--array, composed with "unspl"
+--allows a"x,y" => x,y={},{}
 function a(v,...)
 	_ENV[v]={},... and a(...)
 end
@@ -53,8 +52,7 @@ cx,cy=camera x,y
 cvx,cvy=camera velocity (title)
 
 spdr==spider moving? funcs will
-	make webs walkable
-]]
+	make webs walkable --]]
 local unl,unspr,aspl,
 	typs,stp,pcol,
 	hlt,diff,
@@ -82,7 +80,7 @@ function _update()
 	--[[
 	dget(0) is controls mode.
 	>1 means console or desktop,
-	so we don't need "key up" ]]
+	so we don't need "key up" --]]
 	if dget"0">1 and not loser then
 		lclk,rclk=btnp"5",btnp"4"
 	end
@@ -99,7 +97,7 @@ function _update()
 			--[[
 		 cycle difficulty btwn 0-4.
 		 btnp^^-2 = -1 on ⬅️ and -4
-		 on ➡️ (-4%5=1). wtf?! ]]
+		 on ➡️ (-4%5=1). wtf?! --]]
 			diff+=btnp()^^-2
 			diff%=5
 			sfx"18"
@@ -165,7 +163,7 @@ function _update()
 		reset only if first bar of
 		end music has passed
 		(in case game ends mid-click)
-		]]
+		--]]
 		if lclk and stat"54">56 then
 			menu,cx,cy=unspl"1,5,35"
 			music"63"
@@ -175,7 +173,7 @@ function _update()
 			--[[
 			ban toggles between 0 and
 			240. used as a camera offset,
-			toggles hide/show banner.]]
+			toggles hide/show banner.--]]
 			ban^^=0xf0
 		end
 		return
@@ -187,7 +185,7 @@ function _update()
 	--[[
 	internal refresh rate for
 	calcs that scale with the
-	number of units.]]
+	number of units.--]]
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
@@ -196,7 +194,7 @@ function _update()
 	 units are overlapping
 	asc=a* path cache
 	sele=selected enemy
-	]]
+	--]]
 	aspl"pos,asc,sele"
 
 	--[[
@@ -206,7 +204,7 @@ function _update()
 	t6=on 6-second interval?
 	selh=selected human units
 	selb=selected human bldgs
-	]]
+	--]]
 	upc,hbld,t6,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
@@ -235,7 +233,7 @@ function _update()
 
 				if tile is not explored,
 				draw 14 (pal'd to black)
-				]]
+				--]]
 				sset(109+tx,72+ty,
 					g(exp,x,y) and rescol[
 						g(viz,x,y,"e")..
@@ -249,7 +247,7 @@ function _update()
 		--[[
 		each frame this upcycle,
 		units been entering viz into
-		nviz. now we set viz to nviz]]
+		nviz. now we set viz to nviz--]]
 		viz,nviz=nviz,{}
 
 		--[[
@@ -262,7 +260,7 @@ function _update()
 		(hole in fogmap). if not
 		visible, copy the tile from
 		realmap (drawn with foggy pal)
-		]]
+		--]]
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
 			mset(x+48,y,viz[k] or
@@ -276,7 +274,7 @@ function _update()
 		--[[
 		moves the projectile
 		by the attacker's prj speed
-		towards dest ]]
+		towards dest--]]
 		if norm(b.p1,b,typ.prj_spd)
 		then
 			--if reached dest,
@@ -312,7 +310,7 @@ c=13]],b.x,b.y))
 	--[[
 	selection priority is:
 	human units, human bldg, enemy
-	(these vars set by tick) ]]
+	(these vars set by tick) --]]
 	if selx then
 		sel=selh or selb or sele
 	end
@@ -325,7 +323,7 @@ c=13]],b.x,b.y))
 	through each selected. result:
 	- nil if no selection
 	- {} if different typs sel'd
-	- typ if same typs selected ]]
+	- typ if same typs selected --]]
 	fsel(function(s)
 		seltyp=(not seltyp or
 			s.typ==seltyp) and s.typ
@@ -345,7 +343,7 @@ banner used in end and savefile
 a=ant anim: 1=sad 2=happy
 t=title
 st=subtitle
-cx=camera offset ]]
+cx=camera offset --]]
 function bnr(a,t,st,cx)
 	camera(cx)
 	local s=res1.t\1%60
@@ -576,8 +574,7 @@ function start()
 	--[[
 	copy num players into global,
 	this will count players left
-	hq=human queen
- ]]
+	hq=human queen--]]
 	npl,hq,cx,cy=res1.npl,
 		units[1],
 		unspl(stp[res1.pos],":")
@@ -609,8 +606,7 @@ function init()
 	reqs=bldg reqs met (bitmap)
 	diff=ai difficulty
 	techs=techs done (bitmap)
-	t=gametime (seconds)
-	]]
+	t=gametime (seconds)--]]
 	p[[var=res
 r=20
 g=10
@@ -642,7 +638,7 @@ npl=0]]
 	nviz="new" viz map, gets built
 		across frames, replaces viz
 	dmap_st=goal tiles per dmap key
- ]]
+ --]]
 	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,ais,dmap_st"
 
 	--[[
@@ -656,7 +652,7 @@ npl=0]]
 	amx,amy=mouse (absolute pos)
 	tot=total active units, start
 	 at 50 so upcycle idx starts 1
- ]]
+ --]]
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
@@ -669,7 +665,7 @@ npl=0]]
  ai (idx 4) is so ai attack
  response doesnt break for lbug
 	boi is the build order index
- ]]
+ --]]
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
@@ -753,8 +749,7 @@ up=-1 if repeatable upgrade
 in techs, 2nd arg is unit type
 to modify, 3rd arg is func to
 run, which is passed player's
-version of the unit type
-]]
+version of the unit type --]]
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
@@ -1774,7 +1769,7 @@ end
 moves a group. sets each unit's
 grp to given agg and state.speed
 to lowest speed of the group.
-if no frc, only idls move ]]
+if no frc, only idls move --]]
 function mvg(units,x,y,agg,frc)
 	local l=999
 	foreach(units,function(u)
@@ -1792,22 +1787,21 @@ local function gobld(u,b)
 	--[[
 	allows selecting workers, bld
 	farms and have each worker
-	stay at a farm]]
+	stay at a farm--]]
 	if u.st.farm and b.farm then
 		return
 	end
 	--[[
  in_bld=for ai to know farm/bld
 	ez_adj=if overlapping, unit
-		can adjust to invalid tiles]]
+		can adjust to invalid tiles--]]
 	u.st,u.res=p([[t=bld
 in_bld=1
 ez_adj=1]],path(u,b.x,b.y),b)
 end
 
---[[
-send worker to gather tile.
-optionally dictate the path]]
+--send worker to gather tile.
+--optionally dictate the path
 local function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	--[[
@@ -1815,7 +1809,7 @@ local function gogth(u,tx,ty,wp)
 	3rd arg (res type) set to st.y
 	4/5th args get put into st.p1
 	array so we can unpack later
- ]]
+ --]]
 	u.st=p([[t=gth
 gth=1
 ez_adj=1]],
@@ -1836,7 +1830,7 @@ local function godrop(u,nxt_res,dropu)
 		opponent mound, go to qn
 		of ant's player (qns are
 		always the first units)
-		]]
+		--]]
 		dropu=(not wayp or
 			g(bldgs,x,y,{}).p!=u.p
 			) and units[u.p]
@@ -1983,7 +1977,7 @@ function tick(u)
 			still have a path, keep
 			walking	but aggress.
 			if ant killed ladybug, eat!
-   ]]
+   --]]
 			u.st.agg=1,
 				wayp or rest(u),
 				u.ant and t.lady and
@@ -2005,7 +1999,7 @@ function tick(u)
 	--[[
  if in an active state
 	(atk is always active),
-	call the state's func ]]
+	call the state's func--]]
 	if u.st.active then
 		_ENV[u.st.t](u)
 	end
@@ -2044,7 +2038,7 @@ function tick(u)
 		sprsheet. note u.ap will
 		be 9 for p1 (orange), 11
 		for ai (pal'd to pink), 13
-		for ladyb (pal'd to red) ]]
+		for ladyb (pal'd to red) --]]
 		sset(109+x/20.21,
 			72+y/21.33,u.ap)
 	end
@@ -2073,7 +2067,7 @@ function tick(u)
    where in the tile is unit?
 			get the relative surrounding
 			tiles cached for that pos.
-			if not, generate them]]
+			if not, generate them--]]
 			local xo,yo,l=x%8\2,y%8\2,
 				ceil(los/8)
 			local k=xo|yo*16|los*256
@@ -2120,7 +2114,7 @@ function tick(u)
        if enemy is non-farm
 							bldg, prioritize it if
 							unit is siege, or de-
-							prioritize it non-siege]]
+							prioritize it non-siege--]]
 							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
@@ -2139,7 +2133,7 @@ function tick(u)
 	--[[
  units dont obstruct other units
  so we need to adjust stopped,
- overlapping units ]]
+ overlapping units --]]
 	if u.unit and not u.st.typ then
 		--fr=frontier, v=visited
 		local fr,v={{x,y}},{}
@@ -2159,7 +2153,7 @@ function tick(u)
     if accessible and there
 				is no overlap, move to
 				this position (or stay
-				put if already there) ]]
+				put if already there) --]]
 				if a and not g(pos,x\4,y\4) then
 					u.st.typ=i>1 and {p}
 					break
@@ -2203,7 +2197,7 @@ function cam()
 		if non-endgame console, move
 		mouse with arrows, + move
 		map if mouse is on screenedge
-		-1\128=-1 ! ]]
+		-1\128=-1 ! --]]
 		amx+=dx
 		amy+=dy
 		dx,dy=amx\128*2,amy\128*2
@@ -2211,7 +2205,7 @@ function cam()
 	--[[
  clamp
 	cy can go past bottom edge bc
-	menubar blocks (unless endgame)]]
+	menubar blocks (unless endgame)--]]
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
 		mid(cy+dy,
@@ -2246,8 +2240,7 @@ function input()
 	htile=tile being hovered
 	atkmov=axn button active
 	 and not touch (in touch,
-	 axn btn is normal move)
-	]]
+	 axn btn is normal move)--]]
 	local htile,atkmov,clk=
 		tile_unit(mx8,my8),
 		axn and dget"0">1,
@@ -2748,7 +2741,7 @@ returns a table with all the
 given vals, + puts 3 sequential
 items in it that also have them,
 called p1,p2,p3.
-if "var", sets to a global var]]
+if "var", sets to a global var--]]
 function p(str,typ,x,y,...)
 	local p1={...}
 	aspl"p2,p3"
@@ -2859,7 +2852,7 @@ end
 for each tile in a square of
 n*2+1 centered at x,y, call fn.
 na=tiles can be inaccessible
-returns whether any were found]]
+returns whether any were found--]]
 function surr(fn,x,y,n,na)
 	local n,e=n or 1
 	for dx=-n,n do
@@ -2932,7 +2925,7 @@ f=magnitude factor
 
 normalize `it` vector, add to
 nt vector (and set dir on nt),
-return whether nt reached `it`]]
+return whether nt reached `it`--]]
 function norm(it,nt,f)
 	local dx,dy=
 		it[1]-nt.x,it[2]-nt.y
@@ -2971,7 +2964,7 @@ end
 "register" a building
 for each tile in footprint,
 if alive, mark it as obstacle
-in bldgs, else, remove it]]
+in bldgs, else, remove it--]]
 function reg_bldg(b)
 	local x,y=b.x8,b.y8
 	local function reg(xx,yy)
@@ -3245,7 +3238,7 @@ u=unit, k=dmap key
 returns path using dist maps,
 which are coord=>dist from a
 a goal tile. pick min dist tile
-around unit, repeat until goal.]]
+around unit, repeat until goal.--]]
 function dpath(u,k)
 	--p=path, l=lowest dist
 	local x,y,dmap,p,l=
@@ -3276,8 +3269,7 @@ function dpath(u,k)
 			so that the next attempt
 			doesn't fall into this 'hole'
 			(in 'drop' state, unit will
-			keep running dpath)
-			]]
+			keep running dpath) --]]
 			s(dmap,x,y,min(l+1,9))
 			return
 		end
@@ -3383,7 +3375,7 @@ end
 get path for unit to x,y
 tol=how many tiles away from
  a valid tile is ok?
-r=how far from goal is ok?]]
+r=how far from goal is ok?--]]
 function path(u,x,y,tol,r)
 	if u.unit then
 		spdr,dest,dest_d=
@@ -3406,7 +3398,7 @@ a* based on morgan3d's a*
 modified to cache paths,
 stop early for ranged units,
 and get as close as possible
-to unreachable goals]]
+to unreachable goals--]]
 function as(st,g,d)
 	local gk,t=g.k>>16,
 		{[st.k]=p([[var=sh
