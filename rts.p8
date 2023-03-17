@@ -39,29 +39,21 @@ typs=array of unit types,
  allows us to deserialize a
  unit type index into an
  actual type (eg when loading)
- must be defined here and not
- in aspl in init bc it's
- required by the p func (parse)
 
 stp=starting positions - for
  each corner of the map, has
 	the starting x and y camera
-	position (also used to place
-	starting units)
 
 pcol=array of player colors
-	it rotates when pressing z
-	on the title screen
 
-hlt=time when a highlight
-	(represented by hlv) occured.
+hlt=time of highlight
 
-diff=selected dffclty on title
+diff=selected title difficulty
 
 cx,cy=camera x,y
 
 cvx,cvy=camera velocity (for
-	title screen only)
+	title only)
 
 spdr=is a spider moving?
 	funcs will make webs walkable
@@ -84,12 +76,10 @@ music(63,2000)
 function _update()
 	--[[
 	lclk and rclk are "key up"
-	events. required on
-	touch screens (touch events
-	can be weird)
+	events, required on touch
 
 	stat(121) checks if a file
-	was dropped, we load it if so
+	was dropped, load it if so
 	]]
 	lclk,rclk,llclk,lrclk=
 		llclk and not btn"5",
@@ -101,11 +91,6 @@ function _update()
 	dget(0) is controls mode.
 	>1 means console or desktop,
 	so we don't need "key up"
-	behavior, unless the game
-	is over (in which case, we
-	don't want the keypress to
-	repeat and start a new game
-	immediately from the title
 	]]
 	if dget"0">1 and not loser then
 		lclk,rclk=btnp"5",btnp"4"
@@ -132,34 +117,19 @@ function _update()
 			sfx"18"
 		end
 
-		--put the first color on the
-		--end of the pcol array if
-		--🅾️ is pressed
+		--rotate the pcol array on 🅾️
 		add(pcol,
 			deli(btnp"4" and pcol,1))
 
-		--start the game
 		if lclk then
-			--this fn initializes a lot
-			--variables
+			--init new game
 			init()
 
-			--[[
-			initialize all 3 players
-			(even tho there might only
-			be two). "res" is a table
-			with 3 items that keeps state
-			for each player
-			]]
 			for k=1,3 do
+				--res keeps player state
 				local r=res[k]
-				--[[
-				choose a random position
-				(and delete it),
-				get color from pcol,
-				get # of players + ai diff
-				from diff selection
-				]]
+				--choose random pos
+				--npl=# of players
 				r.pos,r.col,r.npl,r.diff=
 					del(posidx,rnd(posidx)),
 					pcol[k],
@@ -168,9 +138,7 @@ function _update()
 
 			--[[
 			generate starting units
-			typ_idx,x,y
-				(x and y are offsets from
-				starting position)
+			typ_idx,x-offset,y-offset
 			]]
 			foreach(split([[7,64,64
 1,49,64
@@ -182,20 +150,18 @@ function _update()
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
 					--[[
-					set res.p2.newg to
-					truthy, this differentiates
-					from a loaded game, so that
-					we will create ladybugs
+					set res.p2.newg to truthy,
+					this differentiates
+					from a loaded game
 					]]
 					res.p2.newg=
 						unit(u,x+dx,y+dy,p)
 				end
 			end)
 
-			--start the game!
 			start()
 		else
-			--pal for title screen map
+			--pal for title map bg
 			pspl"1,5,13,13,13,13,6,2,6,5,3,13,13,0,5"
 			return
 		end
@@ -205,63 +171,50 @@ function _update()
 	cf+=1
 	cf%=60
 
-	--capture input like ⬅️➡️⬆️⬇️,
-	--mouse clicks, etc.
 	input()
 
 	--win/lose screen
 	if loser then
-		--disable mouse interaction
+		--disable mouse
 		poke"0x5f2d"
 
 		--[[
-		reset only if first bar of end
-		music has passed
-		(prevents immediately jumping
-		to title if in mid-click)
+		reset only if first bar of
+		end music has passed
+		(in case game ends mid-click)
 		]]
 		if lclk and stat"54">56 then
 			menu,cx,cy=unspl"1,5,35"
 			music"63"
 		end
 
-		--toggle whether the endgame
-		--banner is showing
 		if rclk then
 			--[[
-			ban toggles between 0 and 240
-			used as a camera offset for
-			end game banner.
+			ban toggles between 0 and
+			240. used as a camera offset,
+			toggles hide/show banner.
 			]]
 			ban^^=0xf0
 		end
 		return
 	end
 
-	--work on async dist-map queue
+	--async dist-map calc
 	dmap()
 
 	--[[
-	an internal refresh
-	rate for things like
-	visibility, aggression, that
-	scale with the number of units.
-	decrease freq as units incr
+	internal refresh rate for
+	calcs that scale with the
+	number of units.
 	]]
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
 	--[[
-	pos=array that will tell
-	us if units are overlapping
-	(and so should be spread out)
-
-	asc=a* path cache. resets
-	every frame because new
-	obstructions etc invalidate
-
-	sele=selected enemy. used
-	in selection system later
+	pos=array that tells us if 
+	 units are overlapping
+	asc=a* path cache
+	sele=selected enemy
 	]]
 	aspl"pos,asc,sele"
 
@@ -269,7 +222,7 @@ function _update()
 	upc=constrains frame counter
 	 to upcycle
 	hbld=bldg being hovered over
-	t6=6-second interval
+	t6=on 6-second interval?
 	selh=selected human units
 	selb=selected human bldgs
 	]]
@@ -279,8 +232,7 @@ function _update()
 		g(bldgs,mx8,my8,{}),
 		t()%6<1
 
-	--keep track of game time for
-	--end screen (add 0.0333 sec)
+	--keep track of game time
 	res1.t+=0x.0888
 
 	--every second, update minimap
@@ -288,7 +240,6 @@ function _update()
 	if cf%30==19 then
 		for tx=0,19 do
 			for ty=0,12 do
-				--minimap-to-realmap ratio
 				local x,y=tx\0x.6556,
 					ty\0x.6003
 				--[[
@@ -296,15 +247,13 @@ function _update()
 				lives in spritesheet.
 
 				if maptile is explored,
-				look its color up by flag.
-				if maptile is not crrntly
-				visible, prepend an "e"
-				to that flag, which will
+				look its color up.
+				if maptile is not visible,
+				prepend an "e", which will
 				give a darker color.
 
 				if tile is not explored,
-				draw 14 (will be pal'd to
-				black
+				draw 14 (pal'd to black)
 				]]
 				sset(109+tx,72+ty,
 					g(exp,x,y) and rescol[
@@ -314,18 +263,18 @@ function _update()
 		end
 	end
 
-	--refresh visibility.
+	--refresh fogmap
 	if upc==0 then
 		--[[
 		each frame this upcycle,
 		units have been entering
 		their visibility into nviz.
-		now we have all of it, so
-		set viz to nviz
+		now we set viz to nviz
 		]]
 		viz,nviz=nviz,{}
 
-		--[[units have also been
+		--[[
+		units have also been
 		updating explored tiles.
 		for each one, update it in
 		the fogmap (48 tiles offset
@@ -346,42 +295,34 @@ function _update()
 		end
 	end
 
-	--loop through projectiles
+	--projectiles
 	foreach(prj,function(b)
 		local typ=b.typ
 		--[[
 		norm moves the projectile
 		by the attacker's prj speed
-		towards the coordinate b.p1
+		towards the destination
 		]]
 		if norm(b.p1,b,typ.prj_spd)
 		then
 			--if it reached its dest,
-			--delete it and check for hit
+			--remove and check for hit
 			del(prj,b)
 			for u in all(units) do
-				--skip friendly fire
-				--ap is a player index
-				--that is the same for ai's
-
+				--skip friendly fire,
 				--expand intersection
-				--tolerance by proj aoe
+				--tolerance by aoe
 				if u.ap!=b.p1[3] and
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
 					dmg(typ,u)
-					--if no aoe, then only hit
-					--a single unit. otherwise,
-					--keep checking hits
+					--if no aoe, just 1 hit
 					if typ.aoe==0 then
 						break
 					end
 
-					--[[
-					hlv.var means it was
-					reset, so there is no
-					current hilite. draw an
-					aoe hilite]]
+					--only draw aoe circle if
+					--no current hilite
 					if hlv.var then
 						hilite(p([[f=2
 c=13]],b.x,b.y))
@@ -391,26 +332,24 @@ c=13]],b.x,b.y))
 		end
 	end)
 
-	--each unit does its thing.
+	--each unit does its thing
 	foreach(units,tick)
 
 	--[[
-	if we are drawing a selection
-	box, then set our selection
-	array to our own units, our
-	own building, or an enemy
-	unit, in that priority order.
+	selection priority is:
+	human units, human bldg, enemy
 	(these vars set by tick)
 	]]
 	if selx then
 		sel=selh or selb or sele
 	end
-	--some selection helpers
+	
+	--helpers
 	sel1,nsel,seltyp=sel[1],#sel
 
 	--[[
 	compute seltyp by looping
-	through each selected.
+	through each selected. result:
 	- nil if no selection
 	- {} if different typs sel'd
 	- typ if same typs selected
@@ -421,8 +360,7 @@ c=13]],b.x,b.y))
 			or {}
 	end)
 
-	--run any ai still alive
-	--(npl=number of players)
+	--run ai (npl=# of players)
 	for i=2,npl do
 		if upc==i and units[i].alive then
 			ai_frame(ais[i])
@@ -431,10 +369,9 @@ c=13]],b.x,b.y))
 end
 
 --[[
-draw a banner. used in game
-end screen and savefile.
-a=which ant to show?
-  1=sad, 2=happy
+draw banner. used in game
+end and savefile.
+a=ant anim: 1=sad 2=happy
 t=title
 st=subtitle
 cx=camera offset
@@ -470,14 +407,14 @@ function draw_map(o)
 end
 
 function _draw()
-	--draw the realmap
+	--realmap
 	draw_map"0"
 
 	--title screen
 	if menu then
 		camera()
 
-		--x=current ant anim frame
+		--ant anim frame
 		local x=64+t()\.5%2*16
 
 		--ant shadows
@@ -487,18 +424,15 @@ function _draw()
 
 		pspl"1,14,3,4,4,6,7,8,9,10,11,12,13,0,2"
 
-		--left ant (player 1 color)
+		--left ant (p1 color)
 		pal{pcol[1]}
 		sspr(x,unspl"0,16,8,25,17,32,16")
 
-		--right ant (player 2 color)
+		--right ant (p2 color)
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		--static title text
 		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.6⁶jqtᶜ6V1.6⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
-
-		--difficulty selection
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
 	end
@@ -508,13 +442,11 @@ function _draw()
 	--btns=ui buttons
 	aspl"bfog,afog,btns"
 	for u in all(units) do
-		--only draw units onscreen or
-		--if the game is over
 		if u.onscr or loser then
 			if
 				not loser and
 				not g(viz,u.x8,u.y8)
-				and u.disc --or u.hu
+				and u.disc
 			then
 				add(afog,u)
 			elseif u.bldg or u.dead then
@@ -527,7 +459,6 @@ function _draw()
 		end
 	end
 
-	--draw units before fog
 	foreach(bfog,draw_unit)
 
 	--draw projectiles
@@ -540,9 +471,8 @@ function _draw()
 			96,2,2,x,y)
 	end)
 
-	--gameover screen, draw banner
+	--gameover screen
 	if loser then
-		--keep resource bar in view
 		resbar()
 		bnr(loser,split"defeat⁶x2....⁶x4⁶jdnᶜ1defeat⁶x2....,victory!⁶jdnᶜ1victory!"[loser],
 			stat"54">56 and
@@ -564,18 +494,17 @@ function _draw()
 	pal=_pal
 	pal()
 
-	--fillp(▒)
+	--▒
 	fillp"23130.5"
 
 	--draw borders around fog
 	--and visible area.
-	--for each tile on screen...
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
-		--this function takes a tile
-		--and draws a line along its
-		--edges with visible neighbors
+		--this func takes a tile
+		--and draws a line along
+		--edges w/ visible neighbors
 		local function b(a,col)
 			color(col)
 			camera(cx-x*8,cy-y*8)
@@ -586,7 +515,6 @@ function _draw()
 				a[i+1] and unl"8,0,8,7"
 		end
 		if not exp[i] then
-			--not explored, draw black
 			b(exp)
 		elseif not viz[i] then
 			--not visible, draw gray (5),
@@ -603,29 +531,28 @@ function _draw()
 	fillp(
 		--draw selection box
 		selx and rect(unpack(selbox)),
-		--draw (+animate) the rally
-		--flag.
+		--draw (+animate) rally flag
 		sel1 and sel1.rx and
 			spr(64+cf5%3,
 				sel1.rx-2,sel1.ry-5)
 	)
 
-	--draw the current highlight
+	--highlight
 	local dt=t()-hlt
 	if dt>.5 then
 		--if hilite is .5 sec old,
-		--set it to {} (essentially)
+		--set it to {var="hlv"}
 		p"var=hlv"
 	elseif hlv.f then
 		--this is a movement circle
-		--hilite. shrink it with time
+		--hilite. shrink with time
 		circ(hlv.typ,hlv.x,
 			min(hlv.f/dt,4),hlv.c)
 	elseif mid(dt,.1,.25)!=dt
 		and hlv.r then
 		--this is a unit hilite. dont
 		--draw it between .1 and .25
-		--secs, this makes it flash 2x
+		--secs, this makes it flash
 		rect(unpack(hlv.r))
 	end
 
@@ -634,26 +561,23 @@ function _draw()
 	--reset camera + palette
 	campal()
 
-	--if hlv was not generated
-	--by p, then it's a minimap
-	--movement hilite
+	--minimap movement hilite
 	if not hlv.p1 then
 		circ(unpack(hlv))
 	end
 
-	--if we are placing a bldg...
+	--placing a bldg
 	if to_bld then
-		--snap it to an 8x8 grid
+		--snap to 8x8
 		camera(cx-mx8*8,cy-my8*8)
 
-		--if invalid spot, draw the
-		--sprite all red
+		--invalid spot= all red spr
 		pspl(bldable() or
 			"8,8,8,8,8,8,8,8,8,8,8,8,8,8,8"
 		)
 		if amy>=104 then
-			--below the menubar, the
-			--sprite follows the mouse
+			--below menubar,
+			--sprite follows mouse
 			camera(4-amx,4-amy)
 		else
 			--▒
@@ -668,8 +592,7 @@ function _draw()
 		pal()
 	end
 
-	--draw cursor if controls
-	--are not touch.
+	--draw cursor if not touch
 	camera(-amx,-amy)
 	if dget"0">1 then
 		spr(
@@ -690,27 +613,24 @@ end
 
 function start()
 	--[[
-  starts the game!
-	this function is essentially
-	the common elements of
-	starting a new game and
+	this func has common elements
+	of starting a new game and
 	loading a saved game.
 
 	npl==number of players
-	hq=human queen, or hq!
+	hq=human queen
 	cx,cy=camera x,y
-  ]]
+ ]]
 	npl,hq,cx,cy=res1.npl,
 		units[1],
 		unspl(stp[res1.pos],":")
 
 	--queue distance map calcs
-	--starting with drop-offs
 	qdmaps"d"
 end
 
 function init()
-	--enable mouse
+	--mouse
 	poke(0x5f2d,3)
 
 	--reset the realmap+fogmap
@@ -722,18 +642,9 @@ function init()
 		function()	hq.hp=0	end)
 
 	--[[
-  initialize "res", which
+ initialize "res", which
 	keeps track of player state,
 	including their resources.
-
-	note that p generates a
-	table which has all the given
-	vals, but also puts 4
-	sequential ites in that table
-	that each also have all the
-	given vals. this means we
-	also get: res[1] (or res.p1),
-	 res[2] (.p2), res[3] (.p3)
 
 	p=current population
 	pl=population limit
@@ -743,7 +654,7 @@ function init()
 	techs=techs done (bitmap)
 	t=gametime (seconds)
 	npl=number of players
-  ]]
+ ]]
 	p[[var=res
 r=20
 g=10
@@ -758,9 +669,8 @@ t=0
 npl=0]]
 
 	--[[
-  generate a bunch of arrays:
-	dq=queue of dist-map keys to
-	 process.
+ generate a bunch of arrays:
+	dq=queue of dmap keys to calc
 	exp=keys are explored tiles
 	vcache=line-of-sight cache
 	 (for a given los value and
@@ -769,39 +679,33 @@ npl=0]]
 	dmaps=dist-map table-entry
 	 for each res (r,g,b), plus
 	 dropoff bldgs (d)
-	units=all created units
-	restiles=tracks how many
+	restiles=how many
 	 resources are left per tile
-	sel=currently selected units
+	sel=selected units
 	prj=projectiles
-	bldgs=coordinates=>bldg map
+	bldgs=map of coords=>bldg
 	nviz="new" visibility map,
 	 gets built up over several
 	 frames and then replaces viz
-	ais=ai states
 	dmap_st=goal tiles for each
-	 dist-map
-  ]]
+	 dmap key
+ ]]
 	aspl"dq,exp,vcache,dmaps,units,restiles,sel,prj,bldgs,nviz,ais,dmap_st"
 
 	--[[
-  res1=helper var for res.p1
-	posidx=array to remove from
-	 when determining starting
-	 locations
+	posidx=all starting locations
 	ptr=starting mem pointer when
-	 loading a file
+	 loading file
 	cf=current frame. starts at
 	 59 so first frame is 0
-	selt=time since last select
-	 used for double-click
-	alert=time since atk warn
+	selt=time since last select,
+	 used for dbl-click
+	alert=time since last atk warn
 	ban=banner camera x offset
 	amx,amy=mouse (absolute pos)
-	tot=total active units
-	 starts at 50 so upcycle
-	 index (tot\50)=1
-  ]]
+	tot=total active units, start
+	 at 50 so upcycle idx starts 1
+ ]]
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
 		loser,menu=
@@ -810,23 +714,20 @@ npl=0]]
 		unspl"0x9004,59,0,0,0,64,64,50"
 
 	--[[
-  setup the ais. note that we
+ setup the ais. note that we
 	have a "3rd" ai (index #4)
 	for ladybugs - they are not
 	human so they will trigger
 	an ai response (of nothing)
 	when attacked.
 	boi is the build order index
-	 (0-based offset since it
-	 gets looked up in map mem)
-  ]]
+ ]]
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
 
 	--how much units heal (per
-	--player, eg heal[1],heal[2]...)
-	--can change with upgrades
+	--player, eg heal[1],heal[2]..)
 p[[var=heal
 qty=.00083]]
 
@@ -840,100 +741,83 @@ breq=0]]
 --[[
 start unit definitions
 
-general
 idx=index in typs array
-txt=helper description
-req=text if not unlocked
+txt=helper txt
+req=text if locked
 spd=speed (px/frame)
 los=line of sight (px)
-hp=max hp
-atk=atk strength
-atk_freq (frames)
-conv=conversion amt (monks)
+conv=conversion strngth (monks)
 def=defense type
-atk_typ=attack type
 unit=is unit?
 bldg=is a building?
-dsfx=die sfx (unit=62/bld=27)
+dsfx=death sfx (unit=62/bld=27)
 sfx=atk sfx (all=10,monk=63)
 hl=should this unit heal?
-d=what to start dead counter
- at. once it hits 60, the
- unit is removed from game.
- (61 for never, eg queen,
+d=what to start dead counter at
+ (0, or 61 for never, eg queen,
  59 for immediate eg ladybug)
 
-ranged units
 range=attack range (px)
 prj_spd=projectile speed
 prj_xo,yo=proj origin offset
 prj_s=proj sprite x (y=96)
 aoe=area of effect on proj?
 
-buildings
 drop=is a drop-off site?
 bldrs=how many ai workers
- should build/repair this?
+ should build/repair?
 bmap=bldg bitmap value
 units=number of units bld
- produces (ai uses to cycle)
-idl=whether to include the
- bld in idle military bldg
- check (bottom-right corner)
+ produces
+idl=should light up idle bldg
+ btn if no prod?
 mil=produces military units?
 maxbop=if bldg has a greater
  bop (build order population)
  than this, do not produce.
  used to make ai only prod
  caterpillars from 2 castles
-const=time to build bld (sec)
+const=time to build bldg (sec)
  (1 for units)
 
-cost
-t=unit/tech build time (sec)
-r=red resource cost
-g=green resource cost
-b=brown resource cost
-breq=prerequisites (bitmap)
-p=blank if unit, nil if not
+t=train time (sec)
+r=food cost
+g=grass cost
+b=wood cost
+breq=prereqs (bitmap)
+p=blank if unit, undef if not
 
-drawing
 w=hitbox width (px)
 fw=sprite width (px)
 h=sprite/hitbox height (px)
-<state>_x,_y=position in
- spritesheet for that state
+<state>_x,_y=sprite for state
 <state>_fr,_fps=# of anim
- frames, anim rate for state.
-portx,porty="portrait" pos
- in spritesheet
+ frames, anim rate for state
+portx,porty="portrait" sprite
 sdir=sprite face direction
- (1 looks left, -1 right)
-fire=should there be a fire
- anim when unit is low hp
+ (1 left, -1 right)
+fire=low hp fire anim?
 
-unit-specific keys:
 sg=is siege unit?
 gr=worker "gather rate"
- how much to divide its carry
+ how much to divide carry
  when dropping off to get
  the final resource gain)
-cap=worker resource capacity
-gr=farm grow rate
+ for farms, farm grow rate
+cap=worker carry capacity
 mcyc=max farm cycles
 
-techs
 tmap=tech bitmap value (-1
  if not tech)
-up=(upgrade): 0 if tech is
+up=upgrade: 0 if tech is
  repeatable, -1 if not
 
 when defining upgrades, the
-second argument is the unit
+2nd argument is the unit
 type that should be modified,
-and the third arg is a func
-to run when the tech is done.
-the func will be passed the
+the 3rd arg is a func
+to run when tech is done,
+which will be passed the
 player index of the passed
 typ, eg if player 1 does an
 ant upgrade, arg is ant[1].
@@ -1939,7 +1823,6 @@ end
 -->8
 --tick unit
 
---makes a unit rest
 local function rest(u)
 	--agg=aggress nearby enemies
 	u.st=p[[t=rest
@@ -1947,14 +1830,12 @@ agg=1
 idl=1]]
 end
 
---(attack)move a unit
 local function move(u,x,y,agg)
 	--[[
-  second arg to p sets "typ"
+ second arg to p sets "typ"
 	on the returned object. typ
-	is thus the var for the path
-	(array of waypoints)
-  ]]
+	is the key for path (waypoints)
+ ]]
 	u.st=p([[t=move
 move=1]],path(u,x,y,0))
 	u.st.agg=agg
@@ -1965,17 +1846,15 @@ moves a group of units. if
 agg is given, also sets each
 unit's 'grp' to the agg value
 (useful for ai squads)
-"frc"=force, if not given,
+frc="force", if not given,
 only moves units that are idle
 ]]
 function mvg(units,x,y,agg,frc)
 	--[[
-  get the lowest speed of the
+ get the lowest speed of the
 	group and set it to each
-	unit's state.speed (will get
-	used instead of unit's base
-	speed if set)
-  ]]
+	unit's state.speed
+ ]]
 	local l=999
 	foreach(units,function(u)
 		if frc or u.st.idl then
@@ -1987,59 +1866,53 @@ function mvg(units,x,y,agg,frc)
 		st.spd,grp=l,agg end)
 end
 
---make a unit build a building
+--make a worker build/repair
 local function gobld(u,b)
 	--[[
-  active farmers don't build,
-	this allows you to select
-	a group of workers and build
-	a bunch of farms and have
+ active farmers don't build,
+	allows you to select workers
+	and build farms and have
 	each worker stay at a farm
-  ]]
+ ]]
 	if u.st.farm and b.farm then
 		return
 	end
 	--[[
-  in_bld means the unit is
-	allowed to be ontop of a bld.
-	ez_adj means the surrounding
-	areas the unit can adjust to
-	(if overlapping) don't have
-	to be valid tiles
-  ]]
+ in_bld=unit is
+	 allowed to be on a bld
+	ez_adj=unit can adjust (if
+	 overlapping) to ivalid tiles
+ ]]
 	u.st,u.res=p([[t=bld
 in_bld=1
 ez_adj=1]],path(u,b.x,b.y),b)
 end
 
 --[[
-send a worker to gather tile
+send worker to gather tile
 tx,ty. optionally dictate the
-path waypoints, eg when using
-distance map to find next
-closest resource after drop
+path waypoints
 ]]
 local function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	--[[
-  the second argument to p gets
-	set to "x", designated for
+ the 2nd arg to p gets
+	set to x, designated for
 	a state's 'target unit'.
-	here, the target is the tile
+	here, target is the tile
 
-	the third arg to p gets set
-	to y, in this case the res
-	type being gathered.
+	the 3rd arg to p gets set to
+	y, in this case the res type
 
 	the 4/5th args to p get put
-	into the "p1" array. here we
-	put tx,ty to it can be unpkd
+	into the "p1" array. we put
+	tx,ty to it can be unpacked
 
-	path tolerance (4th arg) is
+	4th arg to path (tolerance) is
 	default (1), so unit can go
-	to given coords if there's a
+	to invalid coords if there's a
 	path ending 1 tile away
-  ]]
+ ]]
 	u.st=p([[t=gth
 gth=1
 ez_adj=1]],
@@ -2048,21 +1921,20 @@ ez_adj=1]],
 end
 
 --[[
-have a unit drop its carry
-takes an optional next res
-type to gather, + an optional
-unit to drop to (qn or mound)
+have a unit drop its carry.
+optional nxt_res type to gather,
+optional unit to drop to
 ]]
 local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
 		--[[
-    if no path or ant is led to
+  if no path, or ant is led to
 		opponent mound, go to queen
 		of ant's player (queens are
 		always the first units).
-    ]]
+  ]]
 		dropu=(not wayp or
 			g(bldgs,x,y,{}).p!=u.p
 			) and units[u.p]
@@ -2080,21 +1952,11 @@ ez_adj=1]],
 		nxt_res)
 end
 
---make a unit attack an enemy
+--make a unit attack
 function goatk(u,e)
 	if e then
-		--[[
-    enemy bldgs get discovered
-		when attacking a human unit.
-		carry should be dropped.
-
-		path tol=0, unit can't enter
-		bldg. the last arg to 'path'
-		is range (in tiles), which
-		finds a path until we are
-		within that distance (not
-		necessarily at the goal).
-    ]]
+  --enemy bldgs get discovered
+		--when attacking a human unit.
 		u.st,u.disc,u.res=
 			p([[t=atk
 active=1]],
@@ -2105,10 +1967,10 @@ active=1]],
 	end
 end
 
---tell a worker to farm a farm
+--tell a worker to farm
 local function gofarm(u,f)
-	--add some rand to the farm
-	--center so it farms diff parts
+	--randomize farm center so it
+	--farms diff parts
 	f.farmer,u.st,u.res=u,p([[t=frm
 in_bld=1]],path(u,
 		f.x+rndspl"-2,-1,0,1,2",
@@ -2119,17 +1981,10 @@ end
 --the main unit update func!
 function tick(u)
 	--[[
-  onscreen - does the unit box
-	intersect with the current
-	viewport?
-
+ onscr - onscreen?
 	upd - should we do expensive
-	updates for this unit? checks
-	if the unit's id (rand 0-59)
-	aligns with upcycle
-
-	wayp,ut=helper vars
-  ]]
+	updates for this unit?
+	]]
 	u.onscr,u.upd,wayp,ut=
 		int(box(u).r,{cx,cy,cx+128,cy+104},0),
 		u.id%upcycle==upc,
@@ -2149,11 +2004,11 @@ function tick(u)
 		)
 		if ut.lady then
 			--[[
-      ladybugs find the nearest
+   ladybugs find the nearest
 			valid tile and turn it into
-			a food tile (picks an lbug
-			tile depending on facing)
-      ]]
+			a food tile (pick a lbug
+			tile depending on direction)
+   ]]
 			local t=nearest(u.x,u.y)
 			mset(t[1],t[2],82+u.dir)
 
@@ -2163,20 +2018,19 @@ function tick(u)
 			dmap_st.r[t.k]=t
 			qdmaps"r"
 		elseif u.qn then
-			--when a queen dies, reduce
-			--the number of players. if
+			--qn dead, decr # of players
 			npl-=1
 			if npl==1 or u==hq then
-				--trigger end of game
+				--end of game
 				loser,sel=min(u.p,2),{}
 				music"56"
 			end
 		elseif ut.drop and not u.const then
-			--if dropoff bld dies, reduce
+			--if dropoff dies, reduce
 			--pop limit
 			u.pres.pl-=ut.drop
 		elseif u.unit then
-			--reduce player's population
+			--reduce player's pop
 			u.pres.p-=1
 		end
 	end
@@ -2201,11 +2055,12 @@ function tick(u)
 			u.st.typ=wayp[1] and wayp
 		end
 	elseif u.st.move then
-		--no wayp, finished moving
 		rest(u)
 	elseif u.st.farm then
-		--just got to the farming
-		--spot, start farming!
+		--start farming. necessary bc
+		--farm is not a target (if it
+		--was, unit would start
+		--as soon as it hit the farm)
 		u.st.active=1
 	end
 
@@ -2213,13 +2068,12 @@ function tick(u)
 		u.x,u.y,u.st.x,ut.los,9999
 
 	if u.q then
-		--make progress on current
-		--thing in production queue
+		--progress current prod
 		produce(u)
 	end
 	if u.farm then
-		--clear farm's farmer if prev
-		--farmer left or farm expired
+		--clear farmer if it
+		--left or farm expired
 		local _ENV=u
 		if farmer and
 			farmer.st.farm!=u
@@ -2228,32 +2082,26 @@ function tick(u)
 			farmer=nil
 		end
 	end
-	--t=state.target
 	if t then
 		if t.dead then
 			--[[
-      if target is dead, if you
+   if target is dead, if you
 			have a path still, keep
 			walking towards the target
 			but aggress, in case of
-			other enemies. if no path,
-			rest.
-			if you're an ant and your
-			target was a ladybug, eat!
-      ]]
+			other enemies.
+			if ant kills ladybug, eat!
+   ]]
 			u.st.agg=1,
 				wayp or rest(u),
 				u.ant and t.lady and
 					gogth(u,t.x8,t.y8)
 		elseif int(t.r,u.r,-2) then
-			--if you've gone "inside" the
-			--target (drop,build,gather),
-			--halt + you are now active
+			--inside target (drop,build,
+			--gather), halt + set active
 			u.st.active,u.st.typ=1
 		elseif u.st.gth and not wayp then
-			--unit is gathering + stopped
-			--but is not inside resource,
-			--so try going to res again
+			--not inside tile, try again
 			gogth(u,t.x8,t.y8)
 		end
 		--if you're stopped, face the
@@ -2263,16 +2111,16 @@ function tick(u)
 		end
 	end
 	--[[
-  if you're in an active state
+ if you're in an active state
 	(note atk is always active),
 	call the appropriate func,
-	eg atk(), bld(), gth(), ...
-  ]]
+	eg atk(), bld(), gth()...
+ ]]
 	if u.st.active then
 		_ENV[u.st.t](u)
 	end
 
-	--heal damaged unit passively
+	--heal if damaged
 	if ut.hl and u.dmgd then
 		u.hp+=heal[u.p].qty
 	end
@@ -2286,11 +2134,11 @@ function tick(u)
 	end
 
 	--[[
-  if unit is visible _or_ has
+ if unit is visible _or_ has
 	been discovered, it's
 	selectable, and should be
 	added to the minimap
-  ]]
+ ]]
 	if g(viz,u.x8,u.y8,u.disc) then
 		if selx and int(u.r,selbox,0)
 		then
@@ -2306,12 +2154,12 @@ function tick(u)
 			end
 		end
 		--[[
-    add unit dot to minimap in
+  add unit pixel to minimap in
 		spritesheet. note u.ap will
 		be: 9 for p1 (orange), 11
 		for ai (pal'd to pink), 13
 		for ladyb (pal'd to red)
-    ]]
+  ]]
 		sset(109+x/20.21,
 			72+y/21.33,u.ap)
 	end
@@ -2319,14 +2167,6 @@ function tick(u)
 	--ignore bldg under constructn
 	if (u.const) return
 
-	--[[
-  if unit is at rest, make
-	ladybug wander every 6 sec,
-	mark ant as idle worker
-	(after 10 frames of idleness)
-	and barracks/dens as idle
-	bldg if no queue
-  ]]
 	if u.st.idl then
 		if (ut.lady and t6) wander(u)
 		if u.hu then
@@ -2345,12 +2185,12 @@ function tick(u)
 	if u.upd then
 		if u.hu then
 			--[[
-      first see where in a tile
+   first see where in a tile
 			the unit is. see if we have
 			the relative surrounding
 			tiles cached for that pos.
 			if not, generate them
-      ]]
+   ]]
 			local xo,yo,l=x%8\2,y%8\2,
 				ceil(los/8)
 			local k=xo|yo*16|los*256
@@ -2394,11 +2234,11 @@ function tick(u)
 					if e.alive and d<=los then
 						if e.bldg then
 							--[[
-              if enemy is non-farm
+       if enemy is non-farm
 							bldg, prioritize it if
 							unit is siege, or de-
 							prioritize it non-siege
-              ]]
+       ]]
 							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
@@ -2415,14 +2255,11 @@ function tick(u)
 	end
 
 	--[[
-  units don't pathfind around
-	other units (they don't
-	obstruct) so we need an
-	algorithm to adjust units
-	that are stopped overlapped
-	(so you can see how many
-	there are)
-  ]]
+ units don't pathfind around
+	other units so we need to
+	adjust stopped, overlapping
+	units
+ ]]
 	if u.unit and not u.st.typ then
 		--fr=frontier, v=visited
 		local fr,v={{x,y}},{}
@@ -2439,11 +2276,11 @@ function tick(u)
 			--the current pos is inacc)..
 			if a or i==1 then
 				--[[
-        if accessible and there
+    if accessible and there
 				is no overlap, move to
 				this position (or stay
 				put if already there)
-        ]]
+    ]]
 				if a and not g(pos,x\4,y\4) then
 					u.st.typ=i>1 and {p}
 					break
@@ -2481,32 +2318,32 @@ function cam()
 
 	if dget"0"!=2 or loser then
 		--[[
-    if controls are not console,
+  if controls are not console,
 		track mouse and keep dx,dy
 		as map movement. if console
 		but endgame, use arrows as
 		map movement
-    ]]
+  ]]
 		amx,amy=stat"32",stat"33"
 	else
-    --[[
+  --[[
 		in console mode, move the
 		mouse with arrows, then
 		move map if mouse is on edge
 		of screen. (note that,
 		delightfully, -1\128=-1 !)
-    ]]
+  ]]
 		amx+=dx
 		amy+=dy
 		dx,dy=amx\128*2,amy\128*2
 	end
 	--[[
-  clamp values
+ clamp values
 	camera y can go "past" the
 	bottom of screen normally
 	because the menubar blocks
 	it (unless endgame)
-  ]]
+ ]]
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
 		mid(cy+dy,
@@ -2539,14 +2376,14 @@ function input()
 	end)
 
 	--[[
-  slct=should we select with
+ slct=should we select with
 	 this mouse click? defaults
 	 to axn button not active
 	htile=tile being hovered
 	atkmov=axn button active
 	 and not touch (in touch,
 	 axn btn is normal move)
-  ]]
+	]]
 	local slct,htile,atkmov,clk=
 		not axn,
 		tile_unit(mx8,my8),
@@ -2560,7 +2397,7 @@ function input()
 		return
 	end
 
-	--axn reverses rclk and lclk
+	--axn makes a lclk a rclk
 	if lclk and axn then
 		rclk,axn=1
 	end
@@ -2665,7 +2502,6 @@ function input()
 			hilite(p([[f=.5
 c=8]],mx,my))
 
-		--if unit can prod units,
 		--set rally flag
 		elseif sel1.typ.units then
 			if resqty[mget(mx8,my8)] then
@@ -2682,7 +2518,11 @@ c=8]],mx,my))
 		if btnp"5" and not selx then
 			selx,sely,selt=mx,my,t()
 		end
+		--use llclk we want this to
+		--keep firing while held down
 		if llclk and selx then
+			--keep selbox x1,y1<x2,y2
+			--7=rect color
 			selbox={
 				min(selx,mx),
 				min(sely,my),
@@ -2697,6 +2537,9 @@ end
 --unit
 
 function draw_unit(u)
+	--ihp=inverted hp %. useful bc
+	--we need to multiply and then
+	--flr it, saves a token with \
 	local ut,r,w,h,stt,ihp,ux,uy=
 		u.typ,
 		u.res and u.res.typ or "_",
@@ -2704,6 +2547,10 @@ function draw_unit(u)
 		u.st.typ and "move" or u.st.t,
 		u.max_hp/u.hp,unpack(u.r)
 
+	--anim frame is either the
+	--dead counter or the current
+	--frame offset by the unit id
+	--selc=sel color
 	local fw,sx,sy,ufps,fr,f,selc=
 		ut.fw,
 		ut[stt.."_x"]+resx[r]+
@@ -2717,27 +2564,47 @@ function draw_unit(u)
 	camera(cx-ux,cy-uy)
 
 	if u.const and u.alive then
+		--constructn zone ▒
 		fillp"23130.5"
-		rect(0,0,w,h,
-			u==sel1 and 9 or 12)
+		rect(0,0,w,h,selc or 12)
 		fillp()
+		
+		--constr %
 		local p=u.const/u.typ.const
+		
+		--progress bar
 		line(fw-1,unspl"0,0,0,5")
 		line(fw*p,0,14)
+		
+		--move spr left
 		sx+=p\-.5*fw
+		
+		--<15% complete is blank
 		if p<=.15 then
 			return
 		end
 	elseif ufps then
+		--find the anim frame
 		sx+=f\ufps%fr*fw
 	end
+	--all sprites are drawn w/main
+	--color 1 (blue). change this
+	--to sel col or player col.
+	--draw 14 as black (nil).
+	--farms replace 5 instead of 1
+	--when selected
 	pal{
 		selc or u.pres.col,
 		[14]=pal(u.farm and 5,selc or 5)
 	}
+	--non-qn bldgs (check w fire)
+	--don't rotate face
 	sspr(sx,sy,w,h,1,1,w,h,
 		not ut.fire and u.dir==ut.sdir)
 	pal()
+	
+	--damaged units show hp bar
+	--and can be on fire
 	if u.alive and ihp>=2 then
 		if ut.fire then
 			spr(247+f/20,w\3)
@@ -2747,10 +2614,13 @@ function draw_unit(u)
 	end
 end
 
+--adds 1 res to u's carry. drops
+--at nearest dropoff if full
 local function collect(u,res)
 	if u.res and u.res.typ==res then
 		u.res.qty+=1
 	else
+		--second arg here is 'typ'
 		u.res=p("qty=1",res)
 	end
 	if u.res.qty>=u.typ.cap then
@@ -2758,6 +2628,16 @@ local function collect(u,res)
 	end
 end
 
+--[[
+called by tick when unit drops.
+if farmer, go back to farm.
+else, if has 'nxt_res' set on
+state (was gathering) try to
+gather the closest res of that
+type (does not change state, so
+will keep looking for new tiles
+every frame if new ones appear.)
+]]
 function drop(u)
 	if u.res then
 		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
@@ -2772,12 +2652,16 @@ function drop(u)
 	end
 end
 
+--called by tick on farmer.
 function frm(u)
 	local _ENV,g=u.st.farm,_ENV
 	if not farmer then
 		rest(u)
+
+	--every 2s...
 	elseif g.cf==0 then
 		if ready then
+			--farm can be harvested
 			fres-=1
 			sproff+=1
 			collect(u,"r")
@@ -2786,21 +2670,24 @@ function frm(u)
 				cyc+=1
 				exp,ready=cyc>=typ.mcyc
 				if exp and ai then
+					--ai immediately renews
 					cyc,exp=0,
 						g.pay(g.renew,1,pres)
 				end
 				sproff=exp and
 					(sfx"36" or 32) or 0
 			end
-			--reset farm after drop
+			--set farm key after godrop()
 			u.st.farm=_ENV
 		else
+			--farm needs to grow
 			fres+=typ.gr
 			sproff,ready=fres*2,fres>=9
 		end
 	end
 end
 
+--called by tick on attacker
 function atk(u)
 	local typ,e=u.typ,u.st.x
 	if u.upd then
@@ -2808,23 +2695,30 @@ function atk(u)
 		if typ.range>=d
 			or int(u.r,e.r,0)
 		then
+			--halt
 			u.st.typ=nil
 			if cf%typ.atk_freq==u.id%
 				typ.atk_freq then
 				if e.ap==u.ap then
 					if typ.mnk and e.dmgd then
+						--monk heals
 						e.hp+=1
 						if (u.onscr) sfx"20"
 					else
+						--enemy was just converted
 						rest(u)
 					end
 				else
+					--if ranged unit, add a
+					--projectile. else, do dmg
 					add(prj,typ.prj_s and p("",
 						typ,
 						u.x-u.dir*typ.prj_xo,
 						u.y+typ.prj_yo,
 						e.x,e.y,u.ap
 					) or dmg(typ,e))
+					
+					--check for conversion
 					if e.conv>=e.max_hp then
 						if e.qn then
 							e.hp=0
@@ -2833,6 +2727,7 @@ function atk(u)
 							u.pres.p+=1
 							e.p,e.conv=u.p,0
 						end
+						--remove from ai squad
 						del(e.sqd,e)
 						sfx"38"
 					end
@@ -2841,8 +2736,11 @@ function atk(u)
 		else
 			if u.hu and viz[e.k] or
 				typ.los>=d then
+				--chase unit
 				goatk(u,e.k!=u.st.k and e)
 			elseif not e.disc then
+				--can no longer see unit,
+				--so stop
 				u.st.typ=nil
 			end
 			if not u.st.typ then
@@ -2852,10 +2750,13 @@ function atk(u)
 	end
 end
 
+--called by tick on builder
 function bld(u)
+	--every sec
 	if cf%30==0 then
 		local _ENV,g=u.st.x,_ENV
 		if const then
+			--build (max hp grows)
 			const+=1
 			max_hp+=hpr
 			hp+=hpr
@@ -2868,12 +2769,13 @@ function bld(u)
 					gofarm(u,_ENV)
 				end
 			end
-		elseif dmgd and
-			pres.b>=1 then
+		elseif dmgd and pres.b>=1 then
+			--repair
 			hp+=2
 			pres.b-=.1
 		else
 			rest(u)
+			--look for more bldgs to bld
 			g.surr(function(t)
 				local _ENV=g.bldgs[t.k]
 				if _ENV and hu and const
@@ -2886,21 +2788,34 @@ function bld(u)
 	end
 end
 
+--called by tick on gatherer
 function gth(u)
 	local r,x,y=u.st.y,
 		unpack(u.st.p1)
 	local t=mget(x,y)
 	local f=resqty[t]
 	if not f then
+		--tile is not a resource
+		--if monk, get res, otherwise,
+		--ant finds next resource
+		--of that type to gather. if
+		--there are none, drop carry
 		if u.mnk then
 			pay(pray,-1,res1)
 		elseif not mine_nxt(u,r) then
 			godrop(u,r)
 		end
 	elseif cf==u.id then
-		f+=res1.diff*u.ap\33*5
+		--tiles touched by hard ai
+		--get an extra 7 qty on them
+		f+=res1.diff*u.ap\33*7
 		local n=g(restiles,x,y,f)-1
 		collect(u,r)
+		
+		--112 is y of final tile sprs,
+		--when loading game, tile can
+		--at lowest but will be full,
+		--prevent it from going lower
 		if t<112 and
 			(n==f\3 or n==f\1.25)
 		then
@@ -2921,13 +2836,20 @@ end
 function produce(u)
 	local _ENV,gl=u,_ENV
 	local bld=q.typ
+	--x is remaining time
 	q.x-=0x.0888
 	if q.x<=0 then
+		--x on typ means tech func
 		if bld.x then
 			local _ENV=bld
 			gl.res1.techs|=tmap
+			
+			--run function
 			x(typ.p1)
 			sfx"33"
+			
+			--restore tech at higher
+			--prices if upgrade
 			if up and up<1 then
 				up+=1
 				r*=1.75
@@ -2937,12 +2859,14 @@ function produce(u)
 				done=nil
 			end
 		else
+			--new unit
 			local new=gl.unit(bld,x,y,p),
 				onscr and hu and sfx"19"
 			if bld.ant and
 				rtx and
 				gl.resqty[mget(rtx,rty)]
 			then
+				--rally is on resource
 				gogth(new,rtx,rty)
 			else
 				move(new,rx or x+5,
@@ -2951,6 +2875,8 @@ function produce(u)
 		end
 		if q.qty>1 then
 			q.qty-=1
+			--reset time remaining for
+			--next unit
 			q.x=bld.t
 		else
 			q=nil
@@ -2958,6 +2884,7 @@ function produce(u)
 	end
 end
 
+--gathers closest resource tile
 function mine_nxt(u,res)
 	local wp,x,y=dpath(u,res)
 	if wp then
@@ -2969,6 +2896,15 @@ end
 -->8
 --utils
 
+--[[
+generates a table which has all
+the given key/vals, but also
+puts 4 sequential items in that
+table that each also have all
+the vals.
+
+if "var" val, sets a global var
+]]
 function p(str,typ,x,y,...)
 	local p1={...}
 	aspl"p2,p3"
@@ -2987,10 +2923,14 @@ function p(str,typ,x,y,...)
 	return obj
 end
 
+--many tables are used as maps
+--of coords>vals. these helpers
+--convert coords into a table
+--index and get/set the value
+--max x/y is 255
 function g(a,x,y,def)
 	return a[x|y<<8] or def
 end
-
 function s(a,x,y,v)
 	a[x|y<<8]=v
 end
@@ -2999,13 +2939,18 @@ function hilite(v)
 	hlt,hlv=t(),v
 end
 
-function int(r1,r2,e)
-	return r1[1]-e<r2[3] and
-		r1[3]+e>r2[1] and
-		r1[2]-e<r2[4] and
-		r1[4]+e>r2[2]
+--check if two rects intersect.
+--assumes rect x1,y1 < x2,y2
+--t=tolerance (adds padding)
+function int(r1,r2,t)
+	return r1[1]-t<r2[3] and
+		r1[3]+t>r2[1] and
+		r1[2]-t<r2[4] and
+		r1[4]+t>r2[2]
 end
 
+--converts a tile into a unit-
+--like table that can be box'd
 function tile_unit(tx,ty)
 	return box(p([[p=0
 ais=
@@ -3016,6 +2961,8 @@ w=8
 h=8]],nil,tx*8+4,ty*8+4))
 end
 
+--update a number of frequently
+--used dynamic fields on unit
 function box(u)
 	local _ENV,ais,rz=u,ais,res
 	r,x8,y8,dmgd,ai,ap,pres=
@@ -3026,12 +2973,16 @@ function box(u)
 		ais[p],p|9,rz[p]
 	k,hu=x8|y8<<8,not ai
 	if not const then
+		--upgrades can increase unit
+		--hp. if that happens, add
+		--hp equal to the change
 		hp+=typ.hp-max_hp
 		max_hp=typ.hp
 	end
 	return u
 end
 
+--_ENV is a player's res 
 function can_pay(typ,_ENV)
 	typ.reqs=reqs|typ.breq==reqs
 	return r>=typ.r and
@@ -3041,6 +2992,8 @@ function can_pay(typ,_ENV)
 		and typ.reqs
 end
 
+--_ENV is a player's res
+--dir=1 to pay, -1 to get paid
 function pay(typ,dir,_ENV)
 	r-=typ.r*dir
 	g-=typ.g*dir
@@ -3050,6 +3003,8 @@ function pay(typ,dir,_ENV)
 	end
 end
 
+--from musurca/fres72:
+--lexaloffle.com/bbs/?pid=90968#p
 function dist(dx,dy)
 	local x,y=dx>>31,dy>>31
 	local a0,b0=dx+x^^x,dy+y^^y
@@ -3058,6 +3013,17 @@ function dist(dx,dy)
 		b0*.9609+a0*.3984
 end
 
+--[[
+for each tile in a square
+of n*2+1 centered at x,y,
+call fn with tile x,y,key,and
+whether it's diagonal (1.4) or
+not (1).
+na=the tiles don't have to be
+ accessible
+returns whether any tiles were
+found
+]]
 function surr(fn,x,y,n,na)
 	local n,e=n or 1
 	for dx=-n,n do
@@ -3082,6 +3048,7 @@ function surr(fn,x,y,n,na)
 	return e
 end
 
+--hovering unclaimed farm?
 function avail_farm()
 	local _ENV=hbld
 	return farm and
@@ -3089,6 +3056,8 @@ function avail_farm()
 		not const
 end
 
+--hovering over accessible
+--resource tile?
 function can_gth()
 	local t=mget(mx8,my8)
 	return (seltyp.ant and
@@ -3098,6 +3067,7 @@ function can_gth()
 		and surr(nil,mx8,my8)
 end
 
+--hovering smth we can atk?
 function can_atk()
 	return sel1.atk
 		and hunit
@@ -3108,13 +3078,26 @@ function can_atk()
 		and g(viz,mx8,my8,hunit.disc)
 end
 
+--hovering over bldg that's
+--damaged or under const?
 function can_bld()
+	--checking hp<typ.hp covers
+	--both const and damaged cases
 	return hbld.hu and
 		hbld.hp<hbld.typ.hp and
 		(seltyp.ant or hbld.web and
 		seltyp.sp)
 end
 
+--[[
+it=indexed table coords {1,2}
+nt=named table coords {x=1,y=2}
+f=magnitude factor
+
+normalize `it` vector, add to
+nt vector (and set dir on nt),
+return whether nt reached `it`
+]]
 function norm(it,nt,f)
 	local dx,dy=
 		it[1]-nt.x,it[2]-nt.y
@@ -3125,6 +3108,8 @@ function norm(it,nt,f)
 	return	d<1
 end
 
+--is this tile accessible?
+--strict=include farms+constrn
 function acc(x,y,strict)
 	local _ENV=g(bldgs,x,y)
 	return not fget(mget(x,y),0)
@@ -3134,7 +3119,11 @@ function acc(x,y,strict)
 			and (const or farm))
 end
 
+--is the hovering tile bldable?
 function bldable()
+	--we can cheat and skip the
+	--wide-but-not-tall case as
+	--there are no blds like that
 	return	acc(mx8,my8,1) and
 		(to_bld.h8 or
 			acc(mx8,my8+1,1)) and
@@ -3143,6 +3132,10 @@ function bldable()
 			acc(mx8+1,my8+1,1))
 end
 
+--"register" a building
+--for each tile in footprint,
+--if alive, mark it as obstacle
+--in bldgs, else, remove it
 function reg_bldg(b)
 	local x,y=b.x8,b.y8
 	local function reg(xx,yy)
@@ -3161,10 +3154,12 @@ function reg_bldg(b)
 			b.h8 or reg(x+1,y-1)))
 	if not b.const and not b.farm then
 		qdmaps"d"
+		--update prereqs
 		b.pres.reqs|=b.bmap
 	end
 end
 
+--make a unit move randomly
 function wander(u)
 	move(u,
 		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
@@ -3172,31 +3167,49 @@ function wander(u)
 		1)
 end
 
+--deal damage from a unit typ
+--to a unit
 function dmg(typ,to)
 	to.hp-=typ.atk*dmg_mult[
 		typ.atk_typ..to.def]
+		
+	--wander if victim is idle or
+	--is gathering (y=nxt_res)
 	if to.st.idl or to.st.y then
 		wander(to)
 	end
+	
 	to.conv+=typ.conv
+	
+	--trigger ai defense response
+	--if non-attackers are hit
 	if to.ai and to.grp!="atk" then
+		--ai.p1=defense squad
 		to.ai.safe=
 			mvg(to.ai.p1,to.x,to.y,1)
 	end
+	
 	if to.onscr then
+		--randomize attack sound
 		poke(0x34a8,rnd"32",rnd"32")
 		sfx(typ.sfx)
 		alert=t()
 	elseif to.hu and t()-alert>10 then
+		--been 10s since last alert,
+		--play sound and hilite on map
 		sfx"34"
 		hilite{
 			105+to.x/20.21,
 			107+to.y/21.33,3,14}
 		alert=hlt
+		
+		--adv hilite timestamp so
+		--it stays longer on screen
 		hlt+=2.5
 	end
 end
 
+--can we drop on hovered unit?
 function can_drop()
 	for u in all(sel) do
 		if u.res then
@@ -3206,14 +3219,20 @@ function can_drop()
 	end
 end
 
+--can hovered farm be renewed?
+--t=skip cost check, used when
+-- determining mouse cursor
 function can_renew(t)
 	if hbld.exp and seltyp.ant then
+		--print the resource cost of
+		--renewing next to mouse
 		pres(renew,10,2)
 		rect(unspl"8,0,18,8,4")
 		return	can_pay(renew,res1) or t
 	end
 end
 
+--create a new unit
 function unit(t,_x,_y,_p,
 	_const,_disc,_hp)
 	local _typ,split=typs[t] or t,
@@ -3229,6 +3248,10 @@ fres=0
 conv=0
 alive=1
 bop=101]],_typ[_p],rnd"60"\1))
+		--copy certain keys from typ
+		--to the unit for tokens. if
+		--we copy everything we'll
+		--run out of memory! 
 		foreach(
 		split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
 		function(k)
@@ -3241,25 +3264,30 @@ bop=101]],_typ[_p],rnd"60"\1))
 		id,x,y,p,hp,const,
 			disc,prod=
 			x,_x,_y,_p,
+			--constrain hp in case loaded
+			--game has high-hp units but
+			--lost the hp upgrades
 			min(_hp or 9999,max_hp),
+			--const,disc=0 mean nil
+			--(when loading game)
 			max(_const)>0 and _const,
 			_disc==1,_typ.prod or {}
-		end
+	end
 	tot+=1
 	rest(box(u))
-	if u.bldg then
-		reg_bldg(u)
-	end
-	return u
+	return u,u.bldg and reg_bldg(u)
 end
 
+--queue production of typ u
+--from bldg b. multiply bld time
+--by m (used to nerf easy ai)
 function prod(u,b,m)
 	pay(b,1,u.pres)
 	u.q=u.q or p("qty=0",b,b.t*m)
 	u.q.qty+=1
 end
 
-
+--spr flag to resource type
 p[[var=f2r
 7=r
 10=g
@@ -3267,6 +3295,8 @@ p[[var=f2r
 19=b
 39=r]]
 
+--how many res each spr flag
+--starts with
 p[[var=resqty
 80=45
 96=45
@@ -3302,11 +3332,15 @@ p[[var=resqty
 103=45
 119=45]]
 
+--how much monk produces when
+--praying
 p[[var=pray
 g=.00318
 b=.00318
 r=0]]
 
+--color for resources/flags
+--v=visible, e=explored
 p[[var=rescol
 r=8
 g=3
@@ -3327,18 +3361,20 @@ e11=3
 e19=4
 e33=1]]
 
+--offsets for ant spr when
+--carrying
 p[[var=resx
 _=0
 r=16
 g=0
 b=16]]
-
 p[[var=resy
 _=0
 r=0
 g=4
 b=4]]
 
+--damage multiplier table
 p[[var=dmg_mult
 antant=1.1
 antqn=.7
@@ -4046,11 +4082,14 @@ function mode()
 	return true
 end
 
+--toggle between 0 and ~0
 menuitem(2,"▤ toggle help",
 function() dset(1,~dget"1") end)
 
-
 cartdata"age_of_ants"
+
+--run mode 3 times (no effect
+--on mode, but adds it to menu)
 foreach(split",,",mode)
 
 __gfx__

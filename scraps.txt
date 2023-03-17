@@ -41,6 +41,10 @@ y=32767]],n,
 dist(n[1]-g[1],n[2]-g[2])
 )
 
+
+1.7
+- fix bug where units will change attack targets when stationary ???
+
 1.6
 - fix bug where enemy attackers could stall in the middle of the map
 - fix bug where a worker ant could drop resources off at an opponent mound (now it goes back to queen)
