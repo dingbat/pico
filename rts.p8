@@ -4,7 +4,6 @@ __lua__
 --age of ants
 --eeooty
 
---see bbs for full credits:
 --lexaloffle.com/bbs/?tid=51464
 
 --composes two funcs:
@@ -35,28 +34,26 @@ local pspl,rndspl,unspl,
 --[[
 typs=array of unit types,
  allows us to deserialize a
- unit type index into an
- actual type (eg when loading)
+ type idx into an actual type
 
 stp=start pos - for each corner
 	of map, has start x,y camera
 
-pcol=array of player colors
+pcol=player colors
 
 hlt=time of highlight
 
-diff=0-4 difficulty/# of ai
+diff=0-4 difficulty
 
 cx,cy=camera x,y
-
-cvx,cvy=camera velocity (title)
+cvx,cvy=cam velocity (title)
 
 spdr==spider moving? funcs will
 	make webs walkable --]]
 local unl,unspr,aspl,
 	typs,stp,pcol,
 	hlt,diff,
-	menu,loser,cx,cy,cvx,cvy,
+	title,loser,cx,cy,cvx,cvy,
 	spdr
 	=
 	comp(line,unspl),
@@ -77,15 +74,14 @@ function _update()
 		btn"5",btn"4",
 		stat"121" and loadgame()
 
-	--[[
-	dget(0) is controls mode.
-	>1 means console or desktop,
-	so we don't need "key up" --]]
+	--dget(0) is controls mode.
+	-->1=console/desktop,
+	--dont need "key up" behavior
 	if dget"0">1 and not loser then
 		lclk,rclk=btnp"5",btnp"4"
 	end
 
-	if menu then
+	if title then
 		cx+=cvx
 		cy+=cvy
 		--bounce camera off walls
@@ -94,16 +90,15 @@ function _update()
 
 		--⬅️/➡️ buttons
 		if btnp"0" or btnp"1" then
-			--[[
-		 cycle difficulty btwn 0-4.
-		 btnp^^-2 = -1 on ⬅️ and -4
-		 on ➡️ (-4%5=1). wtf?! --]]
+		 --cycle difficulty btwn 0-4.
+		 --btnp^^-2 = -1 on ⬅️ and -4
+		 --on ➡️ (-4%5=1) !!
 			diff+=btnp()^^-2
 			diff%=5
 			sfx"18"
 		end
 
-		--rotate pcol array on 🅾️
+		--rotate colors on 🅾️
 		add(pcol,
 			deli(btnp"4" and pcol,1))
 
@@ -128,12 +123,13 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
+6,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
 						stp[res[p].pos],":")
-					--set newg to truthy, has
+					--set newgame, has
 					--ai system make lbugs
 					res.p2.newg=
 						unit(u,x+dx,y+dy,p)
@@ -148,7 +144,7 @@ function _update()
 		end
 	end
 
-	--incr a 0-59 frame counter
+	--current frame, 0-59
 	cf+=1
 	cf%=60
 
@@ -159,21 +155,18 @@ function _update()
 		--no mouse
 		poke"0x5f2d"
 
-		--[[
-		reset only if first bar of
-		end music has passed
-		(in case game ends mid-click)
-		--]]
+		--reset only if first bar of
+		--end music has passed (in
+		--case game ends mid-click)
 		if lclk and stat"54">56 then
-			menu,cx,cy=unspl"1,5,35"
+			title,cx,cy=unspl"1,5,35"
 			music"63"
 		end
 
 		if rclk then
-			--[[
-			ban toggles between 0 and
-			240. used as a camera offset,
-			toggles hide/show banner.--]]
+			--toggles between 0 and 240.
+			--used as a camera offset,
+			--hides/shows banner
 			ban^^=0xf0
 		end
 		return
@@ -182,24 +175,19 @@ function _update()
 	--async dist-map calc
 	dmap()
 
-	--[[
-	internal refresh rate for
-	calcs that scale with the
-	number of units.--]]
+	--refresh rate for heavy calcs
+	--that scale with # of units
 	upcycle=
 		split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]
 
-	--[[
-	pos=array that tells us if
-	 units are overlapping
-	asc=a* path cache
-	sele=selected enemy
-	--]]
+	--pos=coord=>occupied? used to
+	-- check if units overlap
+	--asc=a* cache
+	--sele=selected enemy
 	aspl"pos,asc,sele"
 
 	--[[
-	upc=constrains frame counter
-	 to upcycle
+	upc=constrains cf to upcycle
 	hbld=bldg being hovered over
 	t6=on 6-second interval?
 	selh=selected human units
@@ -211,20 +199,16 @@ function _update()
 		g(bldgs,mx8,my8,{}),
 		t()%6<1
 
-	--keep track of game time
+	--update game time
 	res1.t+=0x.0888
 
-	--every second, update minimap
-	--sprite. faster than drawing
+	--update minimap spr every sec
 	if cf%30==19 then
 		for tx=0,19 do
 			for ty=0,12 do
 				local x,y=tx\0x.6556,
 					ty\0x.6003
 				--[[
-				109,72 is where minimap
-				lives in spritesheet.
-
 				if maptile is explored,
 				look its color up.
 				if maptile is not visible,
@@ -244,23 +228,20 @@ function _update()
 
 	--refresh fogmap
 	if upc==0 then
-		--[[
-		each frame this upcycle,
-		units been entering viz into
-		nviz. now we set viz to nviz--]]
+		--each frame this upcycle,
+		--units entered viz into
+		--nviz. now make it real
 		viz,nviz=nviz,{}
 
 		--[[
-		units been updating explored.
-		for each exp, update it in
-		the fogmap.
+		units updated explored map.
+		update fogmap accordingly.
 
 		if tile is visible, viz[k] is
-		"v", which sets the tile to 0
+		"v", which sets tile to 0
 		(hole in fogmap). if not
-		visible, copy the tile from
-		realmap (drawn with foggy pal)
-		--]]
+		visible, copy tile from
+		realmap (drawn with foggy pal)--]]
 		for k in next,exp do
 			local x,y=k&0x00ff,k\256
 			mset(x+48,y,viz[k] or
@@ -271,19 +252,15 @@ function _update()
 	--projectiles
 	foreach(prj,function(b)
 		local typ=b.typ
-		--[[
-		moves the projectile
-		by the attacker's prj speed
-		towards dest--]]
+		--moves projectile by atkr's
+		--prj speed towards its dest
 		if norm(b.p1,b,typ.prj_spd)
 		then
-			--if reached dest,
-			--remove + check for hit
+			--reached dest,del+check hit
 			del(prj,b)
 			for u in all(units) do
 				--skip friendly fire,
-				--expand intersection
-				--tolerance by aoe
+				--pad intersect by aoe
 				if u.ap!=b.p1[3] and
 					int(u.r,{b.x,b.y,b.x,b.y},
 					typ.aoe) then
@@ -307,23 +284,21 @@ c=13]],b.x,b.y))
 	--each unit does its thing
 	foreach(units,tick)
 
-	--[[
-	selection priority is:
-	human units, human bldg, enemy
-	(these vars set by tick) --]]
+	--sel priority: human units,
+	--human bldg, enemy. (these
+	--vars set by tick)
 	if selx then
 		sel=selh or selb or sele
 	end
 
-	--helpers
 	sel1,nsel,seltyp=sel[1],#sel
 
 	--[[
 	compute seltyp by looping
-	through each selected. result:
-	- nil if no selection
-	- {} if different typs sel'd
-	- typ if same typs selected --]]
+	through each selected u. it's:
+	 nil if no selection
+	 {} if different typs sel'd
+	 typ if same typs sel'd --]]
 	fsel(function(s)
 		seltyp=(not seltyp or
 			s.typ==seltyp) and s.typ
@@ -339,7 +314,7 @@ c=13]],b.x,b.y))
 end
 
 --[[
-banner used in end and savefile
+banner for endgame + savefile
 a=ant anim: 1=sad 2=happy
 t=title
 st=subtitle
@@ -376,8 +351,7 @@ end
 function _draw()
 	draw_map"0"
 
-	--title screen
-	if menu then
+	if title then
 		camera()
 
 		--ant anim frame
@@ -416,8 +390,8 @@ function _draw()
 			then
 				add(afog,u)
 			elseif u.bldg or u.dead then
-				--dead units and buildings
-				--are drawn behind all else
+				--dead units + bldgs
+				--drawn behind all else
 				draw_unit(u)
 			else
 				add(bfog,u)
@@ -427,13 +401,14 @@ function _draw()
 
 	foreach(bfog,draw_unit)
 
+	--cf5=proj,flag anim frame
+	--dt=time since hilite
+	local cf5,dt=cf\5,t()-hlt
+	
 	--draw projectiles
 	camera(cx,cy)
-	--anim frame
-	local cf5=cf\5
 	foreach(prj,function(_ENV)
-		sspr(
-			typ.prj_s+cf5%2*2,
+		sspr(typ.prj_s+cf5%2*2,
 			96,2,2,x,y)
 	end)
 
@@ -451,19 +426,16 @@ function _draw()
 	pspl"0,5,13,13,13,13,6,2,6,6,13,13,13,0,5"
 	draw_map"48"
 
-	--draw "after fog" units
-	--(keep the same fogmap pal -
-	--don't allow draw_unit to pal)
+	--draw after-fog units
+	--(ensure same fog pal)
 	_pal,pal=pal,max
 	foreach(afog,draw_unit)
 	pal=_pal
 	pal()
 
-	--▒
-	fillp"23130.5"
+	fillp"23130.5" --▒
 
-	--draw borders around fog
-	--and visible area.
+	--draw borders around fog+viz
 	for x=cx\8,cx\8+16 do
 	for y=cy\8,cy\8+13 do
 		local i=x|y<<8
@@ -501,7 +473,6 @@ function _draw()
 	)
 
 	--highlight
-	local dt=t()-hlt
 	if dt>.5 then
 		--if hilite is .5 sec old,
 		--set it to {var="hlv"}
@@ -539,8 +510,7 @@ function _draw()
 			--below menubar, no 8x8 snap
 			camera(4-amx,4-amy)
 		else
-			--▒
-			fillp"23130.5"
+			fillp"23130.5" --▒
 			--bldg footprint
 			rect(to_bld.fw,to_bld.h,
 				unspl"-1,-1,3")
@@ -571,10 +541,9 @@ end
 --init
 
 function start()
-	--[[
-	copy num players into global,
-	this will count players left
-	hq=human queen--]]
+	--copy num players into global,
+	--this will count players left
+	--hq=human queen
 	npl,hq,cx,cy=res1.npl,
 		units[1],
 		unspl(stp[res1.pos],":")
@@ -587,7 +556,7 @@ function init()
 	--mouse
 	poke(0x5f2d,3)
 
-	--reset the realmap+fogmap
+	--reset realmap+fogmap
 	reload()
 
 	music(unspl"0,0,7")
@@ -595,18 +564,17 @@ function init()
 	menuitem(4,"∧ resign",
 		function()	hq.hp=0	end)
 
-	--[[
+ --[[
  initialize "res",
-	keeps track of player state,
-	including resources.
-
+	keeps track of player state:
+	r,g,b=resources
 	p=current pop
 	pl=pop limit
 	tot=total units made
 	reqs=bldg reqs met (bitmap)
 	diff=ai difficulty
 	techs=techs done (bitmap)
-	t=gametime (seconds)--]]
+	t=gametime (sec)--]]
 	p[[var=res
 r=20
 g=10
@@ -621,13 +589,11 @@ t=0
 npl=0]]
 
 	--[[
- generate arrays:
 	dq=queue of dmap keys to calc
-	exp=coords => is explored
+	exp=coords => explored?
 	vcache=los cache
-	 (for a given los value and
-	 position in a tile, which
-	 tiles around me can i see?)
+	 (for a given los value +
+	 pos in a tile, get viz tiles)
 	dmaps=dist-map for each res
 		(r,g,b), plus dropoff (d)
 	restiles=how many
@@ -655,16 +621,16 @@ npl=0]]
  --]]
 	res1,dmap_st.d,posidx,ptr,
 		cf,selt,alert,ban,amx,amy,tot,
-		loser,menu=
+		loser,title=
 		res.p1,{},
 		split"1,2,3,4",
 		unspl"0x9004,59,0,0,0,64,64,50"
 
 	--[[
- setup the ais. note the "3rd"
+ setup ais. note "3rd"
  ai (idx 4) is so ai attack
  response doesnt break for lbug
-	boi is the build order index
+	boi is build order index
  --]]
 	for i=2,4 do
 		ais[i]=p("boi=0",i)
@@ -749,7 +715,7 @@ up=-1 if repeatable upgrade
 in techs, 2nd arg is unit type
 to modify, 3rd arg is func to
 run, which is passed player's
-version of the unit type --]]
+version of unit type --]]
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
@@ -1768,7 +1734,7 @@ end
 --[[
 moves a group. sets each unit's
 grp to given agg and state.speed
-to lowest speed of the group.
+to lowest speed of group.
 if no frc, only idls move --]]
 function mvg(units,x,y,agg,frc)
 	local l=999
@@ -1801,7 +1767,7 @@ ez_adj=1]],path(u,b.x,b.y),b)
 end
 
 --send worker to gather tile.
---optionally dictate the path
+--optionally dictate path
 local function gogth(u,tx,ty,wp)
 	local t=tile_unit(tx,ty)
 	--[[
@@ -1820,7 +1786,7 @@ end
 --[[
 have a unit drop its carry.
 optnl nxt_res type to gather,
-optnl unit to drop to]]
+optnl unit to drop to--]]
 local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
@@ -1829,14 +1795,14 @@ local function godrop(u,nxt_res,dropu)
   if no path, or ant is led to
 		opponent mound, go to qn
 		of ant's player (qns are
-		always the first units)
+		always first units)
 		--]]
 		dropu=(not wayp or
 			g(bldgs,x,y,{}).p!=u.p
 			) and units[u.p]
 	end
 	--path tol=1 (default) since
-	--unit goes "into" the bldg
+	--unit goes "into" bldg
 	u.st=p([[t=drop
 drop=1
 in_bld=1
@@ -1874,7 +1840,7 @@ in_bld=1]],path(u,
 	u.st.farm=f
 end
 
---the main unit update func!
+--main unit update func!
 function tick(u)
 	--upd=should we do expensive
 	--	updates for this unit?
@@ -1889,7 +1855,7 @@ function tick(u)
 		tot-=1
 		u.st,u.dead,u.farmer,u.alive=
 			p"t=dead",ut.d
-		--unregister the building,
+		--unregister bldg,
 		--play sfx if died onscreen
 		del(sel,u,
 			u.bldg and reg_bldg(u),
@@ -1901,7 +1867,7 @@ function tick(u)
 			local t=nearest(u.x,u.y)
 			mset(t[1],t[2],82+u.dir)
 
-			--add new tile to the food
+			--add new tile to food
 			--dmap goals, queue regen
 			dmap_st.r[t.k]=t
 			qdmaps"r"
@@ -1948,7 +1914,7 @@ function tick(u)
 		--start farming. needed bc
 		--farm is not a target (if it
 		--was, ant would start
-		--when it hit the farm)
+		--when it hits farm)
 		u.st.active=1
 	end
 
@@ -1990,8 +1956,7 @@ function tick(u)
 			--not inside tile, try again
 			gogth(u,t.x8,t.y8)
 		end
-		--if stopped, face the
-		--direction of target
+		--if stopped, face target
 		if not wayp then
 			u.dir=sgn(t.x-x)
 		end
@@ -1999,7 +1964,7 @@ function tick(u)
 	--[[
  if in an active state
 	(atk is always active),
-	call the state's func--]]
+	call state's func--]]
 	if u.st.active then
 		_ENV[u.st.t](u)
 	end
@@ -2064,8 +2029,8 @@ function tick(u)
 	if u.upd then
 		if u.hu then
 			--[[
-   where in the tile is unit?
-			get the relative surrounding
+   where in tile is unit?
+			get relative surrounding
 			tiles cached for that pos.
 			if not, generate them--]]
 			local xo,yo,l=x%8\2,y%8\2,
@@ -2085,7 +2050,7 @@ function tick(u)
 
 			--for each visible tile,
 			--mark bldgs as discovered,
-			--and the tile as exp+viz
+			--and tile as exp+viz
 			foreach(vcache[k],function(t)
 				local k=u.k+t
 				if mid(k,8191)==k and
@@ -2118,7 +2083,7 @@ function tick(u)
 							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
-						--choose the closest targ
+						--choose closest targ
 						if d<agg_d then
 							agg_u,agg_d=e,d
 						end
@@ -2145,9 +2110,9 @@ function tick(u)
 			local a=u.st.ez_adj or
 				acc(x\8,y\8)
 
-			--if accessible or is the
+			--if accessible or is
 			--current position (in case
-			--the current pos is inacc)..
+			--current pos is inacc)..
 			if a or i==1 then
 				--[[
     if accessible and there
@@ -2160,7 +2125,7 @@ function tick(u)
 				end
 				--otherwise, add surrounding
 				--positions (adj x+y by 2)
-				--to the frontier
+				--to frontier
 				for nx=max(x-2),min(x+2,382),2 do
 				for ny=max(y-2),min(y+2,253),2 do
 					s(v,nx\2,ny\2,
@@ -2171,7 +2136,7 @@ function tick(u)
 			end
 		end
 		--mark this position as
-		--occupied for the next unit
+		--occupied for next unit
 		s(pos,x\4,y\4,1)
 	end
 end
@@ -2433,7 +2398,7 @@ function draw_unit(u)
 			return
 		end
 	elseif ufps then
-		--find the anim frame
+		--find anim frame
 		sx+=f\ufps%fr*fw
 	end
 	--all sprs have main color 1.
@@ -2763,7 +2728,7 @@ end
 --many tables are maps of
 --coords => vals. these helpers
 --convert coords into an idx
---and get/set the value
+--and get/set value
 --0<=x,y<=255
 function g(a,x,y,def)
 	return a[x|y<<8] or def
@@ -2801,6 +2766,8 @@ end
 --upkeep dynamic unit fields
 function box(u)
 	local _ENV,ais,rz=u,ais,res
+	--ap=allied player, is same
+	--for players 2+3 (ais)
 	r,x8,y8,dmgd,ai,ap,pres=
 		{x-w/2-1,y-h/2-1,
 			x+w/2,y+h/2,8},
@@ -2947,7 +2914,7 @@ function acc(x,y,strict)
 			and (const or farm))
 end
 
---is the hovering tile bldable?
+--is hovering tile bldable?
 function bldable()
 	--we can cheat and skip the
 	--wide-but-not-tall case as
@@ -3053,7 +3020,7 @@ end
 -- determining mouse cursor
 function can_renew(t)
 	if hbld.exp and seltyp.ant then
-		--print the resource cost of
+		--print resource cost of
 		--renewing next to mouse
 		pres(renew,10,2)
 		rect(unspl"8,0,18,8,4")
@@ -3094,7 +3061,7 @@ bop=101]],_typ[_p],rnd"60"\1))
 			x,_x,_y,_p,
 			--constrain hp in case loaded
 			--game has high-hp units but
-			--lost the hp upgrades
+			--lost hp upgrades
 			min(_hp or 9999,max_hp),
 			--when loading game,
 			--const,disc=0 mean nil
@@ -3262,11 +3229,11 @@ function dpath(u,k)
 			--[[
 			nothing lower was found,
 			either there's nothing within
-			9 tiles, or the dmap hasn't
+			9 tiles, or dmap hasn't
 			been refreshed since a new
 			bldg or a resource exhausted.
-			we incr the tile we ended on
-			so that the next attempt
+			we incr tile we ended on
+			so that next attempt
 			doesn't fall into this 'hole'
 			(in 'drop' state, unit will
 			keep running dpath) --]]
@@ -3316,7 +3283,7 @@ function dmap()
 		cdq.c+=1
 		cdq.typ,cdq.p2=cdq.p2,{}
 		if cdq.c==9 then
-			--done, save the dmap
+			--done, save dmap
 			dmaps[cdq.x],cdq=cdq.p1
 		end
 	else
@@ -3871,8 +3838,8 @@ function ai_frame(ai)
 		u.rs=mine_nxt(u,r)
 
 		--if couldn't find a nearby
-		--res tile, move the unit to
-		--the next cluster
+		--res tile, move unit to
+		--next cluster
 		if not u.rs and nxt[r] then
 			move(u,unpack(nxt[r]))
 		end
@@ -3886,7 +3853,7 @@ function ai_frame(ai)
 		--(stored in map)
 		local off=8288+i%32+i\32*128
 		--move down in map data by
-		--the ai's map start pos to
+		--ai's map start pos to
 		--get coords for this bo
 		local x,y=
 			peek(off+res.pos*768,2)
