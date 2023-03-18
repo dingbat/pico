@@ -123,7 +123,6 @@ function _update()
 1,49,64
 1,77,59
 1,59,52
-6,61,76
 5,61,76]],"\n"),function(s)
 				for p=1,res1.npl do
 					local u,x,y=unspl(s)
@@ -135,7 +134,6 @@ function _update()
 						unit(u,x+dx,y+dy,p)
 				end
 			end)
-
 			start()
 		else
 			--pal for title map bg
@@ -1878,6 +1876,14 @@ function tick(u)
 				--end of game
 				loser,sel=min(u.p,2),{}
 				music"56"
+--				if loser>1 and
+--					res.p2.newg then
+--					scoresub(
+--						res1.npl-1 ..
+--						split"_easy,_normal,_hard"[res1.diff],
+--						-res1.t
+--					)
+--				end
 			end
 		elseif ut.drop and not u.const then
 			--if dropoff dies, reduce
@@ -3909,7 +3915,8 @@ function ai_frame(ai)
 						{ux,uy}
 				elseif adv then
 					if pid==10 then
-						--place lbug if new game
+						--place lbug if ai=p2
+						--and is new game
 						if res.newg then
 							unit(14,ux,uy,4)
 						end
