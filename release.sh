@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=v1_6
+version=v1_7
 pico_path=/Applications/PICO-8.app/Contents/MacOS/pico8
 # pico_path=~/pico-8/pico8_64
 echo "cutting $version"
@@ -96,6 +96,7 @@ mv out/age_of_ants.p8.png "out/age of ants.p8.png"
 
 rm -rf out/windows out/raspi out/linux out/age_of_ants.app
 
+cp age_of_ants_ost.mp3 out/
 mv out/age_of_ants_raspi.zip out/age_of_ants_${version}_raspi.zip
 mv out/age_of_ants_osx.zip out/age_of_ants_${version}_osx.zip
 mv out/age_of_ants_windows.zip out/age_of_ants_${version}_windows.zip
