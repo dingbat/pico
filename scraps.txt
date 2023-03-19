@@ -43,7 +43,9 @@ dist(n[1]-g[1],n[2]-g[2])
 
 
 1.7
-- fix bug where units will change attack targets when stationary ???
+- fix bug where units will stop short or not attack buildings behind fog of war
+- fix bug where game would crash shortly after loading game
+- fix bug where an enemy castle or tower could get undiscovered if it attacks a ladybug
 
 1.6
 - fix bug where enemy attackers could stall in the middle of the map

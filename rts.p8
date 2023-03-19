@@ -370,7 +370,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.6⁶jqtᶜ6V1.6⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
+		?"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.7⁶jqtᶜ6V1.7⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
 	end
@@ -1815,15 +1815,18 @@ end
 --make a unit attack
 function goatk(u,e)
 	if e then
-  --enemy bldgs get discovered
-		--when attacking a human unit.
-		u.st,u.disc,u.res=
+  u.st,u.disc,u.res=
 			p([[t=atk
-active=1]],
+active=1
+k=]]..e.k,
+			--rng shld be /8 but shorten
+			--it to acct for mvmt error
+			--else, unit may stop short
 			path(u,e.x,e.y,0,
-			u.typ.range/8),e),
-			e.hu and u.bldg
-		u.st.k=e.k
+				u.typ.range/10),e),
+			--enemy bldgs get discovered
+			--when attacking a human unit
+			u.disc or e.hu and u.bldg
 	end
 end
 
@@ -1880,7 +1883,7 @@ function tick(u)
 --					res.p2.newg then
 --					scoresub(
 --						res1.npl-1 ..
---						split"_easy,_normal,_hard"[res1.diff],
+--							split"_easy,_normal,_hard"[res1.diff],
 --						-res1.t
 --					)
 --				end
@@ -2061,10 +2064,8 @@ function tick(u)
 				local k=u.k+t
 				if mid(k,8191)==k and
 					k%256<48 then
-					if bldgs[k] then
-						bldgs[k].disc=1
-					end
-					exp[k],nviz[k]=128,"v"
+					(bldgs[k] or {}).disc,
+						exp[k],nviz[k]=1,128,"v"
 				end
 			end)
 		end
@@ -2408,10 +2409,9 @@ function draw_unit(u)
 		sx+=f\ufps%fr*fw
 	end
 	--all sprs have main color 1.
-	--change it to sel col or
-	--player col.
-	--farms replace 5 instead of 1
-	--when selected
+	--change to sel or player col.
+	--farms replace col 5 instead
+	--of 1 when selected
 	pal{
 		selc or u.pres.col,
 		[14]=pal(u.farm and 5,selc or 5)
@@ -2545,7 +2545,7 @@ function atk(u)
 			end
 		else
 			if u.hu and viz[e.k] or
-				typ.los>=d then
+				typ.los>=d or e.disc then
 				--chase unit
 				goatk(u,e.k!=u.st.k and e)
 			elseif not e.disc then
