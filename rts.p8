@@ -2230,11 +2230,12 @@ function input()
 	end
 
 	if amy>104 and not selx then
-		local dx,dy=amx-105,amy-107
-		--click in minimap
-		if mid(dx,18)==dx and
-			mid(dy,12)==dy then
-			local x,y=20.21*dx,21.33*dy
+		--minimap to map coords
+		--20.21*104,21.33*106
+		local x,y=amx*20.21-2101.84,
+			amy*21.33-2260.98
+		if mid(x,384)==x and
+			mid(y,256)==y then
 			if rclk and sel1 then
 				sfx"1"
 				fsel(move,x,y,atkmov)
