@@ -241,9 +241,14 @@ function _update()
 		visible, copy tile from
 		realmap (drawn with foggy pal)--]]
 		for k in next,exp do
-			local x,y=k&0x00ff,k\256
-			mset(x+48,y,viz[k] or
-				mget(x,y))
+			--only set in fogmap bounds
+			--bc exp can go beyond
+			if mid(k,8191)==k and
+				k%256<48 then
+				local x,y=k&0x00ff,k\256
+				mset(x+48,y,viz[k] or
+					mget(x,y))
+			end
 		end
 	end
 
@@ -2061,12 +2066,9 @@ function tick(u)
 			--mark bldgs as discovered,
 			--and tile as exp+viz
 			foreach(vcache[k],function(t)
-				local k=u.k+t
-				if mid(k,8191)==k and
-					k%256<48 then
-					(bldgs[k] or {}).disc,
-						exp[k],nviz[k]=1,128,"v"
-				end
+				local k=u.k+t;
+				(bldgs[k] or {}).disc,
+					exp[k],nviz[k]=1,128,"v"
 			end)
 		end
 
@@ -2240,6 +2242,8 @@ function input()
 				sfx"1"
 				fsel(move,x,y,atkmov)
 				hilite{amx,amy,2,8}
+			--llclk, not lclk, to stop
+			--trigger when game starts
 			elseif not axn and llclk then
 				cx,cy=x-64,y-64
 				cam()
