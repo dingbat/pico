@@ -2208,11 +2208,10 @@ function input()
 		end
 	end)
 
-	--[[
-	htile=tile being hovered
-	atkmov=axn button active
-	 and not touch (in touch,
-	 axn btn is normal move)--]]
+	--htile=tile being hovered
+	--atkmov=axn button active
+	-- and not touch (in touch,
+	-- axn btn is normal move)
 	local htile,atkmov,clk=
 		tile_unit(mx8,my8),
 		axn and dget"0">1,
@@ -2248,10 +2247,7 @@ function input()
 		if clk then
 			to_bld=nil
 		end
-		return
-	end
-
-	if to_bld then
+	elseif to_bld then
 		if clk and bldable() then
 			--place new building
 			local b=unit(
@@ -2270,12 +2266,9 @@ function input()
 				can_pay(to_bld,res1) and
 				to_bld
 		end
-		return
-	end
-
-	--double-click selects all of
-	--same type
-	if btnp"5" and sel1 and
+	elseif btnp"5" and sel1 and
+		--double-click selects all of
+		--same type
 		sel1.unit and
 		t()-selt<.2 then
 		sel,selx={}
@@ -2285,12 +2278,9 @@ function input()
 				u.idx==sel1.idx and
 				sel,u)
 		end)
-		return
-	end
-
-	--right-click (action)
-	if rclk and sel1 and sel1.hu
-	then
+	elseif rclk and sel1 and
+		sel1.hu then
+		--right-click (action)
 		if can_renew() then
 			sfx"0"
 			hilite(hbld)
@@ -2340,23 +2330,23 @@ c=8]],mx,my))
 				sel1.rtx,sel1.rty=
 				mx,my,mx8,my8
 		end
-	end
-
-	if btnp"5" and not selx then
-		selx,sely,selt=mx,my,t()
-	end
-	--use llclk we want this to
-	--keep firing while held down
-	if llclk and selx then
-		--keep selbox x1,y1<x2,y2
-		--7=rect color
-		selbox={
-			min(selx,mx),
-			min(sely,my),
-			max(selx,mx),
-			max(sely,my),7}
-	else
-		selx=nil
+	elseif not axn then
+		if btnp"5" and not selx then
+			selx,sely,selt=mx,my,t()
+		end
+		--use llclk we want this to
+		--keep firing while held down
+		if llclk and selx then
+			--keep selbox x1,y1<x2,y2
+			--7=rect color
+			selbox={
+				min(selx,mx),
+				min(sely,my),
+				max(selx,mx),
+				max(sely,my),7}
+		else
+			selx=nil
+		end
 	end
 end
 -->8
