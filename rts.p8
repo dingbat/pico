@@ -21,15 +21,17 @@ function a(v,...)
 	_ENV[v]={},... and a(...)
 end
 
---sfx and foreach as locals
+--some apis as locals
 --so they can be used in _ENV
 local pspl,rndspl,unspl,
-	campal,fmget,sfx,foreach=
+	campal,fmget,
+	sfx,foreach,split,gl=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(camera,pal),
-	comp(fget,mget),sfx,foreach
+	comp(fget,mget),
+	sfx,foreach,split,_ENV
 
 --[[
 typs=array of unit types,
@@ -407,7 +409,7 @@ function _draw()
 	--cf5=proj,flag anim frame
 	--dt=time since hilite
 	local cf5,dt=cf\5,t()-hlt
-	
+
 	--draw projectiles
 	camera(cx,cy)
 	foreach(prj,function(_ENV)
@@ -541,7 +543,393 @@ function _draw()
 	end
 end
 -->8
---init
+--utils
+
+--[[
+returns a table with all the
+given vals, + puts 3 sequential
+items in it that also have them,
+called p1,p2,p3.
+if "var", sets to a global var--]]
+function p(str,typ,x,y,...)
+	local p1={...}
+	aspl"p2,p3"
+	local obj={p1,p2,p3,p2,
+		p1=p1,p2=p2,p3=p3,typ=typ,
+		x=x,y=y}
+	foreach(split(str,"\n"),function(l)
+		local k,v=unspl(l,"=")
+		if v then
+			foreach(obj,function(o)
+				obj[k],o[k]=v,v end)
+		end
+	end)
+	typs[obj.idx or ""],
+		_ENV[obj.var or ""]=obj,obj
+	return obj
+end
+
+--_ENV is a player's res
+function can_pay(typ,_ENV)
+	typ.reqs=reqs|typ.breq==reqs
+	return r>=typ.r and
+		g>=typ.g and
+		b>=typ.b and
+		(not typ.unit or p<min(pl,99))
+		and typ.reqs
+end
+
+--_ENV is a player's res
+--dir=1 to pay, -1 to get paid
+local function pay(typ,dir,_ENV)
+	r-=typ.r*dir
+	g-=typ.g*dir
+	b-=typ.b*dir
+	if typ.unit then
+		p+=dir
+	end
+end
+
+--"register" a building
+--for each tile in footprint,
+--if alive, mark it as obstacle
+--in bldgs, else, remove it
+local function reg_bldg(b)
+	local x,y=b.x8,b.y8
+	local function reg(xx,yy)
+		s(bldgs,xx,yy,b.alive and b)
+		if b.dead then
+			s(exp,xx,yy,1,
+				b.typ.fire and y==yy and
+				mset(xx,yy,69))
+			s(dmap_st.d,xx,yy)
+		elseif	b.drop then
+			s(dmap_st.d,xx,yy,{xx,yy})
+		end
+	end
+	reg(x,y,b.h8 or reg(x,y-1),
+		b.w8 or reg(x+1,y,
+			b.h8 or reg(x+1,y-1)))
+	if not b.const and not b.farm then
+		qdmaps"d"
+		--update prereqs
+		b.pres.reqs|=b.bmap
+	end
+end
+
+--many tables are maps of
+--coords => vals. these helpers
+--convert coords into an idx
+--and get/set value
+--0<=x,y<=255
+function g(a,x,y,def)
+	return a[x|y<<8] or def
+end
+function s(a,x,y,v)
+	a[x|y<<8]=v
+end
+
+function hilite(v)
+	hlt,hlv=t(),v
+end
+
+--check if two rects intersect.
+--assumes x1,y1<x2,y2
+--p=padding
+function int(r1,r2,p)
+	return r1[1]-p<r2[3] and
+		r1[3]+p>r2[1] and
+		r1[2]-p<r2[4] and
+		r1[4]+p>r2[2]
+end
+
+--upkeep dynamic unit fields
+local function box(u)
+	local _ENV,ais,rz=u,ais,res
+	--ap=allied player, is same
+	--for players 2+3 (ais)
+	r,x8,y8,dmgd,ai,ap,pres=
+		{x-w/2-1,y-h/2-1,
+			x+w/2,y+h/2,8},
+		x\8,y\8,
+		hp<max_hp,
+		ais[p],p|9,rz[p]
+	k,hu=x8|y8<<8,not ai
+	if not const then
+		--when upgrades incr max hp,
+		--add hp equal to the change
+		hp+=typ.hp-max_hp
+		max_hp=typ.hp
+	end
+	return u
+end
+
+--converts a tile into a unit-
+--like table that can be box'd
+function tile_unit(tx,ty)
+	return box(p([[p=0
+ais=
+hp=0
+max_hp=0
+const=1
+w=8
+h=8]],nil,tx*8+4,ty*8+4))
+end
+
+--from musurca/fres72:
+--lexaloffle.com/bbs/?pid=90968#p
+function dist(dx,dy)
+	local x,y=dx>>31,dy>>31
+	local a0,b0=dx+x^^x,dy+y^^y
+	return a0>b0 and
+		a0*.9609+b0*.3984 or
+		b0*.9609+a0*.3984
+end
+
+--[[
+for each tile in a square of
+n*2+1 centered at x,y, call fn.
+na=tiles can be inaccessible
+returns whether any were found--]]
+local function surr(fn,x,y,n,na)
+	local n,e=n or 1
+	for dx=-n,n do
+	for dy=-n,n do
+		local xx,yy=x+dx,y+dy
+		if
+			min(xx,yy)>=0 and
+			xx<48 and yy<32 and
+			(na or acc(xx,yy))
+		then
+			e=e or dx|dy!=0
+			if fn then
+				fn{
+					xx,yy,
+					d=dx&dy!=0 and 1.4 or 1,
+					k=xx|yy<<8
+				}
+			end
+		end
+	end
+	end
+	return e
+end
+
+--hovering unclaimed farm?
+function avail_farm()
+	local _ENV=hbld
+	return farm and
+		not exp and not farmer and
+		not const
+end
+
+--hovering over accessible
+--resource tile?
+function can_gth()
+	local t=mget(mx8,my8)
+	return (seltyp.ant and
+		(resqty[t] or avail_farm())
+		or seltyp.mnk==t)
+		and g(exp,mx8,my8)
+		and surr(nil,mx8,my8)
+end
+
+--hovering smth we can atk?
+function can_atk()
+	return sel1.atk
+		and hunit
+		and (not hunit.hu or
+			seltyp.mnk and
+			hunit.dmgd and not
+			hunit.bldg)
+		and g(viz,mx8,my8,hunit.disc)
+end
+
+--hovering over bldg that's
+--damaged or under const?
+function can_bld()
+	--checking hp<typ.hp covers
+	--both const and damaged cases
+	return hbld.hu and
+		hbld.hp<hbld.typ.hp and
+		(seltyp.ant or hbld.web and
+		seltyp.sp)
+end
+
+--[[
+it=indexed table coords {1,2}
+nt=named table coords {x=1,y=2}
+f=magnitude factor
+
+normalize `it` vector, add to
+nt vector (and set dir on nt),
+return whether nt reached `it`--]]
+function norm(it,nt,f)
+	local dx,dy=
+		it[1]-nt.x,it[2]-nt.y
+	d,nt.dir=dist(dx,dy)+.0001,
+		sgn(dx)
+	nt.x+=dx*f/d
+	nt.y+=dy*f/d
+	return	d<1
+end
+
+--is this tile accessible?
+--strict=include farms+constrn
+function acc(x,y,strict)
+	local _ENV=g(bldgs,x,y)
+	return not fget(mget(x,y),0)
+		and (not _ENV or
+			web and spdr or
+			not strict
+			and (const or farm))
+end
+
+--is hovering tile bldable?
+function bldable()
+	--we can cheat and skip the
+	--wide-but-not-tall case as
+	--there are no blds like that
+	return	acc(mx8,my8,1) and
+		(to_bld.h8 or
+			acc(mx8,my8+1,1)) and
+		(to_bld.w8 or
+			acc(mx8+1,my8,1) and
+			acc(mx8+1,my8+1,1))
+end
+
+--deal damage from a unit typ
+--to a unit
+function dmg(typ,to)
+	to.hp-=typ.atk*dmg_mult[
+		typ.atk_typ..to.def]
+
+	--wander if victim is idle or
+	--is gathering (y=nxt_res)
+	if to.st.idl or to.st.y then
+		wander(to)
+	end
+
+	to.conv+=typ.conv
+
+	--trigger ai defense response
+	--if non-attackers are hit
+	if to.ai and to.grp!="atk" then
+		--ai.p1=defense squad
+		to.ai.safe=
+			mvg(to.ai.p1,to.x,to.y,1)
+	end
+
+	if to.onscr then
+		--randomize atk sfx
+		poke(0x34a8,rnd"32",rnd"32")
+		sfx(typ.sfx)
+		alert=t()
+	elseif to.hu and t()-alert>10 then
+		--been 10s since last alert,
+		--play sound + hilite on map
+		sfx"34"
+		hilite{
+			105+to.x/20.21,
+			107+to.y/21.33,3,14}
+		alert=hlt
+
+		--adv hilite timestamp so
+		--it stays on screen longer
+		hlt+=2.5
+	end
+end
+
+--can we drop on hovered unit?
+function can_drop()
+	for u in all(sel) do
+		if u.res then
+			return hbld.hu and
+				hbld.drop
+		end
+	end
+end
+
+--can hovered farm be renewed?
+--t=skip cost check, used when
+-- determining mouse cursor
+function can_renew(t)
+	if hbld.exp and seltyp.ant then
+		--print resource cost of
+		--renewing next to mouse
+		pres(renew,10,2)
+		rect(unspl"8,0,18,8,4")
+		return	can_pay(renew,res1) or t
+	end
+end
+
+--queue prod of type u from
+--bldg b. multiply bld time
+--by m (to nerf easy ai)
+function prod(u,b,m)
+	pay(b,1,u.pres)
+	u.q=u.q or p("qty=0",b,b.t*m)
+	u.q.qty+=1
+end
+
+local function rest(u)
+	--agg=aggress nearby enemies
+	u.st=p[[t=rest
+agg=1
+idl=1]]
+end
+
+--create a new unit
+function unit(t,_x,_y,_p,
+	_const,_disc,_hp)
+	tot+=1
+	local _typ=typs[t] or t
+	--[[
+	lp='last produced', used by ai
+	sproff=spr offset, for farm
+	cyc=current farm cycle
+	fres=farm resource count
+	conv=conversion "hp"
+	bop=build order pop - see ai
+	--]]
+	local _ENV=add(units,
+		p([[var=u
+dir=1
+lp=1
+sproff=0
+cyc=0
+fres=0
+conv=0
+alive=1
+bop=101]],_typ[_p],rnd"60"\1))
+	--copy keys from typ to unit
+	--for tokens. if we copy all
+	--we run out of memory!
+	foreach(
+	split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
+	function(k)
+		_ENV[k]=typ[k]
+	end)
+
+	max_hp=_const and _const>0
+		and _const*hpr or typ.hp
+
+	id,x,y,p,hp,const,
+		disc,prod=
+		x,_x,_y,_p,
+		--constrain hp in case loaded
+		--game has high-hp units but
+		--lost hp upgrades
+		min(_hp or 9999,max_hp),
+		--when loading game,
+		--const,disc=0 mean nil
+		max(_const)>0 and _const,
+		_disc==1,_typ.prod or {}
+	rest(box(_ENV))
+	return _ENV,bldg and reg_bldg(_ENV)
+end
+-->8
+--init/consts
 
 function start()
 	--copy num players into global,
@@ -629,13 +1017,11 @@ npl=0]]
 		split"1,2,3,4",
 		unspl"0x9004,59,0,0,0,64,64,50"
 
-	--[[
- setup ais. note "3rd"
- ai (idx 4) is so ai attack
- response doesnt break for lbug
-	boi is build order index
- --]]
-	for i=2,4 do
+ --setup ais. note "3rd" ai
+ --(idx 4) is so ai defense
+ --doesnt break for lbug.
+ --boi=build order index
+ for i=2,4 do
 		ais[i]=p("boi=0",i)
 	end
 
@@ -1717,15 +2103,125 @@ porty=80]],castle,function(_ENV)
 end)
 }
 end
+
+
+--spr flag to resource type
+p[[var=f2r
+7=r
+10=g
+11=g
+19=b
+39=r]]
+
+--qty each restile starts with
+p[[var=resqty
+80=45
+96=45
+112=45
+
+82=45
+98=45
+114=45
+
+81=60
+97=60
+113=60
+
+83=60
+99=60
+115=60
+
+123=12
+
+84=50
+100=50
+116=50
+
+85=50
+101=50
+117=50
+
+86=45
+102=45
+118=45
+
+87=45
+103=45
+119=45]]
+
+--monk prayer res production
+p[[var=pray
+g=.00318
+b=.00318
+r=0]]
+
+--color for resources/flags
+--v=visible, e=explored
+p[[var=rescol
+r=8
+g=3
+b=4
+p=1
+v0=15
+v1=15
+v7=8
+v39=8
+v11=3
+v19=4
+v33=1
+e0=5
+e1=5
+e7=8
+e39=8
+e11=3
+e19=4
+e33=1]]
+
+--offsets for carrying ant spr
+p[[var=resx
+_=0
+r=16
+g=0
+b=16]]
+p[[var=resy
+_=0
+r=0
+g=4
+b=4]]
+
+--dmg multipliers
+p[[var=dmg_mult
+antant=1.1
+antqn=.7
+antsp=.8
+antsg=1.5
+antbld=.5
+
+acidant=1
+acidqn=.6
+acidsp=1.5
+acidsg=.9
+acidbld=.25
+
+spant=1.5
+spqn=1.1
+spsp=1
+spsg=1.2
+spbld=.1
+
+sgant=.8
+sgqn=3
+sgsp=.7
+sgsg=1
+sgbld=12
+
+bldant=1
+bldqn=.75
+bldsp=1.25
+bldsg=.9
+bldbld=.1]]
 -->8
 --tick unit
-
-local function rest(u)
-	--agg=aggress nearby enemies
-	u.st=p[[t=rest
-agg=1
-idl=1]]
-end
 
 local function move(u,x,y,agg)
 	--path (2nd arg) put in st.typ
@@ -1792,12 +2288,10 @@ local function godrop(u,nxt_res,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
-		--[[
-  if no path, or ant is led to
-		opponent mound, go to qn
-		of ant's player (qns are
-		always first units)
-		--]]
+		--if no path, or ant is led
+		--to opponent mound, go to qn
+		--of ant's player (qns are
+		--always first units)
 		dropu=(not wayp or
 			g(bldgs,x,y,{}).p!=u.p
 			) and units[u.p]
@@ -1882,7 +2376,7 @@ function tick(u)
 				--end of game
 				loser,sel=min(u.p,2),{}
 				music"56"
-				
+
 				--loser>1 (24 tok, 8168)
 --				if loser>10 and
 --					res.p2.newg then
@@ -1948,13 +2442,11 @@ function tick(u)
 	end
 	if t then
 		if t.dead then
-			--[[
-   if target is dead, if you
-			still have a path, keep
-			walking	but aggress.
-			if ant killed ladybug, eat!
-   --]]
-			u.st.agg=1,
+   --if target is dead, if you
+			--still have a path, keep
+			--walking	but aggress.
+			--if ant killed ladybug, eat!
+   u.st.agg=1,
 				wayp or rest(u),
 				u.ant and t.lady and
 					gogth(u,t.x8,t.y8)
@@ -2038,11 +2530,10 @@ function tick(u)
 	--update visibility
 	if u.upd then
 		if u.hu then
-			--[[
-   where in tile is unit?
-			get relative surrounding
-			tiles cached for that pos.
-			if not, generate them--]]
+			--where in tile is unit?
+			--get relative surrounding
+			--tiles cached for that pos.
+			--if not, generate them
 			local xo,yo,l=x%8\2,y%8\2,
 				ceil(los/8)
 			local k=xo|yo*16|los*256
@@ -2080,11 +2571,10 @@ function tick(u)
 					local d=dist(x-e.x,y-e.y)
 					if e.alive and d<=los then
 						if e.bldg then
-							--[[
-       if enemy is non-farm
-							bldg, prioritize it if
-							unit is siege, or de-
-							prioritize it non-siege--]]
+							--if enemy is non-farm
+							--bldg, prioritize it if
+							--unit is siege, or de-
+							--prioritize it non-siege
 							d+=u.sg and e.bldg==1
 								and -999 or 999
 						end
@@ -2100,10 +2590,9 @@ function tick(u)
 		end
 	end
 
-	--[[
- units dont obstruct other units
- so we need to adjust stopped,
- overlapping units --]]
+ --units dont obstruct other
+ --units so we need to adjust
+ --stopped overlapping units
 	if u.unit and not u.st.typ then
 		--fr=frontier, v=visited
 		local fr,v={{x,y}},{}
@@ -2162,11 +2651,10 @@ function cam()
 		--track mouse if not console
 		amx,amy=stat"32",stat"33"
 	else
-  --[[
-		if non-endgame console, move
-		mouse with arrows, + move
-		map if mouse is on screenedge
-		-1\128=-1 ! --]]
+  --if non-endgame console, move
+		--mouse with arrows, + move
+		--map if mouse is on edge
+		-- -1\128=-1 !
 		amx+=dx
 		amy+=dy
 		dx,dy=amx\128*2,amy\128*2
@@ -2405,7 +2893,7 @@ function draw_unit(u)
 		u.farm and selc or 5,
 		unspl"6,7,8,9,10,11,12,13,0"
 	}
-	
+
 	--non-qn bldgs (check w fire)
 	--don't rotate face
 	sspr(sx,sy,w,h,1,1,w,h,
@@ -2453,12 +2941,12 @@ end
 
 --called by tick on farmer.
 function frm(u)
-	local _ENV,g=u.st.farm,_ENV
+	local _ENV=u.st.farm
 	if not farmer then
 		rest(u)
 
 	--every 2s
-	elseif g.cf==0 then
+	elseif gl.cf==0 then
 		if ready then
 			--farm can be harvested
 			fres-=1
@@ -2471,7 +2959,7 @@ function frm(u)
 				if exp and ai then
 					--ai immediately renews
 					cyc,exp=0,
-						g.pay(g.renew,1,pres)
+						pay(gl.renew,1,pres)
 				end
 				sproff=exp and
 					(sfx"36" or 32) or 0
@@ -2559,7 +3047,7 @@ function bld(u)
 			hp+=hpr
 			if const>=typ.const then
 				const=u.hu and sfx"26"
-				g.reg_bldg(_ENV)
+				reg_bldg(_ENV)
 				if drop then
 					pres.pl+=5
 				elseif farm then
@@ -2573,8 +3061,8 @@ function bld(u)
 		else
 			rest(u)
 			--look for more const
-			g.surr(function(t)
-				local _ENV=g.bldgs[t.k]
+			surr(function(t)
+				local _ENV=gl.bldgs[t.k]
 				if _ENV and hu and const
 					and (u.ant or web)
 				then
@@ -2632,8 +3120,7 @@ function gth(u)
 	end
 end
 
-function produce(u)
-	local _ENV,gl=u,_ENV
+function produce(_ENV)
 	local bld=q.typ
 	--x=remaining time
 	q.x-=0x.0888
@@ -2683,6 +3170,14 @@ function produce(u)
 	end
 end
 
+--make a unit move randomly
+function wander(u)
+	move(u,
+		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
+		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
+		1)
+end
+
 --gather closest res tile
 function mine_nxt(u,res)
 	local wp,x,y=dpath(u,res)
@@ -2692,505 +3187,6 @@ function mine_nxt(u,res)
 	end
 end
 
--->8
---utils
-
---[[
-returns a table with all the
-given vals, + puts 3 sequential
-items in it that also have them,
-called p1,p2,p3.
-if "var", sets to a global var--]]
-function p(str,typ,x,y,...)
-	local p1={...}
-	aspl"p2,p3"
-	local obj={p1,p2,p3,p2,
-		p1=p1,p2=p2,p3=p3,typ=typ,
-		x=x,y=y}
-	foreach(split(str,"\n"),function(l)
-		local k,v=unspl(l,"=")
-		if v then
-			foreach(obj,function(o)
-				obj[k],o[k]=v,v end)
-		end
-	end)
-	typs[obj.idx or ""],
-		_ENV[obj.var or ""]=obj,obj
-	return obj
-end
-
---many tables are maps of
---coords => vals. these helpers
---convert coords into an idx
---and get/set value
---0<=x,y<=255
-function g(a,x,y,def)
-	return a[x|y<<8] or def
-end
-function s(a,x,y,v)
-	a[x|y<<8]=v
-end
-
-function hilite(v)
-	hlt,hlv=t(),v
-end
-
---check if two rects intersect.
---assumes x1,y1<x2,y2
---p=padding
-function int(r1,r2,p)
-	return r1[1]-p<r2[3] and
-		r1[3]+p>r2[1] and
-		r1[2]-p<r2[4] and
-		r1[4]+p>r2[2]
-end
-
---converts a tile into a unit-
---like table that can be box'd
-function tile_unit(tx,ty)
-	return box(p([[p=0
-ais=
-hp=0
-max_hp=0
-const=1
-w=8
-h=8]],nil,tx*8+4,ty*8+4))
-end
-
---upkeep dynamic unit fields
-function box(u)
-	local _ENV,ais,rz=u,ais,res
-	--ap=allied player, is same
-	--for players 2+3 (ais)
-	r,x8,y8,dmgd,ai,ap,pres=
-		{x-w/2-1,y-h/2-1,
-			x+w/2,y+h/2,8},
-		x\8,y\8,
-		hp<max_hp,
-		ais[p],p|9,rz[p]
-	k,hu=x8|y8<<8,not ai
-	if not const then
-		--when upgrades incr max hp,
-		--add hp equal to the change
-		hp+=typ.hp-max_hp
-		max_hp=typ.hp
-	end
-	return u
-end
-
---_ENV is a player's res
-function can_pay(typ,_ENV)
-	typ.reqs=reqs|typ.breq==reqs
-	return r>=typ.r and
-		g>=typ.g and
-		b>=typ.b and
-		(not typ.unit or p<min(pl,99))
-		and typ.reqs
-end
-
---_ENV is a player's res
---dir=1 to pay, -1 to get paid
-function pay(typ,dir,_ENV)
-	r-=typ.r*dir
-	g-=typ.g*dir
-	b-=typ.b*dir
-	if typ.unit then
-		p+=dir
-	end
-end
-
---from musurca/fres72:
---lexaloffle.com/bbs/?pid=90968#p
-function dist(dx,dy)
-	local x,y=dx>>31,dy>>31
-	local a0,b0=dx+x^^x,dy+y^^y
-	return a0>b0 and
-		a0*.9609+b0*.3984 or
-		b0*.9609+a0*.3984
-end
-
---[[
-for each tile in a square of
-n*2+1 centered at x,y, call fn.
-na=tiles can be inaccessible
-returns whether any were found--]]
-function surr(fn,x,y,n,na)
-	local n,e=n or 1
-	for dx=-n,n do
-	for dy=-n,n do
-		local xx,yy=x+dx,y+dy
-		if
-			min(xx,yy)>=0 and
-			xx<48 and yy<32 and
-			(na or acc(xx,yy))
-		then
-			e=e or dx|dy!=0
-			if fn then
-				fn{
-					xx,yy,
-					d=dx&dy!=0 and 1.4 or 1,
-					k=xx|yy<<8
-				}
-			end
-		end
-	end
-	end
-	return e
-end
-
---hovering unclaimed farm?
-function avail_farm()
-	local _ENV=hbld
-	return farm and
-		not exp and not farmer and
-		not const
-end
-
---hovering over accessible
---resource tile?
-function can_gth()
-	local t=mget(mx8,my8)
-	return (seltyp.ant and
-		(resqty[t] or avail_farm())
-		or seltyp.mnk==t)
-		and g(exp,mx8,my8)
-		and surr(nil,mx8,my8)
-end
-
---hovering smth we can atk?
-function can_atk()
-	return sel1.atk
-		and hunit
-		and (not hunit.hu or
-			seltyp.mnk and
-			hunit.dmgd and not
-			hunit.bldg)
-		and g(viz,mx8,my8,hunit.disc)
-end
-
---hovering over bldg that's
---damaged or under const?
-function can_bld()
-	--checking hp<typ.hp covers
-	--both const and damaged cases
-	return hbld.hu and
-		hbld.hp<hbld.typ.hp and
-		(seltyp.ant or hbld.web and
-		seltyp.sp)
-end
-
---[[
-it=indexed table coords {1,2}
-nt=named table coords {x=1,y=2}
-f=magnitude factor
-
-normalize `it` vector, add to
-nt vector (and set dir on nt),
-return whether nt reached `it`--]]
-function norm(it,nt,f)
-	local dx,dy=
-		it[1]-nt.x,it[2]-nt.y
-	d,nt.dir=dist(dx,dy)+.0001,
-		sgn(dx)
-	nt.x+=dx*f/d
-	nt.y+=dy*f/d
-	return	d<1
-end
-
---is this tile accessible?
---strict=include farms+constrn
-function acc(x,y,strict)
-	local _ENV=g(bldgs,x,y)
-	return not fget(mget(x,y),0)
-		and (not _ENV or
-			web and spdr or
-			not strict
-			and (const or farm))
-end
-
---is hovering tile bldable?
-function bldable()
-	--we can cheat and skip the
-	--wide-but-not-tall case as
-	--there are no blds like that
-	return	acc(mx8,my8,1) and
-		(to_bld.h8 or
-			acc(mx8,my8+1,1)) and
-		(to_bld.w8 or
-			acc(mx8+1,my8,1) and
-			acc(mx8+1,my8+1,1))
-end
-
---[[
-"register" a building
-for each tile in footprint,
-if alive, mark it as obstacle
-in bldgs, else, remove it--]]
-function reg_bldg(b)
-	local x,y=b.x8,b.y8
-	local function reg(xx,yy)
-		s(bldgs,xx,yy,b.alive and b)
-		if b.dead then
-			s(exp,xx,yy,1,
-				b.typ.fire and y==yy and
-				mset(xx,yy,69))
-			s(dmap_st.d,xx,yy)
-		elseif	b.drop then
-			s(dmap_st.d,xx,yy,{xx,yy})
-		end
-	end
-	reg(x,y,b.h8 or reg(x,y-1),
-		b.w8 or reg(x+1,y,
-			b.h8 or reg(x+1,y-1)))
-	if not b.const and not b.farm then
-		qdmaps"d"
-		--update prereqs
-		b.pres.reqs|=b.bmap
-	end
-end
-
---make a unit move randomly
-function wander(u)
-	move(u,
-		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
-		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
-		1)
-end
-
---deal damage from a unit typ
---to a unit
-function dmg(typ,to)
-	to.hp-=typ.atk*dmg_mult[
-		typ.atk_typ..to.def]
-
-	--wander if victim is idle or
-	--is gathering (y=nxt_res)
-	if to.st.idl or to.st.y then
-		wander(to)
-	end
-
-	to.conv+=typ.conv
-
-	--trigger ai defense response
-	--if non-attackers are hit
-	if to.ai and to.grp!="atk" then
-		--ai.p1=defense squad
-		to.ai.safe=
-			mvg(to.ai.p1,to.x,to.y,1)
-	end
-
-	if to.onscr then
-		--randomize atk sfx
-		poke(0x34a8,rnd"32",rnd"32")
-		sfx(typ.sfx)
-		alert=t()
-	elseif to.hu and t()-alert>10 then
-		--been 10s since last alert,
-		--play sound + hilite on map
-		sfx"34"
-		hilite{
-			105+to.x/20.21,
-			107+to.y/21.33,3,14}
-		alert=hlt
-
-		--adv hilite timestamp so
-		--it stays on screen longer
-		hlt+=2.5
-	end
-end
-
---can we drop on hovered unit?
-function can_drop()
-	for u in all(sel) do
-		if u.res then
-			return hbld.hu and
-				hbld.drop
-		end
-	end
-end
-
---can hovered farm be renewed?
---t=skip cost check, used when
--- determining mouse cursor
-function can_renew(t)
-	if hbld.exp and seltyp.ant then
-		--print resource cost of
-		--renewing next to mouse
-		pres(renew,10,2)
-		rect(unspl"8,0,18,8,4")
-		return	can_pay(renew,res1) or t
-	end
-end
-
---create a new unit
-function unit(t,_x,_y,_p,
-	_const,_disc,_hp)
-	local _typ,split=typs[t] or t,
-		split
-	do
-		local _ENV=add(units,
-			p([[var=u
-dir=1
-lp=1
-sproff=0
-cyc=0
-fres=0
-conv=0
-alive=1
-bop=101]],_typ[_p],rnd"60"\1))
-		--copy keys from typ to unit
-		--for tokens. if we copy all
-		--we run out of memory!
-		foreach(
-		split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
-		function(k)
-			_ENV[k]=typ[k]
-		end)
-
-		max_hp=_const and _const>0
-			and _const*hpr or typ.hp
-
-		id,x,y,p,hp,const,
-			disc,prod=
-			x,_x,_y,_p,
-			--constrain hp in case loaded
-			--game has high-hp units but
-			--lost hp upgrades
-			min(_hp or 9999,max_hp),
-			--when loading game,
-			--const,disc=0 mean nil
-			max(_const)>0 and _const,
-			_disc==1,_typ.prod or {}
-	end
-	tot+=1
-	rest(box(u))
-	return u,u.bldg and reg_bldg(u)
-end
-
---queue prod of type u from
---bldg b. multiply bld time
---by m (to nerf easy ai)
-function prod(u,b,m)
-	pay(b,1,u.pres)
-	u.q=u.q or p("qty=0",b,b.t*m)
-	u.q.qty+=1
-end
-
---spr flag to resource type
-p[[var=f2r
-7=r
-10=g
-11=g
-19=b
-39=r]]
-
---qty each restile starts with
-p[[var=resqty
-80=45
-96=45
-112=45
-
-82=45
-98=45
-114=45
-
-81=60
-97=60
-113=60
-
-83=60
-99=60
-115=60
-
-123=12
-
-84=50
-100=50
-116=50
-
-85=50
-101=50
-117=50
-
-86=45
-102=45
-118=45
-
-87=45
-103=45
-119=45]]
-
---monk prayer res production
-p[[var=pray
-g=.00318
-b=.00318
-r=0]]
-
---color for resources/flags
---v=visible, e=explored
-p[[var=rescol
-r=8
-g=3
-b=4
-p=1
-v0=15
-v1=15
-v7=8
-v39=8
-v11=3
-v19=4
-v33=1
-e0=5
-e1=5
-e7=8
-e39=8
-e11=3
-e19=4
-e33=1]]
-
---offsets for carrying ant spr
-p[[var=resx
-_=0
-r=16
-g=0
-b=16]]
-p[[var=resy
-_=0
-r=0
-g=4
-b=4]]
-
---dmg multipliers
-p[[var=dmg_mult
-antant=1.1
-antqn=.7
-antsp=.8
-antsg=1.5
-antbld=.5
-
-acidant=1
-acidqn=.6
-acidsp=1.5
-acidsg=.9
-acidbld=.25
-
-spant=1.5
-spqn=1.1
-spsp=1
-spsg=1.2
-spbld=.1
-
-sgant=.8
-sgqn=3
-sgsp=.7
-sgsg=1
-sgbld=12
-
-bldant=1
-bldqn=.75
-bldsp=1.25
-bldsg=.9
-bldbld=.1]]
 -->8
 --paths
 
