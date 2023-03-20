@@ -1753,17 +1753,15 @@ end
 
 --make a worker build/repair
 local function gobld(u,b)
-	--[[
-	allows selecting workers, bld
-	farms and have each worker
-	stay at a farm--]]
+	--allows selecting workers, bld
+	--farms and have each worker
+	--stay at a farm
 	if u.st.farm and b.farm then
 		return
 	end
-	--[[
- in_bld=for ai to know farm/bld
-	ez_adj=if overlapping, unit
-		can adjust to invalid tiles--]]
+ --in_bld=so ai knows farm/bld
+	--ez_adj=if overlapping, unit
+	-- can adjust to invalid tiles
 	u.st,u.res=p([[t=bld
 in_bld=1
 ez_adj=1]],path(u,b.x,b.y),b)
@@ -1884,7 +1882,9 @@ function tick(u)
 				--end of game
 				loser,sel=min(u.p,2),{}
 				music"56"
---				if loser>1 and
+				
+				--loser>1 (24 tok, 8168)
+--				if loser>10 and
 --					res.p2.newg then
 --					scoresub(
 --						res1.npl-1 ..
@@ -1942,9 +1942,7 @@ function tick(u)
 		--left or farm expired
 		local _ENV=u
 		if farmer and
-			farmer.st.farm!=u
-			or exp
-		then
+			farmer.st.farm!=u or exp then
 			farmer=nil
 		end
 	end
@@ -1973,10 +1971,10 @@ function tick(u)
 			u.dir=sgn(t.x-x)
 		end
 	end
-	--[[
- if in an active state
-	(atk is always active),
-	call state's func--]]
+
+ --if in an active state
+	--call state's func
+	--(atk is always active)
 	if u.st.active then
 		_ENV[u.st.t](u)
 	end
@@ -2121,11 +2119,10 @@ function tick(u)
 			--current position (in case
 			--current pos is inacc)..
 			if a or i==1 then
-				--[[
-    if accessible and there
-				is no overlap, move to
-				this position (or stay
-				put if already there) --]]
+    --if accessible and there
+				--is no overlap, move to
+				--this position (or stay
+				--put if already there)
 				if a and not g(pos,x\4,y\4) then
 					u.st.typ=i>1 and {p}
 					break
@@ -2174,10 +2171,9 @@ function cam()
 		amy+=dy
 		dx,dy=amx\128*2,amy\128*2
 	end
-	--[[
- clamp
-	cy can go past bottom edge bc
-	menubar blocks (unless endgame)--]]
+ --clamp. cy can go past bottom
+ --edge bc menu blocks 3 tiles
+ --(unless endgame)
 	cx,cy,amx,amy=
 		mid(cx+dx,256),
 		mid(cy+dy,
@@ -2325,13 +2321,12 @@ c=8]],mx,my))
 
 		--set rally flag
 		elseif sel1.typ.units then
-			if resqty[mget(mx8,my8)] then
-				hilite(htile)
-			end
 			sfx"3"
 			sel1.rx,sel1.ry,
 				sel1.rtx,sel1.rty=
-				mx,my,mx8,my8
+				mx,my,mx8,my8,
+				resqty[mget(mx8,my8)] and
+					hilite(htile)
 		end
 	elseif not axn then
 		if btnp"5" and not selx then
