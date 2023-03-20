@@ -3219,8 +3219,8 @@ function dpath(u,k)
 			been refreshed since a new
 			bldg or a resource exhausted.
 			we incr tile we ended on
-			so that next attempt
-			doesn't fall into this 'hole'
+			so that next pathing attempt
+			doesnt fall into this 'hole'
 			(in 'drop' state, unit will
 			keep running dpath) --]]
 			s(dmap,x,y,min(l+1,9))
@@ -4045,7 +4045,8 @@ menuitem(2,"▤ toggle help",
 		dset(1,~dget"1")
 	end)
 
---run 3 times (adds it to menu)
+--run 3 times, which keeps mode
+--the same, but adds it to menu
 foreach(split",,",mode)
 
 __gfx__
