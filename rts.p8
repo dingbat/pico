@@ -2638,46 +2638,44 @@ end
 -->8
 --unit funcs
 
-function draw_unit(u)
+function draw_unit(_ENV)
 	--ihp=inverted hp %, makes \
 	--mult+flr
-	local ut,r,w,h,stt,ihp,ux,uy=
-		u.typ,
-		u.res and u.res.typ or "_",
-		u.w,u.h,
-		u.st.typ and "move" or u.st.t,
-		u.max_hp/u.hp,unpack(u.r)
+	local cry,stt,ihp,ux,uy=
+		res and res.typ or "_",
+		st.typ and "move" or st.t,
+		max_hp/hp,gl.unpack(r)
 
 	local fw,sx,sy,ufps,fr,f,selc=
-		ut.fw,
-		ut[stt.."_x"]+resx[r]+
-			u.sproff\8*8,
-		ut[stt.."_y"]+resy[r],
-		ut[stt.."_fps"],
-		ut[stt.."_fr"],
-		u.dead or (cf-u.id)%60,
-		count(sel,u)==1 and 9
+		typ.fw,
+		typ[stt.."_x"]+gl.resx[cry]+
+			sproff\8*8,
+		typ[stt.."_y"]+gl.resy[cry],
+		typ[stt.."_fps"],
+		typ[stt.."_fr"],
+		dead or (gl.cf-id)%60,
+		gl.count(gl.sel,_ENV)==1 and 9
 
-	camera(cx-ux,cy-uy)
+	gl.camera(cx-ux,cy-uy)
 
-	if u.const and u.alive then
+	if const and alive then
 		--constructn zone ▒
 		fillp"23130.5"
 		rect(0,0,w,h,selc or 12)
 		fillp()
 
 		--constr %
-		local r=u.const/u.typ.const
+		local bar=const/typ.const
 
 		--progress bar
 		line(fw-1,unspl"0,0,0,5")
-		line(fw*r,0,14)
+		line(fw*bar,0,14)
 
 		--move spr left
-		sx+=r\-.5*fw
+		sx+=bar\-.5*fw
 
 		--<15% complete is blank
-		if r<=.15 then
+		if bar<=.15 then
 			return
 		end
 	elseif ufps then
@@ -2687,22 +2685,22 @@ function draw_unit(u)
 	--all sprs have main color 1.
 	--change to sel or player col.
 	pal{
-		selc or u.pres.col,2,3,4,
+		selc or pres.col,2,3,4,
 		--farms replace col 5 instead
 		--of 1 when selected
-		u.farm and selc or 5,
+		farm and selc or 5,
 		unspl"6,7,8,9,10,11,12,13,0"
 	}
 
 	--non-qn bldgs (check w fire)
 	--don't rotate face
 	sspr(sx,sy,w,h,1,1,w,h,
-		not ut.fire and u.dir==ut.sdir)
+		not typ.fire and dir==typ.sdir)
 	pal()
 
 	--hp<=50%
-	if u.alive and ihp>=2 then
-		spr(ut.fire and 247+f/20,w\3)
+	if alive and ihp>=2 then
+		spr(typ.fire and 247+f/20,w\3)
 		line(w,unspl"-1,0,-1,8")
 		line(w\ihp,-1,11)
 	end
