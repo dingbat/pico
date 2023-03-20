@@ -867,7 +867,7 @@ function can_renew(t)
 		--renewing next to mouse
 		pres(renew,10,2)
 		rect(unspl"8,0,18,8,4")
-		return	can_pay(renew,res1) or t
+		return t or	can_pay(renew,res1)
 	end
 end
 
@@ -925,6 +925,7 @@ bop=101]],_typ[_ply],rnd"60"\1))
 		--const,disc=0 mean nil
 		max(_const)>0 and _const,
 		_disc==1,_typ.prod or {}
+	
 	rest(box(_ENV))
 	return _ENV,
 		bldg and reg_bldg(_ENV)
@@ -2427,7 +2428,7 @@ function tick(u)
 		u.st.active=1
 	end
 
-	local x,y,t,los,agg_d,agg_u=
+	local ux,uy,t,los,agg_d,agg_u=
 		u.x,u.y,u.st.x,ut.los,9999,
 		--progress current prod
 		u.q and produce(u)
@@ -2461,7 +2462,7 @@ function tick(u)
 		end
 		--if stopped, face target
 		if not wayp then
-			u.dir=sgn(t.x-x)
+			u.dir=sgn(t.x-ux)
 		end
 	end
 
@@ -2507,8 +2508,8 @@ function tick(u)
 		be 9 for p1 (orange), 11
 		for ai (pal'd to pink), 13
 		for ladyb (pal'd to red) --]]
-		sset(109+x/20.21,
-			72+y/21.33,u.ap)
+		sset(109+ux/20.21,
+			72+uy/21.33,u.ap)
 	end
 
 	--ignore if under constructn
@@ -2535,7 +2536,7 @@ function tick(u)
 			--get relative surrounding
 			--tiles cached for that pos.
 			--if not, generate them
-			local xo,yo,l=x%8\2,y%8\2,
+			local xo,yo,l=ux%8\2,uy%8\2,
 				ceil(los/8)
 			local k=xo|yo*16|los*256
 			if not vcache[k] then
@@ -2562,26 +2563,26 @@ function tick(u)
 
 		--aggress nearby units
 		if u.st.agg and u.atk then
-			for e in all(units) do
+			for _ENV in all(units) do
 				--check for enemy, or monk
 				--healing own non-bldg unit
-				if e.ap!=u.ap or
-					u.mnk and e.dmgd and
-					not e.bldg
+				if ap!=u.ap or
+					u.mnk and dmgd and
+					not bldg
 				then
-					local d=dist(x-e.x,y-e.y)
-					if e.alive and d<=los then
-						if e.bldg then
+					local d=dist(ux-x,uy-y)
+					if alive and d<=los then
+						if bldg then
 							--if enemy is non-farm
 							--bldg, prioritize it if
 							--unit is siege, or de-
 							--prioritize it non-siege
-							d+=u.sg and e.bldg==1
+							d+=u.sg and bldg==1
 								and -999 or 999
 						end
 						--choose closest targ
 						if d<agg_d then
-							agg_u,agg_d=e,d
+							agg_u,agg_d=_ENV,d
 						end
 					end
 				end
@@ -2596,14 +2597,14 @@ function tick(u)
  --stopped overlapping units
 	if u.unit and not u.st.typ then
 		--fr=frontier, v=visited
-		local fr,v={{x,y}},{}
+		local fr,v={{ux,uy}},{}
 		for i,t in next,fr do
-			x,y=unpack(t)
+			ux,uy=unpack(t)
 
 			--this tile is allowed if
 			--it's accessible or ez_adj
 			local a=u.st.ez_adj or
-				acc(x\8,y\8)
+				acc(ux\8,uy\8)
 
 			--if accessible or is
 			--current position (in case
@@ -2613,15 +2614,15 @@ function tick(u)
 				--is no overlap, move to
 				--this position (or stay
 				--put if already there)
-				if a and not g(pos,x\4,y\4) then
+				if a and not g(pos,ux\4,uy\4) then
 					u.st.typ=i>1 and {t}
 					break
 				end
 				--otherwise, add surrounding
 				--positions (adj x+y by 2)
 				--to frontier
-				for nx=max(x-2),min(x+2,382),2 do
-				for ny=max(y-2),min(y+2,253),2 do
+				for nx=max(ux-2),min(ux+2,382),2 do
+				for ny=max(uy-2),min(uy+2,253),2 do
 					s(v,nx\2,ny\2,
 						add(g(v,nx\2,ny\2,fr),
 							{nx,ny}))
@@ -2631,7 +2632,7 @@ function tick(u)
 		end
 		--mark this position as
 		--occupied for next unit
-		s(pos,x\4,y\4,1)
+		s(pos,ux\4,uy\4,1)
 	end
 end
 -->8
