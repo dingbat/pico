@@ -3565,10 +3565,8 @@ portf=9]],
 						5,12
 					)
 				else
-					local q=sel1.q
-					if sel1.farm then
-						?"ᶜ4⁶jbr⁴i"..sel1.cyc.."/"..seltyp.mcyc.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
-					end
+					local q=sel1.q,
+						sel1.farm and	?"ᶜ4⁶jbr⁴i"..sel1.cyc.."/"..seltyp.mcyc.."⁵he⁶:040c1e0d05010706⁵ch⁶:0c1c1014160f0604"
 					for i,b in next,sel1.prod do
 						if not b.done then
 							draw_port(

@@ -20,17 +20,19 @@ cp rts.p8 rts_print.p8
 sed -i'.bak' -r -E "s/\+=\?(.*)/+=print(\1)/" rts_print.p8
 sed -i'.bak' -r -E "s/\?(.*q\.qty)/print(\1)/" rts_print.p8
 sed -i'.bak' -r -E "s/\?(split.*)/print(\1)/" rts_print.p8
-sed -i'.bak' -r -E "s/tostr\[\[\[\[\]\]/--[[/" rts_print.p8
+sed -i'.bak' -r -E "s/and	\?(.*)/and print(\1)/" rts_print.p8
+# sed -i'.bak' -r -E "s/\?(.*)/print(\1)/g" rts_print.p8
+sed -i'.bak' -r -E "s/tostr\[\[\[\[\]\]/--[[/g" rts_print.p8
 
 echo "shrinking..."
 python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename
 
 header="\n--age of ants\n--eeooty\n\n--commented code on bbs!\n"
-sed -i'.bak' -r -E "s/print\(([^)]+)\)/?\1\n/" rts_sh.p8
+sed -i'.bak' -r -E "s/print\(([^)]+)\)/?\1\n/g" rts_sh.p8
 # sed -i'.bak' -E "s/^function /\nfunction /" rts_sh.p8
 sed -i'.bak' -E "s/^__lua__/__lua__$header/" rts_sh.p8
 # sed -i'.bak' -E "s/=240$/=0xf0/" rts_sh.p8
-sed -i'.bak' -E "s/~=/!=/" rts_sh.p8
+sed -i'.bak' -E "s/~=/!=/g" rts_sh.p8
 # sed -i'.bak' -E "s/24365/0x5f2d/" rts_sh.p8
 # sed -i'.bak' -E "s/13480/0x34a8/" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
