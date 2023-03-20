@@ -6,7 +6,10 @@ __lua__
 
 --lexaloffle.com/bbs/?tid=51464
 
---composes two funcs:
+--♪♪♪
+music(63,2000)
+
+--helper to compose two funcs:
 --"unspl(x)" = unpack(split(x))
 function comp(f,g)
 	return function(...)
@@ -90,7 +93,6 @@ local function p(str,typ,x,y,...)
 	return obj
 end
 
-music(63,2000)
 function _update()
 	--lclk and rclk are "key up"
 	--events, required on mobile
@@ -685,7 +687,7 @@ end
 
 --from musurca/fres72:
 --lexaloffle.com/bbs/?pid=90968#p
-function dist(dx,dy)
+local function dist(dx,dy)
 	local x,y=dx>>31,dy>>31
 	local a0,b0=dx+x^^x,dy+y^^y
 	return a0>b0 and
@@ -764,21 +766,20 @@ function can_bld()
 end
 
 --[[
-it=indexed table coords {1,2}
-nt=named table coords {x=1,y=2}
+it=indexed tbl coords {1,2}
+_ENV=named tbl coords {x=1,y=2}
 f=magnitude factor
 
 normalize `it` vector, add to
 nt vector (and set dir on nt),
 return whether nt reached `it`--]]
-function norm(it,nt,f)
-	local dx,dy=
-		it[1]-nt.x,it[2]-nt.y
-	d,nt.dir=dist(dx,dy)+.0001,
-		sgn(dx)
-	nt.x+=dx*f/d
-	nt.y+=dy*f/d
-	return	d<1
+function norm(it,_ENV,f)
+	local dx,dy=it[1]-x,it[2]-y
+	_d,dir=dist(dx,dy)+.0001,
+		gl.sgn(dx)
+	x+=dx*f/_d
+	y+=dy*f/_d
+	return	_d<1
 end
 
 --is this tile accessible?
