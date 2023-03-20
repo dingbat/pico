@@ -2826,18 +2826,14 @@ function atk(u)
 					end
 				end
 			end
-		else
-			if u.hu and viz[e.k] or
-				typ.los>=d or e.disc then
-				--chase unit
-				goatk(u,e.k!=u.st.k and e)
-			elseif not e.disc then
-				--cant see unit, so stop
-				u.st.typ=nil
-			end
-			if not u.st.typ then
-				rest(u)
-			end
+		elseif u.hu and viz[e.k] or
+			typ.los>=d or e.disc then
+			--out of range but visible,
+			--so chase unit
+			goatk(u,e.k!=u.st.k and e)
+		elseif not e.disc then
+			--cant see unit, so stop
+			rest(u)
 		end
 	end
 end
