@@ -2379,7 +2379,7 @@ function tick(u)
 				loser,sel=min(u.ply,2),{}
 				music"56"
 
-				--loser>1 (24 tok, 8168)
+				--loser>1
 				if loser>10 and
 					res.p2.newg then
 					scoresub(
@@ -3660,13 +3660,13 @@ portf=15]],function()
 	--idle mil bldg
 	sspr(
 		add(btns,idlm and {
-			r=split"106,121,113,128",
+			r=split"105,121,112,128",
 			fn=function()
 				hilite(idlm)
 				sel={idlm}
 			end
 		}) and 48 or 56,
-		unspl"98,8,6,104,121")
+		unspl"98,8,6,105,121")
 
 	--camera box in minimap
 	pspl"1,2,3,4,5,6,7,8,9,10,14,12,8,0,15"
