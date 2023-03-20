@@ -11,6 +11,11 @@ tab () {
  sed -i'.bak' -r -E "s/function $1\(/\n-->8\n--$2\n\nfunction $1(/" rts_sh.p8
 }
 
+repl () {
+  sed -i'.bak' -E '/txt=/!s/'"$1"'/'"$2"'/g' rts_sh.p8
+  # grep -E -i 'txt=.*'"$1"'' rts_sh.p8 || true
+}
+
 cp rts.p8 rts_print.p8
 sed -i'.bak' -r -E "s/\+=\?(.*)/+=print(\1)/" rts_print.p8
 sed -i'.bak' -r -E "s/\?(.*q\.qty)/print(\1)/" rts_print.p8
@@ -31,43 +36,39 @@ sed -i'.bak' -E "s/~=/!=/" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
 # sed -i'.bak' -E "s/36868/0x9004/" rts_sh.p8
 
-for _ in 1 2
-do
-  sed -i'.bak' -E "s/avail_farm/afarm/" rts_sh.p8
-  sed -i'.bak' -E "s/can_renew/cr/" rts_sh.p8
-done
-for _ in 1 2 3 4
-do
-  sed -i'.bak' -E "s/renew/ren/" rts_sh.p8
-  sed -i'.bak' -E "s/rndspl/rs/" rts_sh.p8
-  sed -i'.bak' -E "s/campal/cp/" rts_sh.p8
-  sed -i'.bak' -E "s/fmget/fm/" rts_sh.p8
-  sed -i'.bak' -E "s/loadgame/lg/" rts_sh.p8
-  sed -i'.bak' -E "s/posidx/pi/" rts_sh.p8
-  sed -i'.bak' -E "s/maxbop/mb/" rts_sh.p8
-  sed -i'.bak' -E "s/avail/av/" rts_sh.p8
-  sed -i'.bak' -E "s/fire/f/" rts_sh.p8
-  sed -i'.bak' -E "s/seltyp/st/" rts_sh.p8
-  sed -i'.bak' -E "s/draw_unit/du/" rts_sh.p8
-  sed -i'.bak' -E "s/selbox/sb/" rts_sh.p8
-  sed -i'.bak' -E "s/breq/bq/" rts_sh.p8
-  sed -i'.bak' -E "s/prj_xo/px/" rts_sh.p8
-  sed -i'.bak' -E "s/prj_yo/py/" rts_sh.p8
-  sed -i'.bak' -E "s/prj_s/s/" rts_sh.p8
-  sed -i'.bak' -E "s/portx/ptx/" rts_sh.p8
-  sed -i'.bak' -E "s/porty/pty/" rts_sh.p8
-  sed -i'.bak' -E "s/produce/pr/" rts_sh.p8
-  sed -i'.bak' -E "s/dropu/dr/" rts_sh.p8
-  sed -i'.bak' -E "s/nearest/nr/" rts_sh.p8
-  sed -i'.bak' -E "s/upcycle/z/" rts_sh.p8
-  sed -i'.bak' -E "s/wander/w/" rts_sh.p8
-  sed -i'.bak' -E "s/lady/l/" rts_sh.p8
-  sed -i'.bak' -E "s/vcache/vc/" rts_sh.p8
-  sed -i'.bak' -E "s/mine_nxt/mn/" rts_sh.p8
-  sed -i'.bak' -E "s/tile_unit/tu/" rts_sh.p8
-done
-
-sed -i'.bak' -E "s/fball:/fireball:/" rts_sh.p8
+repl can_renew cr
+repl avail_farm afarm
+repl renew ren
+repl rndspl rs
+repl campal cp
+repl fmget fm
+repl loadgame lg
+repl posidx pi
+repl maxbop mb
+repl avail av
+repl fire f
+repl seltyp st
+repl draw_unit du
+repl selbox sb
+repl breq bq
+repl prj_xo px
+repl prj_yo py
+repl prj_s s
+repl portx ptx
+repl porty pty
+repl produce pr
+repl dropu dr
+repl nearest nr
+repl upcycle z
+repl wander w
+repl lady l
+repl vcache vc
+repl mine_nxt mn
+repl range rng
+repl tile_unit tu
+repl const ct
+repl move mv
+repl rest rt
 
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 # tab start init
@@ -85,6 +86,8 @@ rm rts_print.p8 rts_print.p8.bak rts_sh.p8.bak
 
 python3 ~/shrinko8/shrinko8.py ./rts_sh.p8 --count
 echo
+
+exit 1
 
 rm -rf out
 $pico_path -export "age_of_ants.bin" ./rts_sh.p8
