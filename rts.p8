@@ -3729,7 +3729,7 @@ function save()
 	end
 	--encode res keys
 	foreach(
-		split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
+		split"r,g,b,pop,pl,reqs,tot,diff,techs,t,pos,npl,col",
 		function(k)
 			foreach(res,function(r)
 				draw(r[k])
@@ -3737,7 +3737,7 @@ function save()
 		end)
 	draw(#units)
 	foreach(units,function(_ENV)
-		foreach({idx,x,y,p,
+		foreach({idx,x,y,ply,
 			max(const),
 			max(disc),hp},draw)
 	end)
@@ -3772,7 +3772,7 @@ function loadgame()
 
 	--res
 	foreach(
-		split"r,g,b,p,pl,reqs,tot,diff,techs,t,pos,npl,col",
+		split"r,g,b,pop,pl,reqs,tot,diff,techs,t,pos,npl,col",
 		function(k)
 			foreach(res,function(r)
 				r[k]=px"1"
