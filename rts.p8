@@ -2380,14 +2380,14 @@ function tick(u)
 				music"56"
 
 				--loser>1 (24 tok, 8168)
---				if loser>10 and
---					res.p2.newg then
---					scoresub(
---						res1.npl-1 ..
---							split"_easy,_normal,_hard"[res1.diff],
---						-res1.t
---					)
---				end
+				if loser>10 and
+					res.p2.newg then
+					scoresub(
+						res1.npl-1 ..
+							split"_easy,_normal,_hard"[res1.diff],
+						-res1.t
+					)
+				end
 			end
 		elseif ut.drop and not u.const then
 			--if dropoff dies, reduce
