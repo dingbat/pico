@@ -150,14 +150,14 @@ function _update()
 1,77,59
 1,59,52
 5,61,76]],"\n"),function(s)
-				for p=1,res1.npl do
+				for ply=1,res1.npl do
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
-						stp[res[p].pos],":")
+						stp[res[ply].pos],":")
 					--set newgame, has
 					--ai system make lbugs
 					res.p2.newg=
-						unit(u,x+dx,y+dy,p)
+						unit(u,x+dx,y+dy,ply)
 				end
 			end)
 			start()
@@ -569,6 +569,13 @@ end
 -->8
 --utils
 
+local function rest(_ENV)
+	--agg=aggress nearby enemies
+	st=p[[t=rest
+agg=1
+idl=1]]
+end
+
 --_ENV is a player's res
 function can_pay(typ,_ENV)
 	typ.reqs=reqs|typ.breq==reqs
@@ -870,13 +877,6 @@ function prod(_ENV,b,m)
 	pay(b,1,pres)
 	q=q or p("qty=0",b,b.t*m)
 	q.qty+=1
-end
-
-local function rest(_ENV)
-	--agg=aggress nearby enemies
-	st=p[[t=rest
-agg=1
-idl=1]]
 end
 
 --create a new unit
@@ -2221,208 +2221,6 @@ bldsp=1.25
 bldsg=.9
 bldbld=.1]]
 -->8
---input
-
---update camera+mouse
-function cam()
-	local b=btn()
-	--treat esdf as ⬆️⬅️⬇️➡️
-	if (b>255) b>>=8
-
-	--bit ops to get xy*2 from btn
-	--(map movement)
-	local dx,dy=(b&2)-(b&1)*2,
-		(b&8)/4-(b&4)/2
-
-	if dget"0"!=2 or loser then
-		--track mouse if not console
-		amx,amy=stat"32",stat"33"
-	else
-  --if non-endgame console, move
-		--mouse with arrows, + move
-		--map if mouse is on edge
-		-- -1\128=-1 !
-		amx+=dx
-		amy+=dy
-		dx,dy=amx\128*2,amy\128*2
-	end
- --clamp. cy can go past bottom
- --edge bc menu blocks 3 tiles
- --(unless endgame)
-	cx,cy,amx,amy=
-		mid(cx+dx,256),
-		mid(cy+dy,
-			loser and 128 or 151),
-		mid(amx,126),
-		mid(amy,126)
-
-	--mx,my are relative to camera
-	mx,my,hbtn=amx+cx,amy+cy
-	mx8,my8=mx\8,my\8
-end
-
---foreach selected unit,do func
-function fsel(func,...)
-	for u in all(sel) do
-		func(u,...)
-	end
-end
-
---handle keys, mouse mvmt, clks
-function input()
-	cam()
-
-	--what button are we hovering?
-	foreach(btns,function(b)
-		if int(b.r,{amx,amy,amx,amy},1) then
-			hbtn=b
-		end
-	end)
-
-	--htile=tile being hovered
-	--atkmov=axn button active
-	-- and not touch (in touch,
-	-- axn btn is normal move)
-	local htile,atkmov,clk=
-		tile_unit(mx8,my8),
-		axn and dget"0">1,
-		lclk or rclk
-
-	--click on a button
-	if clk and hbtn then
-		--disable axn
-		axn=hbtn.fn(rclk)
-		return
-	end
-
-	--axn makes a lclk a rclk
-	if lclk and axn then
-		rclk,axn,llclk=1
-	end
-
-	if amy>104 and not selx then
-		--minimap to map coords
-		--20.21*104,21.33*106
-		local x,y=amx*20.21-2101.84,
-			amy*21.33-2260.98
-		if mid(x,384)==x and
-			mid(y,256)==y then
-			if rclk and sel1 then
-				sfx"1"
-				fsel(move,x,y,atkmov)
-				hilite{amx,amy,2,8}
-			--llclk, not lclk, to stop
-			--trigger when game starts
-			elseif not axn and llclk then
-				cx,cy=x-64,y-64
-				cam()
-			end
-		end
-		if clk then
-			to_bld=nil
-		end
-	elseif to_bld then
-		if clk and bldable() then
-			--place new building
-			local b=unit(
-				to_bld,
-				mx8*8+to_bld.w\2,
-				my8*8+to_bld.h\2,
-				unspl"1,1,1")
-			--send selected units to bld
-			fsel(gobld,b)
-			pay(to_bld,1,res1)
-			--clear selection and bldg,
-			--right-click makes another
-			--one if you can pay for it
-			selx,to_bld=sfx"1",
-				rclk and
-				can_pay(to_bld,res1) and
-				to_bld
-		end
-	elseif btnp"5" and sel1 and
-		--double-click selects all of
-		--same type
-		sel1.unit and
-		t()-selt<.2 then
-		sel,selx={}
-		foreach(units,function(_ENV)
-			add(onscr and
-				hu and
-				idx==gl.sel1.idx and
-				gl.sel,_ENV)
-		end)
-	elseif rclk and sel1 and
-		sel1.hu then
-		--right-click (action)
-		if can_renew() then
-			sfx"0"
-			hilite(hbld)
-			hbld.sproff,
-				hbld.cyc,
-				hbld.exp=0,0
-			pay(renew,1,res1)
-			gofarm(sel1,hbld)
-
-		elseif can_gth() then
-			sfx"0"
-			hilite(htile)
-			if avail_farm() then
-				gofarm(sel1,hbld)
-			else
-				fsel(gogth,mx8,my8)
-			end
-
-		elseif can_bld() then
-			sfx"0"
-			fsel(gobld,hbld)
-			hilite(hbld)
-
-		elseif can_atk() then
-			sfx"4"
-			fsel(goatk,hunit)
-			hilite(hunit)
-
-		elseif can_drop() then
-			sfx"0"
-			fsel(godrop,nil,hbld)
-			hilite(hbld)
-
-		elseif sel1.unit then
-			sfx"1"
-			mvg(sel,mx,my,atkmov,1)
-			hilite(p([[f=.5
-c=8]],mx,my))
-
-		--set rally flag
-		elseif sel1.typ.units then
-			sfx"3"
-			sel1.rx,sel1.ry,
-				sel1.rtx,sel1.rty=
-				mx,my,mx8,my8,
-				resqty[mget(mx8,my8)] and
-					hilite(htile)
-		end
-	elseif not axn then
-		if btnp"5" and not selx then
-			selx,sely,selt=mx,my,t()
-		end
-		--use llclk we want this to
-		--keep firing while held down
-		if llclk and selx then
-			--keep selbox x1,y1<x2,y2
-			--7=rect color
-			selbox={
-				min(selx,mx),
-				min(sely,my),
-				max(selx,mx),
-				max(sely,my),7}
-		else
-			selx=nil
-		end
-	end
-end
--->8
 --tick unit
 
 local function move(u,x,y,agg)
@@ -2798,8 +2596,8 @@ function tick(u)
 	if u.unit and not u.st.typ then
 		--fr=frontier, v=visited
 		local fr,v={{x,y}},{}
-		for i,p in next,fr do
-			x,y=unpack(p)
+		for i,t in next,fr do
+			x,y=unpack(t)
 
 			--this tile is allowed if
 			--it's accessible or ez_adj
@@ -2815,7 +2613,7 @@ function tick(u)
 				--this position (or stay
 				--put if already there)
 				if a and not g(pos,x\4,y\4) then
-					u.st.typ=i>1 and {p}
+					u.st.typ=i>1 and {t}
 					break
 				end
 				--otherwise, add surrounding
@@ -2919,15 +2717,15 @@ end
 
 --adds 1 res to u's carry. drops
 --at nearest dropoff if full
-local function collect(_ENV,res)
-	if res and res.typ==res then
+local function collect(_ENV,r)
+	if res and res.typ==r then
 		res.qty+=1
 	else
 		--second arg here is 'typ'
-		res=p("qty=1",res)
+		res=p("qty=1",r)
 	end
 	if res.qty>=typ.cap then
-		godrop(_ENV,res)
+		godrop(_ENV,r)
 	end
 end
 
@@ -3155,7 +2953,8 @@ function produce(_ENV)
 			end
 		else
 			--make unit
-			local new=gl.unit(bld,x,y,p),
+			local new=
+				gl.unit(bld,x,y,ply),
 				onscr and hu and sfx"19"
 			if bld.ant and
 				rtx and
@@ -3186,7 +2985,208 @@ function wander(_ENV)
 		y+rndspl"-6,-5,-4,-3,3,4,5,6",
 		1)
 end
+-->8
+--input
 
+--update camera+mouse
+function cam()
+	local b=btn()
+	--treat esdf as ⬆️⬅️⬇️➡️
+	if (b>255) b>>=8
+
+	--bit ops to get xy*2 from btn
+	--(map movement)
+	local dx,dy=(b&2)-(b&1)*2,
+		(b&8)/4-(b&4)/2
+
+	if dget"0"!=2 or loser then
+		--track mouse if not console
+		amx,amy=stat"32",stat"33"
+	else
+  --if non-endgame console, move
+		--mouse with arrows, + move
+		--map if mouse is on edge
+		-- -1\128=-1 !
+		amx+=dx
+		amy+=dy
+		dx,dy=amx\128*2,amy\128*2
+	end
+ --clamp. cy can go past bottom
+ --edge bc menu blocks 3 tiles
+ --(unless endgame)
+	cx,cy,amx,amy=
+		mid(cx+dx,256),
+		mid(cy+dy,
+			loser and 128 or 151),
+		mid(amx,126),
+		mid(amy,126)
+
+	--mx,my are relative to camera
+	mx,my,hbtn=amx+cx,amy+cy
+	mx8,my8=mx\8,my\8
+end
+
+--foreach selected unit,do func
+function fsel(func,...)
+	for u in all(sel) do
+		func(u,...)
+	end
+end
+
+--handle keys, mouse mvmt, clks
+function input()
+	cam()
+
+	--what button are we hovering?
+	foreach(btns,function(b)
+		if int(b.r,{amx,amy,amx,amy},1) then
+			hbtn=b
+		end
+	end)
+
+	--htile=tile being hovered
+	--atkmov=axn button active
+	-- and not touch (in touch,
+	-- axn btn is normal move)
+	local htile,atkmov,clk=
+		tile_unit(mx8,my8),
+		axn and dget"0">1,
+		lclk or rclk
+
+	--click on a button
+	if clk and hbtn then
+		--disable axn
+		axn=hbtn.fn(rclk)
+		return
+	end
+
+	--axn makes a lclk a rclk
+	if lclk and axn then
+		rclk,axn,llclk=1
+	end
+
+	if amy>104 and not selx then
+		--minimap to map coords
+		--20.21*104,21.33*106
+		local x,y=amx*20.21-2101.84,
+			amy*21.33-2260.98
+		if mid(x,384)==x and
+			mid(y,256)==y then
+			if rclk and sel1 then
+				sfx"1"
+				fsel(move,x,y,atkmov)
+				hilite{amx,amy,2,8}
+			--llclk, not lclk, to stop
+			--trigger when game starts
+			elseif not axn and llclk then
+				cx,cy=x-64,y-64
+				cam()
+			end
+		end
+		if clk then
+			to_bld=nil
+		end
+	elseif to_bld then
+		if clk and bldable() then
+			--place new building
+			local b=unit(
+				to_bld,
+				mx8*8+to_bld.w\2,
+				my8*8+to_bld.h\2,
+				unspl"1,1,1")
+			--send selected units to bld
+			fsel(gobld,b)
+			pay(to_bld,1,res1)
+			--clear selection and bldg,
+			--right-click makes another
+			--one if you can pay for it
+			selx,to_bld=sfx"1",
+				rclk and
+				can_pay(to_bld,res1) and
+				to_bld
+		end
+	elseif btnp"5" and sel1 and
+		--double-click selects all of
+		--same type
+		sel1.unit and
+		t()-selt<.2 then
+		sel,selx={}
+		foreach(units,function(_ENV)
+			add(onscr and
+				hu and
+				idx==gl.sel1.idx and
+				gl.sel,_ENV)
+		end)
+	elseif rclk and sel1 and
+		sel1.hu then
+		--right-click (action)
+		if can_renew() then
+			sfx"0"
+			hilite(hbld)
+			hbld.sproff,
+				hbld.cyc,
+				hbld.exp=0,0
+			pay(renew,1,res1)
+			gofarm(sel1,hbld)
+
+		elseif can_gth() then
+			sfx"0"
+			hilite(htile)
+			if avail_farm() then
+				gofarm(sel1,hbld)
+			else
+				fsel(gogth,mx8,my8)
+			end
+
+		elseif can_bld() then
+			sfx"0"
+			fsel(gobld,hbld)
+			hilite(hbld)
+
+		elseif can_atk() then
+			sfx"4"
+			fsel(goatk,hunit)
+			hilite(hunit)
+
+		elseif can_drop() then
+			sfx"0"
+			fsel(godrop,nil,hbld)
+			hilite(hbld)
+
+		elseif sel1.unit then
+			sfx"1"
+			mvg(sel,mx,my,atkmov,1)
+			hilite(p([[f=.5
+c=8]],mx,my))
+
+		--set rally flag
+		elseif sel1.typ.units then
+			sfx"3"
+			sel1.rx,sel1.ry,
+				sel1.rtx,sel1.rty=
+				mx,my,mx8,my8,
+				resqty[mget(mx8,my8)] and
+					hilite(htile)
+		end
+	elseif not axn then
+		if btnp"5" and not selx then
+			selx,sely,selt=mx,my,t()
+		end
+		--use llclk we want this to
+		--keep firing while held down
+		if llclk and selx then
+			--keep selbox x1,y1<x2,y2
+			--7=rect color
+			selbox={
+				min(selx,mx),
+				min(sely,my),
+				max(selx,mx),
+				max(sely,my),7}
+		else
+			selx=nil
+		end
+	end
+end
 -->8
 --paths
 
@@ -3577,13 +3577,13 @@ portf=9]],
 									if can_pay(b,res1) and (
 										not q or
 										q.typ==b and q.qty<9) then
+										sfx"2"
 										if b.bldg then
-											--cancel place
+											--toggle placing bld
 											to_bld=
 												b!=to_bld and b
 											return
 										end
-										sfx"2"
 										prod(sel1,b,1)
 										--hide if tech
 										b.done=b.x
