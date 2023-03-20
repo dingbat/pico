@@ -25,13 +25,13 @@ end
 --so they can be used in _ENV
 local pspl,rndspl,unspl,
 	campal,fmget,
-	sfx,foreach,split,gl=
+	sfx,foreach,gl=
 	comp(pal,split),
 	comp(rnd,split),
 	comp(unpack,split),
 	comp(camera,pal),
 	comp(fget,mget),
-	sfx,foreach,split,_ENV
+	sfx,foreach,_ENV
 
 --[[
 typs=array of unit types,
@@ -65,6 +65,30 @@ local unl,unspr,aspl,
 	split"-9:-20,263:-20,263:148,-9:148",
 	split"1,2,0,3,1,0,2,1,3,0",
 	unspl"-10,0,63,0,0,30,1,1"
+
+--[[
+returns a table with all the
+given vals, + puts 3 sequential
+items in it that also have them,
+called p1,p2,p3.
+if "var", sets to a global var--]]
+local function p(str,typ,x,y,...)
+	local p1={...}
+	aspl"p2,p3"
+	local obj={p1,p2,p3,p2,
+		p1=p1,p2=p2,p3=p3,typ=typ,
+		x=x,y=y}
+	foreach(split(str,"\n"),function(l)
+		local k,v=unspl(l,"=")
+		if v then
+			foreach(obj,function(o)
+				obj[k],o[k]=v,v end)
+		end
+	end)
+	typs[obj.idx or ""],
+		_ENV[obj.var or ""]=obj,obj
+	return obj
+end
 
 music(63,2000)
 function _update()
@@ -545,37 +569,14 @@ end
 -->8
 --utils
 
---[[
-returns a table with all the
-given vals, + puts 3 sequential
-items in it that also have them,
-called p1,p2,p3.
-if "var", sets to a global var--]]
-function p(str,typ,x,y,...)
-	local p1={...}
-	aspl"p2,p3"
-	local obj={p1,p2,p3,p2,
-		p1=p1,p2=p2,p3=p3,typ=typ,
-		x=x,y=y}
-	foreach(split(str,"\n"),function(l)
-		local k,v=unspl(l,"=")
-		if v then
-			foreach(obj,function(o)
-				obj[k],o[k]=v,v end)
-		end
-	end)
-	typs[obj.idx or ""],
-		_ENV[obj.var or ""]=obj,obj
-	return obj
-end
-
 --_ENV is a player's res
 function can_pay(typ,_ENV)
 	typ.reqs=reqs|typ.breq==reqs
 	return r>=typ.r and
 		g>=typ.g and
 		b>=typ.b and
-		(not typ.unit or p<min(pl,99))
+		(not typ.unit or
+			pop<min(pl,99))
 		and typ.reqs
 end
 
@@ -586,7 +587,7 @@ local function pay(typ,dir,_ENV)
 	g-=typ.g*dir
 	b-=typ.b*dir
 	if typ.unit then
-		p+=dir
+		pop+=dir
 	end
 end
 
@@ -644,8 +645,7 @@ function int(r1,r2,p)
 end
 
 --upkeep dynamic unit fields
-local function box(u)
-	local _ENV,ais,rz=u,ais,res
+local function box(_ENV)
 	--ap=allied player, is same
 	--for players 2+3 (ais)
 	r,x8,y8,dmgd,ai,ap,pres=
@@ -653,7 +653,7 @@ local function box(u)
 			x+w/2,y+h/2,8},
 		x\8,y\8,
 		hp<max_hp,
-		ais[p],p|9,rz[p]
+		gl.ais[ply],ply|9,gl.res[ply]
 	k,hu=x8|y8<<8,not ai
 	if not const then
 		--when upgrades incr max hp,
@@ -661,13 +661,13 @@ local function box(u)
 		hp+=typ.hp-max_hp
 		max_hp=typ.hp
 	end
-	return u
+	return _ENV
 end
 
 --converts a tile into a unit-
 --like table that can be box'd
 function tile_unit(tx,ty)
-	return box(p([[p=0
+	return box(p([[ply=0
 ais=
 hp=0
 max_hp=0
@@ -863,24 +863,24 @@ function can_renew(t)
 	end
 end
 
---queue prod of type u from
+--queue prod of unit type from
 --bldg b. multiply bld time
 --by m (to nerf easy ai)
-function prod(u,b,m)
-	pay(b,1,u.pres)
-	u.q=u.q or p("qty=0",b,b.t*m)
-	u.q.qty+=1
+function prod(_ENV,b,m)
+	pay(b,1,pres)
+	q=q or p("qty=0",b,b.t*m)
+	q.qty+=1
 end
 
-local function rest(u)
+local function rest(_ENV)
 	--agg=aggress nearby enemies
-	u.st=p[[t=rest
+	st=p[[t=rest
 agg=1
 idl=1]]
 end
 
 --create a new unit
-function unit(t,_x,_y,_p,
+function unit(t,_x,_y,_ply,
 	_const,_disc,_hp)
 	tot+=1
 	local _typ=typs[t] or t
@@ -893,20 +893,19 @@ function unit(t,_x,_y,_p,
 	bop=build order pop - see ai
 	--]]
 	local _ENV=add(units,
-		p([[var=u
-dir=1
+		p([[dir=1
 lp=1
 sproff=0
 cyc=0
 fres=0
 conv=0
 alive=1
-bop=101]],_typ[_p],rnd"60"\1))
+bop=101]],_typ[_ply],rnd"60"\1))
 	--copy keys from typ to unit
 	--for tokens. if we copy all
 	--we run out of memory!
 	foreach(
-	split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
+	gl.split"w8,h8,bldg,unit,farm,idx,qn,web,ant,mnk,w,h,atk,def,drop,sp,sg,bldrs,bmap,hpr,lady",
 	function(k)
 		_ENV[k]=typ[k]
 	end)
@@ -914,9 +913,9 @@ bop=101]],_typ[_p],rnd"60"\1))
 	max_hp=_const and _const>0
 		and _const*hpr or typ.hp
 
-	id,x,y,p,hp,const,
+	id,x,y,ply,hp,const,
 		disc,prod=
-		x,_x,_y,_p,
+		x,_x,_y,_ply,
 		--constrain hp in case loaded
 		--game has high-hp units but
 		--lost hp upgrades
@@ -926,7 +925,8 @@ bop=101]],_typ[_p],rnd"60"\1))
 		max(_const)>0 and _const,
 		_disc==1,_typ.prod or {}
 	rest(box(_ENV))
-	return _ENV,bldg and reg_bldg(_ENV)
+	return _ENV,
+		bldg and reg_bldg(_ENV)
 end
 -->8
 --init/consts
@@ -959,7 +959,7 @@ function init()
  initialize "res",
 	keeps track of player state:
 	r,g,b=resources
-	p=current pop
+	pop=current population
 	pl=pop limit
 	tot=total units made
 	reqs=bldg reqs met (bitmap)
@@ -970,7 +970,7 @@ function init()
 r=20
 g=10
 b=20
-p=4
+pop=4
 pl=10
 tot=4
 reqs=0
@@ -1077,7 +1077,7 @@ r=food cost
 g=grass cost
 b=wood cost
 breq=prereqs (bitmap)
-p=blank if unit, undef if not
+pop=blank if unit, undef if not
 
 w=hitbox width (px)
 fw=spr width (px)
@@ -1125,7 +1125,7 @@ r=5
 g=0
 b=0
 breq=0
-p=
+pop=
 
 w=4
 fw=4
@@ -1191,7 +1191,7 @@ r=0
 g=10
 b=10
 breq=0
-p=
+pop=
 
 const=1
 w=8
@@ -1239,7 +1239,7 @@ r=8
 g=8
 b=0
 breq=0
-p=
+pop=
 
 const=1
 w=8
@@ -1333,7 +1333,7 @@ r=3
 g=0
 b=5
 breq=0
-p=
+pop=
 
 const=1
 w=7
@@ -1384,7 +1384,7 @@ r=6
 g=2
 b=0
 breq=0
-p=
+pop=
 
 const=1
 w=8
@@ -1551,7 +1551,7 @@ t=30
 r=0
 g=12
 b=0
-p=
+pop=
 breq=0
 
 const=1
@@ -2043,7 +2043,7 @@ r=2
 g=14
 b=14
 breq=0
-p=
+pop=
 
 const=1
 w=16
@@ -2237,11 +2237,11 @@ to lowest speed of group.
 if no frc, only idls move --]]
 function mvg(units,x,y,agg,frc)
 	local l=999
-	foreach(units,function(u)
-		if frc or u.st.idl then
-			move(u,x,y,agg)
+	foreach(units,function(_ENV)
+		if frc or st.idl then
+			move(_ENV,x,y,agg)
 		end
-		l=min(u.typ.spd,l)
+		l=min(typ.spd,l)
 	end)
 	foreach(units,function(_ENV)
 		st.spd,grp=l,agg end)
@@ -2293,8 +2293,8 @@ local function godrop(u,nxt_res,dropu)
 		--of ant's player (qns are
 		--always first units)
 		dropu=(not wayp or
-			g(bldgs,x,y,{}).p!=u.p
-			) and units[u.p]
+			g(bldgs,x,y,{}).ply!=u.ply
+			) and units[u.ply]
 	end
 	--path tol=1 (default) since
 	--unit goes "into" bldg
@@ -2374,7 +2374,7 @@ function tick(u)
 			npl-=1
 			if npl==1 or u==hq then
 				--end of game
-				loser,sel=min(u.p,2),{}
+				loser,sel=min(u.ply,2),{}
 				music"56"
 
 				--loser>1 (24 tok, 8168)
@@ -2393,7 +2393,7 @@ function tick(u)
 			u.pres.pl-=ut.drop
 		elseif u.unit then
 			--reduce player's pop
-			u.pres.p-=1
+			u.pres.pop-=1
 		end
 	end
 
@@ -2473,7 +2473,7 @@ function tick(u)
 
 	--heal if damaged
 	if ut.hl and u.dmgd then
-		u.hp+=heal[u.p].qty
+		u.hp+=heal[u.ply].qty
 	end
 
 	--is unit being hovered over?
@@ -2759,11 +2759,11 @@ function input()
 		sel1.unit and
 		t()-selt<.2 then
 		sel,selx={}
-		foreach(units,function(u)
-			add(u.onscr and
-				u.hu and
-				u.idx==sel1.idx and
-				sel,u)
+		foreach(units,function(_ENV)
+			add(onscr and
+				hu and
+				idx==gl.sel1.idx and
+				gl.sel,_ENV)
 		end)
 	elseif rclk and sel1 and
 		sel1.hu then
@@ -2867,17 +2867,17 @@ function draw_unit(u)
 		fillp()
 
 		--constr %
-		local p=u.const/u.typ.const
+		local r=u.const/u.typ.const
 
 		--progress bar
 		line(fw-1,unspl"0,0,0,5")
-		line(fw*p,0,14)
+		line(fw*r,0,14)
 
 		--move spr left
-		sx+=p\-.5*fw
+		sx+=r\-.5*fw
 
 		--<15% complete is blank
-		if p<=.15 then
+		if r<=.15 then
 			return
 		end
 	elseif ufps then
@@ -2908,34 +2908,43 @@ function draw_unit(u)
 	end
 end
 
---adds 1 res to u's carry. drops
---at nearest dropoff if full
-local function collect(u,res)
-	if u.res and u.res.typ==res then
-		u.res.qty+=1
-	else
-		--second arg here is 'typ'
-		u.res=p("qty=1",res)
-	end
-	if u.res.qty>=u.typ.cap then
-		godrop(u,res)
+--gather closest res tile
+local function mine_nxt(u,res)
+	local wp,x,y=dpath(u,res)
+	if wp then
+		gogth(u,x,y,wp)
+		return res
 	end
 end
 
-function drop(u)
-	if u.res then
-		u.pres[u.res.typ]+=u.res.qty/u.typ.gr
+--adds 1 res to u's carry. drops
+--at nearest dropoff if full
+local function collect(_ENV,res)
+	if res and res.typ==res then
+		res.qty+=1
+	else
+		--second arg here is 'typ'
+		res=p("qty=1",res)
 	end
-	u.st.idl,u.res=11
-	if u.st.farm then
-		gofarm(u,u.st.farm)
-	elseif u.st.y then
+	if res.qty>=typ.cap then
+		godrop(_ENV,res)
+	end
+end
+
+function drop(_ENV)
+	if res then
+		pres[res.typ]+=res.qty/typ.gr
+	end
+	st.idl,res=11
+	if st.farm then
+		gofarm(_ENV,st.farm)
+	elseif st.y then
 		--gather closest res of that
 		--type. if none, will try
 		--again next frame
-		mine_nxt(u,u.st.y)
+		mine_nxt(_ENV,st.y)
 	else
-		rest(u)
+		rest(_ENV)
 	end
 end
 
@@ -3009,9 +3018,9 @@ function atk(u)
 						if e.qn then
 							e.hp=0
 						else
-							e.pres.p-=1
-							u.pres.p+=1
-							e.p,e.conv=u.p,0
+							e.pres.pop-=1
+							u.pres.pop+=1
+							e.ply,e.conv=u.ply,0
 						end
 						--remove from ai squad
 						del(e.sqd,e)
@@ -3039,7 +3048,7 @@ end
 function bld(u)
 	--every sec
 	if cf%30==0 then
-		local _ENV,g=u.st.x,_ENV
+		local _ENV=u.st.x
 		if const then
 			--build (max hp grows)
 			const+=1
@@ -3171,20 +3180,11 @@ function produce(_ENV)
 end
 
 --make a unit move randomly
-function wander(u)
-	move(u,
-		u.x+rndspl"-6,-5,-4,-3,3,4,5,6",
-		u.y+rndspl"-6,-5,-4,-3,3,4,5,6",
+function wander(_ENV)
+	move(_ENV,
+		x+rndspl"-6,-5,-4,-3,3,4,5,6",
+		y+rndspl"-6,-5,-4,-3,3,4,5,6",
 		1)
-end
-
---gather closest res tile
-function mine_nxt(u,res)
-	local wp,x,y=dpath(u,res)
-	if wp then
-		gogth(u,x,y,wp)
-		return res
-	end
 end
 
 -->8
@@ -3198,7 +3198,7 @@ a goal tile. pick min dist tile
 around unit, repeat until goal.--]]
 function dpath(u,k)
 	--p=path, l=lowest dist
-	local x,y,dmap,p,l=
+	local x,y,dmap,pth,l=
 		u.x8,u.y8,dmaps[k] or {},
 		{},9
 	--.5>.4 (diag), <.55 (tmp dist
@@ -3230,9 +3230,9 @@ function dpath(u,k)
 			s(dmap,x,y,min(l+1,9))
 			return
 		end
-		add(p,{x*8+3,y*8+3})
+		add(pth,{x*8+3,y*8+3})
 	end
-	return p,x,y
+	return pth,x,y
 end
 
 --queues dmap keys to calc
@@ -3415,12 +3415,12 @@ end
 --z=should show 0 (to use in
 -- resource bar, not costs)
 function pres(r,x,y,z)
-	local oop=res1.p>=res1.pl
-	for i,k in inext,split"r,g,b,p" do
+	local oop=res1.pop>=res1.pl
+	for i,k in inext,split"r,g,b,pop" do
 		--good luck lol
 		local newx,v=0,i!=4 and
 			min(r[k]\1,99) or z and
-			"³b ³i"..res1.p..
+			"³b ³i"..res1.pop..
 				"/⁶x9 ⁶-#⁶x1.⁴h²5⁶x0 ⁶x4⁶-#⁵6f"..min(res1.pl,99) or
 			oop and r[k] or 0
 		if z and i==3 then
@@ -3851,7 +3851,7 @@ function ai_frame(ai)
 		--adv=advance bo idx?
 		--p=bo pop threshold
 		--pid=bo prod id
-		local adv,ux,uy,p,pid=
+		local adv,ux,uy,pop,pid=
 			ai.boi==i,
 			x*8,y*8,
 			peek(off,2)
@@ -3863,14 +3863,14 @@ function ai_frame(ai)
 			chr(pid),ant.prod[pid],
 			g(bldgs,x,y)
 
-		if res.tot>=p then
+		if res.tot>=pop then
 			if b then
 				if bld then
 					--set "build order pop",
 					--see bopmax note. we set
 					--this here so that units
 					--from loaded games have it
-					bld.bop=p
+					bld.bop=pop
 				elseif ai.safe then
 					--either havent built this
 					--yet or it was destroyed
@@ -4000,7 +4000,7 @@ function ai_frame(ai)
 			ut.mil and
 			--dont prod from all castles
 			u.bop<ut.maxbop and
-			res.p<res.diff*26
+			res.pop<res.diff*26
 		then
 			--prod next unit in rotation
 			local b,h=u.prod[u.lp]
