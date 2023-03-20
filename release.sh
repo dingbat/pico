@@ -42,6 +42,7 @@ repl can_renew cr
 repl avail_farm afarm
 repl renew ren
 repl rndspl rs
+repl unspl us
 repl campal cp
 repl fmget fm
 repl loadgame lg
@@ -71,6 +72,27 @@ repl tile_unit tu
 repl const ct
 repl move mv
 repl rest rt
+repl input ip
+repl hilite hi
+repl can_drop cdr
+repl can_atk ctk
+repl can_bld cbl
+repl can_gth cgt
+repl can_pay cpy
+repl reg_bldg rb
+repl dmap_st dms
+repl qdmaps qdm
+repl bldable bd
+repl dmg_mult dmt
+repl max_hp mh
+repl gofarm gf
+repl gobld gb
+repl goatk ga
+repl godrop gd
+repl resqty rq
+repl sel_ports sp
+repl draw_port dp
+repl draw_menu dm
 
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 # tab start init
@@ -89,7 +111,7 @@ rm rts_print.p8 rts_print.p8.bak rts_sh.p8.bak
 python3 ~/shrinko8/shrinko8.py ./rts_sh.p8 --count
 echo
 
-exit 1
+# exit 1
 
 rm -rf out
 $pico_path -export "age_of_ants.bin" ./rts_sh.p8
