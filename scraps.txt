@@ -11,6 +11,69 @@ credits:
 2; handheld
 3; desktop
 
+
+--[[
+unit defs!
+
+idx=typs idx
+spd=speed (px/frame)
+los=line of sight (px)
+conv=conversion strngth (monks)
+def=defense type
+dsfx=death sfx (unit=62/bld=27)
+sfx=atk sfx (all=10/monk=63)
+hl=should heal?
+d=dead counter start: 0=default,
+ 61=never (qn) 59=instant (lbug)
+
+prj_spd=projectile speed
+prj_xo,yo=proj origin offset
+prj_s=proj sprite x (y=96)
+aoe=proj area of effect?
+
+bldrs=# of ai build/repair ants
+bmap=bldg bitmap val
+units=# of units bld produces
+idl=should light up idle bldg?
+mil=produces military units?
+maxbop=if bldg has a greater
+ bop (build order population),
+ dont produce. makes ai only
+ prod catrplrs from 2 castles
+const=secs to build (unit=1)
+
+t=train time (sec)
+r=food cost
+g=grass cost
+b=wood cost
+breq=prereqs (bitmap)
+pop="" if unit, nil if not
+
+w=hitbox width (px)
+fw=spr width (px)
+h=spr/hitbox height (px)
+<state>_x,_y=spr for state
+<state>_fr,_fps=# of anim
+ frames, anim speed for state
+portx,porty=portrait spr
+sdir=spr direction (l=1 r=-1)
+fire=low hp fire anim?
+
+sg=is siege unit?
+gr=worker "gather rate".
+ resource gain=carry\gr.
+ for farms, grow rate
+cap=worker carry capacity
+mcyc=max farm cycles
+
+tmap=tech bitmap value
+up=-1 if repeatable
+
+in techs, 2nd arg is unit type
+to modify, 3rd arg is func to
+run, which is passed player's
+version of unit type --]]
+
 if b.hu then
 		printh(b.idx..":"..xx..","..yy,"log")
 		end

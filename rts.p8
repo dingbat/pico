@@ -216,15 +216,13 @@ function _update()
 	--[[
 	upc=constrains cf to upcycle
 	hbld=bldg being hovered over
-	t6=on 6-second interval?
 	selh=selected human units
 	selb=selected human bldgs
 	--]]
-	upc,hbld,t6,selh,selb,
+	upc,hbld,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
-		g(bldgs,mx8,my8,{}),
-		t()%6<1
+		g(bldgs,mx8,my8,{})
 
 	--update game time
 	res1.t+=0x.0888
@@ -825,9 +823,9 @@ function dmg(typ,to)
 	--trigger ai defense response
 	--if non-attackers are hit
 	if to.ai and to.grp!="atk" then
+		to.ai.deft=t()
 		--ai.p1=defense squad
-		to.ai.safe=
-			mvg(to.ai.p1,to.x,to.y,1)
+		mvg(to.ai.p1,to.x,to.y,1)
 	end
 
 	if to.onscr then
@@ -927,7 +925,7 @@ bop=101]],_typ[_ply],rnd"60"\1))
 		--const,disc=0 mean nil
 		max(_const)>0 and _const,
 		_disc==1,_typ.prod or {}
-	
+
 	rest(box(_ENV))
 	return _ENV,
 		bldg and reg_bldg(_ENV)
@@ -1026,7 +1024,8 @@ npl=0]]
  --doesnt break for lbug.
  --boi=build order index
  for i=2,4 do
-		ais[i]=p("boi=0",i)
+		ais[i]=p([[boi=0
+deft=0]],i)
 	end
 
 	--hp heal per frame per player
@@ -1040,67 +1039,6 @@ g=0
 b=6
 breq=0]]
 
---[[
-unit defs!
-
-idx=typs idx
-spd=speed (px/frame)
-los=line of sight (px)
-conv=conversion strngth (monks)
-def=defense type
-dsfx=death sfx (unit=62/bld=27)
-sfx=atk sfx (all=10/monk=63)
-hl=should heal?
-d=dead counter start: 0=default,
- 61=never (qn) 59=instant (lbug)
-
-prj_spd=projectile speed
-prj_xo,yo=proj origin offset
-prj_s=proj sprite x (y=96)
-aoe=proj area of effect?
-
-bldrs=# of ai build/repair ants
-bmap=bldg bitmap val
-units=# of units bld produces
-idl=should light up idle bldg?
-mil=produces military units?
-maxbop=if bldg has a greater
- bop (build order population),
- dont produce. makes ai only
- prod catrplrs from 2 castles
-const=secs to build (unit=1)
-
-t=train time (sec)
-r=food cost
-g=grass cost
-b=wood cost
-breq=prereqs (bitmap)
-pop="" if unit, nil if not
-
-w=hitbox width (px)
-fw=spr width (px)
-h=spr/hitbox height (px)
-<state>_x,_y=spr for state
-<state>_fr,_fps=# of anim
- frames, anim speed for state
-portx,porty=portrait spr
-sdir=spr direction (l=1 r=-1)
-fire=low hp fire anim?
-
-sg=is siege unit?
-gr=worker "gather rate".
- resource gain=carry\gr.
- for farms, grow rate
-cap=worker carry capacity
-mcyc=max farm cycles
-
-tmap=tech bitmap value
-up=-1 if repeatable
-
-in techs, 2nd arg is unit type
-to modify, 3rd arg is func to
-run, which is passed player's
-version of unit type --]]
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
@@ -2261,7 +2199,7 @@ end
 
 --send worker to gather tile.
 --optionally dictate path
-local function gogth(u,tx,ty,wp)
+local function gogth(u,tx,ty,wp,r)
 	local t=tile_unit(tx,ty)
 	--[[
  2nd arg (target) set to st.x
@@ -2273,14 +2211,14 @@ local function gogth(u,tx,ty,wp)
 gth=1
 ez_adj=1]],
 		wp or path(u,t.x,t.y),
-		t,f2r[fmget(tx,ty)],tx,ty)
+		t,r or f2r[fmget(tx,ty)],tx,ty)
 end
 
 --[[
 have a unit drop its carry.
 optnl nxt_res type to gather,
 optnl unit to drop to--]]
-local function godrop(u,nxt_res,dropu)
+local function godrop(u,r,dropu)
 	local wayp
 	if not dropu then
 		wayp,x,y=dpath(u,"d")
@@ -2302,7 +2240,7 @@ ez_adj=1]],
 			path(u,dropu.x,dropu.y)
 			or wayp,
 		dropu or tile_unit(x,y),
-		nxt_res)
+		r)
 end
 
 --make a unit attack
@@ -2508,7 +2446,9 @@ function tick(u)
 	if (u.const) return
 
 	if u.st.idl then
-		if (ut.lady and t6) wander(u)
+		if ut.lady and t()%6<1 then
+			wander(u)
+		end
 		u.disc=u.bldg and u.disc
 		if u.hu then
 			if u.ant then
@@ -2703,7 +2643,7 @@ end
 local function mine_nxt(u,res)
 	local wp,x,y=dpath(u,res)
 	if wp then
-		gogth(u,x,y,wp)
+		gogth(u,x,y,wp,res)
 		return res
 	end
 end
@@ -2798,7 +2738,7 @@ function atk(u)
 					--enemies get discovered
 					--when atking human unit
 					u.disc=u.disc or e.hu
-			
+
 					--if ranged unit, add a
 					--projectile. else, do dmg
 					add(prj,typ.prj_s and p("",
@@ -3798,8 +3738,6 @@ end
 --ai.p2=ofnse sqd
 --ai.p3=atk sqd
 function ai_frame(ai)
-	if (t6) ai.safe=1
-
 	--avail=avail workers
 	--nxt=for keys g/b, next
 	--	closest res cluster
@@ -3810,7 +3748,8 @@ function ai_frame(ai)
 	--ants=# of workers
 	--bgrat=wood/grass ratio
 	--hold=next bldg to build
-	local ants,bgrat,res,hold=
+	local safe,ants,bgrat,res,hold=
+		t()-ai.deft>5,
 		0,2.75,res[ai.typ]
 
 	--make ant gather
@@ -3862,7 +3801,7 @@ function ai_frame(ai)
 					--this here so that units
 					--from loaded games have it
 					bld.bop=pop
-				elseif ai.safe then
+				elseif safe then
 					--either havent built this
 					--yet or it was destroyed
 					if can_pay(b,res) then
@@ -4017,7 +3956,7 @@ function ai_frame(ai)
 
 	--when ai has enough units in
 	--offsqd, empty it into atksqd
-	if ai.p2[res.diff*5] and ai.safe then
+	if ai.p2[res.diff*5] and safe then
 		while ai.p2[1] do
 			add(ai.p3,deli(ai.p2))
 		end
