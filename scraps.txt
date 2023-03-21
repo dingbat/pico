@@ -47,6 +47,8 @@ dist(n[1]-g[1],n[2]-g[2])
 - fix bug where game would crash shortly after loading game
 - fix bug where an enemy castle or tower could get undiscovered if it attacks a ladybug
 - fix fog borders appearing on far right edge of map when it's explored
+- enemy units attacking you from fog of war now get "discovered" like buildings already do
+- if you lose visibility of an enemy while chasing them, attacker will now continue to last known location
 
 1.6
 - fix bug where enemy attackers could stall in the middle of the map

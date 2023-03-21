@@ -134,6 +134,7 @@ function _update()
 			--init new game
 			init()
 
+			srand"8"
 			for k=1,3 do
 				--res keeps player state
 				local r=res[k]
@@ -558,7 +559,8 @@ function _draw()
 		spr(
 			hbtn and pset(unspl"-1,4,5")
 				and 188 or
-			sel1 and sel1.hu and
+			amy<104 and sel1 and
+				sel1.hu and
 			((to_bld or
 				can_bld() or
 				can_renew"1") and 190 or
@@ -1042,8 +1044,6 @@ breq=0]]
 unit defs!
 
 idx=typs idx
-txt=helper txt
-req=text if locked
 spd=speed (px/frame)
 los=line of sight (px)
 conv=conversion strngth (monks)
@@ -1054,32 +1054,28 @@ hl=should heal?
 d=dead counter start: 0=default,
  61=never (qn) 59=instant (lbug)
 
-range=attack range (px)
 prj_spd=projectile speed
 prj_xo,yo=proj origin offset
 prj_s=proj sprite x (y=96)
 aoe=proj area of effect?
 
-drop=is dropoff?
-bldrs=how many ai workers
- should build/repair?
-bmap=bldg bitmap value
+bldrs=# of ai build/repair ants
+bmap=bldg bitmap val
 units=# of units bld produces
-idl=should light up idle bldg
- btn if no prod?
+idl=should light up idle bldg?
 mil=produces military units?
 maxbop=if bldg has a greater
  bop (build order population),
  dont produce. makes ai only
  prod catrplrs from 2 castles
-const=secs to build bldg(unit=1)
+const=secs to build (unit=1)
 
 t=train time (sec)
 r=food cost
 g=grass cost
 b=wood cost
 breq=prereqs (bitmap)
-pop=blank if unit, undef if not
+pop="" if unit, nil if not
 
 w=hitbox width (px)
 fw=spr width (px)
@@ -1093,15 +1089,13 @@ fire=low hp fire anim?
 
 sg=is siege unit?
 gr=worker "gather rate".
- resource gain when dropping
- is carry\gr.
+ resource gain=carry\gr.
  for farms, grow rate
 cap=worker carry capacity
 mcyc=max farm cycles
 
-tmap=tech bitmap value (-1
- if not tech)
-up=-1 if repeatable upgrade
+tmap=tech bitmap value
+up=-1 if repeatable
 
 in techs, 2nd arg is unit type
 to modify, 3rd arg is func to
@@ -2163,7 +2157,7 @@ p[[var=rescol
 r=8
 g=3
 b=4
-p=1
+pop=1
 v0=15
 v1=15
 v7=8
@@ -2314,7 +2308,7 @@ end
 --make a unit attack
 function goatk(u,e)
 	if e then
-  u.st,u.disc,u.res=
+  u.st,u.res=
 			p([[t=atk
 active=1
 k=]]..e.k,
@@ -2322,10 +2316,7 @@ k=]]..e.k,
 			--it to acct for mvmt error
 			--else, unit may stop short
 			path(u,e.x,e.y,0,
-				u.typ.range/10),e),
-			--enemy bldgs get discovered
-			--when attacking a human unit
-			u.disc or e.hu and u.bldg
+				u.typ.range/10),e)
 	end
 end
 
@@ -2409,6 +2400,7 @@ function tick(u)
 
 	--move unit
 	if wayp then
+		u.disc=nil
 		--norm moves u.x,u.y by spd
 		--in direction of wayp[1],
 		--then returns if intersect
@@ -2517,6 +2509,7 @@ function tick(u)
 
 	if u.st.idl then
 		if (ut.lady and t6) wander(u)
+		u.disc=u.bldg and u.disc
 		if u.hu then
 			if u.ant then
 				if u.st.idl>10 then
@@ -2802,6 +2795,10 @@ function atk(u)
 						rest(u)
 					end
 				else
+					--enemies get discovered
+					--when atking human unit
+					u.disc=u.disc or e.hu
+			
 					--if ranged unit, add a
 					--projectile. else, do dmg
 					add(prj,typ.prj_s and p("",
@@ -2831,8 +2828,8 @@ function atk(u)
 			--out of range but visible,
 			--so chase unit
 			goatk(u,e.k!=u.st.k and e)
-		elseif not e.disc then
-			--cant see unit, so stop
+		elseif not u.st.typ then
+			--stopped+cant see unit
 			rest(u)
 		end
 	end
