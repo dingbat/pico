@@ -825,7 +825,9 @@ function dmg(typ,to)
 	if to.ai and to.grp!="atk" then
 		to.ai.deft=t()
 		--ai.p1=defense squad
-		mvg(to.ai.p1,to.x,to.y,1)
+		--defenders will no longer
+		--trigger def response
+		mvg(to.ai.p1,to.x,to.y,"atk")
 	end
 
 	if to.onscr then
@@ -3881,8 +3883,8 @@ function ai_frame(ai)
 				if u.dead then
 					del(u.sqd,u)
 				elseif not u.sqd then
-					--assign mil units to
-					--off or def squad (balance
+					--assign mil units to off-
+					--or def-squad (evenly,
 					--but put siege in offnse)
 					u.sqd=(#ai.p1>#ai.p2 or
 						u.sg) and ai.p2 or ai.p1
