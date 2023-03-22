@@ -331,7 +331,7 @@ c=13]],b.x,b.y))
 	 typ if same typs sel'd --]]
 	fsel(function(s)
 		seltyp=(not seltyp or
-			s.typ==seltyp) and s.typ
+			s.idx==seltyp.idx) and s.typ
 			or {}
 	end)
 
