@@ -2832,8 +2832,8 @@ function gth(u)
 		end
 	elseif cf==u.id then
 		--tiles touched by hard ai
-		--get an extra 7 qty on them
-		f+=res1.diff*u.ap\33*7
+		--get an extra 6 qty on them
+		f+=res1.diff*u.ap\33*6
 		local n=g(restiles,x,y,f)-1
 		collect(u,r)
 
