@@ -1692,6 +1692,7 @@ hp=300
 const=16
 hpr=8
 def=bld
+mon=74
 
 r=0
 g=10
@@ -2888,12 +2889,13 @@ function produce(_ENV)
 			end
 		else
 			--make unit
-			local new=
+			local new,t=
 				gl.unit(bld,x,y,ply),
+				mget(rtx,rty),
 				onscr and hu and sfx"19"
 			if bld.ant and
 				rtx and
-				gl.resqty[mget(rtx,rty)]
+				gl.resqty[t] or bld.mnk==t
 			then
 				--rally is on resource
 				gogth(new,rtx,rty)
@@ -2983,10 +2985,11 @@ function input()
 	--atkmov=axn button active
 	-- and not touch (in touch,
 	-- axn btn is normal move)
-	local htile,atkmov,clk=
+	local htile,atkmov,clk,tile=
 		tile_unit(mx8,my8),
 		axn and dget"0">1,
-		lclk or rclk
+		lclk or rclk,
+		mget(mx8,my8)
 
 	--click on a button
 	if clk and hbtn then
@@ -3100,7 +3103,8 @@ c=8]],mx,my))
 			sel1.rx,sel1.ry,
 				sel1.rtx,sel1.rty=
 				mx,my,mx8,my8,
-				resqty[mget(mx8,my8)] and
+				(sel1.qn and resqty[tile]
+				or seltyp.mon==tile) and
 					hilite(htile)
 		end
 	elseif not axn then
