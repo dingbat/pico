@@ -1395,6 +1395,7 @@ prj_s=52
 bmap=0
 units=1
 qn=1
+antprod=1
 sdir=-1
 tmap=-1
 hl=1
@@ -1530,6 +1531,7 @@ hp=100
 const=10
 hpr=10
 def=bld
+antprod=1
 
 r=0
 g=0
@@ -3103,7 +3105,7 @@ c=8]],mx,my))
 			sel1.rx,sel1.ry,
 				sel1.rtx,sel1.rty=
 				mx,my,mx8,my8,
-				(sel1.qn and resqty[tile]
+				(seltyp.antprod and resqty[tile]
 				or seltyp.mon==tile) and
 					hilite(htile)
 		end
