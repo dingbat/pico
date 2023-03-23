@@ -1417,7 +1417,7 @@ porty=80]],ant,function(_ENV)
 	spd*=1.12
 	gr*=.9
 end),
-	p([[t=20
+	p([[t=10
 r=10
 g=10
 b=10
@@ -2139,7 +2139,7 @@ antbld=.5
 acidant=1
 acidqn=.6
 acidsp=1.5
-acidsg=.9
+acidsg=1
 acidbld=.25
 
 spant=1.5
@@ -2151,13 +2151,13 @@ spbld=.1
 sgant=.8
 sgqn=3
 sgsp=.7
-sgsg=1
-sgbld=12
+sgsg=.9
+sgbld=10
 
 bldant=1
 bldqn=.75
 bldsp=1.25
-bldsg=.9
+bldsg=1
 bldbld=.1]]
 -->8
 --tick unit
