@@ -3369,7 +3369,7 @@ function pres(r,x,y,z)
 			v..=" ³c⁶t⁴fᶜ5⁶-#|"
 		end
 		pspl(
-			(i==4 and oop or
+			(i==4 and oop and r.pop or
 			res1[k]<flr(v))
 			and "1,2,3,4,5,6,10")
 		if v!=0 or z then
