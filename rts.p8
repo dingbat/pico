@@ -131,11 +131,10 @@ function _update()
 			deli(btnp"4" and pcol,1))
 
 		if lclk then
-			--init new game
 			init()
 
 			for k=1,3 do
-				--res keeps player state
+				--res=player state
 				local r=res[k]
 				--choose random pos
 				--npl=# of players
@@ -145,8 +144,8 @@ function _update()
 					unspl(split"2:1,2:2,2:3,3:2,3:3"[diff+1],":")
 			end
 
-			--generate starting units
-			--typ_idx,x-offset,y-offset
+			--make starting units
+			--type,x-,y-offset
 			foreach(split([[7,64,64
 1,49,64
 1,77,59
@@ -156,8 +155,8 @@ function _update()
 					local u,x,y=unspl(s)
 					local dx,dy=unspl(
 						stp[res[ply].pos],":")
-					--set newgame, has
-					--ai system make lbugs
+					--set newgame so
+					--ai system makes lbugs
 					res.p2.newg=
 						unit(u,x+dx,y+dy,ply)
 				end
@@ -191,14 +190,14 @@ function _update()
 
 		if rclk then
 			--toggles between 0 and 240.
-			--used as a camera offset,
+			--used as cam offset, so
 			--hides/shows banner
 			ban^^=0xf0
 		end
 		return
 	end
 
-	--async dist-map calc
+	--incremental dist-map calc
 	dmap()
 
 	--refresh rate for heavy calcs
@@ -212,12 +211,10 @@ function _update()
 	--sele=selected enemy
 	aspl"pos,asc,sele"
 
-	--[[
-	upc=constrains cf to upcycle
-	hbld=bldg being hovered over
-	selh=selected human units
-	selb=selected human bldgs
-	--]]
+	--upc=constrains cf to upcycle
+	--hbld=bldg being hovered
+	--selh=selected human units
+	--selb=selected human bldgs
 	upc,hbld,selh,selb,
 		hunit,idl,idlm=
 		cf%upcycle,
@@ -1040,6 +1037,67 @@ g=0
 b=6
 breq=0]]
 
+--[[
+unit defs!
+
+idx=typs idx
+spd=speed (px/frame)
+los=line of sight (px)
+conv=conversion strngth (monks)
+def=defense type
+dsfx=death sfx (unit=62/bld=27)
+sfx=atk sfx (all=10/monk=63)
+hl=should heal?
+d=dead counter start: 0=default,
+ 61=never (qn) 59=instant (lbug)
+
+prj_spd=projectile speed
+prj_xo,yo=proj origin offset
+prj_s=proj sprite x (y=96)
+aoe=proj area of effect?
+
+bldrs=# of ai build/repair ants
+bmap=bldg bitmap val
+units=# of units bld produces
+idl=should light up idle bldg?
+mil=produces military units?
+maxbop=if bldg has a greater
+ bop (build order population),
+ dont produce. makes ai only
+ prod catrplrs from 2 castles
+const=secs to build (unit=1)
+
+t=train time (sec)
+r=food cost
+g=grass cost
+b=wood cost
+breq=prereqs (bitmap)
+pop="" if unit, nil if not
+
+w=hitbox width (px)
+fw=spr width (px)
+h=spr/hitbox height (px)
+<state>_x,_y=spr for state
+<state>_fr,_fps=# of anim
+ frames, anim speed for state
+portx,porty=portrait spr
+sdir=spr direction (l=1 r=-1)
+fire=low hp fire anim?
+
+sg=is siege unit?
+gr=worker "gather rate".
+ resource gain=carry\gr.
+ for farms, grow rate
+cap=worker carry capacity
+mcyc=max farm cycles
+
+tmap=tech bitmap value
+up=-1 if repeatable
+
+in techs, 2nd arg is unit type
+to modify, 3rd arg is func to
+run, which is passed player's
+version of unit type --]]
 p[[var=ant
 txt=⁶h²5ᶜ9worker ant: ᶜ7gathers resources,⁶g⁴mbuilds and repairs.
 idx=1
