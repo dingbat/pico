@@ -55,6 +55,7 @@ repl selbox sb
 repl breq bq
 repl prj_xo px
 repl prj_yo py
+repl prj_spd ps
 repl prj_s s
 repl portx ptx
 repl porty pty

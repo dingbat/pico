@@ -13,7 +13,7 @@ if btnp"0"or btnp"1"then diff+=btnp()^^-2diff%=5sfx"18"end add(pc,deli(btnp"4"an
 1,49,64
 1,77,59
 1,59,52
-5,61,76]],"\n"),function(s)for ply=1,res1.npl do local u,x,y=us(s)local dx,dy=us(stp[res[ply].pos],":")res.p2.newg=unit(u,x+dx,y+dy,ply)end end)start()else pspl"1,5,13,13,13,13,6,2,6,5,3,13,13,0,5"return end end cf+=1cf%=60ip()if ls then poke"0x5f2d"if lclk and stat"54">56then title,cx,cy=us"1,5,35"music"63"end if rclk then ban^^=240end return end dmap()z=split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]aspl"pos,asc,sele"upc,hbld,selh,selb,hunit,idl,idlm=cf%z,g(bldgs,mx8,my8,{})res1.t+=.03333if cf%30==19then for tx=0,19do for ty=0,12do local x,y=tx\.39585,ty\.37505sset(109+tx,72+ty,g(exp,x,y)and rc[g(viz,x,y,"e")..fm(x,y)]or 14)end end end if upc==0then viz,nviz=nviz,{}for k in next,exp do if mid(k,8191)==k and k%256<48then local x,y=k&255,k\256mset(x+48,y,viz[k]or mget(x,y))end end end foreach(prj,function(b)local typ=b.typ if norm(b.p1,b,typ.spd)then del(prj,b)for u in all(units)do if u.ap!=b.p1[3]and int(u.r,{b.x,b.y,b.x,b.y},typ.aoe)then dmg(typ,u)if typ.aoe==0then break end if hlv.var then hi(p([[f=2
+5,61,76]],"\n"),function(s)for ply=1,res1.npl do local u,x,y=us(s)local dx,dy=us(stp[res[ply].pos],":")res.p2.newg=unit(u,x+dx,y+dy,ply)end end)start()else pspl"1,5,13,13,13,13,6,2,6,5,3,13,13,0,5"return end end cf+=1cf%=60ip()if ls then poke"0x5f2d"if lclk and stat"54">56then title,cx,cy=us"1,5,35"music"63"end if rclk then ban^^=240end return end dmap()z=split"5,10,15,30,30,60,60,60,60,60,60"[tot\50]aspl"pos,asc,sele"upc,hbld,selh,selb,hunit,idl,idlm=cf%z,g(bldgs,mx8,my8,{})res1.t+=.03333if cf%30==19then for tx=0,19do for ty=0,12do local x,y=tx\.39585,ty\.37505sset(109+tx,72+ty,g(exp,x,y)and rc[g(viz,x,y,"e")..fm(x,y)]or 14)end end end if upc==0then viz,nviz=nviz,{}for k in next,exp do if mid(k,8191)==k and k%256<48then local x,y=k&255,k\256mset(x+48,y,viz[k]or mget(x,y))end end end foreach(prj,function(b)local typ=b.typ if norm(b.p1,b,typ.ps)then del(prj,b)for u in all(units)do if u.ap!=b.p1[3]and int(u.r,{b.x,b.y,b.x,b.y},typ.aoe)then dmg(typ,u)if typ.aoe==0then break end if hlv.var then hi(p([[f=2
 c=13]],b.x,b.y))end end end end end)foreach(units,tick)if selx then sel=selh or selb or sele end sel1,nsel,st=sel[1],#sel fsel(function(s)st=(not st or s.idx==st.idx)and s.typ or{}end)for i=2,npl do if upc==i and units[i].a then aif(ais[i])end end end function bnr(a,t,st,cx)camera(cx)local s=res1.t\1%60rectfill(us"0,88,128,107,9")line(?split",⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ5 ,⁶j2l⁵fk²9 ⁵dc⁴e²9ᶜ0 2X "[res1.npl]..split"easy ai ⁶y0⁵dm²9 ,normal ai ⁴m⁶x1 ⁶y0⁵dm²9 ,hard ai ⁶y0⁵dm²9 "[res1.diff]
 -3,us"80,8,80,9")
 ?"⁶jll²9⁴e ⁵df⁶xz ⁶x4⁶jll⁵keᶜ5⧗³h"..(res1.t<600and"0"or"")..res1.t\60 ..(s<10and":0"or":")..s.." ⁶y0⁵dm²9 ⁶jll⁵fk²9 "
@@ -266,7 +266,7 @@ atk=.667
 conv=0
 atk_freq=30
 aoe=0
-spd=1
+ps=1
 atk_typ=acid
 def=ant
 
@@ -361,7 +361,7 @@ atk=1.5
 conv=0
 atk_freq=30
 aoe=0
-spd=1
+ps=1
 atk_typ=acid
 def=qn
 
@@ -717,7 +717,7 @@ atk=1.2
 conv=0
 atk_freq=30
 aoe=0
-spd=.9
+ps=.9
 atk_typ=bld
 def=bld
 
@@ -766,7 +766,7 @@ atk=1.8
 conv=0
 atk_freq=15
 aoe=0
-spd=.8
+ps=.8
 atk_typ=bld
 def=bld
 
@@ -893,7 +893,7 @@ atk=1.5
 conv=0
 atk_freq=60
 aoe=2
-spd=.72
+ps=.72
 def=sg
 atk_typ=sg
 sg=1
