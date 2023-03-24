@@ -106,7 +106,6 @@ repl alive a
 repl active ac
 repl onscr on
 repl dsfx ds
-repl pres ps
 
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 # tab start init
