@@ -38,9 +38,8 @@ sed -i'.bak' -E "s/~=/!=/g" rts_sh.p8
 # sed -i'.bak' -E "s/61440/0xf000/" rts_sh.p8
 # sed -i'.bak' -E "s/36868/0x9004/" rts_sh.p8
 
-repl can_renew cr
 repl avail_farm afarm
-repl renew ren
+repl farmer fmr
 repl rndspl rs
 repl unspl us
 repl campal cp
@@ -79,6 +78,8 @@ repl can_atk ctk
 repl can_bld cbl
 repl can_gth cgt
 repl can_pay cpy
+repl can_renew cr
+repl renew ren
 repl reg_bldg rb
 repl dmap_st dms
 repl qdmaps qdm
@@ -93,6 +94,19 @@ repl resqty rq
 repl sel_ports sp
 repl draw_port dp
 repl draw_menu dm
+repl resbar br
+repl antprod ap
+repl comp co
+repl pcol pc
+repl ai_frame aif
+repl loser ls
+repl surr sr
+repl rescol rc
+repl alive a
+repl active ac
+repl onscr on
+repl dsfx ds
+repl pres ps
 
 sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 # tab start init

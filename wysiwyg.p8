@@ -76,16 +76,15 @@ function _draw()
 	end
 
 	if ins then
-		local win={mw+1,24,
-			mw+70,111,1}
 		add(buttons,{
 			name="inswin",
-			r=win,
+			r=inswin,
 		})
-		local wx,wy=unpack(win)
-		rectfill(unpack(win))
-		win[5]=5
-		rect(unpack(win))
+		inswin[5]=1
+		local wx,wy=unpack(inswin)
+		rectfill(unpack(inswin))
+		inswin[5]=5
+		rect(unpack(inswin))
 		?"insert:",wx+3,wy+3,6
 
 		for i,c in next,split"¹,²,³,⁴,⁵,⁶,ᵇ,ᶜ" do
@@ -216,8 +215,15 @@ function _update()
 			l.y+=my-pmy
 		end)
 	end
+	
+	if (#sel!=1) then
+		ins=false
+	end
 
-	if (menux>0 or mx>mw) and
+	local main=(menux>0 or mx>mw)
+		and (not ins or not
+			int({mx,my,mx,my},inswin,1))
+	if main and
 	 (mbtnp and (
 	 	not hovbtn or
 	 		count(sel,hovbtn.data)==0
@@ -249,7 +255,7 @@ function _update()
 			hovbtn.fn()
 		elseif not dragl and not
 			hovbtn.win and
-			(menux>0 or mx>mw)
+			main
 		then
 			sel,seli={}
 		end
@@ -259,6 +265,7 @@ function _update()
 end
 -->8
 mw=42
+inswin={mw+1,24,mw+70,111}
 
 function edit(l)
 	mode=2
