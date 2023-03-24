@@ -134,7 +134,6 @@ function _update()
 			--init new game
 			init()
 
-			srand"8"
 			for k=1,3 do
 				--res keeps player state
 				local r=res[k]
@@ -2139,7 +2138,7 @@ antbld=.5
 acidant=1
 acidqn=.6
 acidsp=1.5
-acidsg=1
+acidsg=.95
 acidbld=.25
 
 spant=1.5
@@ -2152,12 +2151,12 @@ sgant=.8
 sgqn=3
 sgsp=.7
 sgsg=.9
-sgbld=10
+sgbld=11
 
 bldant=1
 bldqn=.75
 bldsp=1.25
-bldsg=1
+bldsg=.95
 bldbld=.1]]
 -->8
 --tick unit
@@ -2834,8 +2833,8 @@ function gth(u)
 		end
 	elseif cf==u.id then
 		--tiles touched by hard ai
-		--get an extra 6 qty on them
-		f+=res1.diff*u.ap\33*6
+		--get an extra 5 qty on them
+		f+=res1.diff*u.ap\33*5
 		local n=g(restiles,x,y,f)-1
 		collect(u,r)
 
