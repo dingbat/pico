@@ -1019,12 +1019,17 @@ function load_cc()
 	local str=stat"4"
 	sel,seli,load_error={}
 
-	--trim trailing "\n"
-	if str[#str]=="\n" then
+	--trim trailing "\n"s
+	while str[#str]=="\n" do
 		str=sub(str,1,#str-1)
 	end
+	--trim leading "\n"s
+	while str[1]=="\n" do
+		str=sub(str,2,#str)
+	end
+	
 	if sub(str,1,2)=="?\"" then
-		-- trim trailing "
+		-- trim ?" and trailing "
 		str=sub(str,3,#str-1)
 	end
 
