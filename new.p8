@@ -3,7 +3,7 @@ version 39
 __lua__
 function _draw()
 	cls(2)
-
+	?"⁶jch⁴h⁶hᶜf²3only ⁶w2⁶-w\ntokens!⁶jdd³hᶜ0⁶-#text⁶jdc⁴jᶜ7text⁶j46⁵hh⁶w⁶tᶜa²1⁶x5any static\0"
 end
 
 __gfx__

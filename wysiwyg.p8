@@ -6,8 +6,7 @@ __lua__
 
 
 --text effects demo:
-?"⁶jf7ᶜ0heavy outline⁶jf6⁴jheavy outline⁶jf6⁴iheavy outline⁶je6⁵jiheavy outline⁶je6⁵iiheavy outline⁶je6⁵ijheavy outline⁶je7³iheavy outline⁶je7³jheavy outline⁶je6⁵jjᶜ7heavy outline⁶je9⁵jjᶜ0light outline⁶jfalight outline⁶jea³ilight outline⁶jea⁵jhlight outline⁶jea³jᶜ7light outline⁶jed⁵jiᶜ0basic shadow⁶jed⁵jhᶜ7basic shadow⁶jeg⁵jiᶜ9multi-color (y)⁶jeg⁵jiᶜa⁶y2multi-color (y)⁶jej⁵jjᶜ1⁶y6multi-color (x)⁶jej⁵jjᶜ2⁶x2m u l t i - c o l o r   ( x )⁶jfn⁵ihᶜ7²9⁶y8                       ⁶jfn⁵hi⁶x4⁶y6 containers \0"
-
+?"⁶jf4⁵ih⁶hᶜ2²2⁶xo⁶ye  \n  ⁶jg4⁴j⁶h²1⁶xm⁶yc  \n  ⁶jf4⁵ji⁶h⁶xn⁶yd  \n  ⁶jg5³h⁶h²2⁶xl⁶yb  \n  ⁶jg8⁵ijᶜa⁶x4⁶y6 2 tokens ⁶jl7³i only⁶jg7³iᶜ7⁶-#text:⁶jg5⁵ihany static⁶jff⁵iiᶜ0heavy outline⁶jff⁵ihheavy outline⁶jff³iheavy outline⁶jff³hheavy outline⁶jffheavy outline⁶jff⁴hheavy outline⁶jff⁴iheavy outline⁶jff⁵hiheavy outline⁶jff⁵hhᶜ7heavy outline⁶jfh⁵hiᶜ0light outline⁶jfh⁵ijlight outline⁶jfh⁴jlight outline⁶jfi³hlight outline⁶jfh⁵hjᶜ7light outline⁶jfk⁵jiᶜ0basic shadow⁶jfk⁵jhᶜ7basic shadow⁶jem⁵ijᶜ9multi-color (y)⁶jem⁵ijᶜa⁶y2multi-color (y)⁶jep⁵ihᶜ1²d⁶y6multi-color (x)⁶jep⁵ihᶜ2⁶-#⁶x2m u l t i - c o l o r   ( x )⁶jgsᶜ7²9⁶y8                       ⁶jfs⁵jh⁶x4⁶y6 containers \0"
 
 --devkit
 poke(0x5f2d,3)
@@ -102,7 +101,7 @@ function _draw()
 				{13,2},
 				function()
 					type_txt(c)
-					ins=false
+					clear_ins=true
 				end
 			)
 			rectfill(unpack(b))
@@ -142,8 +141,14 @@ function _update()
 	cf+=1
 	cf%=30
 	
+	lmbtnp=mbtn
 	mbtnp=stat"34">0 and not mbtn
 	mbtn=stat"34">0
+	
+	if clear_ins and not mbtn and
+		lmbtnp then
+			ins,clear_ins=false
+	end
 
 	pmx,pmy=mx,my
 	mx,my=
@@ -207,6 +212,10 @@ function _update()
 		menux=menudx>0 and 45 or 0
 		menudx=0
 	end
+	
+	if (#sel!=1) then
+		ins=false
+	end
 
 	newclk=mbtnp and not lastclk
 	lastclk=mbtn
@@ -219,10 +228,6 @@ function _update()
 			l.x+=mx-pmx
 			l.y+=my-pmy
 		end)
-	end
-	
-	if (#sel!=1) then
-		ins=false
 	end
 
 	local main=(menux>0 or mx>mw)
@@ -286,7 +291,7 @@ function draw_menu(x)
 	rectfill(0,0,mw,128,1)
 	rectfill(0,0,mw,9,8)
 	line(mw+1,0,mw+1,128,5)
-	line(mw+1,0,mw+1,9,2)
+	line(mw+1,0,mw+1,9,5)
 
 	for i=0,2 do
 		local w=mw/3
