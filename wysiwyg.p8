@@ -4,6 +4,11 @@ __lua__
 --wysiwyg ctrlcode editor
 --eeooty
 
+
+--text effects demo:
+?"⁶jf7ᶜ0heavy outline⁶jf6⁴jheavy outline⁶jf6⁴iheavy outline⁶je6⁵jiheavy outline⁶je6⁵iiheavy outline⁶je6⁵ijheavy outline⁶je7³iheavy outline⁶je7³jheavy outline⁶je6⁵jjᶜ7heavy outline⁶je9⁵jjᶜ0light outline⁶jfalight outline⁶jea³ilight outline⁶jea⁵jhlight outline⁶jea³jᶜ7light outline⁶jed⁵jiᶜ0basic shadow⁶jed⁵jhᶜ7basic shadow⁶jeg⁵jiᶜ9multi-color (y)⁶jeg⁵jiᶜa⁶y2multi-color (y)⁶jej⁵jjᶜ1⁶y6multi-color (x)⁶jej⁵jjᶜ2⁶x2m u l t i - c o l o r   ( x )⁶jfn⁵ihᶜ7²9⁶y8                       ⁶jfn⁵hi⁶x4⁶y6 containers \0"
+
+
 --devkit
 poke(0x5f2d,3)
 
@@ -24,7 +29,7 @@ menux=0
 menudx=0
 
 home={
-	fg=0
+	fg=5
 }
 
 default_layer={
