@@ -8,6 +8,13 @@ __lua__
 --text effects demo:
 ?"⁶jf4⁵ih⁶hᶜ2²2⁶xo⁶ye  \n  ⁶jg4⁴j⁶h²1⁶xm⁶yc  \n  ⁶jf4⁵ji⁶h⁶xn⁶yd  \n  ⁶jg5³h⁶h²2⁶xl⁶yb  \n  ⁶jg8⁵ijᶜa⁶x4⁶y6 2 tokens ⁶jl7³i only⁶jg7³iᶜ7⁶-#text:⁶jg5⁵ihany static⁶jff⁵iiᶜ0heavy outline⁶jff⁵ihheavy outline⁶jff³iheavy outline⁶jff³hheavy outline⁶jffheavy outline⁶jff⁴hheavy outline⁶jff⁴iheavy outline⁶jff⁵hiheavy outline⁶jff⁵hhᶜ7heavy outline⁶jfh⁵hiᶜ0light outline⁶jfh⁵ijlight outline⁶jfh⁴jlight outline⁶jfi³hlight outline⁶jfh⁵hjᶜ7light outline⁶jfk⁵jiᶜ0basic shadow⁶jfk⁵jhᶜ7basic shadow⁶jem⁵ijᶜ9multi-color (y)⁶jem⁵ijᶜa⁶y2multi-color (y)⁶jep⁵ihᶜ1²d⁶y6multi-color (x)⁶jep⁵ihᶜ2⁶-#⁶x2m u l t i - c o l o r   ( x )⁶jgsᶜ7²9⁶y8                       ⁶jfs⁵jh⁶x4⁶y6 containers \0"
 
+--logo demo:
+?"⁶jif⁵ijᶜ1editor⁶jif⁵iiᶜdeditor⁶jhd⁵ijᶜ1ctrlcode⁶jhd⁵iiᶜdctrlcode⁶jia⁶tᶜ0wysiwyg\n⁶jia⁶=ᶜ8wysiwyg\n⁶jiaᶜ9⁶y4wysiwyg\n⁶jiaᶜa⁶y3wysiwyg\n⁶jiaᶜb⁶y2wysiwyg\n⁶jiaᶜc⁶y1wysiwyg\n\0"
+
+--age of ants title demo:
+?"⁶jd7⁴i⁶w⁶tᶜ0age  ants\n⁶jf6⁴j⁶-w⁶-t⁶y7.         ⁶x3 .⁶x2     .⁶jt8⁵ji⁶x4⁶y6.⁶jc7⁵jh⁶w⁶tᶜ7age  ants\n⁶jt8⁵ih⁶-w⁶-t.⁶je6⁵ji⁶y7.         ⁶x3 .⁶x2     .⁶jj8³jᶜ0⁶x4⁶y6⁶:0060123515120800⁶jj7⁵jjᶜ7⁶:0060123515120800⁶jm6⁵ihᶜ5⁶x2.⁶x3 ⁶x2.⁶jc6⁵ih.⁶x3 ⁶x2.⁶jgc⁵jjᶜ0⁶x4difficulty:⁶jgc⁵jiᶜcdifficulty:⁶jdj⁵hjᶜ0press ❎ to start⁶jdj⁵hiᶜ9press ❎ to start⁶jqt⁵ihᶜ0v1.7⁶jqt³iᶜ6v1.7⁶jct³iᶜ0eeooty⁶jcs⁵ijᶜ6eeooty⁶jdm⁵hjᶜ0pause for options⁶jdm⁵hiᶜapause for options⁶jkf⁴hᶜ6\0"
+
+
 --devkit
 poke(0x5f2d,3)
 
@@ -1117,7 +1124,6 @@ end
 example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2⁶jf7⁴iᶜ73"
 example"⁶jgh³h⁶wᶜ21⁶jhe⁴h⁶-w2aᶜ7x⁶jf7⁴i3"
 example"⁶j59⁵ji⁶w⁶tᶜ0a\n⁶j78⁵jj⁶-w⁶-t⁶y7b⁶x3 .⁶x2⁶jea⁵ii⁶x4⁶y6c"
---example"⁶j59⁵ji⁶w⁶tᶜ0age of ants⁶j78⁵jj⁶-w⁶-t⁶y7.     .       ⁶x3 .⁶x2     .⁶jea⁵ii⁶x4⁶y6.           .⁶j59⁵ih⁶w⁶tᶜ7age of ants⁶jea⁵hh⁶-w⁶-t.           .⁶j78⁵ii⁶y7.     .       ⁶x3 .⁶x2     .⁶jbf³iᶜ0⁶x4⁶y6difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0v1.5⁶jqtᶜ6v1.5⁶j2t⁴hᶜ0eeooty⁶j2tᶜ6eeooty⁶j8pᶜ0pause for options⁶j8o⁴jᶜapause for options⁶jeh⁵jiᶜ6"
 
 __gfx__
 00000000050000000050000000000000000000000000000000000000000000000666660000000000000000007777770000000000000000000000000000000000
