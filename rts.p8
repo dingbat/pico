@@ -2755,7 +2755,7 @@ function frm(u)
 						pay(gl.renew,1,pres)
 				end
 				sproff=exp and
-					(sfx"36" or 32) or 0
+					(sfx"36" and 32) or 0
 			end
 			--set farm key after godrop()
 			u.st.farm=_ENV
@@ -2839,8 +2839,8 @@ function bld(u)
 			max_hp+=hpr
 			hp+=hpr
 			if const>=typ.const then
-				const=u.hu and sfx"26"
-				reg_bldg(_ENV)
+				const=reg_bldg(_ENV,
+					u.hu and sfx"26")
 				if drop then
 					pres.pl+=5
 				elseif farm then
@@ -3084,12 +3084,12 @@ function input()
 				unspl"1,1,1")
 			--send selected units to bld
 			fsel(gobld,b)
-			pay(to_bld,1,res1)
 			--clear selection and bldg,
 			--right-click makes another
 			--one if you can pay for it
-			selx,to_bld=sfx"1",
-				rclk and
+			sfx"1"
+			selx=pay(to_bld,1,res1)
+			to_bld=rclk and
 				can_pay(to_bld,res1) and
 				to_bld
 		end
@@ -4466,4 +4466,3 @@ __music__
 00 1c1e1d44
 02 1c201f44
 03 08484b44
-
