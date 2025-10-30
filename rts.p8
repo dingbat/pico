@@ -389,7 +389,7 @@ function _draw()
 		pal{pcol[2]}
 		sspr(x,unspl"0,16,8,74,17,32,16,1")
 
-		?"⁶j79⁵jj⁶w⁶tᶜ0age  ants⁶j99³j⁶-w⁶-t⁶y7.         ⁶x3 .⁶x2     .⁶joa⁵ij⁶x4⁶y6.⁶j79⁵ii⁶w⁶tᶜ7age  ants⁶joa⁵hi⁶-w⁶-t.⁶j98⁵ij⁶y7.         ⁶x3 .⁶x2     .⁶jea⁵ihᶜ0⁶x4⁶y6⁶:0060123515120800⁶jea³iᶜ7⁶:0060123515120800⁶jh8⁵hiᶜd⁶x2.⁶x3 ⁶x2.⁶j78⁵hi.⁶x3 ⁶x2.⁶jbf³iᶜ0⁶x4difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.7⁶jqtᶜ6V1.7⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
+		?"⁶j79⁵jj⁶w⁶tᶜ0age  ants⁶j99³j⁶-w⁶-t⁶y7.         ⁶x3 .⁶x2     .⁶joa⁵ij⁶x4⁶y6.⁶j79⁵ii⁶w⁶tᶜ7age  ants⁶joa⁵hi⁶-w⁶-t.⁶j98⁵ij⁶y7.         ⁶x3 .⁶x2     .⁶jea⁵ihᶜ0⁶x4⁶y6⁶:0060123515120800⁶jea³iᶜ7⁶:0060123515120800⁶jh8⁵hiᶜd⁶x2.⁶x3 ⁶x2.⁶j78⁵hi.⁶x3 ⁶x2.⁶jbf³iᶜ0⁶x4difficulty:⁶jbe⁵ijᶜcdifficulty:⁶j8mᶜ0press ❎ to start⁶j8l⁴jᶜ9press ❎ to start⁶jqt⁴hᶜ0V1.8⁶jqtᶜ6V1.8⁶j2t⁴hᶜ0EEOOTY⁶j2tᶜ6EEOOTY⁶j8pᶜ0PAUSE FOR OPTIONS⁶j8o⁴jᶜaPAUSE FOR OPTIONS⁶jeh⁵jiᶜ6\0"
 
 		?split"³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0easy⁵0fᶜbeasy ⁴hᶜ0▶⁵cfᶜ7▶,³4ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0normal³0⁵8fᶜanormal ⁴hᶜ0▶⁵cfᶜ7▶,³8ᶜ0◀⁵cfᶜ7◀⁴h ᶜ0hard⁵0fᶜ9hard ⁴hᶜ0▶⁵cfᶜ7▶,³0³eᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 normals³0³0⁵cfᶜ22 normals ⁴hᶜ0▶⁵cfᶜ7▶,³2ᶜ0◀⁵cfᶜ7◀⁴h ᶜ02 hards³0⁵4fᶜ82 hards ⁴hᶜ0▶⁵cfᶜ7▶"[diff+1]
 		return
