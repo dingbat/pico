@@ -2,3 +2,4 @@
 *.wav
 *.bin
 out/
+itch/index.js
