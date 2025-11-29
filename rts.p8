@@ -2839,7 +2839,8 @@ function bld(u)
 			max_hp+=hpr
 			hp+=hpr
 			if const>=typ.const then
-				const=reg_bldg(_ENV,
+				const=nil
+				reg_bldg(_ENV,
 					u.hu and sfx"26")
 				if drop then
 					pres.pl+=5
