@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=v1_8
+version=v1_9
 pico_path=/Applications/PICO-8.app/Contents/MacOS/pico8
 # pico_path=~/pico-8/pico8_64
 echo "cutting $version"
