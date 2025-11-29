@@ -3,6 +3,8 @@
 version=v1_9
 pico_path=/Applications/PICO-8.app/Contents/MacOS/pico8
 # pico_path=~/pico-8/pico8_64
+shrinko_path=~/shrinko8/shrinko8.py
+# shrinko_path=~/Downloads/shrinko8-main/shrinko8.py
 echo "cutting $version"
 
 set -e
@@ -25,7 +27,7 @@ sed -i'.bak' -r -E "s/and	\?(.*)/and print(\1)/" rts_print.p8
 sed -i'.bak' -r -E "s/tostr\[\[\[\[\]\]/--[[/g" rts_print.p8
 
 echo "shrinking..."
-python3 ~/shrinko8/shrinko8.py ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename
+python3 $shrinko_path ./rts_print.p8 ./rts_sh.p8 -m --no-minify-rename
 
 header="\n--age of ants\n--eeooty\n\n--commented code on bbs!\n"
 sed -i'.bak' -r -E "s/print\(([^)]+)\)/?\1\n/g" rts_sh.p8
@@ -122,7 +124,7 @@ sed -i'.bak' -E "s/version 41/version 39/" rts_sh.p8
 
 rm rts_print.p8 rts_print.p8.bak rts_sh.p8.bak
 
-python3 ~/shrinko8/shrinko8.py ./rts_sh.p8 --count
+python3 $shrinko_path ./rts_sh.p8 --count
 echo
 
 # exit 1
