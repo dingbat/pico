@@ -3,8 +3,8 @@
 version=v1_9
 pico_path=/Applications/PICO-8.app/Contents/MacOS/pico8
 # pico_path=~/pico-8/pico8_64
-shrinko_path=~/shrinko8/shrinko8.py
-# shrinko_path=~/Downloads/shrinko8-main/shrinko8.py
+# shrinko_path=~/shrinko8/shrinko8.py
+shrinko_path=~/Downloads/shrinko8-1.0.1/shrinko8.py
 echo "cutting $version"
 
 set -e
